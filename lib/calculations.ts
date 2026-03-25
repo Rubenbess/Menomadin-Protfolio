@@ -54,6 +54,56 @@ export function totalInvestedInCompany(investments: Investment[]): number {
   return investments.reduce((sum, inv) => sum + inv.amount, 0)
 }
 
+// ─── IRR (XIRR via Newton's method) ─────────────────────────────────────────
+
+export interface CashFlow {
+  amount: number  // negative = capital out, positive = proceeds in
+  date: Date
+}
+
+export function calcXIRR(cashFlows: CashFlow[]): number | null {
+  if (cashFlows.length < 2) return null
+  if (!cashFlows.some(cf => cf.amount < 0)) return null
+  if (!cashFlows.some(cf => cf.amount > 0)) return null
+
+  const sorted = [...cashFlows].sort((a, b) => a.date.getTime() - b.date.getTime())
+  const t0 = sorted[0].date.getTime()
+
+  function years(d: Date) {
+    return (d.getTime() - t0) / (365.25 * 86_400_000)
+  }
+
+  function npv(r: number) {
+    return sorted.reduce((s, cf) => s + cf.amount / Math.pow(1 + r, years(cf.date)), 0)
+  }
+
+  function dnpv(r: number) {
+    return sorted.reduce((s, cf) => {
+      const t = years(cf.date)
+      return s - t * cf.amount / Math.pow(1 + r, t + 1)
+    }, 0)
+  }
+
+  let r = 0.15
+  for (let i = 0; i < 200; i++) {
+    const f  = npv(r)
+    const df = dnpv(r)
+    if (Math.abs(df) < 1e-12) break
+    const next = r - f / df
+    if (Math.abs(next - r) < 1e-8) return next > -1 ? next : null
+    r = next
+    if (r <= -1 || r > 100) return null
+  }
+  return null
+}
+
+// ─── DPI ─────────────────────────────────────────────────────────────────────
+
+export function calcDPI(totalDistributions: number, totalInvested: number): number {
+  if (!totalInvested || totalInvested === 0) return 0
+  return totalDistributions / totalInvested
+}
+
 // ─── Formatting ─────────────────────────────────────────────────────────────
 
 export function fmt$$(amount: number): string {

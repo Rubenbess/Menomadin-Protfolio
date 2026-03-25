@@ -2,7 +2,7 @@
 
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend,
+  PieChart, Pie, Legend, AreaChart, Area, ReferenceLine,
 } from 'recharts'
 import { normalizeSector } from '@/lib/calculations'
 
@@ -15,8 +15,14 @@ interface CompanyData {
   status: string
 }
 
+interface InvestmentData {
+  date: string
+  amount: number
+}
+
 interface Props {
   companies: CompanyData[]
+  investments?: InvestmentData[]
 }
 
 const SECTOR_COLORS = [
@@ -241,9 +247,84 @@ function StatusBreakdown({ companies }: Props) {
   )
 }
 
+// ── J-Curve (fund cash flow) ──────────────────────────────────────────────
+
+function JCurveChart({ investments }: { investments: InvestmentData[] }) {
+  if (!investments || investments.length === 0) return null
+
+  // Group by quarter, accumulate cumulative net cash flow (deployed = negative)
+  const quarterMap: Record<string, number> = {}
+  for (const inv of investments) {
+    if (!inv.date || !inv.amount) continue
+    const d = new Date(inv.date)
+    const q = `Q${Math.ceil((d.getMonth() + 1) / 3)} ${d.getFullYear()}`
+    quarterMap[q] = (quarterMap[q] ?? 0) + inv.amount
+  }
+
+  const sorted = Object.entries(quarterMap).sort(([a], [b]) => {
+    const parse = (s: string) => { const [q, y] = s.split(' '); return Number(y) * 4 + Number(q[1]) }
+    return parse(a) - parse(b)
+  })
+
+  let cumulative = 0
+  const data = sorted.map(([period, deployed]) => {
+    cumulative -= deployed   // deployed capital is cash out (negative)
+    return { period, cumulative }
+  })
+
+  if (data.length === 0) return null
+
+  const minVal = Math.min(...data.map(d => d.cumulative))
+  const maxVal = Math.max(...data.map(d => d.cumulative), 0)
+
+  return (
+    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
+      <h3 className="text-sm font-semibold text-slate-900 mb-1">Fund Cash Flow (J-Curve)</h3>
+      <p className="text-xs text-slate-400 mb-4">Cumulative net cash flow over time — capital deployed by quarter</p>
+      <ResponsiveContainer width="100%" height={240}>
+        <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+          <defs>
+            <linearGradient id="jcurveGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="period"
+            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tickFormatter={v => `$${Math.abs(v / 1_000_000).toFixed(1)}M`}
+            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            axisLine={false}
+            tickLine={false}
+            width={56}
+            domain={[minVal * 1.1, maxVal * 1.1 || 1]}
+          />
+          <Tooltip
+            formatter={(v: number) => [`-$${Math.abs(v / 1_000_000).toFixed(2)}M`, 'Net Cash Flow']}
+            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
+          />
+          <ReferenceLine y={0} stroke="#e2e8f0" strokeDasharray="4 4" />
+          <Area
+            type="monotone"
+            dataKey="cumulative"
+            stroke="#7c3aed"
+            strokeWidth={2}
+            fill="url(#jcurveGrad)"
+            dot={{ fill: '#7c3aed', r: 3 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
 // ── Main export ───────────────────────────────────────────────────────────
 
-export default function DashboardCharts({ companies }: Props) {
+export default function DashboardCharts({ companies, investments = [] }: Props) {
   if (companies.length === 0) return null
 
   return (
@@ -261,6 +342,9 @@ export default function DashboardCharts({ companies }: Props) {
 
       {/* Status breakdown */}
       <StatusBreakdown companies={companies} />
+
+      {/* J-Curve */}
+      <JCurveChart investments={investments} />
     </div>
   )
 }

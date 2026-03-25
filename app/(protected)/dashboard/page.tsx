@@ -6,12 +6,15 @@ import {
   calcCurrentValue,
   calcMOIC,
   calcTVPI,
+  calcXIRR,
+  calcDPI,
   getFundOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
   fmt$$,
   fmtMultiple,
   fmtPct,
+  type CashFlow,
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics } from '@/lib/types'
 import Link from 'next/link'
@@ -67,6 +70,20 @@ export default async function DashboardPage({ searchParams }: Props) {
   const tvpi               = calcTVPI(totalCurrentValue, totalInvested)
   const moic               = calcMOIC(totalCurrentValue, totalInvested)
 
+  // IRR: each investment is a negative cash flow; total current value is positive today
+  const xirrFlows: CashFlow[] = [
+    ...investmentsList
+      .filter(i => i.amount > 0 && i.date)
+      .map(i => ({ amount: -i.amount, date: new Date(i.date) })),
+    ...(totalCurrentValue > 0
+      ? [{ amount: totalCurrentValue, date: new Date() }]
+      : []),
+  ]
+  const irr = calcXIRR(xirrFlows)
+
+  // DPI: no distribution model yet — always 0 for now
+  const dpi = calcDPI(0, totalInvested)
+
   const strategyLabel =
     strategy === 'impact'   ? 'Menomadin Impact'   :
     strategy === 'venture'  ? 'Menomadin Ventures' :
@@ -82,13 +99,13 @@ export default async function DashboardPage({ searchParams }: Props) {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-6 md:mb-8">
         <MetricCard label="Total Invested"    value={fmt$$(totalInvested)}      accent="violet" />
         <MetricCard label="Portfolio Value"   value={fmt$$(totalCurrentValue)}  accent="emerald" />
         <MetricCard label="TVPI"              value={fmtMultiple(tvpi)}         accent="blue" />
         <MetricCard label="MOIC"              value={fmtMultiple(moic)}         accent="amber" />
-        <MetricCard label="Companies"         value={String(companiesList.length)} />
-        <MetricCard label="Capital Deployed"  value={fmt$$(totalInvested)} />
+        <MetricCard label="IRR"               value={irr != null ? `${(irr * 100).toFixed(1)}%` : 'N/A'} accent="violet" />
+        <MetricCard label="DPI"               value={fmtMultiple(dpi)} />
       </div>
 
       {/* Strategy breakdown */}
@@ -198,7 +215,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
       {/* Charts */}
       <div className="mt-6">
-        <DashboardCharts companies={companiesWithMetrics} />
+        <DashboardCharts companies={companiesWithMetrics} investments={investmentsList} />
       </div>
     </div>
   )
