@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, MapPin, User } from 'lucide-react'
+import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
@@ -17,6 +17,72 @@ const STRATEGY_FILTERS = [
   { value: 'venture', label: 'Menomadin Ventures' },
 ]
 
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  exited: 'Exited',
+  'written-off': 'Written Off',
+  watchlist: 'Watchlist',
+}
+
+// ── Filter dropdown (reusable) ─────────────────────────────────────────────
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: string[]
+  onChange: (v: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const active = !!value
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${
+          active
+            ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-800'
+        }`}
+      >
+        {active ? value : label}
+        {active
+          ? <X size={13} onClick={(e) => { e.stopPropagation(); onChange(''); setOpen(false) }} className="opacity-80 hover:opacity-100" />
+          : <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        }
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-1.5 z-20 bg-white rounded-xl shadow-xl ring-1 ring-black/[0.06] py-1 min-w-[160px]">
+            {options.map(opt => (
+              <button
+                key={opt}
+                onClick={() => { onChange(opt === value ? '' : opt); setOpen(false) }}
+                className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                  opt === value
+                    ? 'bg-violet-50 text-violet-700 font-medium'
+                    : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────
+
 export default function CompaniesClient({
   companies,
   contacts,
@@ -29,10 +95,51 @@ export default function CompaniesClient({
   const [showAdd, setShowAdd] = useState(false)
   const [editCompany, setEditCompany] = useState<Company | null>(null)
   const [strategyFilter, setStrategyFilter] = useState<'all' | 'impact' | 'venture'>('all')
+  const [search, setSearch] = useState('')
+  const [sectorFilter, setSectorFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [stageFilter, setStageFilter] = useState('')
+  const [hqFilter, setHqFilter] = useState('')
 
-  const filtered = strategyFilter === 'all'
-    ? companies
-    : companies.filter(c => c.strategy === strategyFilter)
+  // Derive unique filter options from data
+  const sectors = useMemo(() =>
+    [...new Set(companies.map(c => c.sector).filter(Boolean))].sort(), [companies])
+  const statuses = useMemo(() =>
+    [...new Set(companies.map(c => c.status))].map(s => STATUS_LABELS[s] ?? s), [companies])
+  const stages = useMemo(() =>
+    [...new Set(companies.map(c => c.entry_stage).filter(Boolean))].sort() as string[], [companies])
+  const hqs = useMemo(() =>
+    [...new Set(companies.map(c => c.hq).filter(Boolean))].sort() as string[], [companies])
+
+  const hasActiveFilters = !!(search || sectorFilter || statusFilter || stageFilter || hqFilter)
+
+  function clearAll() {
+    setSearch('')
+    setSectorFilter('')
+    setStatusFilter('')
+    setStageFilter('')
+    setHqFilter('')
+  }
+
+  const filtered = useMemo(() => {
+    let list = strategyFilter === 'all' ? companies : companies.filter(c => c.strategy === strategyFilter)
+
+    if (search) {
+      const q = search.toLowerCase()
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.sector?.toLowerCase().includes(q) ||
+        c.description?.toLowerCase().includes(q) ||
+        c.hq?.toLowerCase().includes(q)
+      )
+    }
+    if (sectorFilter) list = list.filter(c => c.sector === sectorFilter)
+    if (statusFilter) list = list.filter(c => (STATUS_LABELS[c.status] ?? c.status) === statusFilter)
+    if (stageFilter)  list = list.filter(c => c.entry_stage === stageFilter)
+    if (hqFilter)     list = list.filter(c => c.hq === hqFilter)
+
+    return list
+  }, [companies, strategyFilter, search, sectorFilter, statusFilter, stageFilter, hqFilter])
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
@@ -54,7 +161,7 @@ export default function CompaniesClient({
       </div>
 
       {/* Strategy filter tabs */}
-      <div className="flex gap-1.5 mb-6 bg-white rounded-xl p-1 shadow-card ring-1 ring-black/[0.04] w-fit">
+      <div className="flex gap-1.5 mb-4 bg-white rounded-xl p-1 shadow-card ring-1 ring-black/[0.04] w-fit">
         {STRATEGY_FILTERS.map(({ value, label }) => (
           <button
             key={value}
@@ -75,14 +182,66 @@ export default function CompaniesClient({
         ))}
       </div>
 
+      {/* Search + filter row */}
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search companies…"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 transition-all"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        {/* Filter dropdowns */}
+        {sectors.length > 1 && (
+          <FilterSelect label="Sector" value={sectorFilter} options={sectors} onChange={setSectorFilter} />
+        )}
+        {statuses.length > 1 && (
+          <FilterSelect label="Status" value={statusFilter} options={statuses} onChange={setStatusFilter} />
+        )}
+        {stages.length > 1 && (
+          <FilterSelect label="Stage" value={stageFilter} options={stages} onChange={setStageFilter} />
+        )}
+        {hqs.length > 1 && (
+          <FilterSelect label="HQ" value={hqFilter} options={hqs} onChange={setHqFilter} />
+        )}
+
+        {/* Clear all */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearAll}
+            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <X size={12} /> Clear all
+          </button>
+        )}
+
+        {/* Result count */}
+        <span className="text-xs text-slate-400 ml-auto">
+          {filtered.length} {filtered.length === 1 ? 'company' : 'companies'}
+        </span>
+      </div>
+
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
           <p className="text-sm text-slate-400 mb-5">
-            {strategyFilter === 'all' ? 'No companies yet.' : `No ${strategyFilter === 'impact' ? 'Menomadin Impact' : 'Menomadin Ventures'} companies yet.`}
+            {hasActiveFilters ? 'No companies match your filters.' : 'No companies yet.'}
           </p>
-          <Button onClick={() => setShowAdd(true)}>
-            <Plus size={15} /> Add your first company
-          </Button>
+          {hasActiveFilters ? (
+            <button onClick={clearAll} className="text-sm text-violet-600 hover:underline">Clear filters</button>
+          ) : (
+            <Button onClick={() => setShowAdd(true)}>
+              <Plus size={15} /> Add your first company
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,8 +279,16 @@ export default function CompaniesClient({
                   )}
                 </div>
 
-                {/* Sector */}
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{co.sector}</p>
+                {/* Sector + Stage */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{co.sector}</p>
+                  {co.entry_stage && (
+                    <>
+                      <span className="text-slate-200 text-xs">·</span>
+                      <span className="text-xs text-slate-400">{co.entry_stage}</span>
+                    </>
+                  )}
+                </div>
 
                 {/* Description */}
                 {co.description && (
