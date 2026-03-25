@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       const base64 = Buffer.from(buffer).toString('base64')
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6',
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       const mediaType = (file_type?.startsWith('image/') ? file_type : `image/${ext}`) as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6',
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       }).join('\n\n')
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6',
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       const text = await fileRes.text()
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6',
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
