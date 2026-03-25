@@ -123,9 +123,9 @@ export default async function DashboardPage({ searchParams }: Props) {
             </div>
 
             {/* Ventures */}
-            <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 border-l-4 border-violet-500">
+            <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 border-l-4 border-blue-500">
               <div className="flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                 <span className="text-sm font-semibold text-slate-900">Menomadin Ventures</span>
                 <span className="ml-auto text-xs text-slate-400">{ventureCos.length} companies</span>
               </div>
