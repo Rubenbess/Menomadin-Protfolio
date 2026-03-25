@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { MetricCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import DashboardCharts from '@/components/DashboardCharts'
 import {
   calcCurrentValue,
   calcMOIC,
@@ -149,6 +150,9 @@ export default async function DashboardPage({ searchParams }: Props) {
           </div>
         )
       })()}
+
+      {/* Charts */}
+      <DashboardCharts companies={companiesWithMetrics} />
 
       {/* Portfolio table */}
       <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
