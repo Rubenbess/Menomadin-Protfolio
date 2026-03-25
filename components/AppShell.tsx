@@ -36,18 +36,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile drawer */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 md:hidden transition-transform duration-300
+        fixed inset-y-0 left-0 z-50 flex md:hidden transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="relative h-full">
-          <Sidebar />
-          <button
-            onClick={() => setOpen(false)}
-            className="absolute top-4 right-[-44px] w-9 h-9 bg-white rounded-xl shadow-lg flex items-center justify-center text-slate-600"
-          >
-            <X size={18} />
-          </button>
-        </div>
+        <Sidebar />
+        <button
+          onClick={() => setOpen(false)}
+          className="mt-4 ml-2 w-9 h-9 flex-shrink-0 bg-white rounded-xl shadow-lg flex items-center justify-center text-slate-600 self-start"
+        >
+          <X size={18} />
+        </button>
       </div>
 
       {/* Main content */}
