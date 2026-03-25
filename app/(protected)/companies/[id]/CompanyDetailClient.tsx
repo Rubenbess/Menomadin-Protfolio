@@ -29,7 +29,7 @@ import {
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Document } from '@/lib/types'
 
-type Tab = 'overview' | 'rounds' | 'investments' | 'captable' | 'documents'
+type Tab = 'overview' | 'history' | 'rounds' | 'investments' | 'captable' | 'documents'
 
 interface Props {
   company: Company
@@ -73,6 +73,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
+    { id: 'history',     label: 'Investment History', count: rounds.length },
     { id: 'rounds',      label: 'Rounds',      count: rounds.length },
     { id: 'investments', label: 'Investments',  count: investments.length },
     { id: 'captable',    label: 'Cap Table',    count: capTable.length },
@@ -241,6 +242,75 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             </div>
           </div>
         )}
+
+        {/* INVESTMENT HISTORY */}
+        {activeTab === 'history' && (() => {
+          const sortedRounds = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          const latestRound  = sortedRounds[sortedRounds.length - 1]
+          const fundOwnership = getFundOwnershipPct(capTable)
+
+          return sortedRounds.length === 0 ? (
+            <EmptyState message="No rounds recorded yet. Add rounds to see investment history." />
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {sortedRounds.map((round, idx) => {
+                const roundInvs    = investments.filter(i => i.round_id === round.id)
+                const roundInvested = roundInvs.reduce((s, i) => s + i.amount, 0)
+                const instrument   = roundInvs[0]?.instrument ?? null
+
+                // ownership: cap table entry for this round, or fall back to fund total
+                const roundCap   = capTable.find(c => c.round_id === round.id)
+                const ownership  = roundCap?.ownership_percentage ?? (idx === sortedRounds.length - 1 ? fundOwnership : null)
+
+                // FMV: ownership × latest post-money (current valuation)
+                const fmv        = ownership != null && latestRound ? (ownership / 100) * latestRound.post_money : null
+                const moic       = fmv != null && roundInvested > 0 ? fmv / roundInvested : null
+
+                return (
+                  <div key={round.id} className="p-5 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      {/* Round label */}
+                      <div className="sm:w-36 flex-shrink-0">
+                        <p className="text-sm font-bold text-slate-900">{round.type}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{fmtDate(round.date)}</p>
+                        {instrument && (
+                          <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 ring-1 ring-violet-200">
+                            {instrument}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Metrics grid */}
+                      <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3">
+                        {[
+                          { label: 'Our Investment', value: roundInvested > 0 ? fmt$$(roundInvested) : '—', highlight: roundInvested > 0 },
+                          { label: 'Round Size',     value: round.amount_raised > 0 ? fmt$$(round.amount_raised) : '—' },
+                          { label: 'Pre-money',      value: round.pre_money > 0 ? fmt$$(round.pre_money) : '—' },
+                          { label: 'Post-money',     value: round.post_money > 0 ? fmt$$(round.post_money) : '—' },
+                          { label: 'Ownership',      value: ownership != null ? fmtPct(ownership) : '—' },
+                          { label: 'FMV',            value: fmv != null ? fmt$$(fmv) : '—', accent: true },
+                        ].map(({ label, value, highlight, accent }) => (
+                          <div key={label}>
+                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+                            <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* MOIC badge */}
+                      <div className="sm:text-right flex-shrink-0">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">MOIC</p>
+                        <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-slate-400'}`}>
+                          {moic != null ? fmtMultiple(moic) : '—'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {/* ROUNDS */}
         {activeTab === 'rounds' && (
