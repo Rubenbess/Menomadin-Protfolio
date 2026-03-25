@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Upload, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { createClient } from '@/lib/supabase'
 import { createCompany, updateCompany, upsertContacts } from '@/actions/companies'
 import type { Company, Contact } from '@/lib/types'
 
@@ -30,8 +31,35 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       ? initialContacts.map(c => ({ name: c.name, position: c.position }))
       : []
   )
+  const [logoPreview, setLogoPreview] = useState<string | null>(company?.logo_url ?? null)
+  const [logoFile, setLogoFile]       = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isEdit = !!company
+
+  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLogoFile(file)
+    setLogoPreview(URL.createObjectURL(file))
+  }
+
+  function removeLogo() {
+    setLogoFile(null)
+    setLogoPreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function uploadLogo(companyId: string): Promise<string | null> {
+    if (!logoFile) return logoPreview // keep existing URL if no new file
+    const supabase = createClient()
+    const ext  = logoFile.name.split('.').pop()
+    const path = `${companyId}.${ext}`
+    const { error } = await supabase.storage.from('logos').upload(path, logoFile, { upsert: true })
+    if (error) return null
+    const { data } = supabase.storage.from('logos').getPublicUrl(path)
+    return data.publicUrl
+  }
 
   function addContact() {
     setContacts(prev => [...prev, { name: '', position: '' }])
@@ -51,26 +79,33 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
     setError('')
 
     const fd = new FormData(e.currentTarget)
-    const data = {
-      name:        fd.get('name')        as string,
-      sector:      fd.get('sector')      as string,
-      strategy:    fd.get('strategy')    as string,
-      hq:          fd.get('hq')          as string,
-      status:      fd.get('status')      as string,
-      description: (fd.get('description') as string) || null,
-      logo_url:    (fd.get('logo_url')   as string) || null,
-      entry_stage: (fd.get('entry_stage') as string) || null,
-    }
-
     let companyId = company?.id ?? ''
 
+    // Create/update company first (without logo) to get the ID
+    const baseData = {
+      name:        fd.get('name')         as string,
+      sector:      fd.get('sector')       as string,
+      strategy:    fd.get('strategy')     as string,
+      hq:          fd.get('hq')           as string,
+      status:      fd.get('status')       as string,
+      description: (fd.get('description') as string) || null,
+      entry_stage: (fd.get('entry_stage') as string) || null,
+      logo_url:    logoPreview,
+    }
+
     if (isEdit) {
-      const result = await updateCompany(company.id, data)
+      const result = await updateCompany(company.id, baseData)
       if (result.error) { setError(result.error); setLoading(false); return }
     } else {
-      const result = await createCompany(data)
+      const result = await createCompany(baseData)
       if (result.error || !result.id) { setError(result.error ?? 'Failed to create'); setLoading(false); return }
       companyId = result.id
+    }
+
+    // Upload logo if a new file was selected
+    if (logoFile) {
+      const url = await uploadLogo(companyId)
+      if (url) await updateCompany(companyId, { ...baseData, logo_url: url })
     }
 
     const validContacts = contacts.filter(c => c.name.trim())
@@ -130,8 +165,25 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           </select>
         </div>
         <div>
-          <label className={label}>Logo URL</label>
-          <input name="logo_url" defaultValue={company?.logo_url ?? ''} className={input} placeholder="https://…" />
+          <label className={label}>Logo</label>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+          {logoPreview ? (
+            <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+              <img src={logoPreview} alt="Logo" className="w-10 h-10 rounded-lg object-contain bg-white ring-1 ring-slate-100" />
+              <span className="text-xs text-slate-500 flex-1 truncate">{logoFile?.name ?? 'Current logo'}</span>
+              <button type="button" onClick={removeLogo} className="p-1 text-slate-400 hover:text-red-500 transition-colors">
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-sm text-slate-400 hover:border-violet-400 hover:text-violet-500 transition-all"
+            >
+              <Upload size={14} /> Upload image…
+            </button>
+          )}
         </div>
       </div>
 
