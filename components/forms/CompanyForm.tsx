@@ -16,6 +16,7 @@ interface Props {
 const SECTORS = ['SaaS', 'Fintech', 'Healthtech', 'Cleantech', 'Consumer', 'Deep Tech', 'Marketplace', 'Other']
 const STRATEGIES = ['impact', 'venture']
 const STATUSES = ['active', 'exited', 'written-off', 'watchlist']
+const ENTRY_STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Late Stage', 'Other']
 
 const input = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white transition-all'
 const label = 'block text-sm font-medium text-slate-700 mb-1.5'
@@ -57,6 +58,8 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       hq:          fd.get('hq')          as string,
       status:      fd.get('status')      as string,
       description: (fd.get('description') as string) || null,
+      logo_url:    (fd.get('logo_url')   as string) || null,
+      entry_stage: (fd.get('entry_stage') as string) || null,
     }
 
     let companyId = company?.id ?? ''
@@ -115,6 +118,20 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
               <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')}</option>
             ))}
           </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={label}>Entry Stage</label>
+          <select name="entry_stage" defaultValue={company?.entry_stage ?? ''} className={input}>
+            <option value="">Select…</option>
+            {ENTRY_STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={label}>Logo URL</label>
+          <input name="logo_url" defaultValue={company?.logo_url ?? ''} className={input} placeholder="https://…" />
         </div>
       </div>
 

@@ -67,12 +67,17 @@ export default function CompaniesClient({
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/companies/${co.id}`}
-                      className="text-base font-semibold text-slate-900 hover:text-violet-600 transition-colors truncate block"
-                    >
-                      {co.name}
-                    </Link>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      {co.logo_url && (
+                        <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                      )}
+                      <Link
+                        href={`/companies/${co.id}`}
+                        className="text-base font-semibold text-slate-900 hover:text-violet-600 transition-colors truncate"
+                      >
+                        {co.name}
+                      </Link>
+                    </div>
                     {co.hq && (
                       <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
                         <MapPin size={11} />

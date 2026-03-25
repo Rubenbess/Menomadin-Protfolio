@@ -17,6 +17,8 @@ export interface Company {
   hq: string
   status: CompanyStatus
   description: string | null
+  logo_url: string | null
+  entry_stage: string | null
   created_at: string
 }
 
@@ -87,6 +89,9 @@ export interface CompanyWithMetrics extends Company {
   currentValue: number
   moic: number
   ownershipPct: number
+  plannedReserves: number
+  deployedReserves: number
+  initialInvestment: number
 }
 
 export interface DashboardMetrics {
