@@ -15,7 +15,15 @@ interface ImportResults {
   errors:      string[]
 }
 
-export default function ImportPage() {
+interface TrelloResults {
+  stagesCreated: number
+  cardsCreated:  number
+  errors:        string[]
+}
+
+// ── Excel Import ─────────────────────────────────────────────────────────────
+
+function ExcelImport() {
   const router   = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [status,   setStatus]   = useState<Status>('idle')
@@ -31,7 +39,6 @@ export default function ImportPage() {
       setStatus('error')
       return
     }
-
     setFileName(file.name)
     setStatus('uploading')
     setResults(null)
@@ -43,13 +50,11 @@ export default function ImportPage() {
     try {
       const res  = await fetch('/api/import', { method: 'POST', body: fd })
       const json = await res.json()
-
       if (!res.ok || json.error) {
         setErrorMsg(json.error || 'Import failed')
         setStatus('error')
         return
       }
-
       setResults(json.results)
       setStatus('success')
       router.refresh()
@@ -81,17 +86,17 @@ export default function ImportPage() {
   }
 
   return (
-    <div className="max-w-2xl animate-fade-in">
-      <div className="page-header">
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+          <FileSpreadsheet size={16} className="text-emerald-600" />
+        </div>
         <div>
-          <h1 className="page-title">Import Data</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Upload your Investment Dashboard Excel file to sync all portfolio data.
-          </p>
+          <h2 className="text-sm font-semibold text-slate-900">Excel — Portfolio Data</h2>
+          <p className="text-xs text-slate-400">Syncs companies, rounds, investments &amp; cap table</p>
         </div>
       </div>
 
-      {/* Upload area */}
       {status === 'idle' && (
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -99,42 +104,30 @@ export default function ImportPage() {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={`
-            relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all
+            relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all
             ${dragOver
-              ? 'border-violet-400 bg-violet-50'
-              : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'}
+              ? 'border-emerald-400 bg-emerald-50'
+              : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50'}
           `}
         >
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileInput}
-            className="hidden"
-          />
+          <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleFileInput} className="hidden" />
           <div className="flex flex-col items-center gap-3">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-              dragOver ? 'bg-violet-100' : 'bg-slate-100'
-            }`}>
-              <FileSpreadsheet size={26} className={dragOver ? 'text-violet-600' : 'text-slate-500'} />
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-emerald-100' : 'bg-slate-100'}`}>
+              <FileSpreadsheet size={22} className={dragOver ? 'text-emerald-600' : 'text-slate-500'} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">
-                Drop your Excel file here, or{' '}
-                <span className="text-violet-600">browse</span>
-              </p>
+              <p className="text-sm font-semibold text-slate-900">Drop your Excel file here, or <span className="text-emerald-600">browse</span></p>
               <p className="text-xs text-slate-400 mt-1">Supports .xlsx and .xls</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Uploading */}
       {status === 'uploading' && (
-        <div className="border-2 border-dashed border-violet-300 bg-violet-50/60 rounded-2xl p-12 text-center">
+        <div className="border-2 border-dashed border-emerald-300 bg-emerald-50/60 rounded-2xl p-10 text-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center">
-              <Upload size={26} className="text-violet-600 animate-bounce" />
+            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
+              <Upload size={22} className="text-emerald-600 animate-bounce" />
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-900">Importing {fileName}…</p>
@@ -144,12 +137,11 @@ export default function ImportPage() {
         </div>
       )}
 
-      {/* Success */}
       {status === 'success' && results && (
         <div className="space-y-4">
-          <div className="bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <CheckCircle2 size={22} className="text-emerald-600 flex-shrink-0" />
+          <div className="bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-emerald-800">Import successful</p>
                 <p className="text-xs text-emerald-600 mt-0.5">{fileName}</p>
@@ -178,63 +170,243 @@ export default function ImportPage() {
             )}
           </div>
           <div className="flex gap-3">
-            <Button onClick={() => router.push('/dashboard')}>
-              View Dashboard <ArrowRight size={14} />
-            </Button>
-            <Button variant="secondary" onClick={reset}>
-              <RefreshCw size={14} /> Import another file
-            </Button>
+            <Button onClick={() => router.push('/dashboard')}>View Dashboard <ArrowRight size={14} /></Button>
+            <Button variant="secondary" onClick={reset}><RefreshCw size={14} /> Import another</Button>
           </div>
         </div>
       )}
 
-      {/* Error */}
       {status === 'error' && (
         <div className="space-y-4">
-          <div className="bg-red-50 ring-1 ring-red-200 rounded-2xl p-6">
+          <div className="bg-red-50 ring-1 ring-red-200 rounded-2xl p-5">
             <div className="flex items-center gap-3">
-              <AlertCircle size={22} className="text-red-500 flex-shrink-0" />
+              <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-red-800">Import failed</p>
                 <p className="text-xs text-red-600 mt-0.5">{errorMsg}</p>
               </div>
             </div>
           </div>
-          <Button variant="secondary" onClick={reset}>
-            <RefreshCw size={14} /> Try again
-          </Button>
+          <Button variant="secondary" onClick={reset}><RefreshCw size={14} /> Try again</Button>
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* How it works */}
+// ── Trello Import ─────────────────────────────────────────────────────────────
+
+function TrelloImport() {
+  const router   = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [status,   setStatus]   = useState<Status>('idle')
+  const [dragOver, setDragOver] = useState(false)
+  const [fileName, setFileName] = useState('')
+  const [results,  setResults]  = useState<TrelloResults | null>(null)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function processFile(file: File) {
+    if (!file.name.endsWith('.json')) {
+      setErrorMsg('Please upload a Trello JSON export file (.json)')
+      setStatus('error')
+      return
+    }
+    setFileName(file.name)
+    setStatus('uploading')
+    setResults(null)
+    setErrorMsg('')
+
+    const fd = new FormData()
+    fd.append('file', file)
+
+    try {
+      const res  = await fetch('/api/import/trello', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        setErrorMsg(json.error || 'Import failed')
+        setStatus('error')
+        return
+      }
+      setResults(json.results)
+      setStatus('success')
+      router.refresh()
+    } catch {
+      setErrorMsg('Network error — please try again')
+      setStatus('error')
+    }
+  }
+
+  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) processFile(file)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function reset() {
+    setStatus('idle')
+    setFileName('')
+    setResults(null)
+    setErrorMsg('')
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-violet-600">
+            <rect x="2" y="2" width="9" height="14" rx="2" fill="currentColor" opacity="0.8"/>
+            <rect x="13" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">Trello — Deal Pipeline</h2>
+          <p className="text-xs text-slate-400">Imports lists as stages and cards as pipeline deals</p>
+        </div>
+      </div>
+
       {status === 'idle' && (
-        <div className="mt-6 bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-          <h3 className="text-sm font-semibold text-slate-900 mb-4">How it works</h3>
-          <ol className="space-y-3">
-            {[
-              'Upload your Investment Dashboard Excel file (.xlsx)',
-              'The app reads the "Data_Raw" sheet and syncs all companies, rounds, investments and cap table entries',
-              'Existing records are updated — duplicates are automatically handled',
-              'All KPIs (MOIC, TVPI, NAV, ownership %) recalculate instantly from the new data',
-            ].map((step, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
-                <span className="flex-shrink-0 w-5 h-5 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold flex items-center justify-center mt-0.5">
-                  {i + 1}
-                </span>
-                {step}
-              </li>
-            ))}
-          </ol>
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <p className="text-xs text-slate-400">
-              <span className="font-medium text-slate-500">Expected format:</span> Your Excel must have a sheet named{' '}
-              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">Data_Raw</code> with columns: Investment Name,
-              Entity, Sector, Geography, Stage, Type, Invested Amount, Pre-money Valuation, Post Money Valuation,
-              Current Valuation, Ownership Percentage.
-            </p>
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`
+            relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all
+            ${dragOver
+              ? 'border-violet-400 bg-violet-50'
+              : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'}
+          `}
+        >
+          <input ref={inputRef} type="file" accept=".json" onChange={handleFileInput} className="hidden" />
+          <div className="flex flex-col items-center gap-3">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-violet-100' : 'bg-slate-100'}`}>
+              <Upload size={22} className={dragOver ? 'text-violet-600' : 'text-slate-500'} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Drop your Trello JSON here, or <span className="text-violet-600">browse</span></p>
+              <p className="text-xs text-slate-400 mt-1">Export from Trello: Board → Share → Export as JSON</p>
+            </div>
           </div>
         </div>
       )}
+
+      {status === 'uploading' && (
+        <div className="border-2 border-dashed border-violet-300 bg-violet-50/60 rounded-2xl p-10 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 bg-violet-100 rounded-2xl flex items-center justify-center">
+              <Upload size={22} className="text-violet-600 animate-bounce" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Importing {fileName}…</p>
+              <p className="text-xs text-slate-400 mt-1">Creating stages and deals in your pipeline</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {status === 'success' && results && (
+        <div className="space-y-4">
+          <div className="bg-violet-50 ring-1 ring-violet-200 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle2 size={20} className="text-violet-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-violet-800">Trello import successful</p>
+                <p className="text-xs text-violet-500 mt-0.5">{fileName}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white rounded-xl p-3 ring-1 ring-violet-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stages</p>
+                <p className="text-sm font-semibold text-slate-900 mt-0.5">{results.stagesCreated} created</p>
+              </div>
+              <div className="bg-white rounded-xl p-3 ring-1 ring-violet-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Deals</p>
+                <p className="text-sm font-semibold text-slate-900 mt-0.5">{results.cardsCreated} imported</p>
+              </div>
+            </div>
+            {results.errors.length > 0 && (
+              <div className="mt-4 space-y-1">
+                <p className="text-xs font-semibold text-amber-700">Warnings:</p>
+                {results.errors.map((e, i) => (
+                  <p key={i} className="text-xs text-amber-600">{e}</p>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => router.push('/pipeline')}>View Pipeline <ArrowRight size={14} /></Button>
+            <Button variant="secondary" onClick={reset}><RefreshCw size={14} /> Import another</Button>
+          </div>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="space-y-4">
+          <div className="bg-red-50 ring-1 ring-red-200 rounded-2xl p-5">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-800">Import failed</p>
+                <p className="text-xs text-red-600 mt-0.5">{errorMsg}</p>
+              </div>
+            </div>
+          </div>
+          <Button variant="secondary" onClick={reset}><RefreshCw size={14} /> Try again</Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function ImportPage() {
+  return (
+    <div className="max-w-2xl animate-fade-in">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Import Data</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Upload files to sync portfolio data or import your deal pipeline.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Excel import */}
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6">
+          <ExcelImport />
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <p className="text-xs text-slate-400">
+              <span className="font-medium text-slate-500">Expected format:</span> Excel must have a sheet named{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">Data_Raw</code> with columns:
+              Investment Name, Entity, Sector, Geography, Stage, Type, Invested Amount, Pre-money Valuation,
+              Post Money Valuation, Current Valuation, Ownership Percentage.
+            </p>
+          </div>
+        </div>
+
+        {/* Trello import */}
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6">
+          <TrelloImport />
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <p className="text-xs text-slate-400">
+              <span className="font-medium text-slate-500">How to export from Trello:</span> Open your board →
+              click <span className="font-medium text-slate-500">Share</span> (top right) →{' '}
+              <span className="font-medium text-slate-500">Export as JSON</span>. Each list becomes a pipeline
+              stage and each card becomes a deal. Card labels are used as the sector.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
