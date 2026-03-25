@@ -3,8 +3,14 @@ import Anthropic from '@anthropic-ai/sdk'
 import * as XLSX from 'xlsx'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
+function parseClaudeJSON(text: string) {
+  // Strip markdown code fences if present
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+  return JSON.parse(cleaned)
+}
+
 const SYSTEM_PROMPT = `You are a financial analyst assistant. Extract key financial and business metrics from the provided document.
-Return ONLY valid JSON with this exact structure:
+Return ONLY raw valid JSON with no markdown formatting, no code fences, no explanation. The JSON must have this exact structure:
 {
   "summary": "2-3 sentence description of the document and company stage",
   "metrics": {
@@ -54,7 +60,7 @@ export async function POST(req: NextRequest) {
           ],
         }],
       })
-      extracted = JSON.parse((msg.content[0] as { text: string }).text)
+      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
 
     } else if (isImage) {
       const buffer = await fileRes.arrayBuffer()
@@ -72,7 +78,7 @@ export async function POST(req: NextRequest) {
           ],
         }],
       })
-      extracted = JSON.parse((msg.content[0] as { text: string }).text)
+      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
 
     } else if (isExcel) {
       const buffer = await fileRes.arrayBuffer()
@@ -90,7 +96,7 @@ export async function POST(req: NextRequest) {
           content: `Extract all financial metrics and key business information from this spreadsheet:\n\n${text.slice(0, 20000)}`,
         }],
       })
-      extracted = JSON.parse((msg.content[0] as { text: string }).text)
+      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
 
     } else {
       // Try as plain text (Word docs, PPT exports, etc.)
@@ -104,7 +110,7 @@ export async function POST(req: NextRequest) {
           content: `Extract all financial metrics and key business information from this document:\n\n${text.slice(0, 20000)}`,
         }],
       })
-      extracted = JSON.parse((msg.content[0] as { text: string }).text)
+      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
     }
   } catch (err) {
     return NextResponse.json({ error: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 500 })
