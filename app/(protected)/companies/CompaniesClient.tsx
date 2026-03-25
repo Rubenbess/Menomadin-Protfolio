@@ -3,19 +3,21 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, MapPin, User } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import CompanyForm from '@/components/forms/CompanyForm'
 import { deleteCompany } from '@/actions/companies'
-import type { Company } from '@/lib/types'
+import type { Company, Contact } from '@/lib/types'
 
 export default function CompaniesClient({
   companies,
+  contacts,
   strategyLabel,
 }: {
   companies: Company[]
+  contacts: Contact[]
   strategyLabel: string | null
 }) {
   const router = useRouter()
@@ -28,6 +30,10 @@ export default function CompaniesClient({
     router.refresh()
   }
 
+  function contactsFor(companyId: string) {
+    return contacts.filter(c => c.company_id === companyId)
+  }
+
   return (
     <div className="animate-fade-in">
       <div className="page-header">
@@ -38,75 +44,95 @@ export default function CompaniesClient({
           )}
         </div>
         <Button onClick={() => setShowAdd(true)}>
-          <Plus size={15} />
-          Add Company
+          <Plus size={15} /> Add Company
         </Button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
-        {companies.length === 0 ? (
-          <div className="px-5 py-20 text-center">
-            <p className="text-sm text-slate-400 mb-5">No companies yet.</p>
-            <Button onClick={() => setShowAdd(true)}>
-              <Plus size={15} />
-              Add your first company
-            </Button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sector</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Strategy</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">HQ</th>
-                  <th className="px-5 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {companies.map((co) => (
-                  <tr key={co.id} className="hover:bg-slate-50/60 transition-colors group">
-                    <td className="px-5 py-3.5">
-                      <Link
-                        href={`/companies/${co.id}`}
-                        className="font-semibold text-slate-900 hover:text-violet-600 transition-colors"
-                      >
-                        {co.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-500">{co.sector}</td>
-                    <td className="px-4 py-3.5">
-                      <Badge value={co.strategy} type="strategy" />
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <Badge value={co.status} />
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-400">{co.hq || '—'}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setEditCompany(co)}
-                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(co.id, co.name)}
-                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+      {companies.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
+          <p className="text-sm text-slate-400 mb-5">No companies yet.</p>
+          <Button onClick={() => setShowAdd(true)}>
+            <Plus size={15} /> Add your first company
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {companies.map((co) => {
+            const coContacts = contactsFor(co.id)
+            return (
+              <div
+                key={co.id}
+                className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 flex flex-col gap-3 group hover:shadow-card-hover transition-shadow"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/companies/${co.id}`}
+                      className="text-base font-semibold text-slate-900 hover:text-violet-600 transition-colors truncate block"
+                    >
+                      {co.name}
+                    </Link>
+                    {co.hq && (
+                      <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
+                        <MapPin size={11} />
+                        {co.hq}
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <Badge value={co.strategy} type="strategy" />
+                    <Badge value={co.status} />
+                  </div>
+                </div>
+
+                {/* Sector */}
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{co.sector}</p>
+
+                {/* Description */}
+                {co.description && (
+                  <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{co.description}</p>
+                )}
+
+                {/* Contacts */}
+                {coContacts.length > 0 && (
+                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                    {coContacts.map(contact => (
+                      <div key={contact.id} className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-violet-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User size={11} className="text-violet-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-semibold text-slate-800">{contact.name}</span>
+                          {contact.position && (
+                            <span className="text-xs text-slate-400"> · {contact.position}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-1.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setEditCompany(co)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <Pencil size={12} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(co.id, co.name)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={12} /> Delete
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Company">
         <CompanyForm onClose={() => setShowAdd(false)} />
@@ -114,7 +140,11 @@ export default function CompaniesClient({
 
       <Modal open={!!editCompany} onClose={() => setEditCompany(null)} title="Edit Company">
         {editCompany && (
-          <CompanyForm company={editCompany} onClose={() => setEditCompany(null)} />
+          <CompanyForm
+            company={editCompany}
+            contacts={contactsFor(editCompany.id)}
+            onClose={() => setEditCompany(null)}
+          />
         )}
       </Modal>
     </div>

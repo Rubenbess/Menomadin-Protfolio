@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import CompaniesClient from './CompaniesClient'
-import type { Company } from '@/lib/types'
+import type { Company, Contact } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +14,12 @@ export default async function CompaniesPage({ searchParams }: Props) {
 
   let query = supabase.from('companies').select('*').order('name')
   if (strategy) query = query.eq('strategy', strategy)
+  const { data: companies } = await query
 
-  const { data } = await query
+  const ids = (companies ?? []).map((c: Company) => c.id)
+  const { data: contacts } = ids.length
+    ? await supabase.from('contacts').select('*').in('company_id', ids)
+    : { data: [] }
 
   const strategyLabel =
     strategy === 'impact'
@@ -26,7 +30,8 @@ export default async function CompaniesPage({ searchParams }: Props) {
 
   return (
     <CompaniesClient
-      companies={(data ?? []) as Company[]}
+      companies={(companies ?? []) as Company[]}
+      contacts={(contacts ?? []) as Contact[]}
       strategyLabel={strategyLabel}
     />
   )

@@ -16,7 +16,15 @@ export interface Company {
   strategy: Strategy
   hq: string
   status: CompanyStatus
+  description: string | null
   created_at: string
+}
+
+export interface Contact {
+  id: string
+  company_id: string
+  name: string
+  position: string
 }
 
 export interface Round {
