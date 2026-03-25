@@ -429,7 +429,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
       </div>
 
       {/* Summary bar */}
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 mb-6 grid grid-cols-4 gap-4">
+      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Companies',       value: companies.length },
           { label: 'Total Invested',  value: fmt$(totalInvested) },
@@ -446,7 +446,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
       {/* Full pack */}
       <div className="mb-4">
         <div className="bg-gradient-to-r from-violet-600 to-violet-700 rounded-2xl p-5 text-white">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
             <div>
               <h3 className="text-sm font-bold">Full Portfolio Pack</h3>
               <p className="text-xs text-violet-200 mt-0.5">All reports in one file — overview, investments, rounds & cap table</p>

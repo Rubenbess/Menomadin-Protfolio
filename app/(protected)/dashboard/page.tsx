@@ -78,7 +78,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-6 md:mb-8">
         <MetricCard label="Total Invested"    value={fmt$$(totalInvested)}      accent="violet" />
         <MetricCard label="Portfolio Value"   value={fmt$$(totalCurrentValue)}  accent="emerald" />
         <MetricCard label="TVPI"              value={fmtMultiple(tvpi)}         accent="blue" />
@@ -97,7 +97,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         const ventureValue    = ventureCos.reduce((s, c) => s + c.currentValue,  0)
 
         return (
-          <div className="grid grid-cols-2 gap-3 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 md:mb-8">
             {/* Impact */}
             <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 border-l-4 border-emerald-500">
               <div className="flex items-center gap-2 mb-4">

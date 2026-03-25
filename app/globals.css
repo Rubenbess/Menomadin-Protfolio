@@ -40,10 +40,10 @@
 
 @layer components {
   .page-header {
-    @apply flex items-center justify-between mb-8;
+    @apply flex flex-wrap items-center justify-between gap-3 mb-6 md:mb-8;
   }
   .page-title {
-    @apply text-2xl font-bold text-slate-900 tracking-tight;
+    @apply text-xl md:text-2xl font-bold text-slate-900 tracking-tight;
   }
   .section-title {
     @apply text-sm font-semibold text-slate-700 mb-3;
