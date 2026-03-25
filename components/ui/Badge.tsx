@@ -1,6 +1,6 @@
 const strategyColors: Record<string, string> = {
   impact:  'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-  venture: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200',
+  venture: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
 }
 
 const strategyLabels: Record<string, string> = {
