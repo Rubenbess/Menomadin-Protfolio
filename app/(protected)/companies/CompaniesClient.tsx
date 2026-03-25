@@ -94,30 +94,30 @@ export default function CompaniesClient({
                 className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 flex flex-col gap-3 group hover:shadow-card-hover transition-shadow"
               >
                 {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
                       {co.logo_url && (
                         <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
                       )}
                       <Link
                         href={`/companies/${co.id}`}
-                        className="text-base font-semibold text-slate-900 hover:text-violet-600 transition-colors truncate"
+                        className="text-base font-semibold text-slate-900 hover:text-violet-600 transition-colors leading-snug"
                       >
                         {co.name}
                       </Link>
                     </div>
-                    {co.hq && (
-                      <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
-                        <MapPin size={11} />
-                        {co.hq}
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                      <Badge value={co.strategy} type="strategy" />
+                      <Badge value={co.status} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Badge value={co.strategy} type="strategy" />
-                    <Badge value={co.status} />
-                  </div>
+                  {co.hq && (
+                    <div className="flex items-center gap-1 text-xs text-slate-400">
+                      <MapPin size={11} />
+                      {co.hq}
+                    </div>
+                  )}
                 </div>
 
                 {/* Sector */}

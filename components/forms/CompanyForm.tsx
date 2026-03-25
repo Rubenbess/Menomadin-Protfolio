@@ -6,6 +6,7 @@ import { Plus, Trash2, Upload, X, ChevronDown } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase'
 import { createCompany, updateCompany, upsertContacts } from '@/actions/companies'
+import { normalizeSector } from '@/lib/calculations'
 import type { Company, Contact } from '@/lib/types'
 
 interface Props {
@@ -136,7 +137,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
     // Create/update company first (without logo) to get the ID
     const baseData = {
       name:        fd.get('name')         as string,
-      sector:      selectedSector,
+      sector:      normalizeSector(selectedSector),
       strategy:    fd.get('strategy')     as string,
       hq:          fd.get('hq')           as string,
       status:      fd.get('status')       as string,

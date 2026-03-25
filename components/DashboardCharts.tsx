@@ -4,6 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend,
 } from 'recharts'
+import { normalizeSector } from '@/lib/calculations'
 
 interface CompanyData {
   name: string
@@ -96,7 +97,7 @@ function PerformanceChart({ companies }: Props) {
 function SectorChart({ companies }: Props) {
   const sectorMap: Record<string, number> = {}
   for (const c of companies) {
-    const s = c.sector || 'Other'
+    const s = normalizeSector(c.sector || 'Other')
     sectorMap[s] = (sectorMap[s] ?? 0) + c.totalInvested
   }
 

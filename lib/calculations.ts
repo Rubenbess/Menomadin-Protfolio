@@ -1,5 +1,29 @@
 import type { Investment, Round, CapTableEntry } from './types'
 
+// Canonical sector names — any alias maps to the canonical form
+const SECTOR_ALIASES: Record<string, string> = {
+  healthtech: 'Healthtech',
+  'health tech': 'Healthtech',
+  'health-tech': 'Healthtech',
+  saas: 'SaaS',
+  fintech: 'Fintech',
+  cleantech: 'Cleantech',
+  'clean tech': 'Cleantech',
+  'clean-tech': 'Cleantech',
+  consumer: 'Consumer',
+  'deep tech': 'Deep Tech',
+  deeptech: 'Deep Tech',
+  'deep-tech': 'Deep Tech',
+  marketplace: 'Marketplace',
+  other: 'Other',
+}
+
+export function normalizeSector(sector: string): string {
+  if (!sector) return 'Other'
+  const key = sector.trim().toLowerCase()
+  return SECTOR_ALIASES[key] ?? sector.trim().replace(/\b\w/g, c => c.toUpperCase())
+}
+
 export function calcMOIC(currentValue: number, totalInvested: number): number {
   if (!totalInvested || totalInvested === 0) return 0
   return currentValue / totalInvested
