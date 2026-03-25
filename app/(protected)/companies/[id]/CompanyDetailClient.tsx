@@ -201,6 +201,22 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   )}
                 </div>
               </div>
+
+              {/* Co-investors */}
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <h3 className="text-sm font-semibold text-slate-900">Co-investors</h3>
+                {company.co_investors && company.co_investors.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {company.co_investors.map((inv, i) => (
+                      <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+                        {inv}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">—</p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-4">

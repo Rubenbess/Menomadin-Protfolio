@@ -44,6 +44,8 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
   const [logoFile, setLogoFile]       = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [coInvestors, setCoInvestors] = useState<string[]>(company?.co_investors ?? [])
+
   const [customSectors, setCustomSectors] = useState<string[]>([])
   const [selectedSector, setSelectedSector] = useState(company?.sector ?? '')
   const [sectorDropdownOpen, setSectorDropdownOpen] = useState(false)
@@ -142,6 +144,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       entry_stage:      (fd.get('entry_stage')      as string) || null,
       investment_owner: (fd.get('investment_owner') as string) || null,
       board_seat:       (fd.get('board_seat')       as string) || null,
+      co_investors:     coInvestors.filter(v => v.trim()).length > 0 ? coInvestors.filter(v => v.trim()) : null,
       logo_url:         logoPreview,
     }
 
@@ -313,6 +316,42 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           rows={3}
           placeholder="Brief description of what this company does…"
         />
+      </div>
+
+      {/* Co-investors */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className={`${label} mb-0`}>Co-investors</label>
+          <button
+            type="button"
+            onClick={() => setCoInvestors(prev => [...prev, ''])}
+            className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium"
+          >
+            <Plus size={12} /> Add
+          </button>
+        </div>
+        {coInvestors.length === 0 && (
+          <p className="text-xs text-slate-400 py-2">No co-investors yet — click &quot;Add&quot; to add one.</p>
+        )}
+        <div className="space-y-2">
+          {coInvestors.map((name, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input
+                value={name}
+                onChange={e => setCoInvestors(prev => prev.map((v, idx) => idx === i ? e.target.value : v))}
+                className={`${input} flex-1`}
+                placeholder="Investor name"
+              />
+              <button
+                type="button"
+                onClick={() => setCoInvestors(prev => prev.filter((_, idx) => idx !== i))}
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Contacts */}

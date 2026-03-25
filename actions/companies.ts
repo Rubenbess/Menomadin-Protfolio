@@ -13,6 +13,7 @@ export async function createCompany(data: {
   entry_stage: string | null
   investment_owner: string | null
   board_seat: string | null
+  co_investors: string[] | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { data: company, error } = await supabase.from('companies').insert(data).select('id').single()
@@ -22,7 +23,7 @@ export async function createCompany(data: {
 
 export async function updateCompany(
   id: string,
-  data: { name: string; sector: string; strategy: string; hq: string; status: string; description: string | null; logo_url: string | null; entry_stage: string | null; investment_owner: string | null; board_seat: string | null }
+  data: { name: string; sector: string; strategy: string; hq: string; status: string; description: string | null; logo_url: string | null; entry_stage: string | null; investment_owner: string | null; board_seat: string | null; co_investors: string[] | null }
 ) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('companies').update(data).eq('id', id)

@@ -21,6 +21,7 @@ export interface Company {
   entry_stage: string | null
   investment_owner: string | null
   board_seat: string | null
+  co_investors: string[] | null
   created_at: string
 }
 
