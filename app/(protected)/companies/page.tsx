@@ -32,7 +32,7 @@ export default async function CompaniesPage({ searchParams }: Props) {
     <CompaniesClient
       companies={(companies ?? []) as Company[]}
       contacts={(contacts ?? []) as Contact[]}
-      strategyLabel={strategyLabel}
+      strategyLabel={null}
     />
   )
 }

@@ -11,10 +11,15 @@ import CompanyForm from '@/components/forms/CompanyForm'
 import { deleteCompany } from '@/actions/companies'
 import type { Company, Contact } from '@/lib/types'
 
+const STRATEGY_FILTERS = [
+  { value: 'all',     label: 'All' },
+  { value: 'impact',  label: 'Menomadin Impact' },
+  { value: 'venture', label: 'Menomadin Ventures' },
+]
+
 export default function CompaniesClient({
   companies,
   contacts,
-  strategyLabel,
 }: {
   companies: Company[]
   contacts: Contact[]
@@ -23,6 +28,11 @@ export default function CompaniesClient({
   const router = useRouter()
   const [showAdd, setShowAdd] = useState(false)
   const [editCompany, setEditCompany] = useState<Company | null>(null)
+  const [strategyFilter, setStrategyFilter] = useState<'all' | 'impact' | 'venture'>('all')
+
+  const filtered = strategyFilter === 'all'
+    ? companies
+    : companies.filter(c => c.strategy === strategyFilter)
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
@@ -37,27 +47,46 @@ export default function CompaniesClient({
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <div>
-          <h1 className="page-title">Companies</h1>
-          {strategyLabel && (
-            <p className="text-sm text-slate-400 mt-0.5">{strategyLabel}</p>
-          )}
-        </div>
+        <h1 className="page-title">Companies</h1>
         <Button onClick={() => setShowAdd(true)}>
           <Plus size={15} /> Add Company
         </Button>
       </div>
 
-      {companies.length === 0 ? (
+      {/* Strategy filter tabs */}
+      <div className="flex gap-1.5 mb-6 bg-white rounded-xl p-1 shadow-card ring-1 ring-black/[0.04] w-fit">
+        {STRATEGY_FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setStrategyFilter(value as typeof strategyFilter)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              strategyFilter === value
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {value !== 'all' && (
+              <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 ${
+                value === 'impact' ? 'bg-emerald-400' : 'bg-blue-400'
+              }`} />
+            )}
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
-          <p className="text-sm text-slate-400 mb-5">No companies yet.</p>
+          <p className="text-sm text-slate-400 mb-5">
+            {strategyFilter === 'all' ? 'No companies yet.' : `No ${strategyFilter === 'impact' ? 'Menomadin Impact' : 'Menomadin Ventures'} companies yet.`}
+          </p>
           <Button onClick={() => setShowAdd(true)}>
             <Plus size={15} /> Add your first company
           </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {companies.map((co) => {
+          {filtered.map((co) => {
             const coContacts = contactsFor(co.id)
             return (
               <div
