@@ -13,7 +13,6 @@ import RoundForm from '@/components/forms/RoundForm'
 import InvestmentForm from '@/components/forms/InvestmentForm'
 import CapTableForm from '@/components/forms/CapTableForm'
 import DocumentUpload from '@/components/documents/DocumentUpload'
-import { deleteRound } from '@/actions/rounds'
 import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
 import {
@@ -53,12 +52,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const currentValue  = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
   const moic          = calcMOIC(currentValue, totalInvested)
 
-  async function handleDeleteRound(id: string) {
-    if (!confirm('Delete this round?')) return
-    await deleteRound(id)
-    router.refresh()
-  }
-
   async function handleDeleteInvestment(id: string) {
     if (!confirm('Delete this investment?')) return
     await deleteInvestment(id)
@@ -74,7 +67,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
     { id: 'history',     label: 'Investment History', count: rounds.length },
-    { id: 'rounds',      label: 'Rounds',      count: rounds.length },
     { id: 'investments', label: 'Investments',  count: investments.length },
     { id: 'captable',    label: 'Cap Table',    count: capTable.length },
     { id: 'documents',   label: 'Documents',    count: documents.length },
@@ -250,9 +242,20 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           const fundOwnership = getFundOwnershipPct(capTable)
 
           return sortedRounds.length === 0 ? (
-            <EmptyState message="No rounds recorded yet. Add rounds to see investment history." />
+            <div>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
+                <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+              </div>
+              <EmptyState message="No rounds recorded yet." />
+            </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
+                <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+              </div>
+              <div className="divide-y divide-slate-100">
               {sortedRounds.map((round, idx) => {
                 const roundInvs    = investments.filter(i => i.round_id === round.id)
                 const roundInvested = roundInvs.reduce((s, i) => s + i.amount, 0)
@@ -308,55 +311,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   </div>
                 )
               })}
+              </div>
             </div>
           )
         })()}
-
-        {/* ROUNDS */}
-        {activeTab === 'rounds' && (
-          <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900">Funding Rounds</h3>
-              <Button size="sm" onClick={() => setShowAddRound(true)}>
-                <Plus size={13} /> Add Round
-              </Button>
-            </div>
-            {rounds.length === 0 ? (
-              <EmptyState message="No rounds recorded yet." />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70">
-                      {['Date', 'Type', 'Pre-money', 'Post-money', 'Raised', ''].map((h) => (
-                        <th key={h} className={`${th} ${h === '' ? 'text-right' : ''}`}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {rounds.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-50/60 group transition-colors">
-                        <td className={td + ' text-slate-500'}>{fmtDate(r.date)}</td>
-                        <td className={td + ' font-medium text-slate-900'}>{r.type}</td>
-                        <td className={td + ' text-slate-600'}>{r.pre_money > 0 ? fmt$$(r.pre_money) : '—'}</td>
-                        <td className={td + ' text-slate-600'}>{r.post_money > 0 ? fmt$$(r.post_money) : '—'}</td>
-                        <td className={td + ' text-slate-600'}>{r.amount_raised > 0 ? fmt$$(r.amount_raised) : '—'}</td>
-                        <td className={td + ' text-right'}>
-                          <button
-                            onClick={() => handleDeleteRound(r.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* INVESTMENTS */}
         {activeTab === 'investments' && (
