@@ -93,6 +93,17 @@ export interface CompanyKPI {
   headcount: number | null
   gross_margin: number | null
   notes: string | null
+  custom_kpis: Record<string, string> | null
+  created_at: string
+}
+
+export interface CompanyUpdate {
+  id: string
+  company_id: string
+  date: string
+  category: string
+  title: string
+  notes: string | null
   created_at: string
 }
 

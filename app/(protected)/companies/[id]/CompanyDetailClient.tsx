@@ -13,10 +13,14 @@ import RoundForm from '@/components/forms/RoundForm'
 import InvestmentForm from '@/components/forms/InvestmentForm'
 import CapTableForm from '@/components/forms/CapTableForm'
 import KPIForm from '@/components/forms/KPIForm'
+import UpdateForm from '@/components/forms/UpdateForm'
+import { CATEGORY_COLORS } from '@/components/forms/UpdateForm'
 import DocumentUpload from '@/components/documents/DocumentUpload'
+import { KPITrendChart, ValuationChart } from '@/components/CompanyCharts'
 import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
 import { deleteKPI } from '@/actions/kpis'
+import { deleteUpdate } from '@/actions/updates'
 import {
   calcCurrentValue,
   calcMOIC,
@@ -28,9 +32,9 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate } from '@/lib/types'
 
-type Tab = 'overview' | 'history' | 'kpis' | 'investments' | 'captable' | 'documents'
+type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents'
 
 interface Props {
   company: Company
@@ -39,9 +43,10 @@ interface Props {
   capTable: CapTableEntry[]
   documents: Document[]
   kpis: CompanyKPI[]
+  updates: CompanyUpdate[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -49,6 +54,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [showAddInvestment, setShowAddInvestment] = useState(false)
   const [showAddCapTable, setShowAddCapTable] = useState(false)
   const [showAddKPI, setShowAddKPI] = useState(false)
+  const [showAddUpdate, setShowAddUpdate] = useState(false)
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -72,6 +78,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     { id: 'overview',    label: 'Overview' },
     { id: 'history',     label: 'Investment History', count: rounds.length },
     { id: 'kpis',        label: 'KPIs',         count: kpis.length },
+    { id: 'updates',     label: 'Updates',       count: updates.length },
     { id: 'investments', label: 'Investments',  count: investments.length },
     { id: 'captable',    label: 'Cap Table',    count: capTable.length },
     { id: 'documents',   label: 'Documents',    count: documents.length },
@@ -260,6 +267,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
                 <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
               </div>
+              <div className="px-5 pt-4">
+                <ValuationChart rounds={rounds} />
+              </div>
               <div className="divide-y divide-slate-100">
               {sortedRounds.map((round, idx) => {
                 const roundInvs    = investments.filter(i => i.round_id === round.id)
@@ -446,9 +456,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <Button size="sm" onClick={() => setShowAddKPI(true)}><Plus size={13} /> Add Snapshot</Button>
               </div>
 
+              {/* KPI trend chart */}
+              {kpis.length >= 2 && (
+                <div className="px-5 pt-5">
+                  <KPITrendChart kpis={kpis} />
+                </div>
+              )}
+
               {/* Latest values */}
               {latest && (
-                <div className="px-5 pt-5 pb-2">
+                <div className="px-5 pt-4 pb-2">
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
                     Latest — {fmtDate(latest.date)}
                   </p>
@@ -462,6 +479,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                         </div>
                       ) : null
                     })}
+                    {/* Custom KPIs from latest snapshot */}
+                    {latest.custom_kpis && Object.entries(latest.custom_kpis).map(([k, v]) => (
+                      <div key={k} className="bg-violet-50 rounded-xl px-4 py-3 ring-1 ring-violet-100">
+                        <p className="text-xs font-semibold text-violet-400 uppercase tracking-wider mb-0.5">{k}</p>
+                        <p className="text-sm font-bold text-slate-900">{v}</p>
+                      </div>
+                    ))}
                   </div>
                   {latest.notes && (
                     <p className="mt-3 text-sm text-slate-500 italic">{latest.notes}</p>
@@ -509,6 +533,48 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           )
         })()}
 
+        {/* UPDATES */}
+        {activeTab === 'updates' && (
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-900">Updates & Milestones</h3>
+              <Button size="sm" onClick={() => setShowAddUpdate(true)}><Plus size={13} /> Add Update</Button>
+            </div>
+            {updates.length === 0 ? (
+              <EmptyState message="No updates yet. Log milestones, news, or decisions here." />
+            ) : (
+              <div className="px-5 py-4 space-y-0">
+                {updates.map((u, i) => (
+                  <div key={u.id} className="flex gap-4 group">
+                    {/* Timeline line */}
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-violet-500 mt-1.5 flex-shrink-0 ring-2 ring-white" />
+                      {i < updates.length - 1 && <div className="w-px flex-1 bg-slate-200 my-1" />}
+                    </div>
+                    {/* Content */}
+                    <div className="pb-5 flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[u.category] ?? 'bg-slate-100 text-slate-700'}`}>
+                            {u.category}
+                          </span>
+                          <span className="text-xs text-slate-400">{fmtDate(u.date)}</span>
+                        </div>
+                        <button
+                          onClick={async () => { if (confirm('Delete this update?')) { await deleteUpdate(u.id); router.refresh() } }}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-all flex-shrink-0"
+                        ><Trash2 size={12} /></button>
+                      </div>
+                      <p className="text-sm font-semibold text-slate-900 mb-0.5">{u.title}</p>
+                      {u.notes && <p className="text-sm text-slate-500 leading-relaxed">{u.notes}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* DOCUMENTS */}
         {activeTab === 'documents' && (
           <div className="p-5">
@@ -531,7 +597,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         <CapTableForm companyId={company.id} rounds={rounds} onClose={() => setShowAddCapTable(false)} />
       </Modal>
       <Modal open={showAddKPI}          onClose={() => setShowAddKPI(false)}         title="Add KPI Snapshot">
-        <KPIForm companyId={company.id} onClose={() => setShowAddKPI(false)} />
+        <KPIForm companyId={company.id} sector={company.sector} onClose={() => setShowAddKPI(false)} />
+      </Modal>
+      <Modal open={showAddUpdate}       onClose={() => setShowAddUpdate(false)}      title="Log Update">
+        <UpdateForm companyId={company.id} onClose={() => setShowAddUpdate(false)} />
       </Modal>
     </div>
   )

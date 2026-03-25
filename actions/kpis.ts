@@ -13,6 +13,7 @@ export async function createKPI(data: {
   headcount: number | null
   gross_margin: number | null
   notes: string | null
+  custom_kpis: Record<string, string> | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('company_kpis').insert(data)
