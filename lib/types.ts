@@ -65,6 +65,8 @@ export interface Reserve {
   company_id: string
   reserved_amount: number
   deployed_amount: number
+  target_round: string | null
+  notes: string | null
 }
 
 export interface Document {
