@@ -74,6 +74,26 @@ export interface Document {
   file_name: string
   type: string
   created_at: string
+  extracted_data: {
+    summary?: string
+    metrics?: Record<string, string>
+    key_points?: string[]
+  } | null
+}
+
+export interface CompanyKPI {
+  id: string
+  company_id: string
+  date: string
+  revenue: number | null
+  arr: number | null
+  run_rate: number | null
+  burn_rate: number | null
+  cash_runway: number | null
+  headcount: number | null
+  gross_margin: number | null
+  notes: string | null
+  created_at: string
 }
 
 export interface PipelineEntry {

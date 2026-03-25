@@ -12,9 +12,11 @@ import CompanyForm from '@/components/forms/CompanyForm'
 import RoundForm from '@/components/forms/RoundForm'
 import InvestmentForm from '@/components/forms/InvestmentForm'
 import CapTableForm from '@/components/forms/CapTableForm'
+import KPIForm from '@/components/forms/KPIForm'
 import DocumentUpload from '@/components/documents/DocumentUpload'
 import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
+import { deleteKPI } from '@/actions/kpis'
 import {
   calcCurrentValue,
   calcMOIC,
@@ -26,9 +28,9 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI } from '@/lib/types'
 
-type Tab = 'overview' | 'history' | 'rounds' | 'investments' | 'captable' | 'documents'
+type Tab = 'overview' | 'history' | 'kpis' | 'investments' | 'captable' | 'documents'
 
 interface Props {
   company: Company
@@ -36,15 +38,17 @@ interface Props {
   investments: Investment[]
   capTable: CapTableEntry[]
   documents: Document[]
+  kpis: CompanyKPI[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
   const [showAddRound, setShowAddRound] = useState(false)
   const [showAddInvestment, setShowAddInvestment] = useState(false)
   const [showAddCapTable, setShowAddCapTable] = useState(false)
+  const [showAddKPI, setShowAddKPI] = useState(false)
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -67,6 +71,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
     { id: 'history',     label: 'Investment History', count: rounds.length },
+    { id: 'kpis',        label: 'KPIs',         count: kpis.length },
     { id: 'investments', label: 'Investments',  count: investments.length },
     { id: 'captable',    label: 'Cap Table',    count: capTable.length },
     { id: 'documents',   label: 'Documents',    count: documents.length },
@@ -422,6 +427,88 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           </div>
         )}
 
+        {/* KPIs */}
+        {activeTab === 'kpis' && (() => {
+          const latest = kpis[0] ?? null
+          const KPI_META = [
+            { key: 'revenue',      label: 'Revenue',         fmt: (v: number) => fmt$$(v) },
+            { key: 'arr',          label: 'ARR',             fmt: (v: number) => fmt$$(v) },
+            { key: 'run_rate',     label: 'Run Rate',        fmt: (v: number) => fmt$$(v) },
+            { key: 'burn_rate',    label: 'Burn Rate/mo',    fmt: (v: number) => fmt$$(v) },
+            { key: 'cash_runway',  label: 'Cash Runway',     fmt: (v: number) => `${v} mo` },
+            { key: 'headcount',    label: 'Headcount',       fmt: (v: number) => `${v}` },
+            { key: 'gross_margin', label: 'Gross Margin',    fmt: (v: number) => fmtPct(v) },
+          ]
+          return (
+            <div>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900">KPI Snapshots</h3>
+                <Button size="sm" onClick={() => setShowAddKPI(true)}><Plus size={13} /> Add Snapshot</Button>
+              </div>
+
+              {/* Latest values */}
+              {latest && (
+                <div className="px-5 pt-5 pb-2">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                    Latest — {fmtDate(latest.date)}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {KPI_META.map(({ key, label, fmt }) => {
+                      const val = latest[key as keyof CompanyKPI] as number | null
+                      return val != null ? (
+                        <div key={key} className="bg-slate-50 rounded-xl px-4 py-3 ring-1 ring-slate-200">
+                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+                          <p className="text-sm font-bold text-slate-900">{fmt(val)}</p>
+                        </div>
+                      ) : null
+                    })}
+                  </div>
+                  {latest.notes && (
+                    <p className="mt-3 text-sm text-slate-500 italic">{latest.notes}</p>
+                  )}
+                </div>
+              )}
+
+              {/* History table */}
+              {kpis.length === 0 ? (
+                <EmptyState message="No KPI snapshots yet. Add one to start tracking metrics." />
+              ) : (
+                <div className="overflow-x-auto mt-4">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50/70">
+                        {['Date', 'Revenue', 'ARR', 'Run Rate', 'Burn/mo', 'Runway', 'HC', 'GM%', ''].map(h => (
+                          <th key={h} className={th}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {kpis.map(k => (
+                        <tr key={k.id} className="hover:bg-slate-50/60 group transition-colors">
+                          <td className={td + ' text-slate-500 font-medium'}>{fmtDate(k.date)}</td>
+                          <td className={td + ' text-slate-700'}>{k.revenue != null ? fmt$$(k.revenue) : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.arr != null ? fmt$$(k.arr) : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.run_rate != null ? fmt$$(k.run_rate) : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.burn_rate != null ? fmt$$(k.burn_rate) : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.cash_runway != null ? `${k.cash_runway} mo` : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.headcount ?? '—'}</td>
+                          <td className={td + ' text-slate-700'}>{k.gross_margin != null ? fmtPct(k.gross_margin) : '—'}</td>
+                          <td className={td + ' text-right'}>
+                            <button
+                              onClick={async () => { if (confirm('Delete this snapshot?')) { await deleteKPI(k.id); router.refresh() } }}
+                              className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            ><Trash2 size={13} /></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
         {/* DOCUMENTS */}
         {activeTab === 'documents' && (
           <div className="p-5">
@@ -442,6 +529,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       </Modal>
       <Modal open={showAddCapTable}     onClose={() => setShowAddCapTable(false)}    title="Add Cap Table Entry">
         <CapTableForm companyId={company.id} rounds={rounds} onClose={() => setShowAddCapTable(false)} />
+      </Modal>
+      <Modal open={showAddKPI}          onClose={() => setShowAddKPI(false)}         title="Add KPI Snapshot">
+        <KPIForm companyId={company.id} onClose={() => setShowAddKPI(false)} />
       </Modal>
     </div>
   )
