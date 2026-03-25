@@ -27,16 +27,29 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const supabase = createClient()
 
-    if (error) {
-      setError(error.message)
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out — check your connection')), 10000)
+      )
+
+      const { error } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ])
+
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+
+      window.location.href = '/dashboard'
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
       setLoading(false)
-      return
     }
-
-    window.location.href = '/dashboard'
   }
 
   async function handleSignUp(e: React.FormEvent) {
