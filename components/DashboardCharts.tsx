@@ -304,7 +304,7 @@ function JCurveChart({ investments }: { investments: InvestmentData[] }) {
             domain={[minVal * 1.1, maxVal * 1.1 || 1]}
           />
           <Tooltip
-            formatter={(v: number) => [`-$${Math.abs(v / 1_000_000).toFixed(2)}M`, 'Net Cash Flow']}
+            formatter={(v) => [`-$${Math.abs(Number(v) / 1_000_000).toFixed(2)}M`, 'Net Cash Flow']}
             contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
           />
           <ReferenceLine y={0} stroke="#e2e8f0" strokeDasharray="4 4" />
