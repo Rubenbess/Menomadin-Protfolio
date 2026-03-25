@@ -1,0 +1,27 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="inner">
+      <!-- Slightly inset diamond for clipping interior elements -->
+      <polygon points="100,20 178,100 100,180 22,100"/>
+    </clipPath>
+  </defs>
+
+  <!-- Diamond outline -->
+  <polygon
+    points="100,14 186,100 100,186 14,100"
+    fill="transparent"
+    stroke="currentColor"
+    stroke-width="10"
+    stroke-linejoin="miter"
+  />
+
+  <!-- Interior shapes clipped to diamond -->
+  <g clip-path="url(#inner)" fill="currentColor">
+    <!-- Left tall rectangle -->
+    <rect x="28"  y="62" width="42" height="90"/>
+    <!-- Right: 3 stacked horizontal bars -->
+    <rect x="80"  y="62" width="90" height="22"/>
+    <rect x="80"  y="94" width="90" height="22"/>
+    <rect x="80" y="126" width="90" height="22"/>
+  </g>
+</svg>

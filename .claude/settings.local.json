@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias=\"@/*\" --no-git)",
+      "Bash(ls app/\\\\\\(protected\\\\\\)/ app/api/ app/login/)",
+      "Bash(ls /c/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\))",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(vercel --version)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(printf 'node_modules/\\\\n.next/\\\\n.env\\\\n.env.local\\\\ndist/\\\\nbuild/\\\\ntsconfig.tsbuildinfo\\\\n')",
+      "Bash(git rm:*)"
+    ]
+  }
+}
