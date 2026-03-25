@@ -2,19 +2,42 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network } from 'lucide-react'
+import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import StrategyFilter from './StrategyFilter'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/companies', label: 'Companies',   icon: Building2 },
-  { href: '/pipeline',  label: 'Pipeline',    icon: GitMerge },
-  { href: '/network',   label: 'Co-investors',icon: Network },
-  { href: '/import',    label: 'Import Data', icon: Upload },
-  { href: '/reports',   label: 'Reports',     icon: FileDown },
+  { href: '/dashboard',  label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/companies',  label: 'Companies',    icon: Building2 },
+  { href: '/pipeline',   label: 'Pipeline',     icon: GitMerge },
+  { href: '/network',    label: 'Co-investors', icon: Network },
+  { href: '/reminders',  label: 'Reminders',    icon: Bell },
+  { href: '/import',     label: 'Import Data',  icon: Upload },
+  { href: '/reports',    label: 'Reports',      icon: FileDown },
 ]
+
+function ReminderBadge() {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const today = new Date().toISOString().split('T')[0]
+    supabase
+      .from('reminders')
+      .select('id', { count: 'exact', head: true })
+      .eq('completed', false)
+      .lte('due_date', today)
+      .then(({ count: n }) => setCount(n ?? 0))
+  }, [])
+
+  if (!count) return null
+  return (
+    <span className="ml-auto flex-shrink-0 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+      {count > 9 ? '9+' : count}
+    </span>
+  )
+}
 
 function NavLinks() {
   const pathname = usePathname()
@@ -43,6 +66,7 @@ function NavLinks() {
               className={active ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300 transition-colors'}
             />
             {label}
+            {href === '/reminders' && !active && <ReminderBadge />}
             {active && (
               <span className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-400" />
             )}

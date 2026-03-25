@@ -123,6 +123,17 @@ export interface PipelineEntry {
   created_at: string
 }
 
+export interface Reminder {
+  id: string
+  company_id: string | null
+  title: string
+  due_date: string
+  category: string
+  notes: string | null
+  completed: boolean
+  created_at: string
+}
+
 // Aggregated types used in UI
 export interface CompanyWithMetrics extends Company {
   totalInvested: number
