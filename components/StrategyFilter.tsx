@@ -50,7 +50,7 @@ export default function StrategyFilter() {
               <span className="flex items-center gap-2">
                 <span
                   className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    value === 'impact' ? 'bg-emerald-400' : 'bg-violet-400'
+                    value === 'impact' ? 'bg-emerald-400' : 'bg-blue-400'
                   }`}
                 />
                 {label}
