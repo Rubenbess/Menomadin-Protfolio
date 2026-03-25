@@ -112,8 +112,14 @@ export interface PipelineEntry {
   name: string
   sector: string
   stage: string
-  status: PipelineStatus
+  status: string
   notes: string | null
+  hq: string | null
+  fundraising_ask: number | null
+  lead_partner: string | null
+  source: string | null
+  internal_score: number | null
+  next_steps: string | null
   created_at: string
 }
 
