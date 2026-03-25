@@ -89,8 +89,10 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       hq:          fd.get('hq')           as string,
       status:      fd.get('status')       as string,
       description: (fd.get('description') as string) || null,
-      entry_stage: (fd.get('entry_stage') as string) || null,
-      logo_url:    logoPreview,
+      entry_stage:      (fd.get('entry_stage')      as string) || null,
+      investment_owner: (fd.get('investment_owner') as string) || null,
+      board_seat:       (fd.get('board_seat')       as string) || null,
+      logo_url:         logoPreview,
     }
 
     if (isEdit) {
@@ -184,6 +186,26 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
               <Upload size={14} /> Upload image…
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={label}>Investment Owner</label>
+          <input
+            name="investment_owner"
+            defaultValue={company?.investment_owner ?? ''}
+            className={input}
+            placeholder="e.g. John Smith"
+          />
+        </div>
+        <div>
+          <label className={label}>Board Seat</label>
+          <select name="board_seat" defaultValue={company?.board_seat ?? ''} className={input}>
+            <option value="">None</option>
+            <option value="Board Seat">Board Seat</option>
+            <option value="Observer Seat">Observer Seat</option>
+          </select>
         </div>
       </div>
 

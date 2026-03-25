@@ -171,12 +171,36 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 { label: 'Strategy', value: company.strategy },
                 { label: 'HQ',       value: company.hq || '—' },
                 { label: 'Status',   value: company.status },
+                { label: 'Entry Stage', value: company.entry_stage || '—' },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
                   <p className="text-sm text-slate-900 capitalize">{value}</p>
                 </div>
               ))}
+
+              {/* Menomadin ownership info */}
+              <div className="pt-4 border-t border-slate-100 space-y-4">
+                <h3 className="text-sm font-semibold text-slate-900">Menomadin</h3>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Investment Owner</p>
+                  <p className="text-sm text-slate-900">{company.investment_owner || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Board Representation</p>
+                  {company.board_seat ? (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                      company.board_seat === 'Board Seat'
+                        ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
+                        : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                    }`}>
+                      {company.board_seat}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-slate-400">No seat</span>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4">

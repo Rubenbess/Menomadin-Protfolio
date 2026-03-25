@@ -19,6 +19,8 @@ export interface Company {
   description: string | null
   logo_url: string | null
   entry_stage: string | null
+  investment_owner: string | null
+  board_seat: string | null
   created_at: string
 }
 
