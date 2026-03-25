@@ -151,9 +151,6 @@ export default async function DashboardPage({ searchParams }: Props) {
         )
       })()}
 
-      {/* Charts */}
-      <DashboardCharts companies={companiesWithMetrics} />
-
       {/* Portfolio table */}
       <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -223,6 +220,11 @@ export default async function DashboardPage({ searchParams }: Props) {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Charts */}
+      <div className="mt-6">
+        <DashboardCharts companies={companiesWithMetrics} />
       </div>
     </div>
   )
