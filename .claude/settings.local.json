@@ -13,7 +13,8 @@
       "Bash(printf 'node_modules/\\\\n.next/\\\\n.env\\\\n.env.local\\\\ndist/\\\\nbuild/\\\\ntsconfig.tsbuildinfo\\\\n')",
       "Bash(git rm:*)",
       "Bash(supabase --version)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
