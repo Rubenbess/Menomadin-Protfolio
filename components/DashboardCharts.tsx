@@ -71,7 +71,7 @@ function PerformanceChart({ companies }: Props) {
             width={52}
           />
           <Tooltip
-            formatter={(v: number, name: string) => [fmt(v), name]}
+            formatter={(v) => [fmt(Number(v)), '']}
             contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
             cursor={{ fill: '#f1f5f9' }}
           />
@@ -126,7 +126,7 @@ function SectorChart({ companies }: Props) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(v: number) => [fmt(v), 'Invested']}
+            formatter={(v) => [fmt(Number(v)), 'Invested']}
             contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
           />
           <Legend
@@ -176,7 +176,7 @@ function MoicChart({ companies }: Props) {
             width={110}
           />
           <Tooltip
-            formatter={(v: number) => [`${v}x`, 'MOIC']}
+            formatter={(v) => [`${Number(v)}x`, 'MOIC']}
             contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
             cursor={{ fill: '#f1f5f9' }}
           />
