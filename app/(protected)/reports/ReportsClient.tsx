@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FileSpreadsheet, FileText, Download, CheckCircle2 } from 'lucide-react'
+import Link from 'next/link'
+import { FileSpreadsheet, FileText, Download, CheckCircle2, Users } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
 
 interface CompanyWithMetrics {
@@ -441,6 +442,25 @@ export default function ReportsClient({ companies, rounds, investments, capTable
             <p className="text-base font-bold text-slate-900 mt-1">{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* LP Update CTA */}
+      <div className="mb-4">
+        <Link
+          href="/reports/lp-update"
+          className="flex items-center justify-between bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 hover:shadow-card-hover transition-shadow group"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Users size={16} className="text-violet-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">LP Portfolio Update</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Live report with highlights, KPIs and portfolio metrics — export to PDF</p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold text-violet-600 group-hover:text-violet-700 flex-shrink-0 ml-4">Open →</span>
+        </Link>
       </div>
 
       {/* Full pack */}
