@@ -101,15 +101,15 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  async function uploadLogo(companyId: string): Promise<string | null> {
-    if (!logoFile) return logoPreview // keep existing URL if no new file
+  async function uploadLogo(companyId: string): Promise<{ url: string | null; error: string | null }> {
+    if (!logoFile) return { url: logoPreview, error: null }
     const supabase = createClient()
     const ext  = logoFile.name.split('.').pop()
     const path = `${companyId}.${ext}`
     const { error } = await supabase.storage.from('logos').upload(path, logoFile, { upsert: true })
-    if (error) return null
+    if (error) return { url: null, error: `Logo upload failed: ${error.message}` }
     const { data } = supabase.storage.from('logos').getPublicUrl(path)
-    return data.publicUrl
+    return { url: data.publicUrl, error: null }
   }
 
   function addContact() {
@@ -160,7 +160,8 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
 
     // Upload logo if a new file was selected
     if (logoFile) {
-      const url = await uploadLogo(companyId)
+      const { url, error: uploadError } = await uploadLogo(companyId)
+      if (uploadError) { setError(uploadError); setLoading(false); return }
       if (url) await updateCompany(companyId, { ...baseData, logo_url: url })
     }
 
