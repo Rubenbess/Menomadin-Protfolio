@@ -86,7 +86,9 @@ function StarRow({ score, size = 14 }: { score: number | null; size?: number }) 
 // ── Analytics Bar ─────────────────────────────────────────────────────────
 
 function AnalyticsBar({ entries, stages }: { entries: PipelineEntry[]; stages: Stage[] }) {
-  const total = entries.length
+  const stageNames = new Set(stages.map(s => s.name))
+  const visibleEntries = entries.filter(e => stageNames.has(e.status))
+  const total = visibleEntries.length
 
   const passedNames = stages.filter(s => s.name.toLowerCase().includes('pass')).map(s => s.name)
   const closedNames = stages.filter(s =>
@@ -96,17 +98,17 @@ function AnalyticsBar({ entries, stages }: { entries: PipelineEntry[]; stages: S
     s.name.toLowerCase().includes('due diligence') || s.name.toLowerCase().includes('diligence')
   ).map(s => s.name)
 
-  const activeEntries = entries.filter(e => !passedNames.includes(e.status))
+  const activeEntries = visibleEntries.filter(e => !passedNames.includes(e.status))
   const pipelineValue = activeEntries.reduce((sum, e) => sum + (e.fundraising_ask ?? 0), 0)
-  const ddCount = entries.filter(e => ddNames.includes(e.status)).length
-  const closedCount = entries.filter(e => closedNames.includes(e.status)).length
-  const passedCount = entries.filter(e => passedNames.includes(e.status)).length
+  const ddCount = visibleEntries.filter(e => ddNames.includes(e.status)).length
+  const closedCount = visibleEntries.filter(e => closedNames.includes(e.status)).length
+  const passedCount = visibleEntries.filter(e => passedNames.includes(e.status)).length
   const convDenom = closedCount + passedCount
   const convRate = convDenom > 0 ? `${Math.round((closedCount / convDenom) * 100)}%` : '—'
 
-  const avgDays = entries.length > 0
-    ? Math.round(entries.reduce((sum, e) =>
-        sum + (Date.now() - new Date(e.created_at).getTime()) / 86_400_000, 0) / entries.length)
+  const avgDays = visibleEntries.length > 0
+    ? Math.round(visibleEntries.reduce((sum, e) =>
+        sum + (Date.now() - new Date(e.created_at).getTime()) / 86_400_000, 0) / visibleEntries.length)
     : null
 
   const stats = [
