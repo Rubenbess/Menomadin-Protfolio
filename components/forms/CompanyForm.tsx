@@ -38,7 +38,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
   const [error, setError] = useState('')
   const [contacts, setContacts] = useState<{ name: string; position: string }[]>(
     initialContacts.length > 0
-      ? initialContacts.map(c => ({ name: c.name, position: c.position }))
+      ? initialContacts.map(c => ({ name: c.name, position: c.position ?? '' }))
       : []
   )
   const [logoPreview, setLogoPreview] = useState<string | null>(company?.logo_url ?? null)

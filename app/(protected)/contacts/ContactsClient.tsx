@@ -359,7 +359,7 @@ export default function ContactsClient({ contacts, companies }: Props) {
 
       {/* Add/Edit Modal */}
       <Modal
-        isOpen={showForm}
+        open={showForm}
         onClose={() => { setShowForm(false); setEditContact(null) }}
         title={editContact ? 'Edit contact' : 'Add contact'}
       >
@@ -372,7 +372,7 @@ export default function ContactsClient({ contacts, companies }: Props) {
 
       {/* Delete confirm */}
       <Modal
-        isOpen={!!deleteTarget}
+        open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="Delete contact"
       >
