@@ -215,7 +215,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
       {/* Charts */}
       <div className="mt-6">
-        <DashboardCharts companies={companiesWithMetrics} investments={investmentsList} />
+        <DashboardCharts companies={companiesWithMetrics} />
       </div>
     </div>
   )

@@ -1,8 +1,8 @@
 'use client'
 
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend, AreaChart, Area, ReferenceLine,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  Cell, CartesianGrid, PieChart, Pie,
 } from 'recharts'
 import { normalizeSector } from '@/lib/calculations'
 
@@ -25,17 +25,21 @@ interface Props {
   investments?: InvestmentData[]
 }
 
+// ── Palette ───────────────────────────────────────────────────────────────────
+
 const SECTOR_COLORS = [
-  '#7c3aed', '#3b82f6', '#10b981', '#f59e0b',
-  '#ef4444', '#8b5cf6', '#06b6d4', '#f97316',
+  '#6366f1', '#10b981', '#f59e0b', '#3b82f6',
+  '#ec4899', '#8b5cf6', '#14b8a6', '#f97316',
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  active:        '#10b981',
-  exited:        '#3b82f6',
-  watchlist:     '#f59e0b',
-  'written-off': '#ef4444',
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; text: string }> = {
+  active:        { label: 'Active',       color: '#10b981', bg: 'bg-emerald-50',  text: 'text-emerald-700' },
+  exited:        { label: 'Exited',       color: '#6366f1', bg: 'bg-indigo-50',   text: 'text-indigo-700'  },
+  watchlist:     { label: 'Watchlist',    color: '#f59e0b', bg: 'bg-amber-50',    text: 'text-amber-700'   },
+  'written-off': { label: 'Written off',  color: '#ef4444', bg: 'bg-red-50',      text: 'text-red-600'     },
 }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
@@ -43,7 +47,19 @@ function fmt(n: number) {
   return `$${n}`
 }
 
-// ── Invested vs Value bar chart ───────────────────────────────────────────
+function fmtPct(n: number) {
+  return `${n.toFixed(1)}%`
+}
+
+const tooltipStyle = {
+  borderRadius: 12,
+  border: '1px solid #f1f5f9',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+  fontSize: 12,
+  padding: '8px 12px',
+}
+
+// ── Invested vs Value ─────────────────────────────────────────────────────────
 
 function PerformanceChart({ companies }: Props) {
   const data = companies
@@ -59,11 +75,26 @@ function PerformanceChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-1">Invested vs Current Value</h3>
-      <p className="text-xs text-slate-400 mb-4">Per company, sorted by amount invested</p>
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data} barCategoryGap="30%" barGap={3}>
+    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Invested vs Current Value</h3>
+          <p className="text-xs text-slate-400 mt-0.5">Per company · sorted by capital deployed</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block" />
+            Invested
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />
+            Current Value
+          </span>
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={240}>
+        <BarChart data={data} barCategoryGap="35%" barGap={3} margin={{ top: 0, right: 4, left: 0, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="0" />
           <XAxis
             dataKey="name"
             tick={{ fontSize: 11, fill: '#94a3b8' }}
@@ -78,27 +109,19 @@ function PerformanceChart({ companies }: Props) {
             width={52}
           />
           <Tooltip
-            formatter={(v) => [fmt(Number(v)), '']}
-            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
-            cursor={{ fill: '#f1f5f9' }}
+            formatter={(v, name) => [fmt(Number(v)), name]}
+            contentStyle={tooltipStyle}
+            cursor={{ fill: '#f8fafc', radius: 4 }}
           />
-          <Bar dataKey="Invested" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="Invested" fill="#6366f1" radius={[4, 4, 0, 0]} />
           <Bar dataKey="Value"    fill="#10b981" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
-      <div className="flex items-center gap-5 mt-2 justify-center">
-        <span className="flex items-center gap-1.5 text-xs text-slate-500">
-          <span className="w-3 h-3 rounded-sm bg-violet-600 inline-block" /> Invested
-        </span>
-        <span className="flex items-center gap-1.5 text-xs text-slate-500">
-          <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Current Value
-        </span>
-      </div>
     </div>
   )
 }
 
-// ── Sector allocation donut ───────────────────────────────────────────────
+// ── Sector Allocation ─────────────────────────────────────────────────────────
 
 function SectorChart({ companies }: Props) {
   const sectorMap: Record<string, number> = {}
@@ -107,6 +130,7 @@ function SectorChart({ companies }: Props) {
     sectorMap[s] = (sectorMap[s] ?? 0) + c.totalInvested
   }
 
+  const total = Object.values(sectorMap).reduce((s, v) => s + v, 0)
   const data = Object.entries(sectorMap)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
@@ -114,40 +138,61 @@ function SectorChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-1">Sector Allocation</h3>
-      <p className="text-xs text-slate-400 mb-2">By capital invested</p>
-      <ResponsiveContainer width="100%" height={220}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={55}
-            outerRadius={85}
-            paddingAngle={3}
-            dataKey="value"
-          >
-            {data.map((_, i) => (
-              <Cell key={i} fill={SECTOR_COLORS[i % SECTOR_COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(v) => [fmt(Number(v)), 'Invested']}
-            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
-          />
-          <Legend
-            iconType="circle"
-            iconSize={8}
-            wrapperStyle={{ fontSize: 11, color: '#64748b' }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Sector Allocation</h3>
+      <p className="text-xs text-slate-400 mb-4">By capital invested</p>
+
+      <div className="flex items-center gap-4">
+        {/* Donut */}
+        <div className="flex-shrink-0">
+          <ResponsiveContainer width={140} height={140}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={44}
+                outerRadius={66}
+                paddingAngle={2}
+                dataKey="value"
+                strokeWidth={0}
+              >
+                {data.map((_, i) => (
+                  <Cell key={i} fill={SECTOR_COLORS[i % SECTOR_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(v) => [fmt(Number(v)), 'Invested']}
+                contentStyle={tooltipStyle}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Custom legend */}
+        <div className="flex-1 space-y-2 min-w-0">
+          {data.slice(0, 6).map((entry, i) => (
+            <div key={entry.name} className="flex items-center gap-2 min-w-0">
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: SECTOR_COLORS[i % SECTOR_COLORS.length] }}
+              />
+              <span className="text-xs text-slate-600 truncate flex-1">{entry.name}</span>
+              <span className="text-xs font-semibold text-slate-700 flex-shrink-0">
+                {total > 0 ? fmtPct((entry.value / total) * 100) : '—'}
+              </span>
+            </div>
+          ))}
+          {data.length > 6 && (
+            <p className="text-xs text-slate-400">+{data.length - 6} more</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
-// ── MOIC ranking bars ─────────────────────────────────────────────────────
+// ── MOIC Ranking ──────────────────────────────────────────────────────────────
 
 function MoicChart({ companies }: Props) {
   const data = companies
@@ -155,18 +200,19 @@ function MoicChart({ companies }: Props) {
     .sort((a, b) => b.moic - a.moic)
     .slice(0, 10)
     .map(c => ({
-      name: c.name.length > 16 ? c.name.slice(0, 15) + '…' : c.name,
+      name: c.name.length > 18 ? c.name.slice(0, 17) + '…' : c.name,
       moic: parseFloat(c.moic.toFixed(2)),
     }))
 
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-1">MOIC by Company</h3>
-      <p className="text-xs text-slate-400 mb-4">Top performers ranked by return multiple</p>
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} layout="vertical" barCategoryGap="25%">
+    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">MOIC by Company</h3>
+      <p className="text-xs text-slate-400 mb-5">Top performers ranked by return multiple</p>
+      <ResponsiveContainer width="100%" height={data.length * 32 + 20}>
+        <BarChart data={data} layout="vertical" barCategoryGap="30%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
+          <CartesianGrid horizontal={false} stroke="#f1f5f9" />
           <XAxis
             type="number"
             tickFormatter={v => `${v}x`}
@@ -177,31 +223,45 @@ function MoicChart({ companies }: Props) {
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 11, fill: '#64748b' }}
+            tick={{ fontSize: 11, fill: '#475569' }}
             axisLine={false}
             tickLine={false}
-            width={110}
+            width={120}
           />
           <Tooltip
-            formatter={(v) => [`${Number(v)}x`, 'MOIC']}
-            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
-            cursor={{ fill: '#f1f5f9' }}
+            formatter={(v) => [`${Number(v).toFixed(2)}x`, 'MOIC']}
+            contentStyle={tooltipStyle}
+            cursor={{ fill: '#f8fafc' }}
           />
-          <Bar dataKey="moic" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="moic" radius={[0, 4, 4, 0]} label={{ position: 'right', fontSize: 11, fill: '#94a3b8', formatter: (v: number) => `${v}x` }}>
             {data.map((entry, i) => (
               <Cell
                 key={i}
-                fill={entry.moic >= 2 ? '#10b981' : entry.moic >= 1 ? '#7c3aed' : '#f59e0b'}
+                fill={entry.moic >= 2 ? '#10b981' : entry.moic >= 1 ? '#6366f1' : '#f59e0b'}
               />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+
+      {/* Legend */}
+      <div className="flex items-center gap-5 mt-4 pt-4 border-t border-slate-50">
+        {[
+          { label: '≥ 2x', color: '#10b981' },
+          { label: '1–2x', color: '#6366f1' },
+          { label: '< 1x', color: '#f59e0b' },
+        ].map(l => (
+          <span key={l.label} className="flex items-center gap-1.5 text-xs text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
+            {l.label}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
 
-// ── Status breakdown ──────────────────────────────────────────────────────
+// ── Portfolio Status ──────────────────────────────────────────────────────────
 
 function StatusBreakdown({ companies }: Props) {
   const counts: Record<string, number> = {}
@@ -212,34 +272,37 @@ function StatusBreakdown({ companies }: Props) {
   const total = companies.length
   if (total === 0) return null
 
-  const statuses = [
-    { key: 'active',        label: 'Active' },
-    { key: 'exited',        label: 'Exited' },
-    { key: 'watchlist',     label: 'Watchlist' },
-    { key: 'written-off',   label: 'Written off' },
-  ]
-
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-1">Portfolio Status</h3>
-      <p className="text-xs text-slate-400 mb-4">Company health at a glance</p>
-      <div className="space-y-3">
-        {statuses.map(({ key, label }) => {
+    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Portfolio Status</h3>
+      <p className="text-xs text-slate-400 mb-5">Company health breakdown · {total} total</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
           const count = counts[key] ?? 0
           const pct = total > 0 ? (count / total) * 100 : 0
           return (
-            <div key={key}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-slate-600">{label}</span>
-                <span className="text-xs text-slate-400">{count} / {total}</span>
-              </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${pct}%`, backgroundColor: STATUS_COLORS[key] }}
-                />
-              </div>
+            <div key={key} className={`rounded-xl px-4 py-3 ${cfg.bg}`}>
+              <p className={`text-2xl font-bold ${cfg.text}`}>{count}</p>
+              <p className={`text-xs font-medium mt-0.5 ${cfg.text} opacity-80`}>{cfg.label}</p>
+              <p className={`text-xs mt-1 ${cfg.text} opacity-60`}>{fmtPct(pct)} of portfolio</p>
             </div>
+          )
+        })}
+      </div>
+
+      {/* Stacked bar */}
+      <div className="flex h-2 rounded-full overflow-hidden gap-px">
+        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+          const pct = total > 0 ? ((counts[key] ?? 0) / total) * 100 : 0
+          if (pct === 0) return null
+          return (
+            <div
+              key={key}
+              className="h-full transition-all"
+              style={{ width: `${pct}%`, background: cfg.color }}
+              title={`${cfg.label}: ${counts[key] ?? 0}`}
+            />
           )
         })}
       </div>
@@ -247,92 +310,15 @@ function StatusBreakdown({ companies }: Props) {
   )
 }
 
-// ── J-Curve (fund cash flow) ──────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────────
 
-function JCurveChart({ investments }: { investments: InvestmentData[] }) {
-  if (!investments || investments.length === 0) return null
-
-  // Group by quarter, accumulate cumulative net cash flow (deployed = negative)
-  const quarterMap: Record<string, number> = {}
-  for (const inv of investments) {
-    if (!inv.date || !inv.amount) continue
-    const d = new Date(inv.date)
-    const q = `Q${Math.ceil((d.getMonth() + 1) / 3)} ${d.getFullYear()}`
-    quarterMap[q] = (quarterMap[q] ?? 0) + inv.amount
-  }
-
-  const sorted = Object.entries(quarterMap).sort(([a], [b]) => {
-    const parse = (s: string) => { const [q, y] = s.split(' '); return Number(y) * 4 + Number(q[1]) }
-    return parse(a) - parse(b)
-  })
-
-  let cumulative = 0
-  const data = sorted.map(([period, deployed]) => {
-    cumulative -= deployed   // deployed capital is cash out (negative)
-    return { period, cumulative }
-  })
-
-  if (data.length === 0) return null
-
-  const minVal = Math.min(...data.map(d => d.cumulative))
-  const maxVal = Math.max(...data.map(d => d.cumulative), 0)
-
-  return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-1">Fund Cash Flow (J-Curve)</h3>
-      <p className="text-xs text-slate-400 mb-4">Cumulative net cash flow over time — capital deployed by quarter</p>
-      <ResponsiveContainer width="100%" height={240}>
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-          <defs>
-            <linearGradient id="jcurveGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="period"
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            tickFormatter={v => `$${Math.abs(v / 1_000_000).toFixed(1)}M`}
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
-            axisLine={false}
-            tickLine={false}
-            width={56}
-            domain={[minVal * 1.1, maxVal * 1.1 || 1]}
-          />
-          <Tooltip
-            formatter={(v) => [`-$${Math.abs(Number(v) / 1_000_000).toFixed(2)}M`, 'Net Cash Flow']}
-            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontSize: 12 }}
-          />
-          <ReferenceLine y={0} stroke="#e2e8f0" strokeDasharray="4 4" />
-          <Area
-            type="monotone"
-            dataKey="cumulative"
-            stroke="#7c3aed"
-            strokeWidth={2}
-            fill="url(#jcurveGrad)"
-            dot={{ fill: '#7c3aed', r: 3 }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  )
-}
-
-// ── Main export ───────────────────────────────────────────────────────────
-
-export default function DashboardCharts({ companies, investments = [] }: Props) {
+export default function DashboardCharts({ companies }: Props) {
   if (companies.length === 0) return null
 
   return (
     <div className="space-y-4 mb-8">
-      {/* Full-width performance chart */}
       <PerformanceChart companies={companies} />
 
-      {/* Two-column row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <MoicChart companies={companies} />
@@ -340,11 +326,7 @@ export default function DashboardCharts({ companies, investments = [] }: Props) 
         <SectorChart companies={companies} />
       </div>
 
-      {/* Status breakdown */}
       <StatusBreakdown companies={companies} />
-
-      {/* J-Curve */}
-      <JCurveChart investments={investments} />
     </div>
   )
 }
