@@ -12,7 +12,8 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
-import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip } from 'lucide-react'
+import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip, BarChart2, Sparkles } from 'lucide-react'
+import PipelineAnalytics from './PipelineAnalytics'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import PipelineForm from '@/components/forms/PipelineForm'
@@ -144,6 +145,40 @@ function DealPanel({
   onEdit: (e: PipelineEntry) => void
   onDelete: (id: string, name: string) => void
 }) {
+  const [analyzing, setAnalyzing] = useState(false)
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
+
+  async function analyzeDeck() {
+    if (!entry.deck_url) return
+    setAnalyzing(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/pipeline/analyze-deck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deck_url: entry.deck_url }),
+      })
+      const json = await res.json()
+      if (json.error) { setAiError(json.error); return }
+      const e = json.extracted
+      const lines = [
+        e.tagline && `"${e.tagline}"`,
+        e.problem && `Problem: ${e.problem}`,
+        e.solution && `Solution: ${e.solution}`,
+        e.traction && `Traction: ${e.traction}`,
+        e.market_size && `Market: ${e.market_size}`,
+        e.team && `Team: ${e.team}`,
+        e.business_model && `Model: ${e.business_model}`,
+      ].filter(Boolean)
+      setAiSummary(lines.join('\n\n') || e.summary || 'No summary available')
+    } catch {
+      setAiError('Analysis failed — try again')
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   const createdDate = new Date(entry.created_at).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
@@ -228,15 +263,31 @@ function DealPanel({
 
           {entry.deck_url && (
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Pitch Deck</p>
-              <a
-                href={entry.deck_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 hover:underline"
-              >
-                <Paperclip size={13} /> View deck
-              </a>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Pitch Deck</p>
+              <div className="flex items-center gap-2">
+                <a
+                  href={entry.deck_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 hover:underline"
+                >
+                  <Paperclip size={13} /> View deck
+                </a>
+                <button
+                  onClick={analyzeDeck}
+                  disabled={analyzing}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors disabled:opacity-50"
+                >
+                  <Sparkles size={11} /> {analyzing ? 'Analyzing…' : 'AI Summary'}
+                </button>
+              </div>
+              {aiError && <p className="mt-2 text-xs text-red-500">{aiError}</p>}
+              {aiSummary && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                  <p className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI Analysis</p>
+                  <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -462,6 +513,7 @@ function Column({
 
 export default function PipelineBoard({ stages, entries }: { stages: Stage[]; entries: PipelineEntry[] }) {
   const router = useRouter()
+  const [view, setView] = useState<'board' | 'analytics'>('board')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [localEntries, setLocalEntries] = useState(entries)
 
@@ -515,14 +567,34 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
     <div className="animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Deal Pipeline</h1>
-        <Button onClick={() => setAddCardStage(stages[0]?.name ?? '')} size="sm">
-          <Plus size={14} /> Add deal
-        </Button>
-        <Button onClick={() => setShowAddStage(true)} variant="secondary" size="sm">
-          <Plus size={14} /> Add stage
-        </Button>
+        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <button
+            onClick={() => setView('board')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Plus size={12} /> Board
+          </button>
+          <button
+            onClick={() => setView('analytics')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <BarChart2 size={12} /> Analytics
+          </button>
+        </div>
+        {view === 'board' && <>
+          <Button onClick={() => setAddCardStage(stages[0]?.name ?? '')} size="sm">
+            <Plus size={14} /> Add deal
+          </Button>
+          <Button onClick={() => setShowAddStage(true)} variant="secondary" size="sm">
+            <Plus size={14} /> Add stage
+          </Button>
+        </>}
       </div>
 
+      {view === 'analytics' ? (
+        <PipelineAnalytics entries={localEntries} stages={stages} />
+      ) : (
+      <>
       <AnalyticsBar entries={localEntries} stages={stages} />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -572,6 +644,8 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
           onEdit={(e) => { setPanelEntry(null); setEditCard(e) }}
           onDelete={handleDeleteCard}
         />
+      )}
+      </>
       )}
 
       <Modal

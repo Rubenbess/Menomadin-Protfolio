@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react'
+import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, ArrowRight, RefreshCw, FileText, Users, Building2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 
 type Status = 'idle' | 'uploading' | 'success' | 'error'
@@ -366,6 +366,119 @@ function TrelloImport() {
   )
 }
 
+// ── CSV Import ────────────────────────────────────────────────────────────────
+
+function CsvImport({ type, label, icon: Icon, color, hint }: {
+  type: 'contacts' | 'companies'
+  label: string
+  icon: React.ElementType
+  color: string
+  hint: string
+}) {
+  const router   = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [status,   setStatus]  = useState<Status>('idle')
+  const [fileName, setFileName] = useState('')
+  const [created,  setCreated] = useState(0)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function processFile(file: File) {
+    if (!file.name.endsWith('.csv')) {
+      setErrorMsg('Please upload a CSV file (.csv)')
+      setStatus('error')
+      return
+    }
+    setFileName(file.name)
+    setStatus('uploading')
+
+    const fd = new FormData()
+    fd.append('file', file)
+
+    try {
+      const res  = await fetch(`/api/import/csv?type=${type}`, { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        setErrorMsg(json.error || 'Import failed')
+        setStatus('error')
+        return
+      }
+      setCreated(json.created)
+      setStatus('success')
+      router.refresh()
+    } catch {
+      setErrorMsg('Network error — please try again')
+      setStatus('error')
+    }
+  }
+
+  function reset() {
+    setStatus('idle'); setFileName(''); setCreated(0); setErrorMsg('')
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  const bgColor = color === 'blue'
+    ? { idle: 'hover:border-blue-300', drag: 'border-blue-400 bg-blue-50', icon: 'bg-blue-100', iconText: 'text-blue-600', success: 'bg-blue-50 ring-blue-200', successText: 'text-blue-800', badge: 'bg-blue-100' }
+    : { idle: 'hover:border-rose-300', drag: 'border-rose-400 bg-rose-50', icon: 'bg-rose-100', iconText: 'text-rose-600', success: 'bg-rose-50 ring-rose-200', successText: 'text-rose-800', badge: 'bg-rose-100' }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`w-8 h-8 ${bgColor.badge} rounded-lg flex items-center justify-center`}>
+          <Icon size={16} className={bgColor.iconText} />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">CSV — {label}</h2>
+          <p className="text-xs text-slate-400">{hint}</p>
+        </div>
+      </div>
+
+      {status === 'idle' && (
+        <div
+          onClick={() => inputRef.current?.click()}
+          className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all border-slate-200 ${bgColor.idle} hover:bg-slate-50`}
+        >
+          <input ref={inputRef} type="file" accept=".csv" onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f) }} className="hidden" />
+          <div className="flex flex-col items-center gap-2">
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${bgColor.icon}`}>
+              <Upload size={18} className={bgColor.iconText} />
+            </div>
+            <p className="text-sm font-semibold text-slate-900">Drop CSV here or <span className={bgColor.iconText}>browse</span></p>
+            <p className="text-xs text-slate-400">First row must be column headers</p>
+          </div>
+        </div>
+      )}
+
+      {status === 'uploading' && (
+        <div className="border-2 border-dashed border-slate-300 bg-slate-50 rounded-2xl p-8 text-center">
+          <p className="text-sm font-semibold text-slate-600">Importing {fileName}…</p>
+        </div>
+      )}
+
+      {status === 'success' && (
+        <div className={`ring-1 rounded-2xl p-5 ${bgColor.success}`}>
+          <div className="flex items-center gap-3 mb-2">
+            <CheckCircle2 size={18} className={bgColor.iconText} />
+            <p className={`text-sm font-semibold ${bgColor.successText}`}>{created} {label.toLowerCase()} imported</p>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button variant="secondary" onClick={reset}><RefreshCw size={13} /> Import more</Button>
+          </div>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="space-y-3">
+          <div className="bg-red-50 ring-1 ring-red-200 rounded-2xl p-4 flex items-center gap-3">
+            <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+            <p className="text-sm text-red-700">{errorMsg}</p>
+          </div>
+          <Button variant="secondary" onClick={reset}><RefreshCw size={13} /> Try again</Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ImportPage() {
@@ -390,6 +503,51 @@ export default function ImportPage() {
               <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">Data_Raw</code> with columns:
               Investment Name, Entity, Sector, Geography, Stage, Type, Invested Amount, Pre-money Valuation,
               Post Money Valuation, Current Valuation, Ownership Percentage.
+            </p>
+          </div>
+        </div>
+
+        {/* CSV — Contacts */}
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6">
+          <CsvImport
+            type="contacts"
+            label="Contacts"
+            icon={Users}
+            color="blue"
+            hint="Import contacts with email, phone, address"
+          />
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <p className="text-xs text-slate-400">
+              <span className="font-medium text-slate-500">Expected columns (any order):</span>{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">name</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">email</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">phone</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">position</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">address</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">linkedin</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">notes</code>
+            </p>
+          </div>
+        </div>
+
+        {/* CSV — Companies */}
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6">
+          <CsvImport
+            type="companies"
+            label="Companies"
+            icon={Building2}
+            color="rose"
+            hint="Bulk import portfolio companies"
+          />
+          <div className="mt-5 pt-5 border-t border-slate-100">
+            <p className="text-xs text-slate-400">
+              <span className="font-medium text-slate-500">Expected columns:</span>{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">name</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">sector</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">hq</code>,{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">strategy</code> (impact/venture),{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">status</code> (active/exited…),{' '}
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded-lg text-xs">description</code>
             </p>
           </div>
         </div>

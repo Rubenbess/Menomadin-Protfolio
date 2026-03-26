@@ -16,6 +16,7 @@ import KPIForm from '@/components/forms/KPIForm'
 import UpdateForm from '@/components/forms/UpdateForm'
 import { CATEGORY_COLORS } from '@/components/forms/UpdateForm'
 import DocumentUpload from '@/components/documents/DocumentUpload'
+import UpdateLinkButton from '@/components/UpdateLinkButton'
 import { KPITrendChart, ValuationChart } from '@/components/CompanyCharts'
 import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
@@ -109,9 +110,12 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               {company.sector}{company.hq ? ` · ${company.hq}` : ''}
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => setShowEdit(true)}>
-            <Pencil size={13} /> Edit
-          </Button>
+          <div className="flex items-center gap-2">
+            <UpdateLinkButton companyId={company.id} existingToken={company.update_token ?? null} />
+            <Button variant="secondary" size="sm" onClick={() => setShowEdit(true)}>
+              <Pencil size={13} /> Edit
+            </Button>
+          </div>
         </div>
       </div>
 

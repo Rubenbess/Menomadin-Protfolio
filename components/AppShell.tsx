@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './Sidebar'
+import GlobalSearch from './GlobalSearch'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
@@ -59,12 +60,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Menu size={20} />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <div className="w-6 h-6 rounded-md bg-violet-500/20 flex items-center justify-center ring-1 ring-violet-500/30">
               <img src="/menomadin-icon.svg" alt="" className="h-3 w-3 invert" />
             </div>
             <span className="text-sm font-bold text-slate-900">Menomadin</span>
           </div>
+          <GlobalSearch />
+        </div>
+
+        {/* Desktop search bar */}
+        <div className="hidden md:flex items-center justify-end px-6 py-2 border-b border-slate-100 bg-white/50 flex-shrink-0">
+          <GlobalSearch />
         </div>
 
         {/* Page content */}

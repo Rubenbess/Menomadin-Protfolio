@@ -22,6 +22,7 @@ export interface Company {
   investment_owner: string | null
   board_seat: string | null
   co_investors: string[] | null
+  update_token: string | null
   created_at: string
 }
 

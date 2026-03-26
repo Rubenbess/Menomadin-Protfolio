@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users } from 'lucide-react'
+import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users, Activity } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Suspense, useEffect, useState } from 'react'
 import StrategyFilter from './StrategyFilter'
 
 const navItems = [
   { href: '/dashboard',  label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/companies',  label: 'Companies',    icon: Building2 },
+  { href: '/companies',      label: 'Companies',    icon: Building2 },
+  { href: '/portfolio-kpis', label: 'Portfolio KPIs', icon: Activity },
   { href: '/pipeline',   label: 'Pipeline',     icon: GitMerge },
   { href: '/tasks',      label: 'Tasks',        icon: CheckSquare },
   { href: '/contacts',   label: 'Contacts',     icon: Users },
