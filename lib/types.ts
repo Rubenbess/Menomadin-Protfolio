@@ -27,9 +27,19 @@ export interface Company {
 
 export interface Contact {
   id: string
-  company_id: string
+  company_id: string | null
   name: string
-  position: string
+  position: string | null
+  email: string | null
+  phone: string | null
+  address: string | null
+  linkedin_url: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface ContactWithCompany extends Contact {
+  companies: { id: string; name: string } | null
 }
 
 export interface Round {
