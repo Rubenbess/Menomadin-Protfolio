@@ -233,7 +233,7 @@ function MoicChart({ companies }: Props) {
             contentStyle={tooltipStyle}
             cursor={{ fill: '#f8fafc' }}
           />
-          <Bar dataKey="moic" radius={[0, 4, 4, 0]} label={{ position: 'right', fontSize: 11, fill: '#94a3b8', formatter: (v: number) => `${v}x` }}>
+          <Bar dataKey="moic" radius={[0, 4, 4, 0]} label={{ position: 'right', fontSize: 11, fill: '#94a3b8', formatter: (v: unknown) => `${v}x` }}>
             {data.map((entry, i) => (
               <Cell
                 key={i}
