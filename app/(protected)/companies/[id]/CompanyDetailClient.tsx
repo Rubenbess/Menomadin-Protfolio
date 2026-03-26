@@ -167,7 +167,14 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
         {/* OVERVIEW */}
         {activeTab === 'overview' && (
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div className="p-6 space-y-6">
+            {company.description && (
+              <div className="pb-5 border-b border-slate-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">About</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{company.description}</p>
+              </div>
+            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-900">Company Details</h3>
               {[
@@ -244,6 +251,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 </div>
               ))}
             </div>
+          </div>
           </div>
         )}
 
