@@ -156,3 +156,32 @@ export interface DashboardMetrics {
   capitalDeployed: number
   capitalReserved: number
 }
+
+export type TaskStatus = 'not-started' | 'in-progress' | 'waiting' | 'done'
+export type TaskPriority = 'high' | 'medium' | 'low'
+
+export interface TeamMember {
+  id: string
+  name: string
+  role: string | null
+  color: string
+  created_at: string
+}
+
+export interface Task {
+  id: string
+  title: string
+  description: string | null
+  status: TaskStatus
+  priority: TaskPriority
+  due_date: string | null
+  company_id: string | null
+  assignee_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TaskWithRelations extends Task {
+  companies: { id: string; name: string } | null
+  team_members: { id: string; name: string; color: string; role: string | null } | null
+}

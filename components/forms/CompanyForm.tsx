@@ -146,7 +146,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       investment_owner: (fd.get('investment_owner') as string) || null,
       board_seat:       (fd.get('board_seat')       as string) || null,
       co_investors:     coInvestors.filter(v => v.trim()).length > 0 ? coInvestors.filter(v => v.trim()) : null,
-      logo_url:         logoPreview,
+      logo_url:         logoFile ? (company?.logo_url ?? null) : logoPreview,
     }
 
     if (isEdit) {
