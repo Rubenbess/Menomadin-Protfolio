@@ -48,7 +48,7 @@ function NavLinks() {
   const strategy = searchParams.get('strategy') ?? ''
 
   return (
-    <nav className="flex-1 px-3 py-4 space-y-0.5">
+    <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
       {navItems.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(href + '/')
         const to = strategy ? `${href}?strategy=${strategy}` : href
@@ -117,7 +117,7 @@ export default function Sidebar() {
 
       {/* Nav links */}
       <Suspense fallback={
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500">
