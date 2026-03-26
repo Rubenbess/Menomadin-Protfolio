@@ -71,11 +71,18 @@ export async function POST(req: NextRequest) {
     let cardsCreated = 0
     const errors: string[] = []
 
+    // Fetch existing pipeline entry names to avoid duplicates
+    const { data: existingEntries } = await supabase.from('pipeline').select('name')
+    const existingEntryNames = new Set((existingEntries ?? []).map((e: { name: string }) => e.name.toLowerCase()))
+
     for (const card of activeCards) {
       const status = listMap[card.idList]
       if (!status) {
         errors.push(`Card "${card.name}" skipped — list not found`)
         continue
+      }
+      if (existingEntryNames.has(card.name.toLowerCase())) {
+        continue // skip duplicates
       }
       const sector = card.labels.find(l => l.name)?.name ?? ''
       const { error } = await supabase.from('pipeline').insert({
