@@ -12,7 +12,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
-import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import PipelineForm from '@/components/forms/PipelineForm'
@@ -223,6 +223,20 @@ function DealPanel({
             <div>
               <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Notes</p>
               <p className="text-sm text-slate-800 whitespace-pre-wrap">{entry.notes}</p>
+            </div>
+          )}
+
+          {entry.deck_url && (
+            <div>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Pitch Deck</p>
+              <a
+                href={entry.deck_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 hover:underline"
+              >
+                <Paperclip size={13} /> View deck
+              </a>
             </div>
           )}
 

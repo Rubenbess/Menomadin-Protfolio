@@ -122,6 +122,7 @@ export interface PipelineEntry {
   source: string | null
   internal_score: number | null
   next_steps: string | null
+  deck_url: string | null
   created_at: string
 }
 

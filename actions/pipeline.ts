@@ -14,13 +14,14 @@ interface PipelineData {
   source: string | null
   internal_score: number | null
   next_steps: string | null
+  deck_url: string | null
 }
 
 export async function createPipelineEntry(data: PipelineData) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('pipeline').insert(data)
-  if (error) return { error: error.message }
-  return { error: null }
+  const { data: row, error } = await supabase.from('pipeline').insert(data).select('id').single()
+  if (error) return { error: error.message, id: null }
+  return { error: null, id: row.id as string }
 }
 
 export async function updatePipelineEntry(id: string, data: PipelineData) {
