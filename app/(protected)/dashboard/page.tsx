@@ -18,6 +18,8 @@ import {
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics } from '@/lib/types'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import StrategyTableFilter from '@/components/StrategyTableFilter'
 
 export const dynamic = 'force-dynamic'
 
@@ -149,11 +151,16 @@ export default async function DashboardPage({ searchParams }: Props) {
 
       {/* Portfolio table */}
       <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900">Portfolio Companies</h2>
-          <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded-full px-2.5 py-0.5">
-            {companiesWithMetrics.length}
-          </span>
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-sm font-semibold text-slate-900">Portfolio Companies</h2>
+            <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded-full px-2.5 py-0.5">
+              {companiesWithMetrics.length}
+            </span>
+          </div>
+          <Suspense fallback={null}>
+            <StrategyTableFilter />
+          </Suspense>
         </div>
 
         {companiesWithMetrics.length === 0 ? (
