@@ -21,7 +21,6 @@ interface GraphEmail {
 }
 
 interface OpportunityData {
-  is_opportunity: boolean
   company_name: string
   sector: string
   description: string
@@ -58,10 +57,9 @@ function detectSector(text: string): string {
 }
 
 function extractFundraisingAsk(text: string): number | null {
-  // Match patterns like $5M, $2.5M, $500K, $1,000,000
   const patterns = [
     /\$(\d+(?:\.\d+)?)\s*m(?:illion)?/i,
-    /\$(\d+(?:\.\d+)?)\s*k(?:illion)?/i,
+    /\$(\d+(?:\.\d+)?)\s*k/i,
     /\$(\d{1,3}(?:,\d{3})+)/,
   ]
   for (const pattern of patterns) {
@@ -76,8 +74,7 @@ function extractFundraisingAsk(text: string): number | null {
   return null
 }
 
-function extractCompanyName(subject: string, fromName: string, body: string): string {
-  // Try to extract from subject patterns like "Introduction: CompanyName" or "CompanyName - Pitch"
+function extractCompanyName(subject: string, fromName: string): string {
   const subjectPatterns = [
     /introduction[:\s]+([A-Z][A-Za-z0-9\s&]+?)(?:\s[-–|]|$)/i,
     /^([A-Z][A-Za-z0-9]+)\s*[-–|]/,
@@ -87,26 +84,23 @@ function extractCompanyName(subject: string, fromName: string, body: string): st
     const match = subject.match(pattern)
     if (match?.[1]?.trim().length > 1) return match[1].trim()
   }
-  // Fall back to sender's company name (first capitalized word from name if org)
   const nameWords = fromName.split(/\s+/)
   if (nameWords.length >= 2) return nameWords.slice(0, 2).join(' ')
   return fromName || 'Unknown Company'
 }
 
-function analyzeEmail(
+function detectOpportunity(
   subject: string,
   body: string,
   fromName: string,
   fromEmail: string
 ): OpportunityData | null {
   const combined = `${subject} ${body}`.toLowerCase()
-  const matchCount = OPPORTUNITY_KEYWORDS.filter(k => combined.includes(k)).length
-
-  if (matchCount === 0) return null
+  const matched = OPPORTUNITY_KEYWORDS.filter(k => combined.includes(k)).length
+  if (matched === 0) return null
 
   return {
-    is_opportunity: true,
-    company_name: extractCompanyName(subject, fromName, body),
+    company_name: extractCompanyName(subject, fromName),
     sector: detectSector(combined),
     description: body.slice(0, 300).replace(/\s+/g, ' ').trim(),
     fundraising_ask: extractFundraisingAsk(`${subject} ${body}`),
@@ -121,20 +115,17 @@ async function refreshAccessToken(
 ): Promise<string | null> {
   if (!integration.refresh_token) return null
 
-  const res = await fetch(
-    'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: process.env.MICROSOFT_CLIENT_ID!,
-        client_secret: process.env.MICROSOFT_CLIENT_SECRET!,
-        grant_type: 'refresh_token',
-        refresh_token: integration.refresh_token,
-        scope: 'offline_access Mail.Read User.Read',
-      }),
-    }
-  )
+  const res = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.MICROSOFT_CLIENT_ID!,
+      client_secret: process.env.MICROSOFT_CLIENT_SECRET!,
+      grant_type: 'refresh_token',
+      refresh_token: integration.refresh_token,
+      scope: 'offline_access Mail.Read User.Read',
+    }),
+  })
 
   const tokens = await res.json()
   if (!tokens.access_token) return null
@@ -164,57 +155,12 @@ async function fetchEmails(accessToken: string, since: string): Promise<GraphEma
   const url = `https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=${filter}&$select=id,subject,bodyPreview,from,receivedDateTime,body&$top=50&$orderby=receivedDateTime asc`
 
   const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
   })
 
   if (!res.ok) return []
   const data = await res.json()
   return data.value ?? []
-}
-
-async function analyzeEmail(
-  subject: string,
-  body: string,
-  from: string,
-  anthropic: Anthropic
-): Promise<OpportunityData | null> {
-  const prompt = `You are an investment analyst assistant. Analyze this email and determine if it contains an investment opportunity (startup pitch, fundraising announcement, deal introduction, etc.).
-
-Email from: ${from}
-Subject: ${subject}
-Body:
-${body.slice(0, 3000)}
-
-Respond with ONLY a JSON object (no markdown) with these fields:
-{
-  "is_opportunity": boolean,
-  "company_name": string (company/startup name, or "Unknown" if unclear),
-  "sector": string (e.g. "FinTech", "HealthTech", "SaaS", "CleanTech", etc.),
-  "description": string (1-2 sentence summary of what the company does),
-  "fundraising_ask": number or null (amount in USD if mentioned, e.g. 5000000 for $5M),
-  "hq": string or null (city, country if mentioned),
-  "lead_partner": string or null (person who sent or introduced the deal),
-  "confidence": "high" | "medium" | "low" (confidence this is an investment opportunity)
-}
-
-Only mark is_opportunity as true if this is clearly a startup fundraising, investor introduction, or deal pitch. Ignore newsletters, administrative emails, and general correspondence.`
-
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parsed = JSON.parse(text.trim()) as OpportunityData
-    return parsed
-  } catch {
-    return null
-  }
 }
 
 export async function GET(req: NextRequest) {
@@ -260,10 +206,9 @@ export async function GET(req: NextRequest) {
       const from = `${fromName} <${fromEmail}>`
       const subject = email.subject ?? '(no subject)'
 
-      const analysis = analyzeEmail(subject, body, fromName, fromEmail)
-
-      if (!analysis?.is_opportunity) continue
-      if (!analysis.company_name || analysis.company_name === 'Unknown') continue
+      const analysis = detectOpportunity(subject, body, fromName, fromEmail)
+      if (!analysis) continue
+      if (!analysis.company_name || analysis.company_name === 'Unknown Company') continue
 
       const { data: existing } = await supabase
         .from('pipeline')
@@ -275,13 +220,13 @@ export async function GET(req: NextRequest) {
 
       await supabase.from('pipeline').insert({
         name: analysis.company_name,
-        sector: analysis.sector ?? 'Unknown',
+        sector: analysis.sector,
         stage: 'Seed',
         status: 'prospecting',
         notes: `${analysis.description}\n\nDetected via email from: ${from}\nSubject: ${subject}`,
-        hq: analysis.hq ?? null,
-        fundraising_ask: analysis.fundraising_ask ?? null,
-        lead_partner: analysis.lead_partner ?? null,
+        hq: analysis.hq,
+        fundraising_ask: analysis.fundraising_ask,
+        lead_partner: analysis.lead_partner,
         source: 'Email Scanner',
       })
 
