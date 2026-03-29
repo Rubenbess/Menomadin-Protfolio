@@ -81,8 +81,8 @@ function extractCompanyName(subject: string, fromName: string): string {
     /([A-Z][A-Za-z0-9\s]+?)\s+(?:pitch|deck|raise|round|fundraise)/i,
   ]
   for (const pattern of subjectPatterns) {
-    const match = subject.match(pattern)
-    if (match?.[1]?.trim().length > 1) return match[1]!.trim()
+    const name = subject.match(pattern)?.[1]?.trim()
+    if (name && name.length > 1) return name
   }
   const nameWords = fromName.split(/\s+/)
   if (nameWords.length >= 2) return nameWords.slice(0, 2).join(' ')

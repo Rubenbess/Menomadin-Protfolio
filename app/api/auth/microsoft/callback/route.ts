@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
     }
   )
 
-  const tokens = await tokenRes.json()
-  if (!tokens.access_token) {
+  const tokens = await tokenRes.json() as { access_token?: string; refresh_token?: string; expires_in?: number }
+  if (!tokens?.access_token) {
     return NextResponse.redirect(
       new URL('/settings/email-scanner?error=token_failed', req.url)
     )
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
   const meRes = await fetch('https://graph.microsoft.com/v1.0/me', {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   })
-  const me = await meRes.json()
+  const me = await meRes.json() as { mail?: string; userPrincipalName?: string }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       user_id: userId,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token ?? null,
-      token_expires_at: new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString(),
+      token_expires_at: new Date(Date.now() + ((tokens.expires_in ?? 3600) * 1000)).toISOString(),
       email: me.mail ?? me.userPrincipalName ?? null,
       last_scanned_at: null,
     },

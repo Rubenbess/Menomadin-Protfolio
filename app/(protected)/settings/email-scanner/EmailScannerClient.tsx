@@ -35,8 +35,8 @@ export default function EmailScannerClient({ searchParams }: Props) {
 
   useEffect(() => {
     fetch('/api/auth/microsoft/status')
-      .then(r => r.json())
-      .then(d => { setIntegration(d.integration); setLoading(false) })
+      .then(r => r.json() as Promise<{ integration: Integration | null }>)
+      .then(d => { setIntegration(d?.integration ?? null); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
