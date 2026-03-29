@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users, Activity } from 'lucide-react'
+import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users, Activity, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Suspense, useEffect, useState } from 'react'
 import StrategyFilter from './StrategyFilter'
@@ -16,8 +16,9 @@ const navItems = [
   { href: '/contacts',   label: 'Contacts',     icon: Users },
   { href: '/network',    label: 'Co-investors', icon: Network },
   { href: '/reminders',  label: 'Reminders',    icon: Bell },
-  { href: '/import',     label: 'Import Data',  icon: Upload },
-  { href: '/reports',    label: 'Reports',      icon: FileDown },
+  { href: '/import',              label: 'Import Data',  icon: Upload },
+  { href: '/reports',             label: 'Reports',      icon: FileDown },
+  { href: '/settings/security',   label: 'Security',     icon: ShieldCheck },
 ]
 
 function ReminderBadge() {
