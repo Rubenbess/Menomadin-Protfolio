@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vercel:*)",
+      "Read(//c/Users/rubenb/.vercel/**)",
+      "Read(//c/Users/rubenb//**)",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/@supabase/ssr/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(find \"c:\\\\Users\\\\rubenb\\\\tafshu\\\\src\\\\app\\\\\\(app\\)\" -name \"page.tsx\" -o -name \"layout.tsx\")",
+      "Bash(find \"c:\\\\Users\\\\rubenb\\\\tafshu\\\\src\\\\app\\\\\\(auth\\)\" -name \"page.tsx\" -o -name \"layout.tsx\")",
+      "Bash(find \"c:\\\\Users\\\\rubenb\\\\tafshu\\\\src\\\\app\\\\\\(onboarding\\)\" -name \"page.tsx\" -o -name \"layout.tsx\")",
+      "Bash(node -e \"require\\(''''./tailwind.config.ts''''\\)\")",
+      "Bash(npx tailwindcss:*)",
+      "Bash(tasklist /FI \"PID eq 46288\" /FO LIST)",
+      "Bash(tasklist /FI \"PID eq 43448\" /FO LIST)",
+      "Bash(tasklist /FI \"PID eq 29808\" /FO LIST)",
+      "Bash(tasklist /FI \"PID eq 46444\" /FO LIST)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\rubenb"
+    ]
+  }
+}

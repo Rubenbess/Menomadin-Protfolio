@@ -14,7 +14,10 @@
       "Bash(git rm:*)",
       "Bash(supabase --version)",
       "Bash(npm install:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(wmic process:*)",
+      "Bash(mkdir -p \"c:/Users/rubenb/Portfolio/app/mfa/verify\")",
+      "Bash(mkdir -p \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/settings/security\")"
     ]
   }
 }
