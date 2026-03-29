@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 interface EmailIntegration {
   id: string
@@ -37,7 +32,10 @@ interface OpportunityData {
   confidence: 'high' | 'medium' | 'low'
 }
 
-async function refreshAccessToken(integration: EmailIntegration): Promise<string | null> {
+async function refreshAccessToken(
+  integration: EmailIntegration,
+  supabase: SupabaseClient
+): Promise<string | null> {
   if (!integration.refresh_token) return null
 
   const res = await fetch(
@@ -67,11 +65,13 @@ async function refreshAccessToken(integration: EmailIntegration): Promise<string
   return tokens.access_token
 }
 
-async function getAccessToken(integration: EmailIntegration): Promise<string | null> {
+async function getAccessToken(
+  integration: EmailIntegration,
+  supabase: SupabaseClient
+): Promise<string | null> {
   const expiresAt = new Date(integration.token_expires_at).getTime()
-  // Refresh if expiring within 5 minutes
   if (Date.now() > expiresAt - 5 * 60 * 1000) {
-    return refreshAccessToken(integration)
+    return refreshAccessToken(integration, supabase)
   }
   return integration.access_token
 }
@@ -145,9 +145,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing ANTHROPIC_API_KEY' }, { status: 500 })
   }
 
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   const anthropic = new Anthropic({ apiKey: anthropicKey })
 
-  // Load all email integrations
   const { data: integrations, error: intErr } = await supabase
     .from('email_integrations')
     .select('*')
@@ -160,10 +164,9 @@ export async function GET(req: NextRequest) {
   let totalOpportunities = 0
 
   for (const integration of integrations as EmailIntegration[]) {
-    const accessToken = await getAccessToken(integration)
+    const accessToken = await getAccessToken(integration, supabase)
     if (!accessToken) continue
 
-    // Fetch emails since last scan, or last 24 hours on first run
     const since = integration.last_scanned_at
       ? new Date(integration.last_scanned_at).toISOString()
       : new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -184,7 +187,6 @@ export async function GET(req: NextRequest) {
       if (!analysis?.is_opportunity || analysis.confidence === 'low') continue
       if (!analysis.company_name || analysis.company_name === 'Unknown') continue
 
-      // Check if this company already exists in the pipeline to avoid duplicates
       const { data: existing } = await supabase
         .from('pipeline')
         .select('id')
@@ -193,7 +195,6 @@ export async function GET(req: NextRequest) {
 
       if (existing) continue
 
-      // Create a pipeline entry
       await supabase.from('pipeline').insert({
         name: analysis.company_name,
         sector: analysis.sector ?? 'Unknown',
@@ -209,7 +210,6 @@ export async function GET(req: NextRequest) {
       totalOpportunities++
     }
 
-    // Update last scanned timestamp
     await supabase
       .from('email_integrations')
       .update({ last_scanned_at: new Date().toISOString() })
