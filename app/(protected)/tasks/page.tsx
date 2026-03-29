@@ -9,7 +9,7 @@ export default async function TasksPage() {
   const [tasksRes, companiesRes, teamMembersRes] = await Promise.all([
     supabase
       .from('tasks')
-      .select('*, companies(id,name), team_members(id,name,color,role)')
+      .select('*, companies(id,name), team_members(id,name,color,role), task_participants(team_member_id, team_members(id,name,color))')
       .order('created_at', { ascending: false }),
     supabase
       .from('companies')

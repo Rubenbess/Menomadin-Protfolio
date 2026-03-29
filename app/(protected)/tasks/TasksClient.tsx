@@ -130,18 +130,58 @@ function PriorityBadge({ priority }: { priority: TaskPriority }) {
 
 function AssigneeAvatar({
   member,
+  size = 'sm',
 }: {
   member: { name: string; color: string } | null
+  size?: 'sm' | 'md'
 }) {
   if (!member) return null
+  const dim = size === 'md' ? 'w-7 h-7 text-[11px]' : 'w-6 h-6 text-[10px]'
   return (
     <span
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold flex-shrink-0"
+      className={`inline-flex items-center justify-center rounded-full text-white font-bold flex-shrink-0 ring-2 ring-white ${dim}`}
       style={{ backgroundColor: member.color }}
       title={member.name}
     >
       {getInitials(member.name)}
     </span>
+  )
+}
+
+function AvatarStack({ task }: { task: TaskWithRelations }) {
+  const owner = task.team_members
+  const participants = task.task_participants
+    ?.map(p => p.team_members)
+    .filter((m): m is { id: string; name: string; color: string } => m !== null) ?? []
+
+  const all = [
+    ...(owner ? [{ ...owner, isOwner: true }] : []),
+    ...participants.map(p => ({ ...p, isOwner: false })),
+  ]
+
+  if (all.length === 0) return null
+
+  const visible = all.slice(0, 4)
+  const extra = all.length - 4
+
+  return (
+    <div className="flex items-center">
+      <div className="flex -space-x-1.5">
+        {visible.map((m, i) => (
+          <span
+            key={m.id + i}
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold flex-shrink-0 ring-2 ring-white"
+            style={{ backgroundColor: m.color }}
+            title={m.isOwner ? `${m.name} (owner)` : m.name}
+          >
+            {getInitials(m.name)}
+          </span>
+        ))}
+      </div>
+      {extra > 0 && (
+        <span className="ml-1 text-[10px] font-semibold text-slate-400">+{extra}</span>
+      )}
+    </div>
   )
 }
 
@@ -207,7 +247,7 @@ function TaskCard({
         ) : (
           <span />
         )}
-        <AssigneeAvatar member={task.team_members} />
+        <AvatarStack task={task} />
       </div>
     </div>
   )
@@ -691,7 +731,7 @@ export default function TasksClient({ tasks, companies, teamMembers }: TasksClie
                   <th>Priority</th>
                   <th>Due Date</th>
                   <th>Company</th>
-                  <th>Assignee</th>
+                  <th>People</th>
                   <th></th>
                 </tr>
               </thead>
@@ -750,12 +790,19 @@ export default function TasksClient({ tasks, companies, teamMembers }: TasksClie
                           )}
                         </td>
                         <td>
-                          {task.team_members ? (
+                          {task.team_members || task.task_participants?.length > 0 ? (
                             <div className="flex items-center gap-2">
-                              <AssigneeAvatar member={task.team_members} />
-                              <span className="text-sm text-slate-600">
-                                {task.team_members.name}
-                              </span>
+                              <AvatarStack task={task} />
+                              {task.team_members && (
+                                <span className="text-sm text-slate-600">
+                                  {task.team_members.name}
+                                  {(task.task_participants?.length ?? 0) > 0 && (
+                                    <span className="text-slate-400 text-xs ml-1">
+                                      +{task.task_participants.length}
+                                    </span>
+                                  )}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-slate-300">—</span>

@@ -13,18 +13,35 @@ interface TaskData {
   assignee_id: string | null
 }
 
-export async function createTask(data: TaskData) {
+export async function createTask(data: TaskData, participantIds: string[] = []) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('tasks').insert(data)
+  const { data: task, error } = await supabase.from('tasks').insert(data).select('id').single()
   if (error) return { error: error.message }
+
+  if (participantIds.length > 0) {
+    await supabase.from('task_participants').insert(
+      participantIds.map(team_member_id => ({ task_id: task.id, team_member_id }))
+    )
+  }
+
   revalidatePath('/tasks')
   return { error: null }
 }
 
-export async function updateTask(id: string, data: Partial<TaskData>) {
+export async function updateTask(id: string, data: Partial<TaskData>, participantIds?: string[]) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('tasks').update(data).eq('id', id)
   if (error) return { error: error.message }
+
+  if (participantIds !== undefined) {
+    await supabase.from('task_participants').delete().eq('task_id', id)
+    if (participantIds.length > 0) {
+      await supabase.from('task_participants').insert(
+        participantIds.map(team_member_id => ({ task_id: id, team_member_id }))
+      )
+    }
+  }
+
   revalidatePath('/tasks')
   return { error: null }
 }

@@ -26,6 +26,10 @@ interface TaskFormProps {
   onSuccess: () => void
 }
 
+function getInitials(name: string) {
+  return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
+}
+
 export default function TaskForm({
   task,
   companies,
@@ -41,8 +45,17 @@ export default function TaskForm({
   const [dueDate, setDueDate] = useState(task?.due_date ?? '')
   const [companyId, setCompanyId] = useState(task?.company_id ?? '')
   const [assigneeId, setAssigneeId] = useState(task?.assignee_id ?? '')
+  const [participantIds, setParticipantIds] = useState<string[]>(
+    task?.task_participants?.map(p => p.team_member_id) ?? []
+  )
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  function toggleParticipant(id: string) {
+    setParticipantIds(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    )
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -60,9 +73,12 @@ export default function TaskForm({
       assignee_id: assigneeId || null,
     }
 
+    // Exclude owner from participants to avoid duplication
+    const filteredParticipants = participantIds.filter(id => id !== assigneeId)
+
     const result = task
-      ? await updateTask(task.id, data)
-      : await createTask(data)
+      ? await updateTask(task.id, data, filteredParticipants)
+      : await createTask(data, filteredParticipants)
 
     setLoading(false)
 
@@ -154,19 +170,69 @@ export default function TaskForm({
         </select>
       </div>
 
+      {/* Owner */}
       <div>
-        <label className="field-label">Assignee</label>
+        <label className="field-label">Owner</label>
         <select
           className="field-select"
           value={assigneeId}
           onChange={e => setAssigneeId(e.target.value)}
         >
-          <option value="">Unassigned</option>
+          <option value="">No owner</option>
           {teamMembers.map(m => (
             <option key={m.id} value={m.id}>{m.name}</option>
           ))}
         </select>
       </div>
+
+      {/* Participants */}
+      {teamMembers.length > 0 && (
+        <div>
+          <label className="field-label">
+            Participants
+            {participantIds.filter(id => id !== assigneeId).length > 0 && (
+              <span className="ml-1.5 text-[10px] font-semibold bg-violet-100 text-violet-600 rounded-full px-1.5 py-0.5">
+                {participantIds.filter(id => id !== assigneeId).length}
+              </span>
+            )}
+          </label>
+          <div className="flex flex-wrap gap-2 mt-1.5">
+            {teamMembers
+              .filter(m => m.id !== assigneeId)
+              .map(m => {
+                const selected = participantIds.includes(m.id)
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => toggleParticipant(m.id)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                      selected
+                        ? 'border-violet-400 bg-violet-50 text-violet-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <span
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+                      style={{ backgroundColor: m.color }}
+                    >
+                      {getInitials(m.name)}
+                    </span>
+                    {m.name}
+                    {selected && (
+                      <span className="text-violet-500 font-bold leading-none">✓</span>
+                    )}
+                  </button>
+                )
+              })}
+          </div>
+          {teamMembers.filter(m => m.id !== assigneeId).length === 0 && (
+            <p className="text-xs text-slate-400 mt-1">
+              Add more team members to assign participants.
+            </p>
+          )}
+        </div>
+      )}
 
       {error && (
         <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>

@@ -196,4 +196,5 @@ export interface Task {
 export interface TaskWithRelations extends Task {
   companies: { id: string; name: string } | null
   team_members: { id: string; name: string; color: string; role: string | null } | null
+  task_participants: { team_member_id: string; team_members: { id: string; name: string; color: string } | null }[]
 }
