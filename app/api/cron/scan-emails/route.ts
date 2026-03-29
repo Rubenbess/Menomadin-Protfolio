@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import Anthropic from '@anthropic-ai/sdk'
 
 interface EmailIntegration {
   id: string
@@ -29,7 +28,91 @@ interface OpportunityData {
   fundraising_ask: number | null
   hq: string | null
   lead_partner: string | null
-  confidence: 'high' | 'medium' | 'low'
+}
+
+const OPPORTUNITY_KEYWORDS = [
+  'raising', 'fundraising', 'funding round', 'series a', 'series b', 'series c',
+  'seed round', 'pre-seed', 'pitch deck', 'investment opportunity', 'term sheet',
+  'cap table', 'convertible note', 'safe note', 'due diligence', 'co-invest',
+  'looking to raise', 'raising capital', 'seeking investment', 'venture round',
+  'we are raising', 'our raise', 'closing our round', 'open to investors',
+]
+
+const SECTOR_KEYWORDS: Record<string, string[]> = {
+  FinTech: ['fintech', 'payments', 'banking', 'lending', 'insurance', 'wealth', 'crypto', 'blockchain', 'defi'],
+  HealthTech: ['healthtech', 'medtech', 'health', 'medical', 'clinical', 'biotech', 'pharma', 'diagnostics'],
+  SaaS: ['saas', 'software', 'platform', 'b2b', 'enterprise', 'api', 'cloud'],
+  CleanTech: ['cleantech', 'climate', 'energy', 'solar', 'sustainability', 'carbon', 'renewable'],
+  EdTech: ['edtech', 'education', 'learning', 'training', 'upskilling'],
+  DeepTech: ['ai', 'artificial intelligence', 'machine learning', 'robotics', 'quantum', 'semiconductor'],
+  PropTech: ['proptech', 'real estate', 'property', 'construction'],
+  FoodTech: ['foodtech', 'food', 'agri', 'agriculture', 'farm'],
+}
+
+function detectSector(text: string): string {
+  const lower = text.toLowerCase()
+  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
+    if (keywords.some(k => lower.includes(k))) return sector
+  }
+  return 'Other'
+}
+
+function extractFundraisingAsk(text: string): number | null {
+  // Match patterns like $5M, $2.5M, $500K, $1,000,000
+  const patterns = [
+    /\$(\d+(?:\.\d+)?)\s*m(?:illion)?/i,
+    /\$(\d+(?:\.\d+)?)\s*k(?:illion)?/i,
+    /\$(\d{1,3}(?:,\d{3})+)/,
+  ]
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (match) {
+      const value = parseFloat(match[1].replace(/,/g, ''))
+      if (pattern.source.includes('k')) return Math.round(value * 1000)
+      if (pattern.source.includes('m')) return Math.round(value * 1_000_000)
+      return Math.round(value)
+    }
+  }
+  return null
+}
+
+function extractCompanyName(subject: string, fromName: string, body: string): string {
+  // Try to extract from subject patterns like "Introduction: CompanyName" or "CompanyName - Pitch"
+  const subjectPatterns = [
+    /introduction[:\s]+([A-Z][A-Za-z0-9\s&]+?)(?:\s[-–|]|$)/i,
+    /^([A-Z][A-Za-z0-9]+)\s*[-–|]/,
+    /([A-Z][A-Za-z0-9\s]+?)\s+(?:pitch|deck|raise|round|fundraise)/i,
+  ]
+  for (const pattern of subjectPatterns) {
+    const match = subject.match(pattern)
+    if (match?.[1]?.trim().length > 1) return match[1].trim()
+  }
+  // Fall back to sender's company name (first capitalized word from name if org)
+  const nameWords = fromName.split(/\s+/)
+  if (nameWords.length >= 2) return nameWords.slice(0, 2).join(' ')
+  return fromName || 'Unknown Company'
+}
+
+function analyzeEmail(
+  subject: string,
+  body: string,
+  fromName: string,
+  fromEmail: string
+): OpportunityData | null {
+  const combined = `${subject} ${body}`.toLowerCase()
+  const matchCount = OPPORTUNITY_KEYWORDS.filter(k => combined.includes(k)).length
+
+  if (matchCount === 0) return null
+
+  return {
+    is_opportunity: true,
+    company_name: extractCompanyName(subject, fromName, body),
+    sector: detectSector(combined),
+    description: body.slice(0, 300).replace(/\s+/g, ' ').trim(),
+    fundraising_ask: extractFundraisingAsk(`${subject} ${body}`),
+    hq: null,
+    lead_partner: fromName || fromEmail || null,
+  }
 }
 
 async function refreshAccessToken(
@@ -140,17 +223,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const anthropicKey = process.env.ANTHROPIC_API_KEY
-  if (!anthropicKey) {
-    return NextResponse.json({ error: 'Missing ANTHROPIC_API_KEY' }, { status: 500 })
-  }
-
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-
-  const anthropic = new Anthropic({ apiKey: anthropicKey })
 
   const { data: integrations, error: intErr } = await supabase
     .from('email_integrations')
@@ -179,12 +255,14 @@ export async function GET(req: NextRequest) {
         ? email.body.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
         : (email.body?.content ?? email.bodyPreview ?? '')
 
-      const from = `${email.from?.emailAddress?.name ?? ''} <${email.from?.emailAddress?.address ?? ''}>`
+      const fromName = email.from?.emailAddress?.name ?? ''
+      const fromEmail = email.from?.emailAddress?.address ?? ''
+      const from = `${fromName} <${fromEmail}>`
       const subject = email.subject ?? '(no subject)'
 
-      const analysis = await analyzeEmail(subject, body, from, anthropic)
+      const analysis = analyzeEmail(subject, body, fromName, fromEmail)
 
-      if (!analysis?.is_opportunity || analysis.confidence === 'low') continue
+      if (!analysis?.is_opportunity) continue
       if (!analysis.company_name || analysis.company_name === 'Unknown') continue
 
       const { data: existing } = await supabase
