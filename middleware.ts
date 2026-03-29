@@ -49,11 +49,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // MFA check — if user has 2FA enrolled, require them to verify
-  if (user && !pathname.startsWith('/mfa')) {
+  // MFA enforcement — skip checks on the MFA and security setup pages themselves
+  const isMfaRoute = pathname.startsWith('/mfa') || pathname.startsWith('/settings/security')
+
+  if (user && !isMfaRoute && !isPublic) {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
-      return NextResponse.redirect(new URL('/mfa/verify', request.url))
+    if (aal) {
+      // Has 2FA enrolled but not yet verified this session → verify
+      if (aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+        return NextResponse.redirect(new URL('/mfa/verify', request.url))
+      }
+      // No 2FA enrolled at all → force setup before accessing anything
+      if (aal.nextLevel === 'aal1' && aal.currentLevel === 'aal1') {
+        return NextResponse.redirect(new URL('/settings/security?required=1', request.url))
+      }
     }
   }
 

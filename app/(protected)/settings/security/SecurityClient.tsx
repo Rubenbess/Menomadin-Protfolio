@@ -24,7 +24,7 @@ interface TOTPEnrollData {
   }
 }
 
-export default function SecurityClient() {
+export default function SecurityClient({ required = false }: { required?: boolean }) {
   const [factors, setFactors] = useState<Factor[]>([])
   const [step, setStep] = useState<Step>('idle')
   const [enrollData, setEnrollData] = useState<TOTPEnrollData | null>(null)
@@ -100,6 +100,19 @@ export default function SecurityClient() {
           <p className="text-sm text-slate-400 mt-0.5">Manage two-factor authentication for your account</p>
         </div>
       </div>
+
+      {/* Required banner */}
+      {required && !hasActiveFactor && (
+        <div className="mb-5 flex items-start gap-3 bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-4 py-3.5">
+          <ShieldOff size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800">2FA is required to access this platform</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Set up two-factor authentication below to continue. You won&apos;t be able to access any other page until this is done.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Status card */}
       <div className={`rounded-2xl p-5 mb-6 flex items-start gap-4 ring-1 ${
