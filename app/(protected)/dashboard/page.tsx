@@ -16,10 +16,11 @@ import {
   fmtPct,
   type CashFlow,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe } from '@/lib/types'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import StrategyTableFilter from '@/components/StrategyTableFilter'
+import PortfolioTable from '@/components/PortfolioTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,13 +35,14 @@ export default async function DashboardPage({ searchParams }: Props) {
   let companiesQuery = supabase.from('companies').select('*').order('name')
   if (strategy) companiesQuery = companiesQuery.eq('strategy', strategy)
 
-  const [{ data: companies }, { data: rounds }, { data: investments }, { data: capTable }, { data: reserves }] =
+  const [{ data: companies }, { data: rounds }, { data: investments }, { data: capTable }, { data: reserves }, { data: safes }] =
     await Promise.all([
       companiesQuery,
       supabase.from('rounds').select('*'),
       supabase.from('investments').select('*').order('date'),
       supabase.from('cap_table').select('*'),
       supabase.from('reserves').select('*'),
+      supabase.from('safes').select('*').order('date'),
     ])
 
   const companiesList   = (companies   ?? []) as Company[]
@@ -48,6 +50,7 @@ export default async function DashboardPage({ searchParams }: Props) {
   const investmentsList = (investments ?? []) as Investment[]
   const capTableList    = (capTable    ?? []) as CapTableEntry[]
   const reservesList    = (reserves    ?? []) as Reserve[]
+  const safesList       = (safes       ?? []) as Safe[]
 
   const companiesWithMetrics: CompanyWithMetrics[] = companiesList.map((co) => {
     const coInvestments = investmentsList.filter((i) => i.company_id === co.id)
@@ -171,52 +174,11 @@ export default async function DashboardPage({ searchParams }: Props) {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Company</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Entry Stage</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Invested to Date</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Ownership</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Planned Reserves</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Deployed Reserves</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Initial Investment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {companiesWithMetrics.map((co) => (
-                  <tr key={co.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        {co.logo_url ? (
-                          <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
-                        ) : (
-                          <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-bold text-violet-600">{co.name[0]}</span>
-                          </div>
-                        )}
-                        <div>
-                          <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-violet-600 transition-colors">
-                            {co.name}
-                          </Link>
-                          {co.sector && <p className="text-xs text-slate-400">{co.sector}</p>}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3"><Badge value={co.status} /></td>
-                    <td className="px-4 py-3 text-slate-500 text-xs">{co.entry_stage ?? <span className="text-slate-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right font-medium text-slate-700">{co.totalInvested > 0 ? fmt$$(co.totalInvested) : <span className="text-slate-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right text-slate-600">{co.ownershipPct > 0 ? fmtPct(co.ownershipPct) : <span className="text-slate-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right text-slate-600">{co.plannedReserves > 0 ? fmt$$(co.plannedReserves) : <span className="text-slate-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right text-slate-600">{co.deployedReserves > 0 ? fmt$$(co.deployedReserves) : <span className="text-slate-300">—</span>}</td>
-                    <td className="px-5 py-3 text-right text-slate-600">{co.initialInvestment > 0 ? fmt$$(co.initialInvestment) : <span className="text-slate-300">—</span>}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <PortfolioTable
+            companies={companiesWithMetrics}
+            investments={investmentsList}
+            safes={safesList}
+          />
         )}
       </div>
 
