@@ -25,10 +25,14 @@ import { deleteUpdate } from '@/actions/updates'
 import { deleteSafe } from '@/actions/safes'
 import SafeForm from '@/components/forms/SafeForm'
 import SafeScenarioModal from '@/components/SafeScenarioModal'
+import OwnershipTable from '@/components/OwnershipTable'
+import WaterfallScenarioPanel from '@/components/WaterfallScenarioPanel'
 import {
   calcCurrentValue,
   calcMOIC,
   calcSafeEstimatedOwnership,
+  calcFullyDilutedShares,
+  calcFullyDilutedOwnershipPct,
   getFundOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
@@ -37,9 +41,9 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario } from '@/lib/types'
 
-type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes'
+type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall'
 
 interface Props {
   company: Company
@@ -50,9 +54,12 @@ interface Props {
   kpis: CompanyKPI[]
   updates: CompanyUpdate[]
   safes: Safe[]
+  shareSeries: ShareSeries[]
+  optionPools: OptionPool[]
+  waterfallScenarios: WaterfallScenario[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -86,8 +93,20 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const unconvertedSafes = safes.filter(s => s.status === 'unconverted')
   const totalSafeInvested = safes.reduce((s, safe) => s + safe.investment_amount, 0)
 
+  // Institutional ownership (from share_series if available)
+  const fundSeries = shareSeries.filter(s =>
+    s.holder_name.toLowerCase().includes('menomadin') ||
+    s.holder_name.toLowerCase().includes('fund')
+  )
+  const totalIssuedShares = shareSeries.reduce((s, h) => s + h.shares, 0)
+  const totalFDShares = calcFullyDilutedShares(totalIssuedShares, optionPools)
+  const fundFDShares = fundSeries.reduce((s, h) => s + h.shares, 0)
+  const fundFDPct = fundFDShares > 0 ? calcFullyDilutedOwnershipPct(fundFDShares, totalFDShares) : 0
+
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
+    { id: 'ownership',   label: 'Ownership', count: shareSeries.length + optionPools.length },
+    { id: 'waterfall',   label: 'Waterfall' },
     { id: 'history',     label: 'Investment History', count: rounds.length },
     { id: 'safes',       label: 'SAFEs',         count: safes.length },
     { id: 'kpis',        label: 'KPIs',          count: kpis.length },
@@ -137,7 +156,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           { label: 'Total Invested', value: fmt$$(totalInvested + totalSafeInvested),        accent: 'violet' },
           { label: 'Current Value',  value: currentValue > 0 ? fmt$$(currentValue) : '—',   accent: 'emerald' },
           { label: 'MOIC',           value: moic > 0 ? fmtMultiple(moic) : '—',             accent: 'blue' },
-          { label: 'Ownership',      value: ownershipPct > 0 ? fmtPct(ownershipPct) : '—',  accent: 'amber' },
+          {
+            label: fundFDPct > 0 ? 'Ownership (FD)' : 'Ownership',
+            value: fundFDPct > 0 ? fmtPct(fundFDPct) : ownershipPct > 0 ? fmtPct(ownershipPct) : '—',
+            accent: 'amber',
+          },
           ...(unconvertedSafes.length > 0 ? [{
             label: 'SAFE Est. Ownership',
             value: fmtPct(unconvertedSafes.reduce((s, safe) => s + calcSafeEstimatedOwnership(safe.investment_amount, safe.valuation_cap), 0)),
@@ -373,6 +396,27 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               </div>
             )}
           </div>
+        )}
+
+        {/* OWNERSHIP */}
+        {activeTab === 'ownership' && (
+          <OwnershipTable
+            companyId={company.id}
+            shareSeries={shareSeries}
+            optionPools={optionPools}
+            rounds={rounds}
+          />
+        )}
+
+        {/* WATERFALL */}
+        {activeTab === 'waterfall' && (
+          <WaterfallScenarioPanel
+            companyId={company.id}
+            shareSeries={shareSeries}
+            optionPools={optionPools}
+            safes={safes}
+            savedScenarios={waterfallScenarios}
+          />
         )}
 
         {/* INVESTMENT HISTORY */}

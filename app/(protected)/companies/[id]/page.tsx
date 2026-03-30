@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import CompanyDetailClient from './CompanyDetailClient'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +22,9 @@ export default async function CompanyDetailPage({ params }: Props) {
     { data: kpis },
     { data: updates },
     { data: safes },
+    { data: shareSeries },
+    { data: optionPools },
+    { data: waterfallScenarios },
   ] = await Promise.all([
     supabase.from('companies').select('*').eq('id', id).single(),
     supabase.from('rounds').select('*').eq('company_id', id).order('date', { ascending: false }),
@@ -31,6 +34,9 @@ export default async function CompanyDetailPage({ params }: Props) {
     supabase.from('company_kpis').select('*').eq('company_id', id).order('date', { ascending: false }),
     supabase.from('company_updates').select('*').eq('company_id', id).order('date', { ascending: false }),
     supabase.from('safes').select('*').eq('company_id', id).order('date', { ascending: false }),
+    supabase.from('share_series').select('*').eq('company_id', id).order('liquidation_seniority', { ascending: false }),
+    supabase.from('option_pools').select('*').eq('company_id', id).order('created_at', { ascending: true }),
+    supabase.from('waterfall_scenarios').select('*').eq('company_id', id).order('created_at', { ascending: false }),
   ])
 
   if (!company) notFound()
@@ -45,6 +51,9 @@ export default async function CompanyDetailPage({ params }: Props) {
       kpis={(kpis ?? []) as CompanyKPI[]}
       updates={(updates ?? []) as CompanyUpdate[]}
       safes={(safes ?? []) as Safe[]}
+      shareSeries={(shareSeries ?? []) as ShareSeries[]}
+      optionPools={(optionPools ?? []) as OptionPool[]}
+      waterfallScenarios={(waterfallScenarios ?? []) as WaterfallScenario[]}
     />
   )
 }

@@ -152,6 +152,74 @@ export interface Safe {
   created_at: string
 }
 
+// ─── Institutional Cap Table ─────────────────────────────────────────────────
+
+export type DataCompleteness = 'minimal' | 'partial' | 'high_confidence' | 'fully_modeled'
+
+export interface ShareSeries {
+  id: string
+  company_id: string
+  round_id: string | null
+  holder_name: string
+  share_class: string
+  is_preferred: boolean
+  shares: number
+  price_per_share: number | null
+  invested_amount: number | null
+  liquidation_pref_mult: number
+  liquidation_seniority: number
+  is_participating: boolean
+  participation_cap_mult: number | null
+  conversion_ratio: number
+  anti_dilution: string
+  created_at: string
+}
+
+export interface OptionPool {
+  id: string
+  company_id: string
+  name: string
+  shares_authorized: number
+  shares_issued: number
+  price_per_share: number | null
+  created_at: string
+}
+
+export interface WaterfallScenario {
+  id: string
+  company_id: string
+  name: string
+  exit_value: number
+  created_at: string
+}
+
+// Calculation engine types
+export interface WaterfallHolder {
+  id: string
+  name: string
+  shareClass: string
+  isPreferred: boolean
+  shares: number
+  investedAmount: number
+  liquidationPrefMult: number
+  seniority: number
+  isParticipating: boolean
+  participationCapMult: number | null
+  conversionRatio: number
+}
+
+export interface WaterfallHolderResult extends WaterfallHolder {
+  proceeds: number
+  ownershipPct: number
+  multiple: number
+  isConverting: boolean
+}
+
+export interface WaterfallResult {
+  totalProceeds: number
+  holders: WaterfallHolderResult[]
+}
+
 export interface Reminder {
   id: string
   company_id: string | null

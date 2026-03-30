@@ -1,4 +1,4 @@
-import type { Investment, Round, CapTableEntry } from './types'
+import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness } from './types'
 
 // Canonical sector names — any alias maps to the canonical form
 const SECTOR_ALIASES: Record<string, string> = {
@@ -167,6 +167,249 @@ export function calcSafeEstimatedOwnership(
 ): number {
   if (!valuationCap) return 0
   return (investmentAmount / valuationCap) * 100
+}
+
+// ─── Institutional Cap Table Calculations ────────────────────────────────────
+
+/** Derive price-per-share from pre-money valuation and shares outstanding. */
+export function derivePricePerShare(preMoney: number, sharesOutstanding: number): number {
+  if (!sharesOutstanding || sharesOutstanding === 0) return 0
+  return preMoney / sharesOutstanding
+}
+
+/** Total fully-diluted shares = issued shares + option pool reserved + SAFE shares (estimated). */
+export function calcFullyDilutedShares(
+  issuedShares: number,
+  optionPools: OptionPool[],
+): number {
+  const poolShares = optionPools.reduce((s, p) => s + p.shares_authorized, 0)
+  return issuedShares + poolShares
+}
+
+/** Issued ownership % for a holder. */
+export function calcIssuedOwnershipPct(holderShares: number, totalIssuedShares: number): number {
+  if (!totalIssuedShares) return 0
+  return (holderShares / totalIssuedShares) * 100
+}
+
+/** Fully-diluted ownership % for a holder (denominator includes option pool). */
+export function calcFullyDilutedOwnershipPct(holderShares: number, totalFDShares: number): number {
+  if (!totalFDShares) return 0
+  return (holderShares / totalFDShares) * 100
+}
+
+/**
+ * Broad-based weighted average anti-dilution adjustment.
+ * Returns the adjusted conversion price (new PPS that the preferred holder converts at).
+ */
+export function calcAntiDilutionBroadBasedWA(
+  originalPPS: number,
+  totalSharesPreRound: number,   // fully diluted shares before new issuance
+  newSharesIssued: number,
+  newPPS: number,
+): number {
+  if (!originalPPS || originalPPS === 0) return 0
+  // Formula: CP_new = CP_old × (A + B) / (A + C)
+  //   A = total shares outstanding (pre-round, FD)
+  //   B = shares issuable for the money at old CP
+  //   C = new shares actually issued
+  const a = totalSharesPreRound
+  const b = (newSharesIssued * newPPS) / originalPPS
+  const c = newSharesIssued
+  if (a + c === 0) return originalPPS
+  return originalPPS * ((a + b) / (a + c))
+}
+
+/**
+ * Assess data completeness of a company's cap table.
+ * minimal       = only percentage data
+ * partial       = has some share_series but missing PPS or invested amounts
+ * high_confidence = full share_series with PPS + liq prefs
+ * fully_modeled = all of the above + option pools
+ */
+export function assessDataCompleteness(
+  shareSeries: ShareSeries[],
+  optionPools: OptionPool[],
+): DataCompleteness {
+  if (shareSeries.length === 0) return 'minimal'
+  const hasPPS = shareSeries.every(s => s.price_per_share != null)
+  const hasAmounts = shareSeries.every(s => s.invested_amount != null)
+  if (!hasPPS || !hasAmounts) return 'partial'
+  if (optionPools.length === 0) return 'high_confidence'
+  return 'fully_modeled'
+}
+
+/**
+ * Build WaterfallHolder array from share_series + option_pools + SAFEs.
+ * Options are modeled as unissued common for FD purposes.
+ * Unconverted SAFEs are added as the lowest-seniority preferred.
+ */
+export function buildWaterfallHolders(
+  shareSeries: ShareSeries[],
+  safes: Safe[],
+): WaterfallHolder[] {
+  const holders: WaterfallHolder[] = shareSeries.map(s => ({
+    id: s.id,
+    name: s.holder_name,
+    shareClass: s.share_class,
+    isPreferred: s.is_preferred,
+    shares: s.shares,
+    investedAmount: s.invested_amount ?? 0,
+    liquidationPrefMult: s.liquidation_pref_mult,
+    seniority: s.liquidation_seniority,
+    isParticipating: s.is_participating,
+    participationCapMult: s.participation_cap_mult,
+    conversionRatio: s.conversion_ratio,
+  }))
+
+  // Add unconverted SAFEs as lowest-seniority preferred (using invested_amount as proxy)
+  for (const safe of safes) {
+    if (safe.status !== 'unconverted') continue
+    // Estimate shares: investment / valuation_cap (if cap exists)
+    const estimatedShares = safe.valuation_cap
+      ? Math.round((safe.investment_amount / safe.valuation_cap) * 1_000_000)
+      : 0
+    holders.push({
+      id: `safe-${safe.id}`,
+      name: `SAFE (${safe.date.slice(0, 7)})`,
+      shareClass: 'SAFE',
+      isPreferred: true,
+      shares: estimatedShares,
+      investedAmount: safe.investment_amount,
+      liquidationPrefMult: 1.0,
+      seniority: -1,  // lowest seniority
+      isParticipating: false,
+      participationCapMult: null,
+      conversionRatio: 1.0,
+    })
+  }
+
+  return holders
+}
+
+/**
+ * Liquidation waterfall calculation.
+ *
+ * Algorithm:
+ * 1. Determine which non-participating preferred would convert
+ *    (as-if-converted value > their liq preference)
+ * 2. Pay liq preferences in seniority order (highest first) to non-converters
+ * 3. Distribute remaining to: common + participating preferred + converting preferred
+ *    (pro-rata by common-equivalent shares, capped for participating preferred)
+ */
+export function calcWaterfall(
+  exitValue: number,
+  holders: WaterfallHolder[],
+): WaterfallResult {
+  const totalCommonEquiv = holders.reduce((s, h) => s + h.shares * h.conversionRatio, 0)
+
+  // Step 1: Determine converters among non-participating preferred
+  const convertingIds = new Set<string>()
+  for (const h of holders) {
+    if (!h.isPreferred || h.isParticipating) continue
+    if (totalCommonEquiv === 0) continue
+    const commonEquiv = h.shares * h.conversionRatio
+    const asCommonValue = (commonEquiv / totalCommonEquiv) * exitValue
+    const liqPref = h.investedAmount * h.liquidationPrefMult
+    if (asCommonValue > liqPref) convertingIds.add(h.id)
+  }
+
+  // Step 2: Pay liq preferences to non-converters
+  let remaining = exitValue
+  const payouts = new Map<string, number>()
+
+  const nonConverters = holders.filter(h => h.isPreferred && !convertingIds.has(h.id))
+  const seniorityLevels = [...new Set(nonConverters.map(h => h.seniority))].sort((a, b) => b - a)
+
+  for (const level of seniorityLevels) {
+    if (remaining <= 0) break
+    const levelHolders = nonConverters.filter(h => h.seniority === level)
+    const totalPref = levelHolders.reduce((s, h) => s + h.investedAmount * h.liquidationPrefMult, 0)
+
+    if (remaining >= totalPref) {
+      for (const h of levelHolders) {
+        const pref = h.investedAmount * h.liquidationPrefMult
+        payouts.set(h.id, (payouts.get(h.id) ?? 0) + pref)
+        remaining -= pref
+      }
+    } else {
+      // Waterfall runs dry — pro-rata within this seniority tier
+      for (const h of levelHolders) {
+        const pref = h.investedAmount * h.liquidationPrefMult
+        const share = totalPref > 0 ? (pref / totalPref) * remaining : 0
+        payouts.set(h.id, (payouts.get(h.id) ?? 0) + share)
+      }
+      remaining = 0
+    }
+  }
+
+  // Step 3: Distribute remaining to common + participating preferred + converters
+  if (remaining > 0) {
+    const participatingHolders = holders.filter(
+      h => !h.isPreferred || h.isParticipating || convertingIds.has(h.id)
+    )
+    const totalParticipatingEquiv = participatingHolders.reduce(
+      (s, h) => s + h.shares * h.conversionRatio, 0
+    )
+
+    if (totalParticipatingEquiv > 0) {
+      const dist = new Map<string, number>()
+      for (const h of participatingHolders) {
+        const equiv = h.shares * h.conversionRatio
+        dist.set(h.id, (equiv / totalParticipatingEquiv) * remaining)
+      }
+
+      // Apply participation caps
+      let capExcess = 0
+      const cappedIds = new Set<string>()
+      for (const h of holders) {
+        if (!h.isParticipating || h.participationCapMult === null) continue
+        const alreadyPaid = payouts.get(h.id) ?? 0
+        const maxPayout = h.investedAmount * h.participationCapMult
+        const d = dist.get(h.id) ?? 0
+        if (alreadyPaid + d > maxPayout) {
+          const cappedDist = Math.max(0, maxPayout - alreadyPaid)
+          capExcess += d - cappedDist
+          dist.set(h.id, cappedDist)
+          cappedIds.add(h.id)
+        }
+      }
+
+      // Redistribute cap excess to uncapped common
+      if (capExcess > 0) {
+        const uncappedCommon = participatingHolders.filter(
+          h => !h.isPreferred && !cappedIds.has(h.id)
+        )
+        const uncappedEquiv = uncappedCommon.reduce((s, h) => s + h.shares * h.conversionRatio, 0)
+        if (uncappedEquiv > 0) {
+          for (const h of uncappedCommon) {
+            const extra = ((h.shares * h.conversionRatio) / uncappedEquiv) * capExcess
+            dist.set(h.id, (dist.get(h.id) ?? 0) + extra)
+          }
+        }
+      }
+
+      for (const [id, d] of dist) {
+        payouts.set(id, (payouts.get(id) ?? 0) + d)
+      }
+    }
+  }
+
+  // Build result
+  const totalIssuedShares = holders.reduce((s, h) => s + h.shares, 0)
+
+  const holderResults: WaterfallHolderResult[] = holders.map(h => {
+    const proceeds = payouts.get(h.id) ?? 0
+    return {
+      ...h,
+      proceeds,
+      ownershipPct: totalIssuedShares > 0 ? (h.shares / totalIssuedShares) * 100 : 0,
+      multiple: h.investedAmount > 0 ? proceeds / h.investedAmount : 0,
+      isConverting: convertingIds.has(h.id),
+    }
+  })
+
+  return { totalProceeds: exitValue, holders: holderResults }
 }
 
 // ─── DPI ─────────────────────────────────────────────────────────────────────
