@@ -111,7 +111,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     { id: 'safes',       label: 'SAFEs',         count: safes.length },
     { id: 'kpis',        label: 'KPIs',          count: kpis.length },
     { id: 'updates',     label: 'Updates',        count: updates.length },
-    { id: 'investments', label: 'Investments',   count: investments.length },
     { id: 'captable',    label: 'Cap Table',     count: capTable.length },
     { id: 'documents',   label: 'Documents',     count: documents.length },
   ]
@@ -425,11 +424,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           const latestRound  = sortedRounds[sortedRounds.length - 1]
           const fundOwnership = getFundOwnershipPct(capTable)
 
+          const unlinkedInvs = investments.filter(i => !i.round_id)
+
           return sortedRounds.length === 0 ? (
             <div>
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
-                <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => setShowAddInvestment(true)}><Plus size={13} /> Add Investment</Button>
+                  <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+                </div>
               </div>
               <EmptyState message="No rounds recorded yet." />
             </div>
@@ -437,7 +441,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             <div>
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
-                <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => setShowAddInvestment(true)}><Plus size={13} /> Add Investment</Button>
+                  <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
+                </div>
               </div>
               <div className="px-5 pt-4">
                 <ValuationChart rounds={rounds} />
@@ -495,71 +502,60 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                         </p>
                       </div>
                     </div>
+
+                    {/* Individual investment line items for this round */}
+                    {roundInvs.length > 0 && (
+                      <div className="mt-3 ml-0 sm:ml-40 border-t border-slate-100 pt-3 space-y-1.5">
+                        {roundInvs.map(inv => (
+                          <div key={inv.id} className="flex items-center justify-between group">
+                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                              <span>{fmtDate(inv.date)}</span>
+                              <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
+                              {inv.valuation_cap && (
+                                <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleDeleteInvestment(inv.id)}
+                              className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            ><Trash2 size={11} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
               })}
               </div>
+
+              {/* Investments not linked to any round */}
+              {unlinkedInvs.length > 0 && (
+                <div className="border-t border-slate-200 px-5 py-4">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Other Investments (no round)</p>
+                  <div className="space-y-2">
+                    {unlinkedInvs.map(inv => (
+                      <div key={inv.id} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                          <span>{fmtDate(inv.date)}</span>
+                          <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
+                          {inv.valuation_cap && (
+                            <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteInvestment(inv.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        ><Trash2 size={11} /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )
         })()}
-
-        {/* INVESTMENTS */}
-        {activeTab === 'investments' && (
-          <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900">Investments</h3>
-              <Button size="sm" onClick={() => setShowAddInvestment(true)}>
-                <Plus size={13} /> Add Investment
-              </Button>
-            </div>
-            {investments.length === 0 ? (
-              <EmptyState message="No investments recorded yet." />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70">
-                      {['Date', 'Amount', 'Instrument', 'Valuation Cap', ''].map((h) => (
-                        <th key={h} className={th}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {investments.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-50/60 group transition-colors">
-                        <td className={td + ' text-slate-500'}>{fmtDate(inv.date)}</td>
-                        <td className={td + ' font-semibold text-slate-900'}>{fmt$$(inv.amount)}</td>
-                        <td className={td}>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 ring-1 ring-violet-200">
-                            {inv.instrument}
-                          </span>
-                        </td>
-                        <td className={td + ' text-slate-600'}>
-                          {inv.valuation_cap ? fmt$$(inv.valuation_cap) : '—'}
-                        </td>
-                        <td className={td + ' text-right'}>
-                          <button
-                            onClick={() => handleDeleteInvestment(inv.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t border-slate-200 bg-slate-50/70">
-                      <td className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</td>
-                      <td className="px-5 py-3 text-sm font-bold text-slate-900">{fmt$$(totalInvested)}</td>
-                      <td colSpan={3} />
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* CAP TABLE */}
         {activeTab === 'captable' && (
