@@ -107,8 +107,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     { id: 'overview',    label: 'Overview' },
     { id: 'ownership',   label: 'Ownership', count: shareSeries.length + optionPools.length },
     { id: 'waterfall',   label: 'Waterfall' },
-    { id: 'history',     label: 'Investment History', count: rounds.length },
-    { id: 'safes',       label: 'SAFEs',         count: safes.length },
+    { id: 'history',     label: 'Investment History', count: rounds.length + safes.length },
     { id: 'kpis',        label: 'KPIs',          count: kpis.length },
     { id: 'updates',     label: 'Updates',        count: updates.length },
     { id: 'captable',    label: 'Cap Table',     count: capTable.length },
@@ -299,104 +298,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           </div>
         )}
 
-        {/* SAFEs */}
-        {activeTab === 'safes' && (
-          <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900">SAFEs</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Pre-money SAFEs · click any row to model conversion</p>
-              </div>
-              <Button size="sm" onClick={() => { setEditingSafe(null); setShowAddSafe(true) }}>
-                <Plus size={13} /> Add SAFE
-              </Button>
-            </div>
-
-            {safes.length === 0 ? (
-              <EmptyState message="No SAFEs recorded yet." />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70">
-                      {['Date', 'Amount', 'Val. Cap', 'Discount', 'MFN', 'Pro-rata', 'Est. Ownership', 'Status', ''].map(h => (
-                        <th key={h} className={th}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {safes.map(safe => {
-                      const estOwnership = calcSafeEstimatedOwnership(safe.investment_amount, safe.valuation_cap)
-                      return (
-                        <tr
-                          key={safe.id}
-                          className="hover:bg-violet-50/40 transition-colors cursor-pointer group"
-                          onClick={() => setScenarioSafe(safe)}
-                        >
-                          <td className={td + ' text-slate-500'}>{fmtDate(safe.date)}</td>
-                          <td className={td + ' font-semibold text-slate-900'}>{fmt$$(safe.investment_amount)}</td>
-                          <td className={td + ' text-slate-700'}>{safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{safe.discount_rate ? `${safe.discount_rate}%` : '—'}</td>
-                          <td className={td}>
-                            {safe.has_mfn
-                              ? <span className="text-xs font-medium bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Yes</span>
-                              : <span className="text-slate-300">—</span>}
-                          </td>
-                          <td className={td}>
-                            {safe.has_pro_rata
-                              ? <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">Yes</span>
-                              : <span className="text-slate-300">—</span>}
-                          </td>
-                          <td className={td}>
-                            {estOwnership > 0
-                              ? <span className="font-medium text-orange-600">{fmtPct(estOwnership)}</span>
-                              : <span className="text-slate-400 text-xs italic">N/A (no cap)</span>}
-                          </td>
-                          <td className={td}>
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                              safe.status === 'converted'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-amber-100 text-amber-700'
-                            }`}>
-                              {safe.status === 'converted' ? 'Converted' : 'Unconverted'}
-                            </span>
-                          </td>
-                          <td className={td + ' text-right'}>
-                            <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
-                              <button
-                                onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
-                                className="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
-                              ><Pencil size={12} /></button>
-                              <button
-                                onClick={async e => {
-                                  e.stopPropagation()
-                                  if (!confirm('Delete this SAFE?')) return
-                                  await deleteSafe(safe.id)
-                                  router.refresh()
-                                }}
-                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                              ><Trash2 size={12} /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                  {safes.length > 0 && (
-                    <tfoot>
-                      <tr className="border-t border-slate-200 bg-slate-50/70">
-                        <td className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</td>
-                        <td className="px-5 py-3 text-sm font-bold text-slate-900">{fmt$$(totalSafeInvested)}</td>
-                        <td colSpan={7} />
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* OWNERSHIP */}
         {activeTab === 'ownership' && (
           <OwnershipTable
@@ -418,103 +319,203 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           />
         )}
 
-        {/* INVESTMENT HISTORY */}
+        {/* INVESTMENT HISTORY — unified rounds + SAFEs timeline */}
         {activeTab === 'history' && (() => {
-          const sortedRounds = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          const latestRound  = sortedRounds[sortedRounds.length - 1]
+          const sortedRounds  = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          const latestRound   = sortedRounds[sortedRounds.length - 1]
           const fundOwnership = getFundOwnershipPct(capTable)
+          const unlinkedInvs  = investments.filter(i => !i.round_id)
 
-          const unlinkedInvs = investments.filter(i => !i.round_id)
+          // Build unified timeline: rounds + safes, sorted by date
+          type TimelineItem =
+            | { kind: 'round'; date: string; data: typeof rounds[0] }
+            | { kind: 'safe';  date: string; data: typeof safes[0] }
+          const timeline: TimelineItem[] = [
+            ...sortedRounds.map(r => ({ kind: 'round' as const, date: r.date, data: r })),
+            ...safes.map(s => ({ kind: 'safe' as const, date: s.date, data: s })),
+          ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-          return sortedRounds.length === 0 ? (
+          const isEmpty = timeline.length === 0 && unlinkedInvs.length === 0
+
+          return (
             <div>
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" onClick={() => setShowAddInvestment(true)}><Plus size={13} /> Add Investment</Button>
+                  <Button size="sm" variant="secondary" onClick={() => { setEditingSafe(null); setShowAddSafe(true) }}><Plus size={13} /> Add SAFE</Button>
                   <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
                 </div>
               </div>
-              <EmptyState message="No rounds recorded yet." />
-            </div>
-          ) : (
-            <div>
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => setShowAddInvestment(true)}><Plus size={13} /> Add Investment</Button>
-                  <Button size="sm" onClick={() => setShowAddRound(true)}><Plus size={13} /> Add Round</Button>
-                </div>
-              </div>
-              <div className="px-5 pt-4">
-                <ValuationChart rounds={rounds} />
-              </div>
-              <div className="divide-y divide-slate-100">
-              {sortedRounds.map((round, idx) => {
-                const roundInvs    = investments.filter(i => i.round_id === round.id)
-                const roundInvested = roundInvs.reduce((s, i) => s + i.amount, 0)
-                const instrument   = roundInvs[0]?.instrument ?? null
 
-                // ownership: cap table entry for this round, or fall back to fund total
-                const roundCap   = capTable.find(c => c.round_id === round.id)
-                const ownership  = roundCap?.ownership_percentage ?? (idx === sortedRounds.length - 1 ? fundOwnership : null)
-
-                // FMV: ownership × latest post-money (current valuation)
-                const fmv        = ownership != null && latestRound ? (ownership / 100) * latestRound.post_money : null
-                const moic       = fmv != null && roundInvested > 0 ? fmv / roundInvested : null
-
-                return (
-                  <div key={round.id} className="p-5 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                      {/* Round label */}
-                      <div className="sm:w-36 flex-shrink-0">
-                        <p className="text-sm font-bold text-slate-900">{round.type}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{fmtDate(round.date)}</p>
-                        {instrument && (
-                          <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 ring-1 ring-violet-200">
-                            {instrument}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Metrics grid */}
-                      <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3">
-                        {[
-                          { label: 'Our Investment', value: roundInvested > 0 ? fmt$$(roundInvested) : '—', highlight: roundInvested > 0 },
-                          { label: 'Round Size',     value: round.amount_raised > 0 ? fmt$$(round.amount_raised) : '—' },
-                          { label: 'Pre-money',      value: round.pre_money > 0 ? fmt$$(round.pre_money) : '—' },
-                          { label: 'Post-money',     value: round.post_money > 0 ? fmt$$(round.post_money) : '—' },
-                          { label: 'Ownership',      value: ownership != null ? fmtPct(ownership) : '—' },
-                          { label: 'FMV',            value: fmv != null ? fmt$$(fmv) : '—', accent: true },
-                        ].map(({ label, value, highlight, accent }) => (
-                          <div key={label}>
-                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                            <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* MOIC badge */}
-                      <div className="sm:text-right flex-shrink-0">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">MOIC</p>
-                        <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-slate-400'}`}>
-                          {moic != null ? fmtMultiple(moic) : '—'}
-                        </p>
-                      </div>
+              {isEmpty ? (
+                <EmptyState message="No investment history yet." />
+              ) : (
+                <>
+                  {rounds.length > 0 && (
+                    <div className="px-5 pt-4">
+                      <ValuationChart rounds={rounds} />
                     </div>
+                  )}
 
-                    {/* Individual investment line items for this round */}
-                    {roundInvs.length > 0 && (
-                      <div className="mt-3 ml-0 sm:ml-40 border-t border-slate-100 pt-3 space-y-1.5">
-                        {roundInvs.map(inv => (
+                  <div className="divide-y divide-slate-100">
+                    {timeline.map((item, idx) => {
+
+                      /* ── SAFE row ── */
+                      if (item.kind === 'safe') {
+                        const safe = item.data
+                        const estOwnership = calcSafeEstimatedOwnership(safe.investment_amount, safe.valuation_cap)
+                        return (
+                          <div
+                            key={`safe-${safe.id}`}
+                            className="p-5 sm:p-6 cursor-pointer hover:bg-orange-50/40 transition-colors group"
+                            onClick={() => setScenarioSafe(safe)}
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                              {/* SAFE label */}
+                              <div className="sm:w-36 flex-shrink-0">
+                                <p className="text-sm font-bold text-slate-900">SAFE</p>
+                                <p className="text-xs text-slate-400 mt-0.5">{fmtDate(safe.date)}</p>
+                                <span className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                  safe.status === 'converted'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-amber-100 text-amber-700'
+                                }`}>
+                                  {safe.status === 'converted' ? 'Converted' : 'Unconverted'}
+                                </span>
+                              </div>
+
+                              {/* SAFE metrics */}
+                              <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3">
+                                {[
+                                  { label: 'Investment',    value: fmt$$(safe.investment_amount), highlight: true },
+                                  { label: 'Valuation Cap', value: safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—' },
+                                  { label: 'Discount',      value: safe.discount_rate ? `${safe.discount_rate}%` : '—' },
+                                  { label: 'MFN / Pro-rata', value: [safe.has_mfn && 'MFN', safe.has_pro_rata && 'Pro-rata'].filter(Boolean).join(' · ') || '—' },
+                                  { label: 'Est. Ownership', value: estOwnership > 0 ? fmtPct(estOwnership) : '—', accent: estOwnership > 0 },
+                                ].map(({ label, value, highlight, accent }) => (
+                                  <div key={label}>
+                                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+                                    <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Action hint */}
+                              <div className="sm:text-right flex-shrink-0">
+                                <div className="flex items-center gap-1 justify-end">
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
+                                  ><Pencil size={12} /></button>
+                                  <button
+                                    onClick={async e => {
+                                      e.stopPropagation()
+                                      if (!confirm('Delete this SAFE?')) return
+                                      await deleteSafe(safe.id)
+                                      router.refresh()
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  ><Trash2 size={12} /></button>
+                                </div>
+                                {safe.status === 'unconverted' && (
+                                  <p className="text-xs text-orange-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Click to model →
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+
+                      /* ── Round row ── */
+                      const round = item.data
+                      const roundIdx = sortedRounds.indexOf(round)
+                      const roundInvs     = investments.filter(i => i.round_id === round.id)
+                      const roundInvested = roundInvs.reduce((s, i) => s + i.amount, 0)
+                      const instrument    = roundInvs[0]?.instrument ?? null
+                      const roundCap      = capTable.find(c => c.round_id === round.id)
+                      const ownership     = roundCap?.ownership_percentage ?? (roundIdx === sortedRounds.length - 1 ? fundOwnership : null)
+                      const fmv           = ownership != null && latestRound ? (ownership / 100) * latestRound.post_money : null
+                      const moic          = fmv != null && roundInvested > 0 ? fmv / roundInvested : null
+
+                      return (
+                        <div key={`round-${round.id}`} className="p-5 sm:p-6">
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                            {/* Round label */}
+                            <div className="sm:w-36 flex-shrink-0">
+                              <p className="text-sm font-bold text-slate-900">{round.type}</p>
+                              <p className="text-xs text-slate-400 mt-0.5">{fmtDate(round.date)}</p>
+                              {instrument && (
+                                <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 ring-1 ring-violet-200">
+                                  {instrument}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Metrics grid */}
+                            <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3">
+                              {[
+                                { label: 'Our Investment', value: roundInvested > 0 ? fmt$$(roundInvested) : '—', highlight: roundInvested > 0 },
+                                { label: 'Round Size',     value: round.amount_raised > 0 ? fmt$$(round.amount_raised) : '—' },
+                                { label: 'Pre-money',      value: round.pre_money > 0 ? fmt$$(round.pre_money) : '—' },
+                                { label: 'Post-money',     value: round.post_money > 0 ? fmt$$(round.post_money) : '—' },
+                                { label: 'Ownership',      value: ownership != null ? fmtPct(ownership) : '—' },
+                                { label: 'FMV',            value: fmv != null ? fmt$$(fmv) : '—', accent: true },
+                              ].map(({ label, value, highlight, accent }) => (
+                                <div key={label}>
+                                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+                                  <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* MOIC */}
+                            <div className="sm:text-right flex-shrink-0">
+                              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">MOIC</p>
+                              <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-slate-400'}`}>
+                                {moic != null ? fmtMultiple(moic) : '—'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Investment line items for this round */}
+                          {roundInvs.length > 0 && (
+                            <div className="mt-3 ml-0 sm:ml-40 border-t border-slate-100 pt-3 space-y-1.5">
+                              {roundInvs.map(inv => (
+                                <div key={inv.id} className="flex items-center justify-between group">
+                                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                                    <span>{fmtDate(inv.date)}</span>
+                                    <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
+                                    <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
+                                    {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
+                                  </div>
+                                  <button
+                                    onClick={() => handleDeleteInvestment(inv.id)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  ><Trash2 size={11} /></button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Investments not linked to any round */}
+                  {unlinkedInvs.length > 0 && (
+                    <div className="border-t border-slate-200 px-5 py-4">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Other Investments (no round)</p>
+                      <div className="space-y-2">
+                        {unlinkedInvs.map(inv => (
                           <div key={inv.id} className="flex items-center justify-between group">
                             <div className="flex items-center gap-3 text-xs text-slate-500">
                               <span>{fmtDate(inv.date)}</span>
                               <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
                               <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
-                              {inv.valuation_cap && (
-                                <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>
-                              )}
+                              {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
                             <button
                               onClick={() => handleDeleteInvestment(inv.id)}
@@ -523,35 +524,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                           </div>
                         ))}
                       </div>
-                    )}
-                  </div>
-                )
-              })}
-              </div>
-
-              {/* Investments not linked to any round */}
-              {unlinkedInvs.length > 0 && (
-                <div className="border-t border-slate-200 px-5 py-4">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Other Investments (no round)</p>
-                  <div className="space-y-2">
-                    {unlinkedInvs.map(inv => (
-                      <div key={inv.id} className="flex items-center justify-between group">
-                        <div className="flex items-center gap-3 text-xs text-slate-500">
-                          <span>{fmtDate(inv.date)}</span>
-                          <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
-                          <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
-                          {inv.valuation_cap && (
-                            <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => handleDeleteInvestment(inv.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        ><Trash2 size={11} /></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )
