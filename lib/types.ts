@@ -137,6 +137,21 @@ export interface PipelineEntry {
   created_at: string
 }
 
+export interface Safe {
+  id: string
+  company_id: string
+  date: string
+  investment_amount: number
+  valuation_cap: number | null
+  discount_rate: number | null
+  has_mfn: boolean
+  has_pro_rata: boolean
+  status: 'unconverted' | 'converted'
+  converted_round_id: string | null
+  notes: string | null
+  created_at: string
+}
+
 export interface Reminder {
   id: string
   company_id: string | null

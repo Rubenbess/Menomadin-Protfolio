@@ -97,6 +97,78 @@ export function calcXIRR(cashFlows: CashFlow[]): number | null {
   return null
 }
 
+// ─── SAFE Calculations (Pre-money SAFE) ─────────────────────────────────────
+//
+// In a pre-money SAFE the conversion price is derived from the pre-money cap
+// (not the post-money), so the SAFE holder's dilution from the new round is
+// accounted for separately.
+//
+// Ownership formula (all in $, no share counts needed):
+//   safe_units      = investment / effective_val
+//   new_inv_units   = round_raise / pre_money
+//   total_units     = 1 + safe_units + new_inv_units
+//   safe_pct        = safe_units / total_units  (as a %)
+
+export interface SafeConversionResult {
+  effectiveVal: number          // valuation used for conversion
+  mechanism: 'cap' | 'discount' | 'mfn' | 'cap+discount'
+  ownershipPct: number          // % post-conversion, post-round
+  sharesValue: number           // value of stake at that pre-money
+}
+
+/** Effective conversion valuation for a pre-money SAFE. */
+export function calcSafeEffectiveValuation(
+  valuationCap: number | null,
+  discountRate: number | null,  // e.g. 20 for 20%
+  nextPreMoney: number,
+): { effectiveVal: number; mechanism: SafeConversionResult['mechanism'] } {
+  const capVal      = valuationCap ?? Infinity
+  const discountVal = discountRate != null ? nextPreMoney * (1 - discountRate / 100) : Infinity
+
+  if (valuationCap != null && discountRate != null) {
+    const effectiveVal = Math.min(capVal, discountVal)
+    return {
+      effectiveVal,
+      mechanism: effectiveVal === capVal ? 'cap+discount' : 'cap+discount',
+    }
+  }
+  if (valuationCap != null) return { effectiveVal: capVal, mechanism: 'cap' }
+  if (discountRate != null) return { effectiveVal: discountVal, mechanism: 'discount' }
+  return { effectiveVal: nextPreMoney, mechanism: 'mfn' }
+}
+
+/** Full post-conversion ownership calculation given a hypothetical next round. */
+export function calcSafeConversion(
+  investmentAmount: number,
+  valuationCap: number | null,
+  discountRate: number | null,
+  nextPreMoney: number,
+  roundRaise: number,
+): SafeConversionResult {
+  const { effectiveVal, mechanism } = calcSafeEffectiveValuation(valuationCap, discountRate, nextPreMoney)
+
+  const safeUnits   = investmentAmount / effectiveVal
+  const newInvUnits = roundRaise / nextPreMoney
+  const totalUnits  = 1 + safeUnits + newInvUnits
+  const ownershipPct = (safeUnits / totalUnits) * 100
+
+  return {
+    effectiveVal,
+    mechanism,
+    ownershipPct,
+    sharesValue: (ownershipPct / 100) * (nextPreMoney + roundRaise),
+  }
+}
+
+/** Estimated ownership before conversion, using the cap as proxy (ignores round dilution). */
+export function calcSafeEstimatedOwnership(
+  investmentAmount: number,
+  valuationCap: number | null,
+): number {
+  if (!valuationCap) return 0
+  return (investmentAmount / valuationCap) * 100
+}
+
 // ─── DPI ─────────────────────────────────────────────────────────────────────
 
 export function calcDPI(totalDistributions: number, totalInvested: number): number {

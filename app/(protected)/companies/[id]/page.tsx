@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import CompanyDetailClient from './CompanyDetailClient'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +21,7 @@ export default async function CompanyDetailPage({ params }: Props) {
     { data: documents },
     { data: kpis },
     { data: updates },
+    { data: safes },
   ] = await Promise.all([
     supabase.from('companies').select('*').eq('id', id).single(),
     supabase.from('rounds').select('*').eq('company_id', id).order('date', { ascending: false }),
@@ -29,6 +30,7 @@ export default async function CompanyDetailPage({ params }: Props) {
     supabase.from('documents').select('*').eq('company_id', id).order('created_at', { ascending: false }),
     supabase.from('company_kpis').select('*').eq('company_id', id).order('date', { ascending: false }),
     supabase.from('company_updates').select('*').eq('company_id', id).order('date', { ascending: false }),
+    supabase.from('safes').select('*').eq('company_id', id).order('date', { ascending: false }),
   ])
 
   if (!company) notFound()
@@ -42,6 +44,7 @@ export default async function CompanyDetailPage({ params }: Props) {
       documents={(documents ?? []) as Document[]}
       kpis={(kpis ?? []) as CompanyKPI[]}
       updates={(updates ?? []) as CompanyUpdate[]}
+      safes={(safes ?? []) as Safe[]}
     />
   )
 }

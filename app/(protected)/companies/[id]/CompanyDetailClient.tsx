@@ -22,9 +22,13 @@ import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
 import { deleteKPI } from '@/actions/kpis'
 import { deleteUpdate } from '@/actions/updates'
+import { deleteSafe } from '@/actions/safes'
+import SafeForm from '@/components/forms/SafeForm'
+import SafeScenarioModal from '@/components/SafeScenarioModal'
 import {
   calcCurrentValue,
   calcMOIC,
+  calcSafeEstimatedOwnership,
   getFundOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
@@ -33,9 +37,9 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe } from '@/lib/types'
 
-type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents'
+type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes'
 
 interface Props {
   company: Company
@@ -45,9 +49,10 @@ interface Props {
   documents: Document[]
   kpis: CompanyKPI[]
   updates: CompanyUpdate[]
+  safes: Safe[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -56,6 +61,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [showAddCapTable, setShowAddCapTable] = useState(false)
   const [showAddKPI, setShowAddKPI] = useState(false)
   const [showAddUpdate, setShowAddUpdate] = useState(false)
+  const [showAddSafe, setShowAddSafe] = useState(false)
+  const [editingSafe, setEditingSafe] = useState<Safe | null>(null)
+  const [scenarioSafe, setScenarioSafe] = useState<Safe | null>(null)
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -75,14 +83,18 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     router.refresh()
   }
 
+  const unconvertedSafes = safes.filter(s => s.status === 'unconverted')
+  const totalSafeInvested = safes.reduce((s, safe) => s + safe.investment_amount, 0)
+
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
     { id: 'history',     label: 'Investment History', count: rounds.length },
-    { id: 'kpis',        label: 'KPIs',         count: kpis.length },
-    { id: 'updates',     label: 'Updates',       count: updates.length },
-    { id: 'investments', label: 'Investments',  count: investments.length },
-    { id: 'captable',    label: 'Cap Table',    count: capTable.length },
-    { id: 'documents',   label: 'Documents',    count: documents.length },
+    { id: 'safes',       label: 'SAFEs',         count: safes.length },
+    { id: 'kpis',        label: 'KPIs',          count: kpis.length },
+    { id: 'updates',     label: 'Updates',        count: updates.length },
+    { id: 'investments', label: 'Investments',   count: investments.length },
+    { id: 'captable',    label: 'Cap Table',     count: capTable.length },
+    { id: 'documents',   label: 'Documents',     count: documents.length },
   ]
 
   const th = 'px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider text-left'
@@ -122,10 +134,15 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       {/* KPI bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
         {[
-          { label: 'Total Invested', value: fmt$$(totalInvested),                           accent: 'violet' },
+          { label: 'Total Invested', value: fmt$$(totalInvested + totalSafeInvested),        accent: 'violet' },
           { label: 'Current Value',  value: currentValue > 0 ? fmt$$(currentValue) : '—',   accent: 'emerald' },
           { label: 'MOIC',           value: moic > 0 ? fmtMultiple(moic) : '—',             accent: 'blue' },
           { label: 'Ownership',      value: ownershipPct > 0 ? fmtPct(ownershipPct) : '—',  accent: 'amber' },
+          ...(unconvertedSafes.length > 0 ? [{
+            label: 'SAFE Est. Ownership',
+            value: fmtPct(unconvertedSafes.reduce((s, safe) => s + calcSafeEstimatedOwnership(safe.investment_amount, safe.valuation_cap), 0)),
+            accent: 'orange' as const,
+          }] : []),
         ].map(({ label, value, accent }) => (
           <div
             key={label}
@@ -133,6 +150,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               accent === 'violet'  ? 'border-t-violet-500'  :
               accent === 'emerald' ? 'border-t-emerald-500' :
               accent === 'blue'    ? 'border-t-blue-500'    :
+              accent === 'orange'  ? 'border-t-orange-400'  :
                                      'border-t-amber-500'
             }`}
           >
@@ -256,6 +274,104 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               ))}
             </div>
           </div>
+          </div>
+        )}
+
+        {/* SAFEs */}
+        {activeTab === 'safes' && (
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">SAFEs</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Pre-money SAFEs · click any row to model conversion</p>
+              </div>
+              <Button size="sm" onClick={() => { setEditingSafe(null); setShowAddSafe(true) }}>
+                <Plus size={13} /> Add SAFE
+              </Button>
+            </div>
+
+            {safes.length === 0 ? (
+              <EmptyState message="No SAFEs recorded yet." />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/70">
+                      {['Date', 'Amount', 'Val. Cap', 'Discount', 'MFN', 'Pro-rata', 'Est. Ownership', 'Status', ''].map(h => (
+                        <th key={h} className={th}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {safes.map(safe => {
+                      const estOwnership = calcSafeEstimatedOwnership(safe.investment_amount, safe.valuation_cap)
+                      return (
+                        <tr
+                          key={safe.id}
+                          className="hover:bg-violet-50/40 transition-colors cursor-pointer group"
+                          onClick={() => setScenarioSafe(safe)}
+                        >
+                          <td className={td + ' text-slate-500'}>{fmtDate(safe.date)}</td>
+                          <td className={td + ' font-semibold text-slate-900'}>{fmt$$(safe.investment_amount)}</td>
+                          <td className={td + ' text-slate-700'}>{safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—'}</td>
+                          <td className={td + ' text-slate-700'}>{safe.discount_rate ? `${safe.discount_rate}%` : '—'}</td>
+                          <td className={td}>
+                            {safe.has_mfn
+                              ? <span className="text-xs font-medium bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Yes</span>
+                              : <span className="text-slate-300">—</span>}
+                          </td>
+                          <td className={td}>
+                            {safe.has_pro_rata
+                              ? <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">Yes</span>
+                              : <span className="text-slate-300">—</span>}
+                          </td>
+                          <td className={td}>
+                            {estOwnership > 0
+                              ? <span className="font-medium text-orange-600">{fmtPct(estOwnership)}</span>
+                              : <span className="text-slate-400 text-xs italic">N/A (no cap)</span>}
+                          </td>
+                          <td className={td}>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                              safe.status === 'converted'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {safe.status === 'converted' ? 'Converted' : 'Unconverted'}
+                            </span>
+                          </td>
+                          <td className={td + ' text-right'}>
+                            <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
+                              <button
+                                onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
+                                className="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
+                              ><Pencil size={12} /></button>
+                              <button
+                                onClick={async e => {
+                                  e.stopPropagation()
+                                  if (!confirm('Delete this SAFE?')) return
+                                  await deleteSafe(safe.id)
+                                  router.refresh()
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              ><Trash2 size={12} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                  {safes.length > 0 && (
+                    <tfoot>
+                      <tr className="border-t border-slate-200 bg-slate-50/70">
+                        <td className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</td>
+                        <td className="px-5 py-3 text-sm font-bold text-slate-900">{fmt$$(totalSafeInvested)}</td>
+                        <td colSpan={7} />
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+            )}
           </div>
         )}
 
@@ -614,6 +730,25 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       <Modal open={showAddUpdate}       onClose={() => setShowAddUpdate(false)}      title="Log Update">
         <UpdateForm companyId={company.id} onClose={() => setShowAddUpdate(false)} />
       </Modal>
+      <Modal
+        open={showAddSafe}
+        onClose={() => { setShowAddSafe(false); setEditingSafe(null) }}
+        title={editingSafe ? 'Edit SAFE' : 'Add SAFE'}
+      >
+        <SafeForm
+          companyId={company.id}
+          safe={editingSafe}
+          onClose={() => { setShowAddSafe(false); setEditingSafe(null); router.refresh() }}
+        />
+      </Modal>
+      {scenarioSafe && (
+        <SafeScenarioModal
+          safe={scenarioSafe}
+          rounds={rounds}
+          open={!!scenarioSafe}
+          onClose={() => setScenarioSafe(null)}
+        />
+      )}
     </div>
   )
 }
