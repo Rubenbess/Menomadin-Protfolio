@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users, Activity, ShieldCheck, Mail } from 'lucide-react'
+import { LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut, Network, Bell, CheckSquare, Users, Activity, ShieldCheck, Mail, FolderOpen, UserPlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Suspense, useEffect, useState } from 'react'
 import StrategyFilter from './StrategyFilter'
@@ -14,12 +14,14 @@ const navItems = [
   { href: '/pipeline',   label: 'Pipeline',     icon: GitMerge },
   { href: '/tasks',      label: 'Tasks',        icon: CheckSquare },
   { href: '/contacts',   label: 'Contacts',     icon: Users },
+  { href: '/documents',  label: 'Documents',    icon: FolderOpen },
   { href: '/network',    label: 'Co-investors', icon: Network },
   { href: '/reminders',  label: 'Reminders',    icon: Bell },
   { href: '/import',              label: 'Import Data',  icon: Upload },
   { href: '/reports',             label: 'Reports',      icon: FileDown },
   { href: '/settings/security',       label: 'Security',       icon: ShieldCheck },
   { href: '/settings/email-scanner',  label: 'Email Scanner',  icon: Mail },
+  { href: '/settings/team',           label: 'Team',           icon: UserPlus },
 ]
 
 function ReminderBadge() {
@@ -93,8 +95,10 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-56 flex-shrink-0 flex flex-col border-r border-white/[0.06]"
-      style={{ background: 'linear-gradient(180deg, #0f0f1e 0%, #0d0d1a 100%)' }}
+      className="w-56 flex-shrink-0 flex flex-col border-r border-white/[0.06] dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950"
+      style={{
+        background: 'linear-gradient(180deg, #0f0f1e 0%, #0d0d1a 100%)',
+      }}
     >
       {/* Brand */}
       <div className="h-16 flex items-center px-5 border-b border-white/[0.06]">

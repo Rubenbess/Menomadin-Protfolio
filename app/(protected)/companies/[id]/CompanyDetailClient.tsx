@@ -27,12 +27,14 @@ import SafeForm from '@/components/forms/SafeForm'
 import SafeScenarioModal from '@/components/SafeScenarioModal'
 import OwnershipTable from '@/components/OwnershipTable'
 import WaterfallScenarioPanel from '@/components/WaterfallScenarioPanel'
+import { HealthScoreBreakdown } from '@/components/HealthScoreBadge'
 import {
   calcCurrentValue,
   calcMOIC,
   calcSafeEstimatedOwnership,
   calcFullyDilutedShares,
   calcFullyDilutedOwnershipPct,
+  calcHealthScore,
   getFundOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
@@ -102,6 +104,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const totalFDShares = calcFullyDilutedShares(totalIssuedShares, optionPools)
   const fundFDShares = fundSeries.reduce((s, h) => s + h.shares, 0)
   const fundFDPct = fundFDShares > 0 ? calcFullyDilutedOwnershipPct(fundFDShares, totalFDShares) : 0
+
+  const healthScore = calcHealthScore(kpis, updates, investments, rounds, capTable)
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'overview',    label: 'Overview' },
@@ -294,6 +298,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Health Score */}
+          <div className="pt-4 border-t border-slate-100">
+            <HealthScoreBreakdown score={healthScore} />
           </div>
           </div>
         )}

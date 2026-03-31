@@ -3,13 +3,15 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown, LayoutGrid, List } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import CompanyForm from '@/components/forms/CompanyForm'
+import EmptyState from '@/components/EmptyState'
 import { deleteCompany } from '@/actions/companies'
-import type { Company, Contact } from '@/lib/types'
+import { HealthScorePill } from '@/components/HealthScoreBadge'
+import type { Company, Contact, HealthScore } from '@/lib/types'
 
 const STRATEGY_FILTERS = [
   { value: 'all',     label: 'All' },
@@ -24,7 +26,7 @@ const STATUS_LABELS: Record<string, string> = {
   watchlist: 'Watchlist',
 }
 
-// ── Filter dropdown (reusable) ─────────────────────────────────────────────
+// ── Filter dropdown ────────────────────────────────────────────────────────
 
 function FilterSelect({
   label,
@@ -86,9 +88,11 @@ function FilterSelect({
 export default function CompaniesClient({
   companies,
   contacts,
+  healthScores,
 }: {
   companies: Company[]
   contacts: Contact[]
+  healthScores: Record<string, HealthScore>
   strategyLabel: string | null
 }) {
   const router = useRouter()
@@ -100,8 +104,8 @@ export default function CompaniesClient({
   const [statusFilter, setStatusFilter] = useState('')
   const [stageFilter, setStageFilter] = useState('')
   const [hqFilter, setHqFilter] = useState('')
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
 
-  // Derive unique filter options from data
   const sectors = useMemo(() =>
     [...new Set(companies.map(c => c.sector).filter(Boolean))].sort(), [companies])
   const statuses = useMemo(() =>
@@ -123,7 +127,6 @@ export default function CompaniesClient({
 
   const filtered = useMemo(() => {
     let list = strategyFilter === 'all' ? companies : companies.filter(c => c.strategy === strategyFilter)
-
     if (search) {
       const q = search.toLowerCase()
       list = list.filter(c =>
@@ -137,7 +140,6 @@ export default function CompaniesClient({
     if (statusFilter) list = list.filter(c => (STATUS_LABELS[c.status] ?? c.status) === statusFilter)
     if (stageFilter)  list = list.filter(c => c.entry_stage === stageFilter)
     if (hqFilter)     list = list.filter(c => c.hq === hqFilter)
-
     return list
   }, [companies, strategyFilter, search, sectorFilter, statusFilter, stageFilter, hqFilter])
 
@@ -184,7 +186,6 @@ export default function CompaniesClient({
 
       {/* Search + filter row */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
-        {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -200,7 +201,6 @@ export default function CompaniesClient({
           )}
         </div>
 
-        {/* Filter dropdowns */}
         {sectors.length > 1 && (
           <FilterSelect label="Sector" value={sectorFilter} options={sectors} onChange={setSectorFilter} />
         )}
@@ -214,7 +214,6 @@ export default function CompaniesClient({
           <FilterSelect label="HQ" value={hqFilter} options={hqs} onChange={setHqFilter} />
         )}
 
-        {/* Clear all */}
         {hasActiveFilters && (
           <button
             onClick={clearAll}
@@ -224,29 +223,54 @@ export default function CompaniesClient({
           </button>
         )}
 
-        {/* Result count */}
         <span className="text-xs text-slate-400 ml-auto">
           {filtered.length} {filtered.length === 1 ? 'company' : 'companies'}
         </span>
+
+        {/* View toggle */}
+        <div className="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`p-1.5 transition-colors ${viewMode === 'card' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+            title="Card view"
+          >
+            <LayoutGrid size={14} />
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`p-1.5 transition-colors ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+            title="Table view"
+          >
+            <List size={14} />
+          </button>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
-          <p className="text-sm text-slate-400 mb-5">
-            {hasActiveFilters ? 'No companies match your filters.' : 'No companies yet.'}
-          </p>
-          {hasActiveFilters ? (
-            <button onClick={clearAll} className="text-sm text-violet-600 hover:underline">Clear filters</button>
-          ) : (
-            <Button onClick={() => setShowAdd(true)}>
-              <Plus size={15} /> Add your first company
-            </Button>
-          )}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-card ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
+          <EmptyState
+            type="companies"
+            title={hasActiveFilters ? 'No companies found' : 'No companies yet'}
+            description={hasActiveFilters ? 'Try adjusting your filters to find what you\'re looking for.' : 'Start building your portfolio by adding your first company.'}
+            action={
+              hasActiveFilters ? (
+                <button onClick={clearAll} className="text-sm text-violet-600 dark:text-violet-400 hover:underline">
+                  Clear filters
+                </button>
+              ) : (
+                <Button onClick={() => setShowAdd(true)}>
+                  <Plus size={15} /> Add your first company
+                </Button>
+              )
+            }
+          />
         </div>
-      ) : (
+      ) : viewMode === 'card' ? (
+        /* ── Card grid ─────────────────────────────────────────────────────── */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((co) => {
             const coContacts = contactsFor(co.id)
+            const hs = healthScores[co.id]
             return (
               <div
                 key={co.id}
@@ -267,6 +291,7 @@ export default function CompaniesClient({
                       </Link>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                      {hs && <HealthScorePill score={hs} />}
                       <Badge value={co.strategy} type="strategy" />
                       <Badge value={co.status} />
                     </div>
@@ -290,12 +315,10 @@ export default function CompaniesClient({
                   )}
                 </div>
 
-                {/* Description */}
                 {co.description && (
                   <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{co.description}</p>
                 )}
 
-                {/* Contacts */}
                 {coContacts.length > 0 && (
                   <div className="pt-2 border-t border-slate-100 space-y-1.5">
                     {coContacts.map(contact => (
@@ -314,7 +337,6 @@ export default function CompaniesClient({
                   </div>
                 )}
 
-                {/* Actions */}
                 <div className="flex items-center gap-1.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setEditCompany(co)}
@@ -332,6 +354,71 @@ export default function CompaniesClient({
               </div>
             )
           })}
+        </div>
+      ) : (
+        /* ── Table view ─────────────────────────────────────────────────────── */
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/70">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Company</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sector</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">HQ</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Stage</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Strategy</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Health</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(co => {
+                const hs = healthScores[co.id]
+                return (
+                  <tr key={co.id} className="border-t border-slate-50 hover:bg-slate-50/60 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        {co.logo_url ? (
+                          <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-md bg-violet-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-bold text-violet-600">{co.name[0]}</span>
+                          </div>
+                        )}
+                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-violet-600 transition-colors">
+                          {co.name}
+                        </Link>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-500">{co.sector ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500">{co.hq ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500">{co.entry_stage ?? '—'}</td>
+                    <td className="px-4 py-3"><Badge value={co.status} /></td>
+                    <td className="px-4 py-3"><Badge value={co.strategy} type="strategy" /></td>
+                    <td className="px-4 py-3 text-center">
+                      {hs && <HealthScorePill score={hs} />}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 justify-end">
+                        <button
+                          onClick={() => setEditCompany(co)}
+                          className="p-1.5 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(co.id, co.name)}
+                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 

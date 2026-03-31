@@ -26,6 +26,8 @@ export interface Company {
   created_at: string
 }
 
+export type ContactType = 'Founder' | 'Advisor' | 'Co-investor' | 'Service Provider' | 'Other'
+
 export interface Contact {
   id: string
   company_id: string | null
@@ -36,11 +38,25 @@ export interface Contact {
   address: string | null
   linkedin_url: string | null
   notes: string | null
+  contact_type: ContactType | null
+  relationship_owner: string | null
+  last_interaction_date: string | null
   created_at: string
 }
 
 export interface ContactWithCompany extends Contact {
   companies: { id: string; name: string } | null
+}
+
+export type InteractionType = 'call' | 'meeting' | 'email' | 'other'
+
+export interface ContactInteraction {
+  id: string
+  contact_id: string
+  date: string
+  interaction_type: InteractionType
+  notes: string | null
+  created_at: string
 }
 
 export interface Round {
@@ -94,6 +110,27 @@ export interface Document {
   } | null
 }
 
+export type DocumentCategory =
+  | 'Term Sheet'
+  | 'SHA'
+  | 'Investment Agreement'
+  | 'Board Minutes'
+  | 'Financials'
+  | 'Pitch Deck'
+  | 'Legal'
+  | 'Other'
+
+export interface GlobalDocument {
+  id: string
+  company_id: string | null
+  file_url: string
+  file_name: string
+  category: DocumentCategory
+  doc_date: string | null
+  notes: string | null
+  created_at: string
+}
+
 export interface CompanyKPI {
   id: string
   company_id: string
@@ -132,6 +169,14 @@ export interface PipelineEntry {
   lead_partner: string | null
   source: string | null
   internal_score: number | null
+  // Structured deal scoring (1-5 each)
+  score_team: number | null
+  score_market: number | null
+  score_traction: number | null
+  score_fit: number | null
+  // Deal outcome
+  pass_reason: string | null
+  referred_by: string | null
   next_steps: string | null
   deck_url: string | null
   created_at: string
@@ -220,6 +265,29 @@ export interface WaterfallResult {
   holders: WaterfallHolderResult[]
 }
 
+export type NotificationType =
+  | 'kpi_added'
+  | 'update_added'
+  | 'stage_changed'
+  | 'new_deal'
+  | 'task_overdue'
+  | 'investment_added'
+  | 'company_added'
+  | 'safe_added'
+  | 'document_uploaded'
+  | 'general'
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  title: string
+  body: string | null
+  company_id: string | null
+  link: string | null
+  read: boolean
+  created_at: string
+}
+
 export interface Reminder {
   id: string
   company_id: string | null
@@ -242,6 +310,18 @@ export interface CompanyWithMetrics extends Company {
   initialInvestment: number
 }
 
+export interface HealthScore {
+  total: number           // 0-100
+  kpiScore: number        // 0-30
+  runwayScore: number     // 0-30
+  updateScore: number     // 0-20
+  moicScore: number       // 0-20
+  runwayMonths: number | null
+  lastUpdateDays: number | null
+  kpiTrend: 'up' | 'down' | 'flat' | null
+  moic: number
+}
+
 export interface DashboardMetrics {
   totalInvested: number
   totalCurrentValue: number
@@ -255,12 +335,26 @@ export interface DashboardMetrics {
 export type TaskStatus = 'not-started' | 'in-progress' | 'waiting' | 'done'
 export type TaskPriority = 'high' | 'medium' | 'low'
 
+export type UserRole = 'admin' | 'associate' | 'viewer'
+
 export interface TeamMember {
   id: string
+  user_id: string
   name: string
-  role: string | null
+  email: string
+  role: UserRole
   color: string
   created_at: string
+}
+
+export interface TeamInvite {
+  id: string
+  email: string
+  role: UserRole
+  status: 'pending' | 'accepted' | 'expired'
+  invited_by: string
+  created_at: string
+  accepted_at: string | null
 }
 
 export interface Task {

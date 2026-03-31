@@ -11,10 +11,20 @@ import type { PipelineEntry } from '@/lib/types'
 const BASE_SECTORS = ['SaaS', 'Fintech', 'Healthtech', 'Cleantech', 'Consumer', 'Deep Tech', 'Marketplace', 'Agritech', 'Cybersecurity', 'EdTech', 'Other']
 const STAGES  = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth']
 const SOURCES = ['Inbound', 'Network Referral', 'Conference', 'Accelerator', 'Cold Outreach', 'Co-investor', 'Other']
+const PASS_REASONS = ['Team concerns', 'Market too small', 'Valuation too high', 'No traction', 'Not strategic fit', 'Too early', 'Too late', 'Competitive landscape', 'Other']
 const LS_KEY  = 'pipeline_custom_sectors'
+
+const SCORE_DIMS = [
+  { key: 'score_team',     label: 'Team',              description: '1 = weak  · 5 = exceptional' },
+  { key: 'score_market',   label: 'Market Size',       description: '1 = niche · 5 = >$10B TAM' },
+  { key: 'score_traction', label: 'Traction',          description: '1 = idea  · 5 = strong metrics' },
+  { key: 'score_fit',      label: 'Strategic Fit',     description: '1 = low   · 5 = perfect fit' },
+] as const
 
 const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+
+type ScoreKey = typeof SCORE_DIMS[number]['key']
 
 interface Props {
   entry?: PipelineEntry
@@ -23,13 +33,65 @@ interface Props {
   onClose: () => void
 }
 
+function StarRating({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string
+  description: string
+  value: number
+  onChange: (v: number) => void
+}) {
+  const [hover, setHover] = useState(0)
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-semibold text-slate-700">{label}</span>
+        <span className="text-xs text-slate-400">{description}</span>
+      </div>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map(i => (
+          <button
+            key={i}
+            type="button"
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover(0)}
+            onClick={() => onChange(value === i ? 0 : i)}
+            className="p-0.5 transition-transform hover:scale-110"
+          >
+            <svg viewBox="0 0 24 24" className={`w-5 h-5 transition-colors ${i <= (hover || value) ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}`}>
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+            </svg>
+          </button>
+        ))}
+        {value > 0 && <span className="text-xs text-slate-400 self-center ml-1">{value}/5</span>}
+      </div>
+    </div>
+  )
+}
+
 export default function PipelineForm({ entry, defaultStatus, stageNames, onClose }: Props) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState('')
-  const [score, setScore]         = useState(entry?.internal_score ?? 0)
-  const [hoverScore, setHoverScore] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+  const [status, setStatus]   = useState(entry?.status ?? defaultStatus ?? stageNames?.[0] ?? '')
+
+  // 4-dimension scores
+  const [scores, setScores] = useState<Record<ScoreKey, number>>({
+    score_team:     entry?.score_team     ?? 0,
+    score_market:   entry?.score_market   ?? 0,
+    score_traction: entry?.score_traction ?? 0,
+    score_fit:      entry?.score_fit      ?? 0,
+  })
+
+  // Weighted average (equal weights for now)
+  const filledDims  = Object.values(scores).filter(v => v > 0)
+  const compositeScore = filledDims.length > 0
+    ? Math.round(filledDims.reduce((s, v) => s + v, 0) / filledDims.length * 10) / 10
+    : 0
 
   // Sectors
   const [customSectors, setCustomSectors]     = useState<string[]>([])
@@ -38,8 +100,8 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
   const [selectedSector, setSelectedSector]   = useState(entry?.sector ?? '')
 
   // Deck
-  const [deckFile, setDeckFile]   = useState<File | null>(null)
-  const [deckUrl, setDeckUrl]     = useState<string | null>(entry?.deck_url ?? null)
+  const [deckFile, setDeckFile]     = useState<File | null>(null)
+  const [deckUrl, setDeckUrl]       = useState<string | null>(entry?.deck_url ?? null)
   const [removeDeck, setRemoveDeck] = useState(false)
 
   const isEdit = !!entry
@@ -89,19 +151,26 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
 
     const fd  = new FormData(e.currentTarget)
     const num = (k: string) => { const v = fd.get(k) as string; return v ? Number(v) : null }
+    const str = (k: string) => (fd.get(k) as string) || null
 
     const data = {
       name:            fd.get('name') as string,
       sector:          selectedSector,
       stage:           fd.get('stage') as string,
-      status:          fd.get('status') as string,
-      notes:           (fd.get('notes') as string) || null,
-      hq:              (fd.get('hq') as string) || null,
+      status,
+      notes:           str('notes'),
+      hq:              str('hq'),
       fundraising_ask: num('fundraising_ask'),
-      lead_partner:    (fd.get('lead_partner') as string) || null,
-      source:          (fd.get('source') as string) || null,
-      internal_score:  score || null,
-      next_steps:      (fd.get('next_steps') as string) || null,
+      lead_partner:    str('lead_partner'),
+      source:          str('source'),
+      internal_score:  compositeScore || null,
+      score_team:      scores.score_team     || null,
+      score_market:    scores.score_market   || null,
+      score_traction:  scores.score_traction || null,
+      score_fit:       scores.score_fit      || null,
+      pass_reason:     status === 'passed' ? str('pass_reason') : null,
+      referred_by:     str('referred_by'),
+      next_steps:      str('next_steps'),
       deck_url:        deckFile ? (entry?.deck_url ?? null) : (removeDeck ? null : deckUrl),
     }
 
@@ -133,15 +202,11 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
         <input name="name" required defaultValue={entry?.name} className={inp} placeholder="Acme Corp" />
       </div>
 
-      {/* Sector + custom */}
+      {/* Sector + HQ */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={lbl}>Sector</label>
-          <select
-            value={selectedSector}
-            onChange={e => setSelectedSector(e.target.value)}
-            className={inp}
-          >
+          <select value={selectedSector} onChange={e => setSelectedSector(e.target.value)} className={inp}>
             <option value="">—</option>
             {allSectors.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -160,11 +225,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
               <button type="button" onClick={() => { setShowSectorInput(false); setNewSector('') }} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"><X size={14} /></button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowSectorInput(true)}
-              className="mt-1.5 flex items-center gap-1 text-xs text-slate-400 hover:text-violet-600 transition-colors"
-            >
+            <button type="button" onClick={() => setShowSectorInput(true)} className="mt-1.5 flex items-center gap-1 text-xs text-slate-400 hover:text-violet-600 transition-colors">
               <Plus size={12} /> Add custom sector
             </button>
           )}
@@ -185,12 +246,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
         </div>
         <div>
           <label className={lbl}>Pipeline Stage *</label>
-          <select
-            name="status"
-            required
-            defaultValue={entry?.status ?? defaultStatus ?? stageNames?.[0] ?? ''}
-            className={inp}
-          >
+          <select value={status} onChange={e => setStatus(e.target.value)} required className={inp}>
             {(stageNames ?? []).map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -210,21 +266,56 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
         </div>
       </div>
 
-      <div>
-        <label className={lbl}>Lead Partner / Owner</label>
-        <input name="lead_partner" defaultValue={entry?.lead_partner ?? ''} className={inp} placeholder="Name" />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={lbl}>Lead Partner / Owner</label>
+          <input name="lead_partner" defaultValue={entry?.lead_partner ?? ''} className={inp} placeholder="Name" />
+        </div>
+        <div>
+          <label className={lbl}>Referred By</label>
+          <input name="referred_by" defaultValue={entry?.referred_by ?? ''} className={inp} placeholder="Contact name or firm" />
+        </div>
       </div>
+
+      {/* Deal Scoring Rubric */}
+      <div className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-slate-900">Deal Score</p>
+          {compositeScore > 0 && (
+            <span className={`text-sm font-bold tabular-nums ${
+              compositeScore >= 4 ? 'text-emerald-600' :
+              compositeScore >= 3 ? 'text-amber-600' : 'text-red-500'
+            }`}>
+              {compositeScore}/5 avg
+            </span>
+          )}
+        </div>
+        {SCORE_DIMS.map(dim => (
+          <StarRating
+            key={dim.key}
+            label={dim.label}
+            description={dim.description}
+            value={scores[dim.key]}
+            onChange={v => setScores(prev => ({ ...prev, [dim.key]: v }))}
+          />
+        ))}
+      </div>
+
+      {/* Pass reason (only when status = passed) */}
+      {status === 'passed' && (
+        <div>
+          <label className={lbl}>Pass Reason</label>
+          <select name="pass_reason" defaultValue={entry?.pass_reason ?? ''} className={inp}>
+            <option value="">—</option>
+            {PASS_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
+      )}
 
       {/* Deck upload */}
       <div>
         <label className={lbl}>Pitch Deck</label>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.ppt,.pptx"
-          onChange={handleDeckChange}
-          className="hidden"
-        />
+        <input ref={fileInputRef} type="file" accept=".pdf,.ppt,.pptx" onChange={handleDeckChange} className="hidden" />
         {deckFile ? (
           <div className="flex items-center gap-2 px-3 py-2.5 bg-violet-50 border border-violet-200 rounded-xl">
             <Paperclip size={14} className="text-violet-500 flex-shrink-0" />
@@ -252,27 +343,6 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
             Attach deck (PDF, PPT, PPTX)
           </button>
         )}
-      </div>
-
-      <div>
-        <label className={lbl}>Internal Score</label>
-        <div className="flex gap-1.5 mt-1">
-          {[1, 2, 3, 4, 5].map(i => (
-            <button
-              key={i}
-              type="button"
-              onMouseEnter={() => setHoverScore(i)}
-              onMouseLeave={() => setHoverScore(0)}
-              onClick={() => setScore(score === i ? 0 : i)}
-              className="p-0.5 transition-transform hover:scale-110"
-            >
-              <svg viewBox="0 0 24 24" className={`w-6 h-6 transition-colors ${i <= (hoverScore || score) ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}`}>
-                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-              </svg>
-            </button>
-          ))}
-          {score > 0 && <span className="text-xs text-slate-400 self-center ml-1">{score}/5</span>}
-        </div>
       </div>
 
       <div>

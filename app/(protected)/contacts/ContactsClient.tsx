@@ -5,16 +5,28 @@ import { useRouter } from 'next/navigation'
 import {
   Plus, Search, X, Pencil, Trash2, Mail, Phone, MapPin,
   Linkedin, Building2, ExternalLink, SlidersHorizontal,
+  MessageSquare, CalendarDays, Users, ChevronDown,
 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import ContactForm from '@/components/forms/ContactForm'
-import { deleteContact } from '@/actions/contacts'
-import type { ContactWithCompany } from '@/lib/types'
+import EmptyState from '@/components/EmptyState'
+import { deleteContact, createInteraction, deleteInteraction } from '@/actions/contacts'
+import type { ContactWithCompany, ContactInteraction, InteractionType } from '@/lib/types'
+
+const INTERACTION_TYPES: { value: InteractionType; label: string }[] = [
+  { value: 'call',    label: 'Phone call' },
+  { value: 'meeting', label: 'Meeting' },
+  { value: 'email',   label: 'Email' },
+  { value: 'other',   label: 'Other' },
+]
+
+const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 'Other']
 
 interface Props {
   contacts: ContactWithCompany[]
   companies: { id: string; name: string }[]
+  interactionsByContact: Record<string, ContactInteraction[]>
 }
 
 function avatarColor(name: string) {
@@ -39,23 +51,92 @@ function initials(name: string) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-// ── Contact Panel (slide-over) ──────────────────────────────────────────────
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function typeIcon(t: InteractionType) {
+  if (t === 'call')    return '📞'
+  if (t === 'meeting') return '🤝'
+  if (t === 'email')   return '✉️'
+  return '💬'
+}
+
+// ── Add Interaction Form ─────────────────────────────────────────────────────
+
+function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: () => void }) {
+  const router = useRouter()
+  const [type, setType] = useState<InteractionType>('call')
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    await createInteraction({ contact_id: contactId, date, interaction_type: type, notes: notes || null })
+    setSaving(false)
+    router.refresh()
+    onDone()
+  }
+
+  const inp = 'px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white transition-all'
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-3">
+      <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Log Interaction</p>
+      <div className="grid grid-cols-2 gap-2">
+        <select value={type} onChange={e => setType(e.target.value as InteractionType)} className={inp}>
+          {INTERACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+        </select>
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inp} required />
+      </div>
+      <textarea
+        value={notes}
+        onChange={e => setNotes(e.target.value)}
+        rows={2}
+        className={`${inp} w-full resize-none`}
+        placeholder="What was discussed…"
+      />
+      <div className="flex gap-2">
+        <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-violet-600 text-white rounded-xl text-xs font-semibold hover:bg-violet-700 disabled:opacity-50 transition-colors">
+          {saving ? 'Saving…' : 'Log interaction'}
+        </button>
+        <button type="button" onClick={onDone} className="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
+      </div>
+    </form>
+  )
+}
+
+// ── Contact Panel (slide-over) ───────────────────────────────────────────────
 
 function ContactPanel({
   contact,
+  interactions,
   onClose,
   onEdit,
   onDelete,
 }: {
   contact: ContactWithCompany
+  interactions: ContactInteraction[]
   onClose: () => void
   onEdit: (c: ContactWithCompany) => void
   onDelete: (id: string, name: string) => void
 }) {
+  const router = useRouter()
+  const [showAddInteraction, setShowAddInteraction] = useState(false)
+
+  const sorted = [...interactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  async function handleDeleteInteraction(id: string) {
+    await deleteInteraction(id)
+    router.refresh()
+  }
+
   return (
     <>
       <div className="fixed inset-0 bg-black/25 z-40 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-[400px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
+      <div className="fixed right-0 top-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100">
@@ -66,11 +147,18 @@ function ContactPanel({
             <div>
               <h2 className="text-lg font-bold text-slate-900">{contact.name}</h2>
               {contact.position && <p className="text-sm text-slate-500 mt-0.5">{contact.position}</p>}
-              {contact.companies && (
-                <p className="text-xs text-violet-600 font-medium mt-0.5 flex items-center gap-1">
-                  <Building2 size={11} /> {contact.companies.name}
-                </p>
-              )}
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                {contact.companies && (
+                  <p className="text-xs text-violet-600 font-medium flex items-center gap-1">
+                    <Building2 size={11} /> {contact.companies.name}
+                  </p>
+                )}
+                {contact.contact_type && (
+                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                    {contact.contact_type}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button
@@ -82,24 +170,18 @@ function ContactPanel({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
           {/* Contact info */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {contact.email && (
-              <a
-                href={`mailto:${contact.email}`}
-                className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors group"
-              >
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors group">
                 <Mail size={15} className="text-slate-400 group-hover:text-violet-500 flex-shrink-0" />
                 <span className="text-sm text-slate-700 group-hover:text-violet-700 truncate">{contact.email}</span>
               </a>
             )}
             {contact.phone && (
-              <a
-                href={`tel:${contact.phone}`}
-                className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors group"
-              >
+              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors group">
                 <Phone size={15} className="text-slate-400 group-hover:text-violet-500 flex-shrink-0" />
                 <span className="text-sm text-slate-700 group-hover:text-violet-700">{contact.phone}</span>
               </a>
@@ -111,18 +193,31 @@ function ContactPanel({
               </div>
             )}
             {contact.linkedin_url && (
-              <a
-                href={contact.linkedin_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors group"
-              >
+              <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors group">
                 <Linkedin size={15} className="text-slate-400 group-hover:text-blue-500 flex-shrink-0" />
                 <span className="text-sm text-slate-700 group-hover:text-blue-700 flex-1 truncate">LinkedIn Profile</span>
                 <ExternalLink size={12} className="text-slate-300 group-hover:text-blue-400 flex-shrink-0" />
               </a>
             )}
           </div>
+
+          {/* CRM meta */}
+          {(contact.relationship_owner || contact.last_interaction_date) && (
+            <div className="grid grid-cols-2 gap-3">
+              {contact.relationship_owner && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Relationship Owner</p>
+                  <p className="text-sm text-slate-700 flex items-center gap-1.5"><Users size={12} className="text-slate-400" /> {contact.relationship_owner}</p>
+                </div>
+              )}
+              {contact.last_interaction_date && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Last Interaction</p>
+                  <p className="text-sm text-slate-700 flex items-center gap-1.5"><CalendarDays size={12} className="text-slate-400" /> {fmtDate(contact.last_interaction_date)}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {contact.notes && (
             <div>
@@ -131,11 +226,55 @@ function ContactPanel({
             </div>
           )}
 
+          {/* Interaction timeline */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Interaction Log</p>
+              <button
+                onClick={() => setShowAddInteraction(v => !v)}
+                className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium"
+              >
+                <Plus size={12} /> Log
+              </button>
+            </div>
+
+            {showAddInteraction && (
+              <div className="mb-3">
+                <AddInteractionForm contactId={contact.id} onDone={() => setShowAddInteraction(false)} />
+              </div>
+            )}
+
+            {sorted.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No interactions logged yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {sorted.map(item => (
+                  <div key={item.id} className="flex items-start gap-3 group">
+                    <span className="text-base mt-0.5">{typeIcon(item.interaction_type)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-700 capitalize">{item.interaction_type}</span>
+                        <span className="text-xs text-slate-400">{fmtDate(item.date)}</span>
+                      </div>
+                      {item.notes && (
+                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.notes}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteInteraction(item.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 rounded transition-all flex-shrink-0"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Added</p>
-            <p className="text-sm text-slate-500">
-              {new Date(contact.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </p>
+            <p className="text-sm text-slate-500">{fmtDate(contact.created_at)}</p>
           </div>
         </div>
 
@@ -159,12 +298,14 @@ function ContactPanel({
   )
 }
 
-// ── Main component ──────────────────────────────────────────────────────────
+// ── Main component ───────────────────────────────────────────────────────────
 
-export default function ContactsClient({ contacts, companies }: Props) {
+export default function ContactsClient({ contacts, companies, interactionsByContact }: Props) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [filterCompany, setFilterCompany] = useState('')
+  const [filterType, setFilterType] = useState('')
+  const [filterOwner, setFilterOwner] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editContact, setEditContact] = useState<ContactWithCompany | null>(null)
   const [panelContact, setPanelContact] = useState<ContactWithCompany | null>(null)
@@ -179,11 +320,14 @@ export default function ContactsClient({ contacts, companies }: Props) {
         (c.email?.toLowerCase().includes(q) ?? false) ||
         (c.position?.toLowerCase().includes(q) ?? false) ||
         (c.companies?.name.toLowerCase().includes(q) ?? false) ||
-        (c.phone?.includes(q) ?? false)
+        (c.phone?.includes(q) ?? false) ||
+        (c.relationship_owner?.toLowerCase().includes(q) ?? false)
       const matchCompany = !filterCompany || c.company_id === filterCompany
-      return matchSearch && matchCompany
+      const matchType    = !filterType    || c.contact_type === filterType
+      const matchOwner   = !filterOwner   || c.relationship_owner === filterOwner
+      return matchSearch && matchCompany && matchType && matchOwner
     })
-  }, [contacts, search, filterCompany])
+  }, [contacts, search, filterCompany, filterType, filterOwner])
 
   async function handleDelete() {
     if (!deleteTarget) return
@@ -194,22 +338,23 @@ export default function ContactsClient({ contacts, companies }: Props) {
     router.refresh()
   }
 
-  const uniqueCompanies = companies.filter(co =>
-    contacts.some(c => c.company_id === co.id)
-  )
+  const uniqueCompanies = companies.filter(co => contacts.some(c => c.company_id === co.id))
+  const uniqueOwners = [...new Set(contacts.map(c => c.relationship_owner).filter(Boolean))] as string[]
+
+  const hasFilters = !!(search || filterCompany || filterType || filterOwner)
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
 
       {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4">
+      <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Contacts</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'} total</p>
+          <p className="text-xs text-slate-400 mt-0.5">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
         </div>
-        <div className="flex-1 flex items-center gap-3">
+        <div className="flex-1 flex items-center gap-2 flex-wrap">
           {/* Search */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative min-w-[200px] max-w-sm flex-1">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={search}
@@ -224,21 +369,35 @@ export default function ContactsClient({ contacts, companies }: Props) {
             )}
           </div>
 
+          {/* Contact type filter */}
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 cursor-pointer">
+            <option value="">All types</option>
+            {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
           {/* Company filter */}
           {uniqueCompanies.length > 0 && (
-            <div className="relative">
-              <SlidersHorizontal size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-              <select
-                value={filterCompany}
-                onChange={e => setFilterCompany(e.target.value)}
-                className="pl-8 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 appearance-none cursor-pointer"
-              >
-                <option value="">All companies</option>
-                {uniqueCompanies.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
+            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 cursor-pointer">
+              <option value="">All companies</option>
+              {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          )}
+
+          {/* Owner filter */}
+          {uniqueOwners.length > 0 && (
+            <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 cursor-pointer">
+              <option value="">All owners</option>
+              {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          )}
+
+          {hasFilters && (
+            <button
+              onClick={() => { setSearch(''); setFilterCompany(''); setFilterType(''); setFilterOwner('') }}
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100"
+            >
+              <X size={12} /> Clear
+            </button>
           )}
         </div>
 
@@ -250,16 +409,19 @@ export default function ContactsClient({ contacts, companies }: Props) {
       {/* Table */}
       <div className="flex-1 overflow-auto px-6 py-5">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-              <Mail size={22} className="text-slate-300" />
-            </div>
-            <p className="text-sm font-medium text-slate-500">
-              {search || filterCompany ? 'No contacts match your filters' : 'No contacts yet'}
-            </p>
-            {!search && !filterCompany && (
-              <p className="text-xs text-slate-400 mt-1">Add your first contact to get started</p>
-            )}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <EmptyState
+              type="contacts"
+              title={hasFilters ? 'No contacts found' : 'No contacts yet'}
+              description={hasFilters ? 'Try adjusting your filters.' : 'Start building your network by adding your first contact.'}
+              action={
+                !hasFilters && (
+                  <Button onClick={() => setShowAdd(true)}>
+                    <Plus size={15} /> Add your first contact
+                  </Button>
+                )
+              }
+            />
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -267,10 +429,11 @@ export default function ContactsClient({ contacts, companies }: Props) {
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Name</th>
+                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden md:table-cell">Type</th>
                   <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden md:table-cell">Company</th>
                   <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Email</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Phone</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Location</th>
+                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Owner</th>
+                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Last Touch</th>
                   <th className="px-5 py-3 w-20" />
                 </tr>
               </thead>
@@ -293,6 +456,11 @@ export default function ContactsClient({ contacts, companies }: Props) {
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
+                      {contact.contact_type ? (
+                        <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">{contact.contact_type}</span>
+                      ) : <span className="text-slate-300 text-sm">—</span>}
+                    </td>
+                    <td className="px-5 py-3.5 hidden md:table-cell">
                       {contact.companies ? (
                         <span className="text-sm text-slate-600">{contact.companies.name}</span>
                       ) : (
@@ -301,11 +469,7 @@ export default function ContactsClient({ contacts, companies }: Props) {
                     </td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">
                       {contact.email ? (
-                        <a
-                          href={`mailto:${contact.email}`}
-                          onClick={e => e.stopPropagation()}
-                          className="text-sm text-slate-600 hover:text-violet-600 transition-colors flex items-center gap-1.5"
-                        >
+                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-slate-600 hover:text-violet-600 transition-colors flex items-center gap-1.5">
                           <Mail size={12} className="text-slate-300 flex-shrink-0" />
                           {contact.email}
                         </a>
@@ -313,21 +477,14 @@ export default function ContactsClient({ contacts, companies }: Props) {
                         <span className="text-sm text-slate-300">—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 hidden lg:table-cell">
-                      {contact.phone ? (
-                        <span className="text-sm text-slate-600 flex items-center gap-1.5">
-                          <Phone size={12} className="text-slate-300 flex-shrink-0" />
-                          {contact.phone}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-slate-300">—</span>
-                      )}
+                    <td className="px-5 py-3.5 hidden xl:table-cell">
+                      <span className="text-sm text-slate-500">{contact.relationship_owner ?? <span className="text-slate-300">—</span>}</span>
                     </td>
                     <td className="px-5 py-3.5 hidden xl:table-cell">
-                      {contact.address ? (
-                        <span className="text-sm text-slate-600 flex items-center gap-1.5">
-                          <MapPin size={12} className="text-slate-300 flex-shrink-0" />
-                          {contact.address}
+                      {contact.last_interaction_date ? (
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
+                          <CalendarDays size={11} className="text-slate-300" />
+                          {fmtDate(contact.last_interaction_date)}
                         </span>
                       ) : (
                         <span className="text-sm text-slate-300">—</span>
@@ -358,11 +515,7 @@ export default function ContactsClient({ contacts, companies }: Props) {
       </div>
 
       {/* Add/Edit Modal */}
-      <Modal
-        open={showForm}
-        onClose={() => { setShowForm(false); setEditContact(null) }}
-        title={editContact ? 'Edit contact' : 'Add contact'}
-      >
+      <Modal open={showForm} onClose={() => { setShowForm(false); setEditContact(null) }} title={editContact ? 'Edit contact' : 'Add contact'}>
         <ContactForm
           contact={editContact ?? undefined}
           companies={companies}
@@ -371,18 +524,12 @@ export default function ContactsClient({ contacts, companies }: Props) {
       </Modal>
 
       {/* Delete confirm */}
-      <Modal
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        title="Delete contact"
-      >
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete contact">
         <p className="text-sm text-slate-600 mb-6">
           Are you sure you want to delete <span className="font-semibold">{deleteTarget?.name}</span>? This cannot be undone.
         </p>
         <div className="flex gap-3">
-          <Button variant="danger" loading={deleting} onClick={handleDelete} className="flex-1">
-            Delete
-          </Button>
+          <Button variant="danger" loading={deleting} onClick={handleDelete} className="flex-1">Delete</Button>
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
         </div>
       </Modal>
@@ -391,6 +538,7 @@ export default function ContactsClient({ contacts, companies }: Props) {
       {panelContact && (
         <ContactPanel
           contact={panelContact}
+          interactions={interactionsByContact[panelContact.id] ?? []}
           onClose={() => setPanelContact(null)}
           onEdit={c => { setPanelContact(null); setEditContact(c); setShowForm(true) }}
           onDelete={(id, name) => { setPanelContact(null); setDeleteTarget({ id, name }) }}

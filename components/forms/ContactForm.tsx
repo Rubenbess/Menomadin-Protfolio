@@ -6,6 +6,8 @@ import Button from '@/components/ui/Button'
 import { createContact, updateContact } from '@/actions/contacts'
 import type { Contact } from '@/lib/types'
 
+const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 'Other'] as const
+
 const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
 
@@ -30,14 +32,16 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
     const str = (k: string) => (fd.get(k) as string).trim() || null
 
     const data = {
-      name:         (fd.get('name') as string).trim(),
-      position:     str('position'),
-      email:        str('email'),
-      phone:        str('phone'),
-      address:      str('address'),
-      linkedin_url: str('linkedin_url'),
-      company_id:   str('company_id'),
-      notes:        str('notes'),
+      name:                 (fd.get('name') as string).trim(),
+      position:             str('position'),
+      email:                str('email'),
+      phone:                str('phone'),
+      address:              str('address'),
+      linkedin_url:         str('linkedin_url'),
+      company_id:           str('company_id'),
+      notes:                str('notes'),
+      contact_type:         str('contact_type'),
+      relationship_owner:   str('relationship_owner'),
     }
 
     if (!data.name) { setError('Name is required'); setLoading(false); return }
@@ -65,6 +69,16 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
           <input name="position" defaultValue={contact?.position ?? ''} className={inp} placeholder="Partner, CEO…" />
         </div>
         <div>
+          <label className={lbl}>Contact Type</label>
+          <select name="contact_type" defaultValue={contact?.contact_type ?? ''} className={inp}>
+            <option value="">—</option>
+            {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
           <label className={lbl}>Company</label>
           <select name="company_id" defaultValue={contact?.company_id ?? ''} className={inp}>
             <option value="">— No company —</option>
@@ -72,6 +86,10 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className={lbl}>Relationship Owner</label>
+          <input name="relationship_owner" defaultValue={contact?.relationship_owner ?? ''} className={inp} placeholder="Team member name" />
         </div>
       </div>
 

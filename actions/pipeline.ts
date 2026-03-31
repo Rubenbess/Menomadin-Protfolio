@@ -13,6 +13,12 @@ interface PipelineData {
   lead_partner: string | null
   source: string | null
   internal_score: number | null
+  score_team: number | null
+  score_market: number | null
+  score_traction: number | null
+  score_fit: number | null
+  pass_reason: string | null
+  referred_by: string | null
   next_steps: string | null
   deck_url: string | null
 }

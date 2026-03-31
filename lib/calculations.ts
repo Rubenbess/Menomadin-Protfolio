@@ -1,4 +1,4 @@
-import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness } from './types'
+import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness, CompanyKPI, CompanyUpdate, HealthScore } from './types'
 
 // Canonical sector names — any alias maps to the canonical form
 const SECTOR_ALIASES: Record<string, string> = {
@@ -410,6 +410,91 @@ export function calcWaterfall(
   })
 
   return { totalProceeds: exitValue, holders: holderResults }
+}
+
+// ─── Health Score ─────────────────────────────────────────────────────────────
+
+/**
+ * Compute a 0-100 health score for a portfolio company.
+ *  KPI trend    0-30  (ARR/revenue/run_rate QoQ growth)
+ *  Runway       0-30  (cash_runway months from latest KPI)
+ *  Update recency 0-20 (days since last company update)
+ *  MOIC         0-20  (current value vs invested)
+ */
+export function calcHealthScore(
+  kpis: CompanyKPI[],
+  updates: CompanyUpdate[],
+  investments: Investment[],
+  rounds: Round[],
+  capTable: CapTableEntry[],
+  today: Date = new Date(),
+): HealthScore {
+  // MOIC score (0-20)
+  const invested = totalInvestedInCompany(investments)
+  const latestRound = getLatestRound(rounds)
+  const ownershipPct = getFundOwnershipPct(capTable)
+  const currentValue = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
+  const moic = calcMOIC(currentValue, invested)
+  let moicScore = 10 // neutral — no data
+  if (invested > 0 && latestRound) {
+    if (moic >= 2) moicScore = 20
+    else if (moic >= 1.5) moicScore = 15
+    else if (moic >= 1) moicScore = 10
+    else moicScore = 5
+  }
+
+  // KPI trend score (0-30)
+  const sortedKpis = [...kpis].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  let kpiScore = 10 // neutral
+  let kpiTrend: HealthScore['kpiTrend'] = null
+  if (sortedKpis.length >= 2) {
+    const latestKpi = sortedKpis[0]
+    const prevKpi   = sortedKpis[1]
+    const latestVal = latestKpi.arr ?? latestKpi.revenue ?? latestKpi.run_rate
+    const prevVal   = prevKpi.arr   ?? prevKpi.revenue   ?? prevKpi.run_rate
+    if (latestVal != null && prevVal != null && prevVal > 0) {
+      const growth = (latestVal - prevVal) / prevVal
+      if (growth > 0.05)       { kpiScore = 30; kpiTrend = 'up' }
+      else if (growth < -0.05) { kpiScore = 5;  kpiTrend = 'down' }
+      else                     { kpiScore = 15; kpiTrend = 'flat' }
+    }
+  }
+
+  // Runway score (0-30)
+  let runwayScore = 10 // neutral
+  let runwayMonths: number | null = null
+  if (sortedKpis.length > 0 && sortedKpis[0].cash_runway != null) {
+    runwayMonths = sortedKpis[0].cash_runway
+    if (runwayMonths > 18) runwayScore = 30
+    else if (runwayMonths >= 6) runwayScore = 15
+    else runwayScore = 5
+  }
+
+  // Update recency score (0-20)
+  let updateScore = 0
+  let lastUpdateDays: number | null = null
+  if (updates.length > 0) {
+    const latest = [...updates].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0]
+    const diffMs = today.getTime() - new Date(latest.date).getTime()
+    lastUpdateDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    if (lastUpdateDays <= 30) updateScore = 20
+    else if (lastUpdateDays <= 90) updateScore = 10
+    else updateScore = 0
+  }
+
+  return {
+    total: kpiScore + runwayScore + updateScore + moicScore,
+    kpiScore,
+    runwayScore,
+    updateScore,
+    moicScore,
+    runwayMonths,
+    lastUpdateDays,
+    kpiTrend,
+    moic,
+  }
 }
 
 // ─── DPI ─────────────────────────────────────────────────────────────────────
