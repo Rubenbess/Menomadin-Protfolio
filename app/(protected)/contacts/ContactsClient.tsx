@@ -416,7 +416,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
               description={hasFilters ? 'Try adjusting your filters.' : 'Start building your network by adding your first contact.'}
               action={
                 !hasFilters && (
-                  <Button onClick={() => setShowAdd(true)}>
+                  <Button onClick={() => setShowForm(true)}>
                     <Plus size={15} /> Add your first contact
                   </Button>
                 )
