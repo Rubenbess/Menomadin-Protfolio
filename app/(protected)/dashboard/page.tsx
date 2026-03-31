@@ -98,7 +98,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     <div className="animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title text-red-600">Dashboard</h1>
+          <h1 className="page-title">Dashboard</h1>
           <p className="text-sm text-slate-400 mt-0.5">{strategyLabel}</p>
         </div>
       </div>
