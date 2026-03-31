@@ -32,7 +32,12 @@
       "Bash(grep -E '\\\\.sql$')",
       "Bash(find c:/Users/rubenb/Portfolio -name *sign* -o -name *auth*)",
       "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")",
-      "Bash(grep -E \"app/layout.tsx$\")"
+      "Bash(grep -E \"app/layout.tsx$\")",
+      "Bash(rm -rf \"app/\\(protected\\)/settings/team\")",
+      "Bash(rm -rf app/accept-invite)",
+      "Bash(rm -rf app/pending-invite)",
+      "Bash(rm -f actions/team.ts)",
+      "Bash(rm -f lib/team-utils.ts)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
