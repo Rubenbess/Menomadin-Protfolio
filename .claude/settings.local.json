@@ -48,7 +48,8 @@
       "Bash(ls -la /c/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/pipeline/)",
       "Bash(grep -n \"activeTab.*overview\\\\|Tab.*history\\\\|investments.*captable\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
       "Bash(grep -n \"const tabs = \\\\|tabs.*map\\\\\\(\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
-      "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/contacts/)"
+      "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/contacts/)",
+      "Bash(wc -l c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/TaskDetailModal.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

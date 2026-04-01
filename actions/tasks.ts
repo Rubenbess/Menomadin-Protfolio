@@ -85,11 +85,17 @@ export async function updateTask(id: string, data: Partial<Task>) {
     updated_at: new Date().toISOString(),
   }
 
-  const { error } = await supabase.from('tasks').update(updateData).eq('id', id)
-  if (error) return { error: error.message }
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .update(updateData)
+    .eq('id', id)
+    .select('*')
+    .single()
+
+  if (error) return { error: error.message, data: null }
 
   revalidatePath('/tasks')
-  return { error: null }
+  return { error: null, data: task }
 }
 
 export async function deleteTask(id: string) {
