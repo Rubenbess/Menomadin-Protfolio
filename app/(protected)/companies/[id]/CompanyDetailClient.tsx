@@ -43,9 +43,9 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations } from '@/lib/types'
 
-type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall'
+type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall' | 'tasks'
 
 interface Props {
   company: Company
@@ -59,9 +59,10 @@ interface Props {
   shareSeries: ShareSeries[]
   optionPools: OptionPool[]
   waterfallScenarios: WaterfallScenario[]
+  tasks: TaskWithRelations[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -116,6 +117,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     { id: 'updates',     label: 'Updates',        count: updates.length },
     { id: 'captable',    label: 'Cap Table',     count: capTable.length },
     { id: 'documents',   label: 'Documents',     count: documents.length },
+    { id: 'tasks',       label: 'Tasks',         count: tasks.length },
   ]
 
   const th = 'px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider text-left'
@@ -731,6 +733,48 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {activeTab === 'documents' && (
           <div className="p-5">
             <DocumentUpload companyId={company.id} documents={documents} />
+          </div>
+        )}
+
+        {/* TASKS */}
+        {activeTab === 'tasks' && (
+          <div className="p-5">
+            {tasks.length === 0 ? (
+              <EmptyState title="No tasks" description="No tasks have been created for this company yet." />
+            ) : (
+              <div className="space-y-3">
+                {tasks.map(task => (
+                  <div key={task.id} className="flex items-start justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:border-violet-200 transition-colors">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-slate-900">{task.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          task.status === 'To do' ? 'bg-slate-100 text-slate-600' :
+                          task.status === 'In progress' ? 'bg-blue-100 text-blue-600' :
+                          task.status === 'Done' ? 'bg-emerald-100 text-emerald-600' :
+                          'bg-slate-100 text-slate-600'
+                        }`}>
+                          {task.status}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          task.priority === 'high' ? 'bg-red-100 text-red-600' :
+                          task.priority === 'medium' ? 'bg-amber-100 text-amber-600' :
+                          'bg-emerald-100 text-emerald-600'
+                        }`}>
+                          {task.priority}
+                        </span>
+                        {task.due_date && (
+                          <span className="text-xs text-slate-500">{new Date(task.due_date).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    <Link href="/tasks" className="text-xs text-violet-600 hover:text-violet-700 font-medium">
+                      View
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

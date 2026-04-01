@@ -333,3 +333,17 @@ export function validateTaskData(data: Partial<Task>): { valid: boolean; errors:
     errors,
   }
 }
+
+/**
+ * Search tasks by title and description (case-insensitive)
+ */
+export function searchTasks<T extends Task>(tasks: T[], query: string): T[] {
+  if (!query.trim()) return tasks
+
+  const lowerQuery = query.toLowerCase()
+  return tasks.filter(task => {
+    const titleMatch = task.title.toLowerCase().includes(lowerQuery)
+    const descriptionMatch = task.description?.toLowerCase().includes(lowerQuery) ?? false
+    return titleMatch || descriptionMatch
+  })
+}

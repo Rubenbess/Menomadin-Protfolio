@@ -214,14 +214,63 @@ export default function TaskDetailModal({
             </div>
           </div>
 
-          {/* Company */}
-          {task.company && (
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                <Building2 size={16} />
-                Company
-              </label>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{task.company.name}</p>
+          {/* Linked Entities */}
+          {(task.company || task.pipeline_deal || task.contact) && (
+            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Related Items</p>
+              <div className="space-y-2">
+                {task.company && (
+                  <a
+                    href={`/companies/${task.company.id}`}
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-500 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Building2 size={14} className="text-slate-400" />
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Company</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">{task.company.name}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-slate-400">→</span>
+                    </div>
+                  </a>
+                )}
+                {task.pipeline_deal && (
+                  <a
+                    href="/pipeline"
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-500 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Building2 size={14} className="text-slate-400" />
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Deal</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">{task.pipeline_deal.name}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-slate-400">→</span>
+                    </div>
+                  </a>
+                )}
+                {task.contact && (
+                  <a
+                    href="/contacts"
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-500 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-slate-400" />
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Contact</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">{task.contact.name}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-slate-400">→</span>
+                    </div>
+                  </a>
+                )}
+              </div>
             </div>
           )}
 

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import CompanyDetailClient from './CompanyDetailClient'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +25,7 @@ export default async function CompanyDetailPage({ params }: Props) {
     { data: shareSeries },
     { data: optionPools },
     { data: waterfallScenarios },
+    { data: tasks },
   ] = await Promise.all([
     supabase.from('companies').select('*').eq('id', id).single(),
     supabase.from('rounds').select('*').eq('company_id', id).order('date', { ascending: false }),
@@ -37,6 +38,7 @@ export default async function CompanyDetailPage({ params }: Props) {
     supabase.from('share_series').select('*').eq('company_id', id).order('liquidation_seniority', { ascending: false }),
     supabase.from('option_pools').select('*').eq('company_id', id).order('created_at', { ascending: true }),
     supabase.from('waterfall_scenarios').select('*').eq('company_id', id).order('created_at', { ascending: false }),
+    supabase.from('tasks').select('*').eq('company_id', id).order('created_at', { ascending: false }),
   ])
 
   if (!company) notFound()
@@ -54,6 +56,7 @@ export default async function CompanyDetailPage({ params }: Props) {
       shareSeries={(shareSeries ?? []) as ShareSeries[]}
       optionPools={(optionPools ?? []) as OptionPool[]}
       waterfallScenarios={(waterfallScenarios ?? []) as WaterfallScenario[]}
+      tasks={(tasks ?? []) as TaskWithRelations[]}
     />
   )
 }
