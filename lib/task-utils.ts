@@ -99,10 +99,10 @@ export function formatDueDate(task: Task): string {
 }
 
 /**
- * Group tasks by status
+ * Group tasks by status (preserves full type)
  */
-export function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
-  const grouped: Record<TaskStatus, Task[]> = {
+export function groupTasksByStatus<T extends Task>(tasks: T[]): Record<TaskStatus, T[]> {
+  const grouped: Record<TaskStatus, T[]> = {
     'To do': [],
     'In progress': [],
     'Waiting': [],

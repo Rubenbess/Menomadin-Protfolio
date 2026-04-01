@@ -7,7 +7,7 @@ import TaskAssigneesStack from '@/components/ui/TaskAssigneesStack'
 import type { Task, TaskStatus, TaskWithRelations } from '@/lib/types'
 
 interface Props {
-  groupedTasks: Record<TaskStatus, Task[]>
+  groupedTasks: Record<TaskStatus, TaskWithRelations[]>
   onTaskClick: (task: TaskWithRelations) => void
   onTaskUpdate: (task: TaskWithRelations) => void
 }
@@ -47,11 +47,11 @@ export default function TasksBoard({ groupedTasks, onTaskClick }: Props) {
                   </div>
                 ) : (
                   tasks.map(task => {
-                    const overdue = isTaskOverdue(task as TaskWithRelations)
+                    const overdue = isTaskOverdue(task)
                     return (
                       <div
                         key={task.id}
-                        onClick={() => onTaskClick(task as TaskWithRelations)}
+                        onClick={() => onTaskClick(task)}
                         className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-slate-950 cursor-pointer transition-all hover:border-slate-300 dark:hover:border-slate-600"
                       >
                         {/* Title */}
@@ -82,7 +82,7 @@ export default function TasksBoard({ groupedTasks, onTaskClick }: Props) {
                         {/* Due Date */}
                         {task.due_date && (
                           <div className={`text-xs mb-3 font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                            {formatDueDate(task as TaskWithRelations)}
+                            {formatDueDate(task)}
                           </div>
                         )}
 
