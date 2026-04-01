@@ -39,7 +39,10 @@
       "Bash(rm -f actions/team.ts)",
       "Bash(rm -f lib/team-utils.ts)",
       "Bash(find c:UsersrubenbPortfolio -name *task* -type f)",
-      "Bash(grep -E \"\\\\.\\(sql|ts|tsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(sql|ts|tsx\\)$\")",
+      "Bash(rm -rf app/\\\\\\(protected\\\\\\)/tasks)",
+      "Bash(rm -f components/forms/TaskForm.tsx)",
+      "Bash(rm -f actions/tasks.ts)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

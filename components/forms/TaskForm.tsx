@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { createTask, updateTask } from '@/actions/tasks'
-import { TaskWithRelations, TaskStatus, TaskPriority } from '@/lib/types'
 import Button from '@/components/ui/Button'
 
 interface Company {
@@ -17,17 +16,34 @@ interface TeamMember {
   role: string | null
 }
 
+interface Task {
+  id: string
+  title: string
+  description: string | null
+  status: string
+  priority: string
+  due_date: string | null
+  company_id: string | null
+  assignee_id: string | null
+  task_participants?: Array<{ team_member_id: string }>
+}
+
 interface TaskFormProps {
-  task?: TaskWithRelations | null
+  task?: Task | null
   companies: Company[]
   teamMembers: TeamMember[]
-  defaultStatus?: TaskStatus
+  defaultStatus?: string
   onClose: () => void
   onSuccess: () => void
 }
 
 function getInitials(name: string) {
-  return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map(p => p[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 export default function TaskForm({
@@ -40,8 +56,8 @@ export default function TaskForm({
 }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [status, setStatus] = useState<TaskStatus>(task?.status ?? defaultStatus)
-  const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'medium')
+  const [status, setStatus] = useState(task?.status ?? defaultStatus)
+  const [priority, setPriority] = useState(task?.priority ?? 'medium')
   const [dueDate, setDueDate] = useState(task?.due_date ?? '')
   const [companyId, setCompanyId] = useState(task?.company_id ?? '')
   const [assigneeId, setAssigneeId] = useState(task?.assignee_id ?? '')
@@ -60,6 +76,7 @@ export default function TaskForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
+
     setLoading(true)
     setError(null)
 
@@ -73,28 +90,33 @@ export default function TaskForm({
       assignee_id: assigneeId || null,
     }
 
-    // Exclude owner from participants to avoid duplication
     const filteredParticipants = participantIds.filter(id => id !== assigneeId)
 
-    const result = task
-      ? await updateTask(task.id, data, filteredParticipants)
-      : await createTask(data, filteredParticipants)
+    try {
+      const result = task
+        ? await updateTask(task.id, data, filteredParticipants)
+        : await createTask(data, filteredParticipants)
 
-    setLoading(false)
+      if (result.error) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
 
-    if (result.error) {
-      setError(result.error)
-      return
+      onSuccess()
+      onClose()
+    } catch (err) {
+      setError('An unexpected error occurred')
+      setLoading(false)
     }
-
-    onSuccess()
-    onClose()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="field-label">Title <span className="text-red-500">*</span></label>
+        <label className="field-label">
+          Title <span className="text-red-500">*</span>
+        </label>
         <input
           type="text"
           className="field-input"
@@ -123,7 +145,7 @@ export default function TaskForm({
           <select
             className="field-select"
             value={status}
-            onChange={e => setStatus(e.target.value as TaskStatus)}
+            onChange={e => setStatus(e.target.value)}
           >
             <option value="not-started">Not Started</option>
             <option value="in-progress">In Progress</option>
@@ -137,7 +159,7 @@ export default function TaskForm({
           <select
             className="field-select"
             value={priority}
-            onChange={e => setPriority(e.target.value as TaskPriority)}
+            onChange={e => setPriority(e.target.value)}
           >
             <option value="high">High</option>
             <option value="medium">Medium</option>
@@ -165,12 +187,13 @@ export default function TaskForm({
         >
           <option value="">No company</option>
           {companies.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* Owner */}
       <div>
         <label className="field-label">Owner</label>
         <select
@@ -180,22 +203,16 @@ export default function TaskForm({
         >
           <option value="">No owner</option>
           {teamMembers.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* Participants */}
       {teamMembers.length > 0 && (
         <div>
-          <label className="field-label">
-            Participants
-            {participantIds.filter(id => id !== assigneeId).length > 0 && (
-              <span className="ml-1.5 text-[10px] font-semibold bg-violet-100 text-violet-600 rounded-full px-1.5 py-0.5">
-                {participantIds.filter(id => id !== assigneeId).length}
-              </span>
-            )}
-          </label>
+          <label className="field-label">Participants</label>
           <div className="flex flex-wrap gap-2 mt-1.5">
             {teamMembers
               .filter(m => m.id !== assigneeId)
@@ -219,18 +236,11 @@ export default function TaskForm({
                       {getInitials(m.name)}
                     </span>
                     {m.name}
-                    {selected && (
-                      <span className="text-violet-500 font-bold leading-none">✓</span>
-                    )}
+                    {selected && <span className="text-violet-500 font-bold">✓</span>}
                   </button>
                 )
               })}
           </div>
-          {teamMembers.filter(m => m.id !== assigneeId).length === 0 && (
-            <p className="text-xs text-slate-400 mt-1">
-              Add more team members to assign participants.
-            </p>
-          )}
         </div>
       )}
 
