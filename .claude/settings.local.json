@@ -43,7 +43,8 @@
       "Bash(rm -rf app/\\\\\\(protected\\\\\\)/tasks)",
       "Bash(rm -f components/forms/TaskForm.tsx)",
       "Bash(rm -f actions/tasks.ts)",
-      "Bash(rm -f supabase/migrations/tasks.sql)"
+      "Bash(rm -f supabase/migrations/tasks.sql)",
+      "Bash(xargs grep:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

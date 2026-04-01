@@ -332,8 +332,151 @@ export interface DashboardMetrics {
   capitalReserved: number
 }
 
-export type TaskStatus = 'not-started' | 'in-progress' | 'waiting' | 'done'
+// ─── TASKS SYSTEM TYPES ─────────────────────────────────────────────────────
+
+export type TaskStatus = 'To do' | 'In progress' | 'Waiting' | 'Done' | 'Cancelled'
 export type TaskPriority = 'high' | 'medium' | 'low'
+export type TaskActivityAction = 'status_changed' | 'assignee_added' | 'assignee_removed' | 'due_date_changed' | 'priority_changed' | 'completed' | 'cancelled'
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly'
+export type AutomationTrigger = 'deal_created' | 'company_created' | 'task_overdue' | 'task_completed'
+export type AutomationAction = 'create_task' | 'notify_team' | 'assign_to'
+
+// Core task interface
+export interface Task {
+  id: string
+  title: string
+  description: string | null
+  status: TaskStatus
+  priority: TaskPriority
+  created_by: string
+  created_at: string
+  updated_at: string
+  completed_at: string | null
+  completed_by: string | null
+  start_date: string | null
+  due_date: string | null
+  company_id: string | null
+  pipeline_deal_id: string | null
+  contact_id: string | null
+  internal_project_id: string | null
+  is_recurring: boolean
+  recurrence_rule_id: string | null
+  template_id: string | null
+}
+
+// Multi-assignee support
+export interface TaskAssignee {
+  id: string
+  task_id: string
+  assigned_to: string
+  assigned_at: string
+  assigned_by: string
+  team_member?: TeamMember
+}
+
+// Comments and activity
+export interface TaskComment {
+  id: string
+  task_id: string
+  author_id: string
+  content: string
+  created_at: string
+  updated_at: string
+  is_activity: boolean
+  author?: TeamMember
+}
+
+export interface TaskActivity {
+  id: string
+  task_id: string
+  actor_id: string
+  action_type: TaskActivityAction
+  old_value: string | null
+  new_value: string | null
+  created_at: string
+  metadata: Record<string, any> | null
+}
+
+// Attachments and labels
+export interface TaskAttachment {
+  id: string
+  task_id: string
+  file_url: string
+  file_name: string
+  file_size: number | null
+  uploaded_by: string
+  created_at: string
+  metadata: Record<string, any> | null
+}
+
+export interface TaskLabel {
+  id: string
+  name: string
+  color: string | null
+  created_at: string
+}
+
+// Templates and automation
+export interface TaskTemplate {
+  id: string
+  name: string
+  description: string | null
+  category: 'diligence' | 'ic_prep' | 'legal_followup' | 'portfolio_followup' | 'fundraising' | 'internal' | 'other'
+  template_content: Record<string, any> | null
+  created_by: string
+  created_at: string
+  is_public: boolean
+}
+
+export interface TaskRecurrenceRule {
+  id: string
+  frequency: RecurrenceFrequency
+  interval: number
+  day_of_week: number | null
+  day_of_month: number | null
+  next_occurrence: string
+  last_generated: string | null
+  is_active: boolean
+  created_by: string
+  created_at: string
+  metadata: Record<string, any> | null
+}
+
+export interface TaskAutomationRule {
+  id: string
+  name: string
+  trigger_type: AutomationTrigger
+  action_type: AutomationAction
+  config: Record<string, any>
+  created_by: string
+  created_at: string
+  is_active: boolean
+}
+
+// Aggregate view with relations
+export interface TaskWithRelations extends Task {
+  creator?: TeamMember
+  completed_by_user?: TeamMember
+  company?: { id: string; name: string }
+  pipeline_deal?: { id: string; name: string }
+  contact?: { id: string; name: string }
+  assignees?: TaskAssignee[]
+  labels?: TaskLabel[]
+  comments?: TaskComment[]
+  activities?: TaskActivity[]
+  attachments?: TaskAttachment[]
+  recurrence_rule?: TaskRecurrenceRule
+}
+
+export interface TaskStats {
+  total: number
+  overdue: number
+  dueToday: number
+  dueThisWeek: number
+  completed: number
+  byStatus: Record<TaskStatus, number>
+  byPriority: Record<TaskPriority, number>
+}
 
 export type UserRole = 'admin' | 'associate' | 'viewer'
 
@@ -355,23 +498,4 @@ export interface TeamInvite {
   invited_by: string
   created_at: string
   accepted_at: string | null
-}
-
-export interface Task {
-  id: string
-  title: string
-  description: string | null
-  status: TaskStatus
-  priority: TaskPriority
-  due_date: string | null
-  company_id: string | null
-  assignee_id: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface TaskWithRelations extends Task {
-  companies: { id: string; name: string } | null
-  team_members: { id: string; name: string; color: string; role: string | null } | null
-  task_participants: { team_member_id: string; team_members: { id: string; name: string; color: string } | null }[]
 }
