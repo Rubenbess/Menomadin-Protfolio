@@ -91,7 +91,7 @@ export default function AppShell({ children, initialNotifications }: Props) {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
-          <div className="p-4 md:p-8">{children}</div>
+          <div className={pathname === '/tasks' ? '' : 'p-4 md:p-8'}>{children}</div>
         </main>
       </div>
     </div>
