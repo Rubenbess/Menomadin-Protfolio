@@ -80,7 +80,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
           <TemplateForm onSuccess={handleCreateTemplate} onCancel={() => setShowForm(false)} />
         ) : (
           <EmptyState
-            icon="📋"
+            type="general"
             title="No templates yet"
             description="Create your first template to speed up task creation"
             action={
