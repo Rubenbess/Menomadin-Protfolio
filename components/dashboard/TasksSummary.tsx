@@ -57,10 +57,10 @@ export default async function TasksSummary() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <MetricCard label="Total" value={stats.total.toString()} accent="slate" />
+        <MetricCard label="Total" value={stats.total.toString()} accent="violet" />
         <MetricCard label="Active" value={stats.active.toString()} accent="blue" />
         <MetricCard label="Completed" value={stats.completed.toString()} accent="emerald" />
-        <MetricCard label="Due Today" value={stats.dueToday.toString()} accent={stats.dueToday > 0 ? 'amber' : 'slate'} />
+        <MetricCard label="Due Today" value={stats.dueToday.toString()} accent={stats.dueToday > 0 ? 'amber' : 'violet'} />
         {stats.overdue > 0 && (
           <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-4 flex flex-col items-center justify-center border-t-2 border-red-500">
             <div className="flex items-center gap-1.5 mb-1">
