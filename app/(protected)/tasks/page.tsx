@@ -7,58 +7,10 @@ export const dynamic = 'force-dynamic'
 export default async function TasksPage() {
   const supabase = await createServerSupabaseClient()
 
-  // Fetch tasks with relations
+  // Fetch tasks with basic data (relations will be fetched separately if needed)
   const { data: tasks, error } = await supabase
     .from('tasks')
-    .select(`
-      *,
-      creator:created_by(id, name, color),
-      completed_by_user:completed_by(id, name),
-      company:company_id(id, name),
-      pipeline_deal:pipeline_deal_id(id, name),
-      contact:contact_id(id, name),
-      assignees:task_assignees(
-        id,
-        task_id,
-        assigned_to,
-        assigned_at,
-        assigned_by,
-        team_member:assigned_to(id, name, color)
-      ),
-      labels:task_label_links(
-        id,
-        label:label_id(id, name, color)
-      ),
-      comments:task_comments(
-        id,
-        task_id,
-        author_id,
-        content,
-        created_at,
-        updated_at,
-        is_activity,
-        author:author_id(id, name, color)
-      ),
-      activities:task_activities(
-        id,
-        task_id,
-        actor_id,
-        action_type,
-        old_value,
-        new_value,
-        created_at
-      ),
-      attachments:task_attachments(
-        id,
-        task_id,
-        file_url,
-        file_name,
-        file_size,
-        uploaded_by,
-        created_at
-      ),
-      recurrence_rule:recurrence_rule_id(*)
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
 
   // Fetch all labels for the label selector
