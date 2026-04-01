@@ -37,7 +37,9 @@
       "Bash(rm -rf app/accept-invite)",
       "Bash(rm -rf app/pending-invite)",
       "Bash(rm -f actions/team.ts)",
-      "Bash(rm -f lib/team-utils.ts)"
+      "Bash(rm -f lib/team-utils.ts)",
+      "Bash(find c:UsersrubenbPortfolio -name *task* -type f)",
+      "Bash(grep -E \"\\\\.\\(sql|ts|tsx\\)$\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
