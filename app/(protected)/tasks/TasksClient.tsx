@@ -23,7 +23,7 @@ type ViewType = 'list' | 'board'
 export default function TasksClient({ initialTasks, allLabels, teamMembers, companies }: Props) {
   const router = useRouter()
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
-  const [view, setView] = useState<ViewType>('board')
+  const [view, setView] = useState<ViewType>('list')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null)
 
@@ -69,16 +69,16 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
         <h1 className="page-title">Tasks</h1>
         <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
           <button
-            onClick={() => setView('board')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <Kanban size={12} /> Board
-          </button>
-          <button
             onClick={() => setView('list')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'list' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <LayoutList size={12} /> List
+          </button>
+          <button
+            onClick={() => setView('board')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Kanban size={12} /> Board
           </button>
         </div>
         <Button onClick={() => setShowCreateForm(true)} size="sm">
@@ -101,7 +101,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
         ))}
       </div>
 
-      {/* Board/List View */}
+      {/* List/Board View */}
       {tasks.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-16 text-center">
           <CheckSquare size={32} className="mx-auto mb-3 text-slate-300" />
@@ -110,18 +110,18 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
             <Plus size={14} /> Create your first task
           </Button>
         </div>
-      ) : view === 'board' ? (
+      ) : view === 'list' ? (
+        <TasksList
+          tasks={Object.values(groupedByStatus).flat()}
+          onTaskClick={setSelectedTask}
+          onTaskUpdate={handleTaskUpdated}
+        />
+      ) : (
         <TasksBoard
           groupedTasks={groupedByStatus}
           onTaskClick={setSelectedTask}
           onTaskCreate={() => setShowCreateForm(true)}
           onTaskEdit={setSelectedTask}
-        />
-      ) : (
-        <TasksList
-          tasks={Object.values(groupedByStatus).flat()}
-          onTaskClick={setSelectedTask}
-          onTaskUpdate={handleTaskUpdated}
         />
       )}
 
