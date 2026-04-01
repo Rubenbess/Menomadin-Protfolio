@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export default async function TasksPage() {
   const supabase = await createServerSupabaseClient()
 
-  // Fetch tasks with relations (assignees and company)
+  // Fetch tasks with relations (assignees, company, pipeline deal, and contact)
   const { data: tasks, error } = await supabase
     .from('tasks')
     .select(`
@@ -20,7 +20,9 @@ export default async function TasksPage() {
         assigned_by,
         team_member:team_members(id, name, color)
       ),
-      company:companies(id, name)
+      company:companies(id, name),
+      pipeline_deal:pipeline(id, name),
+      contact:contacts(id, name)
     `)
     .order('created_at', { ascending: false })
 

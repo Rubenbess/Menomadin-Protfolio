@@ -300,7 +300,7 @@ export default function TaskDetailModal({
                 Description
               </label>
               <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
-                {task.description}
+                {currentTask.description}
               </p>
             </div>
           )}

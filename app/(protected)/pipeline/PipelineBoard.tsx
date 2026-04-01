@@ -20,6 +20,7 @@ import PipelineForm from '@/components/forms/PipelineForm'
 import StageForm from '@/components/forms/StageForm'
 import { movePipelineCard, deleteStage } from '@/actions/pipeline-stages'
 import { deletePipelineEntry } from '@/actions/pipeline'
+import DealTasks from './DealTasks'
 import type { PipelineEntry } from '@/lib/types'
 
 // ── Color maps ────────────────────────────────────────────────────────────
@@ -145,6 +146,7 @@ function DealPanel({
   onEdit: (e: PipelineEntry) => void
   onDelete: (id: string, name: string) => void
 }) {
+  const [tab, setTab] = useState<'details' | 'tasks'>('details')
   const [analyzing, setAnalyzing] = useState(false)
   const [aiSummary, setAiSummary] = useState<string | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
@@ -218,8 +220,35 @@ function DealPanel({
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-slate-100 bg-slate-50/60 px-6">
+          <button
+            onClick={() => setTab('details')}
+            className={`py-3 px-4 text-xs font-semibold transition-all ${
+              tab === 'details'
+                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Details
+          </button>
+          <button
+            onClick={() => setTab('tasks')}
+            className={`py-3 px-4 text-xs font-semibold transition-all ${
+              tab === 'tasks'
+                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Tasks
+          </button>
+        </div>
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          {tab === 'details' && (
+            <>
 
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-3">
@@ -295,6 +324,13 @@ function DealPanel({
             <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Added</p>
             <p className="text-sm text-slate-500">{createdDate}</p>
           </div>
+
+            </>
+          )}
+
+          {tab === 'tasks' && (
+            <DealTasks dealId={entry.id} dealName={entry.name} />
+          )}
         </div>
 
         {/* Footer actions */}

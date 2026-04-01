@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button'
 import ContactForm from '@/components/forms/ContactForm'
 import EmptyState from '@/components/EmptyState'
 import { deleteContact, createInteraction, deleteInteraction } from '@/actions/contacts'
+import ContactTasks from './ContactTasks'
 import type { ContactWithCompany, ContactInteraction, InteractionType } from '@/lib/types'
 
 const INTERACTION_TYPES: { value: InteractionType; label: string }[] = [
@@ -124,6 +125,7 @@ function ContactPanel({
   onDelete: (id: string, name: string) => void
 }) {
   const router = useRouter()
+  const [tab, setTab] = useState<'interactions' | 'tasks'>('interactions')
   const [showAddInteraction, setShowAddInteraction] = useState(false)
 
   const sorted = [...interactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -169,8 +171,35 @@ function ContactPanel({
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-slate-100 bg-slate-50/60 px-6">
+          <button
+            onClick={() => setTab('interactions')}
+            className={`py-3 px-4 text-xs font-semibold transition-all ${
+              tab === 'interactions'
+                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Interactions
+          </button>
+          <button
+            onClick={() => setTab('tasks')}
+            className={`py-3 px-4 text-xs font-semibold transition-all ${
+              tab === 'tasks'
+                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Tasks
+          </button>
+        </div>
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          {tab === 'interactions' && (
+            <>
 
           {/* Contact info */}
           <div className="space-y-2.5">
@@ -276,6 +305,13 @@ function ContactPanel({
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Added</p>
             <p className="text-sm text-slate-500">{fmtDate(contact.created_at)}</p>
           </div>
+
+            </>
+          )}
+
+          {tab === 'tasks' && (
+            <ContactTasks contactId={contact.id} contactName={contact.name} />
+          )}
         </div>
 
         {/* Footer */}
