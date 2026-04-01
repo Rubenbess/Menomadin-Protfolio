@@ -41,11 +41,13 @@ export default async function TasksPage() {
   }
 
   return (
-    <TasksClient
-      initialTasks={(tasks || []) as TaskWithRelations[]}
-      allLabels={allLabels || []}
-      teamMembers={teamMembers || []}
-      companies={companies || []}
-    />
+    <div className="max-w-full px-6 py-6">
+      <TasksClient
+        initialTasks={(tasks || []) as TaskWithRelations[]}
+        allLabels={allLabels || []}
+        teamMembers={teamMembers || []}
+        companies={companies || []}
+      />
+    </div>
   )
 }

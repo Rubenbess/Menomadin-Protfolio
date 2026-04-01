@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { CheckSquare, Plus, LayoutList, Kanban } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, BarChart2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TasksBoard from './TasksBoard'
 import TasksList from './TasksList'
-import TasksFilters from './TasksFilters'
 import TaskDetailModal from './TaskDetailModal'
 import TaskForm from '@/components/forms/TaskForm'
 import { filterTasks, groupTasksByStatus, sortTasks } from '@/lib/task-utils'
@@ -25,33 +24,13 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   const [view, setView] = useState<ViewType>('board')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null)
-  const [sortBy, setSortBy] = useState<'due-date' | 'priority' | 'created' | 'updated'>('due-date')
 
-  // Filters
-  const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([])
-  const [priorityFilter, setPriorityFilter] = useState<string[]>([])
-  const [assigneeFilter, setAssigneeFilter] = useState<string>('')
-  const [companyFilter, setCompanyFilter] = useState<string>('')
-  const [includeCompleted, setIncludeCompleted] = useState(true)
-
-  // Apply filters and sorting
-  const filteredAndSorted = useMemo(() => {
-    let filtered = filterTasks(tasks, {
-      status: statusFilter.length > 0 ? statusFilter : undefined,
-      priority: priorityFilter.length > 0 ? priorityFilter : undefined,
-      companyId: companyFilter ? companyFilter : undefined,
-      includeCompleted,
-    })
-
-    return sortTasks(filtered, sortBy)
-  }, [tasks, statusFilter, priorityFilter, companyFilter, includeCompleted, sortBy])
-
-  // Group by status for board view
+  // Group by status for board view (unfiltered for stats)
   const groupedByStatus = useMemo(() => {
-    return groupTasksByStatus(filteredAndSorted)
-  }, [filteredAndSorted])
+    return groupTasksByStatus(tasks)
+  }, [tasks])
 
-  // Stats
+  // Stats (from all tasks, not filtered)
   const stats = {
     total: tasks.length,
     active: tasks.filter(t => t.status !== 'Done' && t.status !== 'Cancelled').length,
@@ -81,114 +60,67 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
-      {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CheckSquare size={24} className="text-violet-600 dark:text-violet-400" />
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tasks</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {stats.active} active • {stats.completed} completed {stats.overdue > 0 && `• ${stats.overdue} overdue`}
-              </p>
-            </div>
+    <div className="animate-fade-in">
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">Tasks</h1>
+        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <button
+            onClick={() => setView('board')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Kanban size={12} /> Board
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'list' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <LayoutList size={12} /> List
+          </button>
+        </div>
+        <Button onClick={() => setShowCreateForm(true)} size="sm">
+          <Plus size={14} /> Add task
+        </Button>
+      </div>
+
+      {/* Stats Bar */}
+      <div className="grid grid-cols-4 gap-3 mb-5">
+        {[
+          { label: 'Total',      count: stats.total,      color: 'text-violet-600',     bg: 'bg-violet-50   border-violet-200' },
+          { label: 'Active',     count: stats.active,     color: 'text-blue-600',       bg: 'bg-blue-50    border-blue-200' },
+          { label: 'Completed',  count: stats.completed,  color: 'text-emerald-600',    bg: 'bg-emerald-50 border-emerald-200' },
+          { label: 'Overdue',    count: stats.overdue,    color: stats.overdue > 0 ? 'text-red-600' : 'text-slate-400', bg: stats.overdue > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200' },
+        ].map(s => (
+          <div key={s.label} className={`rounded-xl border px-4 py-3 ${s.bg}`}>
+            <p className="text-xs text-slate-500 font-medium">{s.label}</p>
+            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.count}</p>
           </div>
-          <Button onClick={() => setShowCreateForm(true)} className="flex items-center gap-2">
-            <Plus size={16} />
-            Create Task
+        ))}
+      </div>
+
+      {/* Board/List View */}
+      {tasks.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-16 text-center">
+          <CheckSquare size={32} className="mx-auto mb-3 text-slate-300" />
+          <p className="text-sm text-slate-500 mb-4">No tasks yet</p>
+          <Button onClick={() => setShowCreateForm(true)} variant="secondary">
+            <Plus size={14} /> Create your first task
           </Button>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Filters Sidebar */}
-        <TasksFilters
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          priorityFilter={priorityFilter}
-          onPriorityChange={setPriorityFilter}
-          companyFilter={companyFilter}
-          onCompanyChange={setCompanyFilter}
-          includeCompleted={includeCompleted}
-          onIncludeCompletedChange={setIncludeCompleted}
-          companies={companies}
-          stats={stats}
+      ) : view === 'board' ? (
+        <TasksBoard
+          groupedTasks={groupedByStatus}
+          onTaskClick={setSelectedTask}
+          onTaskCreate={() => setShowCreateForm(true)}
+          onTaskEdit={setSelectedTask}
         />
-
-        {/* Tasks View */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* View Controls */}
-          <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-3 bg-white dark:bg-slate-900 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setView('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  view === 'list'
-                    ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                }`}
-              >
-                <LayoutList size={18} />
-              </button>
-              <button
-                onClick={() => setView('board')}
-                className={`p-2 rounded-lg transition-colors ${
-                  view === 'board'
-                    ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                }`}
-              >
-                <Kanban size={18} />
-              </button>
-            </div>
-
-            {/* Sort Control */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-            >
-              <option value="due-date">Sort: Due Date</option>
-              <option value="priority">Sort: Priority</option>
-              <option value="created">Sort: Created</option>
-              <option value="updated">Sort: Updated</option>
-            </select>
-          </div>
-
-          {/* View Content */}
-          <div className="flex-1 overflow-auto">
-            {filteredAndSorted.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <CheckSquare size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                  <p className="text-slate-500 dark:text-slate-400">No tasks yet</p>
-                  <button
-                    onClick={() => setShowCreateForm(true)}
-                    className="mt-4 text-violet-600 hover:text-violet-700 dark:text-violet-400 text-sm font-medium"
-                  >
-                    Create your first task
-                  </button>
-                </div>
-              </div>
-            ) : view === 'list' ? (
-              <TasksList
-                tasks={filteredAndSorted}
-                onTaskClick={setSelectedTask}
-                onTaskUpdate={handleTaskUpdated}
-              />
-            ) : (
-              <TasksBoard
-                groupedTasks={groupedByStatus}
-                onTaskClick={setSelectedTask}
-                onTaskCreate={(status) => setShowCreateForm(true)}
-                onTaskEdit={setSelectedTask}
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      ) : (
+        <TasksList
+          tasks={Object.values(groupedByStatus).flat()}
+          onTaskClick={setSelectedTask}
+          onTaskUpdate={handleTaskUpdated}
+        />
+      )}
 
       {/* Modals */}
       {showCreateForm && (
