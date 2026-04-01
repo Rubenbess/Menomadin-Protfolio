@@ -69,8 +69,7 @@ export default function TaskTemplates({ templates }: Props) {
           </Button>
         </div>
         <EmptyState
-          title="No templates"
-          description="Create templates to quickly spawn common task workflows"
+          message="Create templates to quickly spawn common task workflows"
           action={<Button onClick={() => setShowCreateTemplate(true)}>Create your first template</Button>}
         />
       </div>
