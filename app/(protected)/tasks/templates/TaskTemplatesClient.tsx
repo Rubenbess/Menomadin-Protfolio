@@ -25,7 +25,7 @@ interface Props {
 export default function TaskTemplatesClient({ initialTemplates }: Props) {
   const [templates, setTemplates] = useState(initialTemplates)
   const [showForm, setShowForm] = useState(false)
-  const [editTemplate, setEditTemplate] = useState<TaskTemplate | null>(null)
+  const [editTemplate, setEditTemplate] = useState<TaskTemplate | undefined>()
   const [deleteTarget, setDeleteTarget] = useState<TaskTemplate | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -36,7 +36,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
 
   const handleUpdateTemplate = (updated: TaskTemplate) => {
     setTemplates(templates.map(t => t.id === updated.id ? updated : t))
-    setEditTemplate(null)
+    setEditTemplate(undefined)
   }
 
   const handleDelete = async () => {
@@ -117,7 +117,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
             onSuccess={editTemplate ? handleUpdateTemplate : handleCreateTemplate}
             onCancel={() => {
               setShowForm(false)
-              setEditTemplate(null)
+              setEditTemplate(undefined)
             }}
           />
         </div>
