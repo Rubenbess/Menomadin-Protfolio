@@ -34,14 +34,17 @@ export default function TaskForm({
     try {
       const fd = new FormData(e.currentTarget)
 
+      const priorityValue = (fd.get('priority') as string) || 'medium'
+      const assigneeIds = fd.getAll('assignee_ids').map(id => id.toString()).filter(id => id)
+
       const data = {
         title: (fd.get('title') as string).trim(),
         description: ((fd.get('description') as string)?.trim() || null) as string | null,
-        priority: (fd.get('priority') as string) || 'medium',
+        priority: priorityValue as 'high' | 'medium' | 'low',
         status: 'To do' as const,
         due_date: (fd.get('due_date') as string) || null,
         company_id: (fd.get('company_id') as string) || null,
-        assignee_ids: fd.getAll('assignee_ids').filter(id => id),
+        assignee_ids: assigneeIds,
       }
 
       if (!data.title) {
