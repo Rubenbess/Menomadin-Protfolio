@@ -60,7 +60,7 @@ export async function updateTask(id: string, data: Partial<TaskData>, participan
       if (participantIds.length > 0) {
         await supabase
           .from('task_participants')
-          .insert(participantIds.map(id => ({ task_id: id, team_member_id: id })))
+          .insert(participantIds.map(team_member_id => ({ task_id: id, team_member_id })))
       }
     }
 
