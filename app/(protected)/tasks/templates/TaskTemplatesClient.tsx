@@ -170,9 +170,8 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
 
       {/* Delete Confirmation */}
       {deleteTarget && (
-        <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} size="sm">
+        <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Template?">
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Template?</h3>
             <p className="text-sm text-slate-600 mb-6">
               Are you sure you want to delete "{deleteTarget.name}"? This cannot be undone.
             </p>

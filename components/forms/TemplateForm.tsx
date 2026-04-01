@@ -20,10 +20,12 @@ interface Props {
   onCancel: () => void
 }
 
+type CategoryType = typeof CATEGORIES[number]['value']
+
 export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
   const [name, setName] = useState(template?.name || '')
   const [description, setDescription] = useState(template?.description || '')
-  const [category, setCategory] = useState(template?.category || 'other')
+  const [category, setCategory] = useState<CategoryType>(template?.category as CategoryType || 'other')
   const [taskTitle, setTaskTitle] = useState(template?.template_content?.title || '')
   const [taskDescription, setTaskDescription] = useState(template?.template_content?.description || '')
   const [isPublic, setIsPublic] = useState(template?.is_public ?? true)
@@ -89,7 +91,7 @@ export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
-          <select value={category} onChange={e => setCategory(e.target.value)} className={inp}>
+          <select value={category} onChange={e => setCategory(e.target.value as CategoryType)} className={inp}>
             {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
