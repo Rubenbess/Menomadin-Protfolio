@@ -44,50 +44,76 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
               return (
                 <tr
                   key={task.id}
-                  className="hover:bg-slate-50 transition-colors group"
+                  onClick={() => onTaskClick(task)}
+                  className="hover:bg-slate-50 transition-colors group cursor-pointer"
                 >
                   <td className="px-5 py-4">
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">{task.title}</p>
+                  </td>
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onTaskClick(task)}
-                      className="text-left hover:text-violet-600 transition-colors"
+                      className="hover:opacity-80 transition-opacity"
+                      title="Click to edit status"
                     >
-                      <p className="text-sm font-medium text-slate-900 hover:underline">{task.title}</p>
+                      <TaskStatusBadge status={task.status} />
                     </button>
                   </td>
-                  <td className="px-5 py-4">
-                    <TaskStatusBadge status={task.status} />
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onTaskClick(task)}
+                      className="hover:opacity-80 transition-opacity"
+                      title="Click to edit priority"
+                    >
+                      <TaskPriorityBadge priority={task.priority} size="sm" />
+                    </button>
                   </td>
-                  <td className="px-5 py-4">
-                    <TaskPriorityBadge priority={task.priority} size="sm" />
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onTaskClick(task)}
+                      className="hover:text-violet-600 transition-colors"
+                      title="Click to edit due date"
+                    >
+                      {task.due_date ? (
+                        <span className={`text-sm font-medium ${
+                          overdue
+                            ? 'text-red-600'
+                            : 'text-slate-600'
+                        }`}>
+                          {format(new Date(task.due_date), 'MMM dd')}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-slate-400">—</span>
+                      )}
+                    </button>
                   </td>
-                  <td className="px-5 py-4">
-                    {task.due_date ? (
-                      <span className={`text-sm font-medium ${
-                        overdue
-                          ? 'text-red-600'
-                          : 'text-slate-600'
-                      }`}>
-                        {format(new Date(task.due_date), 'MMM dd')}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-slate-400">—</span>
-                    )}
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onTaskClick(task)}
+                      className="hover:opacity-80 transition-opacity"
+                      title="Click to edit assignees"
+                    >
+                      {task.assignees && task.assignees.length > 0 ? (
+                        <TaskAssigneesStack assignees={task.assignees} />
+                      ) : (
+                        <span className="text-sm text-slate-400">—</span>
+                      )}
+                    </button>
                   </td>
-                  <td className="px-5 py-4">
-                    {task.assignees && task.assignees.length > 0 ? (
-                      <TaskAssigneesStack assignees={task.assignees} />
-                    ) : (
-                      <span className="text-sm text-slate-400">—</span>
-                    )}
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onTaskClick(task)}
+                      className="text-sm text-slate-600 hover:text-violet-600 transition-colors"
+                      title="Click to edit company"
+                    >
+                      {task.company ? (
+                        <span>{task.company.name}</span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </button>
                   </td>
-                  <td className="px-5 py-4">
-                    {task.company ? (
-                      <span className="text-sm text-slate-600">{task.company.name}</span>
-                    ) : (
-                      <span className="text-sm text-slate-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-center">
+                  <td className="px-5 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onTaskClick(task)}
