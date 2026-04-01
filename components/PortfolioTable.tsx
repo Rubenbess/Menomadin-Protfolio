@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
@@ -49,9 +49,8 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
             ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
             return (
-              <>
+              <Fragment key={co.id}>
                 <tr
-                  key={co.id}
                   className={`border-t border-slate-50 transition-colors ${isExpanded ? 'bg-slate-50/80' : 'hover:bg-slate-50/60'}`}
                 >
                   {/* Expand toggle */}
@@ -192,7 +191,7 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             )
           })}
         </tbody>
