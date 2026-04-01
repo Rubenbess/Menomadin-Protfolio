@@ -310,10 +310,9 @@ export default function TaskDetailModal({
         {/* Footer */}
         <div className="sticky bottom-0 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between">
           <Button
-            variant="tertiary"
+            variant="danger"
             onClick={handleDelete}
             loading={isDeleting}
-            className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
           >
             Delete
           </Button>

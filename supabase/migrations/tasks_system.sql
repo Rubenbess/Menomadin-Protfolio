@@ -1,6 +1,33 @@
 -- Complete Tasks Management System Schema
 -- Run this in the Supabase SQL editor
 
+-- ====== TASK TEMPLATES (no dependencies) ======
+create table if not exists task_templates (
+  id                uuid primary key default gen_random_uuid(),
+  name              text not null,
+  description       text,
+  category          text check (category in ('diligence', 'ic_prep', 'legal_followup', 'portfolio_followup', 'fundraising', 'internal', 'other')),
+  template_content  jsonb,
+  created_by        uuid not null,
+  created_at        timestamptz not null default now(),
+  is_public         boolean not null default true
+);
+
+-- ====== TASK RECURRENCE RULES (no dependencies) ======
+create table if not exists task_recurrence_rules (
+  id              uuid primary key default gen_random_uuid(),
+  frequency       text not null check (frequency in ('daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly')),
+  interval        integer not null default 1,
+  day_of_week     integer check (day_of_week >= 0 and day_of_week <= 6),
+  day_of_month    integer check (day_of_month >= 1 and day_of_month <= 31),
+  next_occurrence date not null,
+  last_generated  date,
+  is_active       boolean not null default true,
+  created_by      uuid not null,
+  created_at      timestamptz not null default now(),
+  metadata        jsonb
+);
+
 -- ====== MAIN TASKS TABLE ======
 create table if not exists tasks (
   id                    uuid primary key default gen_random_uuid(),
@@ -83,33 +110,6 @@ create table if not exists task_label_links (
   task_id  uuid not null references tasks(id) on delete cascade,
   label_id uuid not null references task_labels(id) on delete cascade,
   unique(task_id, label_id)
-);
-
--- ====== TASK TEMPLATES ======
-create table if not exists task_templates (
-  id                uuid primary key default gen_random_uuid(),
-  name              text not null,
-  description       text,
-  category          text check (category in ('diligence', 'ic_prep', 'legal_followup', 'portfolio_followup', 'fundraising', 'internal', 'other')),
-  template_content  jsonb,
-  created_by        uuid not null,
-  created_at        timestamptz not null default now(),
-  is_public         boolean not null default true
-);
-
--- ====== TASK RECURRENCE RULES ======
-create table if not exists task_recurrence_rules (
-  id              uuid primary key default gen_random_uuid(),
-  frequency       text not null check (frequency in ('daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly')),
-  interval        integer not null default 1,
-  day_of_week     integer check (day_of_week >= 0 and day_of_week <= 6),
-  day_of_month    integer check (day_of_month >= 1 and day_of_month <= 31),
-  next_occurrence date not null,
-  last_generated  date,
-  is_active       boolean not null default true,
-  created_by      uuid not null,
-  created_at      timestamptz not null default now(),
-  metadata        jsonb
 );
 
 -- ====== TASK AUTOMATION RULES ======
