@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
@@ -20,7 +20,7 @@ export default function DealTasks({ dealId, dealName }: Props) {
   const [creating, setCreating] = useState(false)
 
   // Load tasks on mount
-  useState(() => {
+  useEffect(() => {
     loadTasks()
   }, [dealId])
 

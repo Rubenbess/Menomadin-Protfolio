@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import type { TaskWithRelations } from '@/lib/types'
@@ -18,7 +18,7 @@ export default function ContactTasks({ contactId, contactName }: Props) {
   const [creating, setCreating] = useState(false)
 
   // Load tasks on mount
-  useState(() => {
+  useEffect(() => {
     loadTasks()
   }, [contactId])
 
