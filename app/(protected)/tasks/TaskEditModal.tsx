@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { updateTask } from '@/actions/tasks'
+import { updateTask, assignTask, removeAssignee } from '@/actions/tasks'
 import type { TaskWithRelations } from '@/lib/types'
 
 interface Props {
@@ -22,6 +22,7 @@ export default function TaskEditModal({
   onClose,
   onTaskUpdated,
   companies,
+  teamMembers,
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -32,6 +33,9 @@ export default function TaskEditModal({
   const [priority, setPriority] = useState(task.priority)
   const [dueDate, setDueDate] = useState(task.due_date || '')
   const [companyId, setCompanyId] = useState(task.company_id || '')
+  const [selectedAssignees, setSelectedAssignees] = useState<Set<string>>(
+    new Set(task.assignees?.map(a => a.assigned_to) || [])
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,25 +48,50 @@ export default function TaskEditModal({
       return
     }
 
-    const result = await updateTask(task.id, {
-      title: title.trim(),
-      description: description.trim() || null,
-      status,
-      priority,
-      due_date: dueDate || null,
-      company_id: companyId || null,
-    })
+    try {
+      // Update basic task fields
+      const result = await updateTask(task.id, {
+        title: title.trim(),
+        description: description.trim() || null,
+        status,
+        priority,
+        due_date: dueDate || null,
+        company_id: companyId || null,
+      })
 
-    setLoading(false)
+      if (result.error) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
 
-    if (result.error) {
-      setError(result.error)
-      return
-    }
+      // Handle assignee changes
+      const oldAssignees = new Set(task.assignees?.map(a => a.assigned_to) || [])
 
-    if (result.data) {
-      onTaskUpdated(result.data as TaskWithRelations)
-      onClose()
+      // Remove assignees that were unselected
+      for (const assigneeId of oldAssignees) {
+        if (!selectedAssignees.has(assigneeId)) {
+          await removeAssignee(task.id, assigneeId)
+        }
+      }
+
+      // Add assignees that were newly selected
+      for (const assigneeId of selectedAssignees) {
+        if (!oldAssignees.has(assigneeId)) {
+          await assignTask(task.id, assigneeId)
+        }
+      }
+
+      setLoading(false)
+
+      if (result.data) {
+        // Refetch the task to get updated assignees
+        onTaskUpdated(result.data as TaskWithRelations)
+        onClose()
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+      setLoading(false)
     }
   }
 
@@ -162,13 +191,43 @@ export default function TaskEditModal({
               onChange={(e) => setCompanyId(e.target.value)}
               className={inp}
             >
-              <option value="">Select company...</option>
+              <option value="">— No company —</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Assignees */}
+          <div>
+            <label className={lbl}>Assignees</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+              {teamMembers.length > 0 ? (
+                teamMembers.map((member) => (
+                  <label key={member.id} className="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 p-2 rounded transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedAssignees.has(member.id)}
+                      onChange={(e) => {
+                        const newAssignees = new Set(selectedAssignees)
+                        if (e.target.checked) {
+                          newAssignees.add(member.id)
+                        } else {
+                          newAssignees.delete(member.id)
+                        }
+                        setSelectedAssignees(newAssignees)
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{member.name}</span>
+                  </label>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 p-2">No team members available</p>
+              )}
+            </div>
           </div>
 
           {/* Buttons */}
