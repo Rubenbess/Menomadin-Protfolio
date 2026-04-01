@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { CheckSquare, Plus, LayoutList, Kanban, BarChart2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TasksBoard from './TasksBoard'
@@ -20,6 +21,7 @@ interface Props {
 type ViewType = 'list' | 'board'
 
 export default function TasksClient({ initialTasks, allLabels, teamMembers, companies }: Props) {
+  const router = useRouter()
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
   const [view, setView] = useState<ViewType>('board')
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -47,6 +49,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   const handleTaskCreated = (newTask: TaskWithRelations) => {
     setTasks([newTask, ...tasks])
     setShowCreateForm(false)
+    router.refresh()
   }
 
   const handleTaskUpdated = (updatedTask: TaskWithRelations) => {
