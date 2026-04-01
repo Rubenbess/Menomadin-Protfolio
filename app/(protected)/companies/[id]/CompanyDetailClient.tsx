@@ -740,7 +740,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {activeTab === 'tasks' && (
           <div className="p-5">
             {tasks.length === 0 ? (
-              <EmptyState title="No tasks" description="No tasks have been created for this company yet." />
+              <EmptyState message="No tasks have been created for this company yet." />
             ) : (
               <div className="space-y-3">
                 {tasks.map(task => (
