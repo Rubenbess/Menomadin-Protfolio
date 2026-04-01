@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createContact, updateContact } from '@/actions/contacts'
+import { createCompany } from '@/actions/companies'
 import type { Contact } from '@/lib/types'
 
 const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 'Other'] as const
@@ -21,6 +22,9 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedCompany, setSelectedCompany] = useState(contact?.company_id ?? '')
+  const [showNewCompany, setShowNewCompany] = useState(false)
+  const [newCompanyName, setNewCompanyName] = useState('')
   const isEdit = !!contact
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,32 +32,62 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
     setLoading(true)
     setError('')
 
-    const fd = new FormData(e.currentTarget)
-    const str = (k: string) => (fd.get(k) as string).trim() || null
+    try {
+      let companyId = selectedCompany || null
 
-    const data = {
-      name:                 (fd.get('name') as string).trim(),
-      position:             str('position'),
-      email:                str('email'),
-      phone:                str('phone'),
-      address:              str('address'),
-      linkedin_url:         str('linkedin_url'),
-      company_id:           str('company_id'),
-      notes:                str('notes'),
-      contact_type:         str('contact_type'),
-      relationship_owner:   str('relationship_owner'),
+      // Create new company if needed
+      if (showNewCompany && newCompanyName.trim()) {
+        const companyResult = await createCompany({
+          name: newCompanyName.trim(),
+          sector: '',
+          strategy: 'venture',
+          hq: '',
+          status: 'active',
+          description: null,
+          logo_url: null,
+          entry_stage: null,
+          investment_owner: null,
+          board_seat: null,
+          co_investors: null,
+        })
+        if (companyResult.error) {
+          setError(companyResult.error)
+          setLoading(false)
+          return
+        }
+        companyId = companyResult.id
+      }
+
+      const fd = new FormData(e.currentTarget)
+      const str = (k: string) => (fd.get(k) as string).trim() || null
+
+      const data = {
+        name:                 (fd.get('name') as string).trim(),
+        position:             str('position'),
+        email:                str('email'),
+        phone:                str('phone'),
+        address:              str('address'),
+        linkedin_url:         str('linkedin_url'),
+        company_id:           companyId,
+        notes:                str('notes'),
+        contact_type:         str('contact_type'),
+        relationship_owner:   str('relationship_owner'),
+      }
+
+      if (!data.name) { setError('Name is required'); setLoading(false); return }
+
+      const result = isEdit
+        ? await updateContact(contact.id, data)
+        : await createContact(data)
+
+      if (result.error) { setError(result.error); setLoading(false); return }
+
+      router.refresh()
+      onClose()
+    } catch (err) {
+      setError('An unexpected error occurred')
+      setLoading(false)
     }
-
-    if (!data.name) { setError('Name is required'); setLoading(false); return }
-
-    const result = isEdit
-      ? await updateContact(contact.id, data)
-      : await createContact(data)
-
-    if (result.error) { setError(result.error); setLoading(false); return }
-
-    router.refresh()
-    onClose()
   }
 
   return (
@@ -80,12 +114,48 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={lbl}>Company</label>
-          <select name="company_id" defaultValue={contact?.company_id ?? ''} className={inp}>
-            <option value="">— No company —</option>
-            {companies.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          {!showNewCompany ? (
+            <select
+              value={selectedCompany}
+              onChange={(e) => {
+                if (e.target.value === '__new__') {
+                  setShowNewCompany(true)
+                  setSelectedCompany('')
+                } else {
+                  setSelectedCompany(e.target.value)
+                }
+              }}
+              className={inp}
+            >
+              <option value="">— No company —</option>
+              {companies.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+              <option value="__new__">+ Create new company</option>
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={newCompanyName}
+              onChange={(e) => setNewCompanyName(e.target.value)}
+              placeholder="Enter company name"
+              className={inp}
+              autoFocus
+            />
+          )}
+          {showNewCompany && (
+            <button
+              type="button"
+              onClick={() => {
+                setShowNewCompany(false)
+                setNewCompanyName('')
+                setSelectedCompany('')
+              }}
+              className="text-xs text-slate-500 hover:text-slate-700 mt-1"
+            >
+              ← Back to list
+            </button>
+          )}
         </div>
         <div>
           <label className={lbl}>Relationship Owner</label>
