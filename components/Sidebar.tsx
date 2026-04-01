@@ -45,6 +45,32 @@ function ReminderBadge() {
   )
 }
 
+function TasksBadge() {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayString = today.toISOString().split('T')[0]
+
+    supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .neq('status', 'Done')
+      .neq('status', 'Cancelled')
+      .lt('due_date', todayString)
+      .then(({ count: n }) => setCount(n ?? 0))
+  }, [])
+
+  if (!count) return null
+  return (
+    <span className="ml-auto flex-shrink-0 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+      {count > 9 ? '9+' : count}
+    </span>
+  )
+}
+
 function NavLinks() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -73,6 +99,7 @@ function NavLinks() {
             />
             {label}
             {href === '/reminders' && !active && <ReminderBadge />}
+            {href === '/tasks' && !active && <TasksBadge />}
             {active && (
               <span className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-400" />
             )}
