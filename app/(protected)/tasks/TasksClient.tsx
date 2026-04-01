@@ -182,7 +182,8 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               <TasksBoard
                 groupedTasks={groupedByStatus}
                 onTaskClick={setSelectedTask}
-                onTaskUpdate={handleTaskUpdated}
+                onTaskCreate={(status) => setShowCreateForm(true)}
+                onTaskEdit={setSelectedTask}
               />
             )}
           </div>
