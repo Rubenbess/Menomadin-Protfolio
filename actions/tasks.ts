@@ -48,10 +48,10 @@ export async function createTask(data: {
   const { data: task, error } = await supabase
     .from('tasks')
     .insert(taskData)
-    .select('id')
+    .select('*')
     .single()
 
-  if (error) return { error: error.message, id: null }
+  if (error) return { error: error.message, data: null }
 
   // Add assignees if provided
   if (data.assignee_ids && data.assignee_ids.length > 0) {
@@ -74,7 +74,7 @@ export async function createTask(data: {
     link: `/tasks`,
   })
 
-  return { error: null, id: task.id }
+  return { error: null, data: task }
 }
 
 export async function updateTask(id: string, data: Partial<Task>) {

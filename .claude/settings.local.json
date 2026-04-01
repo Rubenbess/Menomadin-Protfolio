@@ -44,7 +44,11 @@
       "Bash(rm -f components/forms/TaskForm.tsx)",
       "Bash(rm -f actions/tasks.ts)",
       "Bash(rm -f supabase/migrations/tasks.sql)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(ls -la /c/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/pipeline/)",
+      "Bash(grep -n \"activeTab.*overview\\\\|Tab.*history\\\\|investments.*captable\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
+      "Bash(grep -n \"const tabs = \\\\|tabs.*map\\\\\\(\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
+      "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/contacts/)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
