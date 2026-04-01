@@ -28,10 +28,23 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      if (!email || !password) {
+        setError('Email and password are required')
+        setLoading(false)
+        return
+      }
+
       const supabase = createClient()
 
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setError('Supabase configuration is missing. Please check your environment variables.')
+        setLoading(false)
+        return
+      }
+
       const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Request timed out — check your connection')), 10000)
+        setTimeout(() => reject(new Error('Request timed out — check your internet connection')), 15000)
       )
 
       const { error } = await Promise.race([
@@ -45,9 +58,26 @@ export default function LoginPage() {
         return
       }
 
-      window.location.href = '/dashboard'
+      // Verify user is authenticated before redirecting
+      const { data } = await supabase.auth.getUser()
+      if (data?.user) {
+        window.location.href = '/dashboard'
+      } else {
+        setError('Authentication failed - please try again')
+        setLoading(false)
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      const errMsg = err instanceof Error ? err.message : 'Something went wrong'
+      console.error('Sign in error:', err)
+
+      // Provide helpful error messages
+      if (errMsg.includes('Failed to fetch')) {
+        setError('Network error - check your internet connection and that Supabase is accessible')
+      } else if (errMsg.includes('timed out')) {
+        setError(errMsg)
+      } else {
+        setError(errMsg)
+      }
       setLoading(false)
     }
   }
@@ -56,6 +86,10 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
+    if (!email || !password) {
+      setError('Email and password are required')
+      return
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
       return
@@ -65,37 +99,62 @@ export default function LoginPage() {
       return
     }
 
-    setLoading(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
+    try {
+      setLoading(true)
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({ email, password })
 
-    setLoading(false)
-    if (error) {
-      setError(error.message)
-      return
+      setLoading(false)
+      if (error) {
+        if (error.message.includes('Failed to fetch')) {
+          setError('Network error - check your internet connection')
+        } else {
+          setError(error.message)
+        }
+        return
+      }
+
+      setSuccess('Account created! Check your email to confirm, then sign in.')
+      switchTab('signin')
+    } catch (err) {
+      console.error('Sign up error:', err)
+      setError('An error occurred during sign up')
+      setLoading(false)
     }
-
-    setSuccess('Account created! Check your email to confirm, then sign in.')
-    switchTab('signin')
   }
 
   async function handleReset(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`,
-    })
-
-    setLoading(false)
-    if (error) {
-      setError(error.message)
+    if (!email) {
+      setError('Email is required')
       return
     }
 
-    setSuccess('Password reset email sent — check your inbox.')
+    try {
+      setLoading(true)
+      const supabase = createClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      })
+
+      setLoading(false)
+      if (error) {
+        if (error.message.includes('Failed to fetch')) {
+          setError('Network error - check your internet connection')
+        } else {
+          setError(error.message)
+        }
+        return
+      }
+
+      setSuccess('Password reset email sent — check your inbox.')
+    } catch (err) {
+      console.error('Password reset error:', err)
+      setError('An error occurred during password reset')
+      setLoading(false)
+    }
   }
 
   const tabs: { id: Tab; label: string }[] = [
