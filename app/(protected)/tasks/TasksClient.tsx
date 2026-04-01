@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, Plus, LayoutList, Kanban, BarChart2 } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, BarChart2, RefreshCw } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TasksBoard from './TasksBoard'
 import TasksList from './TasksList'
@@ -67,18 +67,27 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
       {/* Page Header */}
       <div className="page-header">
         <h1 className="page-title">Tasks</h1>
-        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+            <button
+              onClick={() => setView('list')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'list' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <LayoutList size={12} /> List
+            </button>
+            <button
+              onClick={() => setView('board')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <Kanban size={12} /> Board
+            </button>
+          </div>
           <button
-            onClick={() => setView('list')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'list' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            onClick={() => router.refresh()}
+            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            title="Refresh tasks"
           >
-            <LayoutList size={12} /> List
-          </button>
-          <button
-            onClick={() => setView('board')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <Kanban size={12} /> Board
+            <RefreshCw size={16} />
           </button>
         </div>
         <Button onClick={() => setShowCreateForm(true)} size="sm">
