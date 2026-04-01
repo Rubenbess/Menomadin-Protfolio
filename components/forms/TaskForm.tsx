@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createTask, updateTask } from '@/actions/tasks'
 import Button from '@/components/ui/Button'
 
@@ -54,18 +55,13 @@ export default function TaskForm({
   onClose,
   onSuccess,
 }: TaskFormProps) {
-  const [title, setTitle] = useState(task?.title ?? '')
-  const [description, setDescription] = useState(task?.description ?? '')
-  const [status, setStatus] = useState(task?.status ?? defaultStatus)
-  const [priority, setPriority] = useState(task?.priority ?? 'medium')
-  const [dueDate, setDueDate] = useState(task?.due_date ?? '')
-  const [companyId, setCompanyId] = useState(task?.company_id ?? '')
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [assigneeId, setAssigneeId] = useState(task?.assignee_id ?? '')
   const [participantIds, setParticipantIds] = useState<string[]>(
     task?.task_participants?.map(p => p.team_member_id) ?? []
   )
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
 
   function toggleParticipant(id: string) {
     setParticipantIds(prev =>
@@ -73,20 +69,31 @@ export default function TaskForm({
     )
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!title.trim()) return
-
     setLoading(true)
     setError(null)
 
+    const fd = new FormData(e.currentTarget)
+    const title = (fd.get('title') as string)?.trim()
+    const description = (fd.get('description') as string)?.trim() || null
+    const status = fd.get('status') as string
+    const priority = fd.get('priority') as string
+    const due_date = (fd.get('due_date') as string) || null
+    const company_id = (fd.get('company_id') as string) || null
+    if (!title) {
+      setError('Title is required')
+      setLoading(false)
+      return
+    }
+
     const data = {
-      title: title.trim(),
-      description: description.trim() || null,
+      title,
+      description,
       status,
       priority,
-      due_date: dueDate || null,
-      company_id: companyId || null,
+      due_date,
+      company_id,
       assignee_id: assigneeId || null,
     }
 
@@ -103,6 +110,7 @@ export default function TaskForm({
         return
       }
 
+      router.refresh()
       onSuccess()
       onClose()
     } catch (err) {
@@ -119,10 +127,10 @@ export default function TaskForm({
         </label>
         <input
           type="text"
+          name="title"
           className="field-input"
           placeholder="Task title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
+          defaultValue={task?.title ?? ''}
           required
           autoFocus
         />
@@ -131,10 +139,10 @@ export default function TaskForm({
       <div>
         <label className="field-label">Description</label>
         <textarea
+          name="description"
           className="field-input min-h-[80px] resize-none"
           placeholder="Optional description..."
-          value={description}
-          onChange={e => setDescription(e.target.value)}
+          defaultValue={task?.description ?? ''}
           rows={3}
         />
       </div>
@@ -143,9 +151,9 @@ export default function TaskForm({
         <div>
           <label className="field-label">Status</label>
           <select
+            name="status"
             className="field-select"
-            value={status}
-            onChange={e => setStatus(e.target.value)}
+            defaultValue={task?.status ?? defaultStatus}
           >
             <option value="not-started">Not Started</option>
             <option value="in-progress">In Progress</option>
@@ -157,9 +165,9 @@ export default function TaskForm({
         <div>
           <label className="field-label">Priority</label>
           <select
+            name="priority"
             className="field-select"
-            value={priority}
-            onChange={e => setPriority(e.target.value)}
+            defaultValue={task?.priority ?? 'medium'}
           >
             <option value="high">High</option>
             <option value="medium">Medium</option>
@@ -172,18 +180,18 @@ export default function TaskForm({
         <label className="field-label">Due Date</label>
         <input
           type="date"
+          name="due_date"
           className="field-input"
-          value={dueDate}
-          onChange={e => setDueDate(e.target.value)}
+          defaultValue={task?.due_date ?? ''}
         />
       </div>
 
       <div>
         <label className="field-label">Company</label>
         <select
+          name="company_id"
           className="field-select"
-          value={companyId}
-          onChange={e => setCompanyId(e.target.value)}
+          defaultValue={task?.company_id ?? ''}
         >
           <option value="">No company</option>
           {companies.map(c => (
@@ -197,6 +205,7 @@ export default function TaskForm({
       <div>
         <label className="field-label">Owner</label>
         <select
+          name="assignee_id"
           className="field-select"
           value={assigneeId}
           onChange={e => setAssigneeId(e.target.value)}
