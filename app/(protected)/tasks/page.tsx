@@ -7,10 +7,21 @@ export const dynamic = 'force-dynamic'
 export default async function TasksPage() {
   const supabase = await createServerSupabaseClient()
 
-  // Fetch tasks with basic data (relations will be fetched separately if needed)
+  // Fetch tasks with relations (assignees and company)
   const { data: tasks, error } = await supabase
     .from('tasks')
-    .select('*')
+    .select(`
+      *,
+      assignees:task_assignees(
+        id,
+        task_id,
+        assigned_to,
+        assigned_at,
+        assigned_by,
+        team_member:team_members(id, name, color)
+      ),
+      company:companies(id, name)
+    `)
     .order('created_at', { ascending: false })
 
   // Fetch all labels for the label selector
