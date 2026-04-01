@@ -74,7 +74,25 @@ export async function createTask(data: {
     link: `/tasks`,
   })
 
-  return { error: null, data: task }
+  // Fetch the complete task with relations
+  const { data: fullTask } = await supabase
+    .from('tasks')
+    .select(`
+      *,
+      assignees:task_assignees(
+        id,
+        task_id,
+        assigned_to,
+        assigned_at,
+        assigned_by,
+        team_member:team_members(id, name, color)
+      ),
+      company:companies(id, name)
+    `)
+    .eq('id', task.id)
+    .single()
+
+  return { error: null, data: fullTask || task }
 }
 
 export async function updateTask(id: string, data: Partial<Task>) {
@@ -95,7 +113,26 @@ export async function updateTask(id: string, data: Partial<Task>) {
   if (error) return { error: error.message, data: null }
 
   revalidatePath('/tasks')
-  return { error: null, data: task }
+
+  // Fetch the complete task with relations
+  const { data: fullTask } = await supabase
+    .from('tasks')
+    .select(`
+      *,
+      assignees:task_assignees(
+        id,
+        task_id,
+        assigned_to,
+        assigned_at,
+        assigned_by,
+        team_member:team_members(id, name, color)
+      ),
+      company:companies(id, name)
+    `)
+    .eq('id', id)
+    .single()
+
+  return { error: null, data: fullTask || task }
 }
 
 export async function deleteTask(id: string) {
