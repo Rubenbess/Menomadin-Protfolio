@@ -64,6 +64,7 @@ export default function TaskForm({
       if (result.data) {
         onTaskCreated(result.data as TaskWithRelations)
       }
+      setLoading(false)
       onClose()
     } catch (err) {
       setError('An unexpected error occurred')
