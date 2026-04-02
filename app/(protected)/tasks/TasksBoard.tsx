@@ -151,7 +151,7 @@ function Column({
       <div
         ref={setNodeRef}
         className={`flex-1 flex flex-col gap-2 min-h-24 rounded-xl p-1.5 transition-colors ${
-          isOver ? 'bg-primary-50 ring-2 ring-violet-200 ring-dashed' : ''
+          isOver ? 'bg-gold-50 ring-2 ring-violet-200 ring-dashed' : ''
         }`}
       >
         {tasks.map(task => (
@@ -168,7 +168,7 @@ function Column({
         {tasks.length === 0 && !isOver && (
           <button
             onClick={() => onAddTask(status)}
-            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-primary-200 hover:text-primary-500 transition-colors"
+            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
           >
             <Plus size={12} /> Add task
           </button>
@@ -267,7 +267,7 @@ export default function TasksBoard({ groupedTasks, onTaskClick, onTaskCreate, on
 
       <DragOverlay>
         {activeTask && (
-          <div className="bg-white rounded-xl border border-primary-200 shadow-xl p-3 w-72 rotate-2 opacity-95">
+          <div className="bg-white rounded-xl border border-gold-200 shadow-xl p-3 w-72 rotate-2 opacity-95">
             <p className="text-sm font-semibold text-slate-900">{activeTask.title}</p>
             {activeTask.priority && (
               <p className="text-xs text-slate-400 mt-0.5">Priority: {activeTask.priority}</p>

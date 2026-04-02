@@ -15,7 +15,7 @@ export default async function TasksSummary() {
       <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6 text-center">
         <CheckSquare size={32} className="mx-auto mb-3 text-slate-300" />
         <p className="text-sm text-slate-500 mb-4">No tasks yet</p>
-        <Link href="/tasks" className="inline-flex items-center text-sm font-semibold text-primary-500 hover:text-primary-600">
+        <Link href="/tasks" className="inline-flex items-center text-sm font-semibold text-gold-500 hover:text-gold-600">
           Create your first task →
         </Link>
       </div>
@@ -48,10 +48,10 @@ export default async function TasksSummary() {
     <div className="space-y-4 mb-6 md:mb-8">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-          <CheckSquare size={16} className="text-primary-500" />
+          <CheckSquare size={16} className="text-gold-500" />
           Tasks Overview
         </h2>
-        <Link href="/tasks" className="text-xs font-medium text-primary-500 hover:text-primary-600">
+        <Link href="/tasks" className="text-xs font-medium text-gold-500 hover:text-gold-600">
           View all →
         </Link>
       </div>

@@ -88,20 +88,20 @@ function NavLinks() {
             className={`
               group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
               ${active
-                ? 'bg-primary-500/15 text-primary-200 shadow-sm'
+                ? 'bg-gold-500/15 text-gold-200 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
               }
             `}
           >
             <Icon
               size={16}
-              className={active ? 'text-primary-300' : 'text-slate-500 group-hover:text-slate-300 transition-colors'}
+              className={active ? 'text-gold-300' : 'text-slate-500 group-hover:text-slate-300 transition-colors'}
             />
             {label}
             {href === '/reminders' && !active && <ReminderBadge />}
             {href === '/tasks' && !active && <TasksBadge />}
             {active && (
-              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-300" />
+              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-gold-300" />
             )}
           </Link>
         )
@@ -129,7 +129,7 @@ export default function Sidebar() {
       {/* Brand */}
       <div className="h-16 flex items-center px-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-500/30">
+          <div className="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-500/30">
             <img
               src="/menomadin-icon.svg"
               alt="Menomadin Group"

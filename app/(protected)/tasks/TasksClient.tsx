@@ -251,7 +251,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               onClick={() => setQuickFilter(tab.id as QuickFilter)}
               className={`px-1 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
                 quickFilter === tab.id
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  ? 'border-gold-500 text-gold-600 dark:text-gold-400'
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
               }`}
             >

@@ -5,7 +5,7 @@ import { CheckCircle2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { submitFounderUpdate } from '@/actions/founder-updates'
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
 
 interface Props {
@@ -65,8 +65,8 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="bg-primary-50 rounded-xl px-4 py-3">
-        <p className="text-xs text-primary-500 font-semibold">
+      <div className="bg-gold-50 rounded-xl px-4 py-3">
+        <p className="text-xs text-gold-500 font-semibold">
           Submitting update for <span className="text-violet-800">{companyName}</span>
         </p>
       </div>

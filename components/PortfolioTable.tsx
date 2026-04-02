@@ -60,7 +60,7 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                         onClick={() => setExpandedId(isExpanded ? null : co.id)}
                         className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
                           isExpanded
-                            ? 'bg-primary-100 text-primary-500'
+                            ? 'bg-gold-100 text-gold-500'
                             : 'text-slate-300 hover:bg-slate-100 hover:text-slate-600'
                         }`}
                         title={isExpanded ? 'Collapse' : 'View investments'}
@@ -80,12 +80,12 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                       {co.logo_url ? (
                         <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
                       ) : (
-                        <div className="w-7 h-7 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
+                        <div className="w-7 h-7 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-gold-500">{co.name[0]}</span>
                         </div>
                       )}
                       <div>
-                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-primary-500 transition-colors">
+                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-gold-500 transition-colors">
                           {co.name}
                         </Link>
                         {co.sector && <p className="text-xs text-slate-400">{co.sector}</p>}
@@ -103,7 +103,7 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
 
                 {/* Expanded investment rows */}
                 {isExpanded && timeline.length > 0 && (
-                  <tr key={`${co.id}-expanded`} className="border-t border-primary-100">
+                  <tr key={`${co.id}-expanded`} className="border-t border-gold-100">
                     <td colSpan={9} className="px-0 py-0">
                       <div className="bg-slate-50/60 border-b border-slate-100">
                         <table className="w-full text-xs">
@@ -124,11 +124,11 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                                 return (
                                   <tr key={`inv-${inv.id}`} className="hover:bg-white/60 transition-colors">
                                     <td className="w-8 pl-8">
-                                      <span className="w-1 h-1 rounded-full bg-primary-300 block mx-auto" />
+                                      <span className="w-1 h-1 rounded-full bg-gold-300 block mx-auto" />
                                     </td>
                                     <td className="px-4 py-2 text-slate-500">{fmtDate(inv.date)}</td>
                                     <td className="px-4 py-2">
-                                      <span className="px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 ring-1 ring-violet-200 font-medium">
+                                      <span className="px-2 py-0.5 rounded-full bg-gold-50 text-gold-600 ring-1 ring-violet-200 font-medium">
                                         {inv.instrument}
                                       </span>
                                     </td>

@@ -103,7 +103,7 @@ export default function TasksFilters({
                   type="checkbox"
                   checked={statusFilter.includes(status)}
                   onChange={() => toggleStatus(status)}
-                  className="w-4 h-4 accent-primary-500"
+                  className="w-4 h-4 accent-gold-500"
                 />
                 <span className={`text-sm font-medium ${STATUS_COLORS[status]}`}>{status}</span>
               </label>
@@ -121,7 +121,7 @@ export default function TasksFilters({
                   type="checkbox"
                   checked={priorityFilter.includes(p.value)}
                   onChange={() => togglePriority(p.value)}
-                  className="w-4 h-4 accent-primary-500"
+                  className="w-4 h-4 accent-gold-500"
                 />
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.label}</span>
               </label>
@@ -154,7 +154,7 @@ export default function TasksFilters({
             type="checkbox"
             checked={includeCompleted}
             onChange={(e) => onIncludeCompletedChange(e.target.checked)}
-            className="w-4 h-4 accent-primary-500"
+            className="w-4 h-4 accent-gold-500"
           />
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show completed</span>
         </label>

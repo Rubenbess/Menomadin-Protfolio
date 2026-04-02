@@ -296,7 +296,7 @@ export default function LPReportClient({
                 onClick={() => setPeriodDays(p.days)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                   periodDays === p.days
-                    ? 'bg-primary-500 text-white'
+                    ? 'bg-gold-500 text-white'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
@@ -308,7 +308,7 @@ export default function LPReportClient({
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
           >
             {exported
               ? <><CheckCircle2 size={14} /> Exported</>
@@ -327,7 +327,7 @@ export default function LPReportClient({
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-primary-200 text-xs font-semibold uppercase tracking-widest mb-2">LP Portfolio Update</p>
+            <p className="text-gold-200 text-xs font-semibold uppercase tracking-widest mb-2">LP Portfolio Update</p>
             <h1 className="text-2xl font-bold tracking-tight">Menomadin Group</h1>
             <p className="text-slate-400 text-sm mt-1">As of {today}</p>
           </div>
@@ -405,7 +405,7 @@ export default function LPReportClient({
                     <div className="flex items-center gap-2.5">
                       {co.logo_url
                         ? <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
-                        : <div className="w-6 h-6 rounded-md bg-primary-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary-500">{co.name[0]}</div>
+                        : <div className="w-6 h-6 rounded-md bg-gold-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-gold-500">{co.name[0]}</div>
                       }
                       <span className="font-semibold text-slate-900 text-sm">{co.name}</span>
                     </div>
@@ -472,7 +472,7 @@ export default function LPReportClient({
                     <div key={u.id} className="px-5 py-3.5 flex items-start gap-4">
                       <p className="text-xs text-slate-400 flex-shrink-0 w-24 pt-0.5">{fmtDate(u.date)}</p>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-primary-500 mb-0.5">{companyName(u.company_id)}</p>
+                        <p className="text-xs font-semibold text-gold-500 mb-0.5">{companyName(u.company_id)}</p>
                         <p className="text-sm font-medium text-slate-800">{u.title}</p>
                         {u.notes && <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{u.notes}</p>}
                       </div>

@@ -175,7 +175,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         {companiesWithMetrics.length === 0 ? (
           <div className="px-5 py-16 text-center">
             <p className="text-sm text-slate-400 mb-4">No companies found.</p>
-            <Link href="/companies" className="inline-flex items-center text-sm font-semibold text-primary-500 hover:text-primary-600">
+            <Link href="/companies" className="inline-flex items-center text-sm font-semibold text-gold-500 hover:text-gold-600">
               Add a company →
             </Link>
           </div>

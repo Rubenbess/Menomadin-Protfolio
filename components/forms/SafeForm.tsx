@@ -80,12 +80,12 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
 
       <div className="flex gap-6 pt-1">
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" className="w-4 h-4 rounded accent-primary-500"
+          <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasMfn} onChange={e => setHasMfn(e.target.checked)} />
           <span className="text-sm text-slate-700 font-medium">MFN Clause</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" className="w-4 h-4 rounded accent-primary-500"
+          <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasProRata} onChange={e => setHasProRata(e.target.checked)} />
           <span className="text-sm text-slate-700 font-medium">Pro-rata Rights</span>
         </label>

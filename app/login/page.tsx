@@ -165,8 +165,8 @@ export default function LoginPage() {
 
   const inputClass =
     'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 ' +
-    'placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 ' +
-    'focus:border-primary-500 focus:bg-white transition-all'
+    'placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 ' +
+    'focus:border-gold-500 focus:bg-white transition-all'
 
   return (
     <div
@@ -198,7 +198,7 @@ export default function LoginPage() {
                 onClick={() => switchTab(t.id)}
                 className={`flex-1 py-3 text-xs font-semibold transition-all ${
                   tab === t.id
-                    ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
+                    ? 'text-gold-500 border-b-2 border-gold-500 -mb-px bg-white'
                     : 'text-slate-400 hover:text-slate-600'
                 }`}
               >
@@ -248,8 +248,8 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl
-                             hover:bg-primary-600 shadow-sm hover:shadow transition-all
+                  className="w-full py-2.5 bg-gold-500 text-white text-sm font-semibold rounded-xl
+                             hover:bg-gold-600 shadow-sm hover:shadow transition-all
                              disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Signing in…' : 'Sign in'}
@@ -301,8 +301,8 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl
-                             hover:bg-primary-600 shadow-sm hover:shadow transition-all
+                  className="w-full py-2.5 bg-gold-500 text-white text-sm font-semibold rounded-xl
+                             hover:bg-gold-600 shadow-sm hover:shadow transition-all
                              disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Creating account…' : 'Create account'}
@@ -335,8 +335,8 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl
-                             hover:bg-primary-600 shadow-sm hover:shadow transition-all
+                  className="w-full py-2.5 bg-gold-500 text-white text-sm font-semibold rounded-xl
+                             hover:bg-gold-600 shadow-sm hover:shadow transition-all
                              disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Sending…' : 'Send reset link'}

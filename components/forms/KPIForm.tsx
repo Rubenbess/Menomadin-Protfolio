@@ -12,7 +12,7 @@ interface Props {
   onClose: () => void
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
 
 // Standard fields always shown
@@ -134,8 +134,8 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
                   disabled={added}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                     added
-                      ? 'bg-primary-50 border-violet-200 text-primary-500 cursor-default'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-500'
+                      ? 'bg-gold-50 border-violet-200 text-gold-500 cursor-default'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-gold-300 hover:text-gold-500'
                   }`}
                 >
                   {added ? '✓ ' : '+ '}{s}
@@ -176,7 +176,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
       <button
         type="button"
         onClick={addCustom}
-        className="flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 font-medium"
+        className="flex items-center gap-1.5 text-xs text-gold-500 hover:text-gold-600 font-medium"
       >
         <Plus size={12} /> Add custom metric
       </button>

@@ -12,7 +12,7 @@ interface Props {
   onClose: () => void
 }
 
-const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
 
 export default function ShareSeriesForm({ companyId, rounds, series, onClose }: Props) {
   const [holderName, setHolderName]       = useState(series?.holder_name ?? '')
@@ -109,7 +109,7 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" className="w-4 h-4 rounded accent-primary-500"
+        <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
           checked={isPreferred} onChange={e => setIsPreferred(e.target.checked)} />
         <span className="text-sm text-slate-700 font-medium">Preferred Shares (has liquidation preference)</span>
       </label>
@@ -151,7 +151,7 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="w-4 h-4 rounded accent-primary-500"
+            <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
               checked={isParticipating} onChange={e => setIsParticipating(e.target.checked)} />
             <span className="text-sm text-slate-700 font-medium">Participating preferred (double-dip)</span>
           </label>

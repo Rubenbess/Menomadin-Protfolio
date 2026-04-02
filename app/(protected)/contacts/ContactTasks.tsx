@@ -99,7 +99,7 @@ export default function ContactTasks({ contactId, contactName }: Props) {
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Follow-up Tasks ({tasks.length})</p>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
+          className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium"
         >
           <Plus size={12} /> New
         </button>
@@ -112,14 +112,14 @@ export default function ContactTasks({ contactId, contactName }: Props) {
             value={newTaskTitle}
             onChange={e => setNewTaskTitle(e.target.value)}
             placeholder={`Follow-up task for ${contactName}…`}
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
+            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
             onKeyPress={e => e.key === 'Enter' && handleCreateTask()}
           />
           <div className="flex gap-2">
             <button
               onClick={handleCreateTask}
               disabled={creating || !newTaskTitle.trim()}
-              className="flex-1 px-3 py-1.5 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors"
+              className="flex-1 px-3 py-1.5 bg-gold-500 text-white rounded-lg text-xs font-semibold hover:bg-gold-600 disabled:opacity-50 transition-colors"
             >
               {creating ? 'Creating…' : 'Create'}
             </button>

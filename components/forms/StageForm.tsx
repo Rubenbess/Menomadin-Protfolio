@@ -59,7 +59,7 @@ export default function StageForm({ stage, nextPosition = 0, onClose }: Props) {
           required
           value={name}
           onChange={e => setName(e.target.value)}
-          className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all"
+          className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all"
           placeholder="e.g. Portfolio Review"
           autoFocus
         />

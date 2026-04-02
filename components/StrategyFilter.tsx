@@ -40,7 +40,7 @@ export default function StrategyFilter() {
             onClick={() => setStrategy(value)}
             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all ${
               current === value
-                ? 'bg-primary-500/15 text-primary-200'
+                ? 'bg-gold-500/15 text-gold-200'
                 : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'
             }`}
           >

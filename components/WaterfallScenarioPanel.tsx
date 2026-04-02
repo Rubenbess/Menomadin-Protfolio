@@ -44,7 +44,7 @@ function ColorBar({ pct, color }: { pct: number; color: string }) {
 }
 
 const BAR_COLORS = [
-  'bg-primary-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500',
+  'bg-gold-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500',
   'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-orange-500',
 ]
 
@@ -111,7 +111,7 @@ export default function WaterfallScenarioPanel({
           {/* Exit value selector */}
           <div>
             <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-              <Zap size={14} className="text-primary-500" /> Model Exit Scenario
+              <Zap size={14} className="text-gold-500" /> Model Exit Scenario
             </p>
             <div className="flex flex-wrap gap-2 mb-3">
               {PRESETS.map(p => (
@@ -120,8 +120,8 @@ export default function WaterfallScenarioPanel({
                   onClick={() => { setExitValue(p.value.toString()); setCustomExit('') }}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                     exitValue === p.value.toString()
-                      ? 'bg-primary-500 text-white border-primary-500'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:text-primary-500'
+                      ? 'bg-gold-500 text-white border-gold-500'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-gold-300 hover:text-gold-500'
                   }`}
                 >
                   {p.label}
@@ -133,7 +133,7 @@ export default function WaterfallScenarioPanel({
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                 <input
                   type="number"
-                  className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
+                  className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
                   placeholder="Custom exit value"
                   value={customExit}
                   onChange={e => { setCustomExit(e.target.value); setExitValue('') }}
@@ -149,8 +149,8 @@ export default function WaterfallScenarioPanel({
           {result && (
             <div className="space-y-4">
               {/* Summary bar */}
-              <div className="bg-primary-50 rounded-xl p-4 ring-1 ring-primary-100">
-                <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-3">
+              <div className="bg-gold-50 rounded-xl p-4 ring-1 ring-gold-100">
+                <p className="text-xs font-semibold text-gold-500 uppercase tracking-wider mb-3">
                   Exit at {fmt$$(result.totalProceeds)} — Distribution
                 </p>
                 <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-3">
@@ -192,7 +192,7 @@ export default function WaterfallScenarioPanel({
                         <td className="px-4 py-3">
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                             h.isPreferred
-                              ? 'bg-primary-100 text-primary-600'
+                              ? 'bg-gold-100 text-gold-600'
                               : 'bg-slate-100 text-slate-600'
                           }`}>
                             {h.shareClass}
@@ -234,7 +234,7 @@ export default function WaterfallScenarioPanel({
                             <span className="text-blue-600 font-medium">Converts ↗</span>
                           )}
                           {!h.isConverting && h.isPreferred && h.proceeds > 0 && (
-                            <span className="text-primary-500">Takes pref.</span>
+                            <span className="text-gold-500">Takes pref.</span>
                           )}
                         </td>
                       </tr>
@@ -254,7 +254,7 @@ export default function WaterfallScenarioPanel({
               <div className="flex items-center gap-2 pt-1">
                 <input
                   type="text"
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
                   placeholder="Name this scenario to save…"
                   value={saveName}
                   onChange={e => setSaveName(e.target.value)}

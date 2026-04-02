@@ -14,7 +14,7 @@ interface Result {
 }
 
 const TYPE_CONFIG = {
-  company: { label: 'Company',  icon: Building2, color: 'text-primary-500 bg-primary-50' },
+  company: { label: 'Company',  icon: Building2, color: 'text-gold-500 bg-gold-50' },
   contact: { label: 'Contact',  icon: Users,     color: 'text-blue-500 bg-blue-50' },
   deal:    { label: 'Deal',     icon: GitMerge,  color: 'text-emerald-500 bg-emerald-50' },
 }
@@ -135,7 +135,7 @@ export default function GlobalSearch() {
                   onClick={() => navigate(r.href)}
                   onMouseEnter={() => setCursor(i)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                    i === cursor ? 'bg-primary-50' : 'hover:bg-slate-50'
+                    i === cursor ? 'bg-gold-50' : 'hover:bg-slate-50'
                   }`}
                 >
                   {r.logo ? (
@@ -163,7 +163,7 @@ export default function GlobalSearch() {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick navigation</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Companies', href: '/companies', icon: Building2, color: 'bg-primary-50 text-primary-500' },
+                { label: 'Companies', href: '/companies', icon: Building2, color: 'bg-gold-50 text-gold-500' },
                 { label: 'Contacts',  href: '/contacts',  icon: Users,     color: 'bg-blue-50 text-blue-600' },
                 { label: 'Pipeline',  href: '/pipeline',  icon: GitMerge,  color: 'bg-emerald-50 text-emerald-600' },
               ].map(({ label, href, icon: Icon, color }) => (

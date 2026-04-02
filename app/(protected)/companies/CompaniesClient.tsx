@@ -48,7 +48,7 @@ function FilterSelect({
         onClick={() => setOpen(v => !v)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${
           active
-            ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
+            ? 'bg-gold-500 text-white border-gold-500 shadow-sm'
             : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-800'
         }`}
       >
@@ -69,7 +69,7 @@ function FilterSelect({
                 onClick={() => { onChange(opt === value ? '' : opt); setOpen(false) }}
                 className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                   opt === value
-                    ? 'bg-primary-50 text-primary-600 font-medium'
+                    ? 'bg-gold-50 text-gold-600 font-medium'
                     : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
@@ -192,7 +192,7 @@ export default function CompaniesClient({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search companies…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 transition-all"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -254,7 +254,7 @@ export default function CompaniesClient({
             description={hasActiveFilters ? 'Try adjusting your filters to find what you\'re looking for.' : 'Start building your portfolio by adding your first company.'}
             action={
               hasActiveFilters ? (
-                <button onClick={clearAll} className="text-sm text-primary-500 dark:text-primary-300 hover:underline">
+                <button onClick={clearAll} className="text-sm text-gold-500 dark:text-gold-300 hover:underline">
                   Clear filters
                 </button>
               ) : (
@@ -285,7 +285,7 @@ export default function CompaniesClient({
                       )}
                       <Link
                         href={`/companies/${co.id}`}
-                        className="text-base font-semibold text-slate-900 hover:text-primary-500 transition-colors leading-snug"
+                        className="text-base font-semibold text-slate-900 hover:text-gold-500 transition-colors leading-snug"
                       >
                         {co.name}
                       </Link>
@@ -323,8 +323,8 @@ export default function CompaniesClient({
                   <div className="pt-2 border-t border-slate-100 space-y-1.5">
                     {coContacts.map(contact => (
                       <div key={contact.id} className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User size={11} className="text-primary-500" />
+                        <div className="w-6 h-6 bg-gold-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User size={11} className="text-gold-500" />
                         </div>
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-slate-800">{contact.name}</span>
@@ -381,11 +381,11 @@ export default function CompaniesClient({
                         {co.logo_url ? (
                           <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
                         ) : (
-                          <div className="w-6 h-6 rounded-md bg-primary-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
+                          <div className="w-6 h-6 rounded-md bg-gold-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-bold text-gold-500">{co.name[0]}</span>
                           </div>
                         )}
-                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-primary-500 transition-colors">
+                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-gold-500 transition-colors">
                           {co.name}
                         </Link>
                       </div>

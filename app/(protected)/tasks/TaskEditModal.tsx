@@ -14,7 +14,7 @@ interface Props {
   teamMembers: { id: string; name: string; color: string }[]
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:focus:border-primary-500 focus:bg-white dark:focus:bg-slate-700 transition-all'
+const inp = 'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 dark:focus:border-gold-500 focus:bg-white dark:focus:bg-slate-700 transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5'
 
 export default function TaskEditModal({
@@ -138,7 +138,7 @@ export default function TaskEditModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about this task..."
               rows={3}
-              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:focus:border-primary-500 focus:bg-white dark:focus:bg-slate-700 transition-all resize-none"
+              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 dark:focus:border-gold-500 focus:bg-white dark:focus:bg-slate-700 transition-all resize-none"
             />
           </div>
 
@@ -219,7 +219,7 @@ export default function TaskEditModal({
                         }
                         setSelectedAssignees(newAssignees)
                       }}
-                      className="w-4 h-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-300 text-gold-500 focus:ring-gold-500 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
                     />
                     <span className="text-sm text-slate-700 dark:text-slate-300">{member.name}</span>
                   </label>

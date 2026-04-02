@@ -89,7 +89,7 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
         {/* Scenario inputs */}
         <div>
           <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <Calculator size={15} className="text-primary-500" />
+            <Calculator size={15} className="text-gold-500" />
             Model next round
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -108,19 +108,19 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
 
         {/* Result */}
         {result && (
-          <div className="bg-primary-50 rounded-xl p-4 ring-1 ring-violet-200 space-y-3">
-            <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-gold-50 rounded-xl p-4 ring-1 ring-violet-200 space-y-3">
+            <p className="text-xs font-semibold text-gold-500 uppercase tracking-wider flex items-center gap-1.5">
               <Zap size={12} /> Conversion result
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Effective Conversion Val.</p>
                 <p className="text-sm font-bold text-slate-900">{fmt$$(result.effectiveVal)}</p>
-                <p className="text-[11px] text-primary-500 mt-0.5">{MECH_LABELS[result.mechanism]}</p>
+                <p className="text-[11px] text-gold-500 mt-0.5">{MECH_LABELS[result.mechanism]}</p>
               </div>
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Our Ownership</p>
-                <p className="text-lg font-bold text-primary-600">{fmtPct(result.ownershipPct)}</p>
+                <p className="text-lg font-bold text-gold-600">{fmtPct(result.ownershipPct)}</p>
               </div>
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Stake Value (post-round)</p>
