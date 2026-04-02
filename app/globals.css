@@ -1,57 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --brand: 139 92 246;       /* violet-500 */
-    --brand-dark: 109 40 217;  /* violet-700 */
-    --sidebar-bg: #0d0d1a;
-    --sidebar-border: rgba(255,255,255,0.06);
+    --brand: 212 165 116;      /* brand-400 warm gold */
+    --brand-dark: 122 90 46;   /* brand-700 dark gold */
+    --sidebar-bg: #1a1f35;
+    --sidebar-border: rgba(255,255,255,0.08);
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 antialiased;
+    @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+
+  h1 { @apply text-3xl md:text-4xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
+  h4 { @apply text-lg md:text-xl; }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 dark:bg-slate-700 rounded-full;
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-300 dark:bg-slate-600;
+    @apply bg-slate-400 dark:bg-slate-500;
   }
 }
 
 @layer components {
   .page-header {
-    @apply flex flex-wrap items-center justify-between gap-3 mb-6 md:mb-8;
+    @apply flex flex-wrap items-center justify-between gap-4 mb-8 md:mb-10 px-6 pt-6;
   }
   .page-title {
-    @apply text-xl md:text-2xl font-bold text-slate-900 tracking-tight;
+    @apply text-3xl md:text-4xl font-display font-semibold text-slate-900 dark:text-slate-50 tracking-tight;
   }
   .section-title {
-    @apply text-sm font-semibold text-slate-700 mb-3;
+    @apply text-sm font-semibold text-slate-600 dark:text-slate-400 mb-4 uppercase tracking-widest;
   }
 
   /* Card base */
   .card {
-    @apply bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.04];
+    @apply bg-white dark:bg-slate-900 rounded-2xl shadow-card hover:shadow-card-hover ring-1 ring-slate-200 dark:ring-slate-800 transition-shadow duration-300;
   }
 
   /* Table styles */
@@ -59,29 +68,29 @@
     @apply w-full text-sm;
   }
   .data-table thead tr {
-    @apply border-b border-slate-100 bg-slate-50/80;
+    @apply border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50;
   }
   .data-table thead th {
-    @apply text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider;
+    @apply text-left px-5 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest;
   }
   .data-table tbody tr {
-    @apply border-b border-slate-50 hover:bg-slate-50/60 transition-colors;
+    @apply border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors duration-150;
   }
   .data-table tbody td {
-    @apply px-5 py-3.5;
+    @apply px-5 py-4;
   }
 
   /* Form fields */
   .field-label {
-    @apply block text-sm font-medium text-slate-700 mb-1.5;
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2;
   }
   .field-input {
-    @apply w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900
-           placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30
-           focus:border-violet-500 transition-all;
+    @apply w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100
+           placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-300/50 dark:focus:ring-brand-400/30
+           focus:border-brand-400 dark:focus:border-brand-500 transition-all duration-200;
   }
   .field-select {
-    @apply w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900
-           focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 transition-all;
+    @apply w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100
+           focus:outline-none focus:ring-2 focus:ring-brand-300/50 dark:focus:ring-brand-400/30 focus:border-brand-400 dark:focus:border-brand-500 transition-all duration-200;
   }
 }

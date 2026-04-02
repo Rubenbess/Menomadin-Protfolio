@@ -73,42 +73,43 @@ export default function TasksFilters({
   const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || companyFilter
 
   return (
-    <aside className="w-56 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto flex flex-col">
+    <aside className="w-56 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 overflow-y-auto flex flex-col">
       {/* Stats */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Active</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.active}</p>
+      <div className="p-5 border-b border-slate-200 dark:border-slate-800">
+        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4">Summary</p>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Active</p>
+            <p className="text-2xl font-display font-semibold text-slate-900 dark:text-white mt-1">{stats.active}</p>
           </div>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Completed</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Done</p>
+            <p className="text-2xl font-display font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{stats.completed}</p>
           </div>
           {stats.overdue > 0 && (
-            <div className="col-span-2">
-              <p className="text-slate-500 dark:text-slate-400 text-xs">Overdue</p>
-              <p className="text-lg font-bold text-red-600 dark:text-red-400">{stats.overdue} tasks</p>
+            <div className="col-span-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900">
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Overdue</p>
+              <p className="text-lg font-display font-semibold text-red-600 dark:text-red-400 mt-1">{stats.overdue}</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex-1 p-4 space-y-6">
+      <div className="flex-1 p-5 space-y-6">
         {/* Status Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2.5">Status</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Status</h3>
+          <div className="space-y-2.5">
             {STATUSES.map(status => (
-              <label key={status} className="flex items-center gap-2 cursor-pointer">
+              <label key={status} className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={statusFilter.includes(status)}
                   onChange={() => toggleStatus(status)}
-                  className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
-                <span className={`text-sm ${STATUS_COLORS[status]}`}>{status}</span>
+                <span className={`text-sm font-medium transition-colors ${STATUS_COLORS[status]}`}>{status}</span>
               </label>
             ))}
           </div>
@@ -116,17 +117,17 @@ export default function TasksFilters({
 
         {/* Priority Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2.5">Priority</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Priority</h3>
+          <div className="space-y-2.5">
             {PRIORITIES.map(p => (
-              <label key={p.value} className="flex items-center gap-2 cursor-pointer">
+              <label key={p.value} className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={priorityFilter.includes(p.value)}
                   onChange={() => togglePriority(p.value)}
-                  className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
-                <span className="text-sm text-slate-700 dark:text-slate-300">{p.label}</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.label}</span>
               </label>
             ))}
           </div>
@@ -135,11 +136,11 @@ export default function TasksFilters({
         {/* Company Filter */}
         {companies.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2.5">Company</h3>
+            <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Company</h3>
             <select
               value={companyFilter}
               onChange={(e) => onCompanyChange(e.target.value)}
-              className="w-full px-2 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="field-select"
             >
               <option value="">All companies</option>
               {companies.map(company => (
@@ -152,25 +153,25 @@ export default function TasksFilters({
         )}
 
         {/* Completed Filter */}
-        <div>
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="pt-2">
+          <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={includeCompleted}
               onChange={(e) => onIncludeCompletedChange(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+              className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-sm text-slate-700 dark:text-slate-300">Show completed</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show completed</span>
           </label>
         </div>
       </div>
 
       {/* Clear Filters */}
       {hasActiveFilters && (
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <button
             onClick={clearAllFilters}
-            className="w-full text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 font-medium"
+            className="w-full text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-semibold transition-colors"
           >
             Clear all filters
           </button>
