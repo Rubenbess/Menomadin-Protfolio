@@ -129,8 +129,8 @@ function ReportCard({ title, description, onExcel, onPDF }: ReportCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-          <FileText size={16} className="text-violet-600" />
+        <div className="w-9 h-9 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0">
+          <FileText size={16} className="text-brand-500" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
@@ -152,7 +152,7 @@ function ReportCard({ title, description, onExcel, onPDF }: ReportCardProps) {
         <button
           onClick={() => handle('pdf')}
           disabled={!!loading}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold border border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 transition-all disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold border border-violet-200 text-brand-600 bg-brand-50 hover:bg-brand-100 transition-all disabled:opacity-50"
         >
           {pdfDone
             ? <><CheckCircle2 size={13} /> Downloaded</>
@@ -451,21 +451,21 @@ export default function ReportsClient({ companies, rounds, investments, capTable
           className="flex items-center justify-between bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 hover:shadow-card-hover transition-shadow group"
         >
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Users size={16} className="text-violet-600" />
+            <div className="w-9 h-9 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Users size={16} className="text-brand-500" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-slate-900">LP Portfolio Update</h3>
               <p className="text-xs text-slate-400 mt-0.5">Live report with highlights, KPIs and portfolio metrics — export to PDF</p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-violet-600 group-hover:text-violet-700 flex-shrink-0 ml-4">Open →</span>
+          <span className="text-xs font-semibold text-brand-500 group-hover:text-brand-600 flex-shrink-0 ml-4">Open →</span>
         </Link>
       </div>
 
       {/* Full pack */}
       <div className="mb-4">
-        <div className="bg-gradient-to-r from-violet-600 to-violet-700 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-r from-brand-500 to-brand-600 rounded-2xl p-5 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
             <div>
               <h3 className="text-sm font-bold">Full Portfolio Pack</h3>
@@ -526,8 +526,8 @@ function DownloadButton({ label, onClick, color }: { label: string; onClick: () 
 
   const base = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all'
   const cls  = color === 'white'
-    ? `${base} bg-white text-violet-700 hover:bg-violet-50`
-    : `${base} bg-violet-500 text-white hover:bg-violet-400 ring-1 ring-white/20`
+    ? `${base} bg-white text-brand-600 hover:bg-brand-50`
+    : `${base} bg-brand-500 text-white hover:bg-brand-300 ring-1 ring-white/20`
 
   return (
     <button onClick={handle} disabled={loading} className={cls}>

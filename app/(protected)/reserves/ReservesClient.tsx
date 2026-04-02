@@ -29,7 +29,7 @@ function pct(deployed: number, planned: number) {
 
 function barColor(p: number) {
   if (p >= 100) return 'bg-emerald-500'
-  if (p >= 75)  return 'bg-violet-500'
+  if (p >= 75)  return 'bg-brand-500'
   if (p >= 40)  return 'bg-blue-400'
   return 'bg-slate-300'
 }
@@ -44,8 +44,8 @@ function CompanyAvatar({ co }: { co: CompanySnippet }) {
     <img src={co.logo_url} alt={co.name} className="w-8 h-8 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-200 flex-shrink-0" />
   )
   return (
-    <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
-      <span className="text-xs font-bold text-violet-600">{co.name[0]}</span>
+    <div className="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+      <span className="text-xs font-bold text-brand-500">{co.name[0]}</span>
     </div>
   )
 }
@@ -74,7 +74,7 @@ function ReserveRow({
         <div className="flex items-center gap-2.5">
           <CompanyAvatar co={co} />
           <div>
-            <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-violet-600 transition-colors">
+            <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-brand-500 transition-colors">
               {co.name}
             </Link>
             <p className="text-xs text-slate-400">{co.sector}</p>
@@ -188,7 +188,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Total Planned',   value: fmt$$(totalPlanned),  sub: `${withReserve.length} companies`, accent: 'text-violet-600' },
+          { label: 'Total Planned',   value: fmt$$(totalPlanned),  sub: `${withReserve.length} companies`, accent: 'text-brand-500' },
           { label: 'Total Deployed',  value: fmt$$(totalDeployed), sub: `${overallPct}% of reserves`,      accent: 'text-blue-600' },
           { label: 'Remaining',       value: fmt$$(totalRemain),   sub: 'available to deploy',              accent: 'text-emerald-600' },
           { label: 'No Reserve Set',  value: String(withoutReserve.length), sub: 'companies',              accent: 'text-slate-400' },
@@ -206,7 +206,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
         <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 mb-5">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="font-semibold text-slate-700">Portfolio Reserve Deployment</span>
-            <span className="font-bold text-violet-600">{overallPct}% deployed</span>
+            <span className="font-bold text-brand-500">{overallPct}% deployed</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-3">
             <div
@@ -271,14 +271,14 @@ export default function ReservesClient({ companies, reserves }: Props) {
               >
                 <CompanyAvatar co={co} />
                 <div className="flex-1 min-w-0">
-                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-violet-600 transition-colors truncate block">
+                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-brand-500 transition-colors truncate block">
                     {co.name}
                   </Link>
                   <p className="text-xs text-slate-400">{co.sector}</p>
                 </div>
                 <button
                   onClick={() => setAddTarget(co)}
-                  className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 opacity-0 group-hover:opacity-100 transition-opacity bg-violet-50 px-2.5 py-1.5 rounded-lg"
+                  className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-brand-500 hover:text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity bg-brand-50 px-2.5 py-1.5 rounded-lg"
                 >
                   <TrendingUp size={12} /> Set reserve
                 </button>
@@ -292,7 +292,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {withReserve.length === 0 && withoutReserve.length === 0 && (
         <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
           <p className="text-sm text-slate-400 mb-4">No portfolio companies yet.</p>
-          <Link href="/companies" className="text-sm font-semibold text-violet-600 hover:underline">
+          <Link href="/companies" className="text-sm font-semibold text-brand-500 hover:underline">
             Add companies →
           </Link>
         </div>

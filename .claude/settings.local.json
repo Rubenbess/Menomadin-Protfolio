@@ -51,7 +51,8 @@
       "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/contacts/)",
       "Bash(wc -l c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/TaskDetailModal.tsx)",
       "Bash(curl -s -m 5 http://localhost:3000/login)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3006/tasks)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

@@ -28,7 +28,7 @@ import type { PipelineEntry } from '@/lib/types'
 const COLOR_HEADER: Record<string, string> = {
   slate:  'bg-slate-100 text-slate-700 border-slate-200',
   blue:   'bg-blue-100 text-blue-700 border-blue-200',
-  indigo: 'bg-violet-100 text-violet-700 border-violet-200',
+  indigo: 'bg-brand-100 text-brand-600 border-violet-200',
   purple: 'bg-purple-100 text-purple-700 border-purple-200',
   amber:  'bg-amber-100 text-amber-700 border-amber-200',
   orange: 'bg-orange-100 text-orange-700 border-orange-200',
@@ -39,7 +39,7 @@ const COLOR_HEADER: Record<string, string> = {
 const COLOR_DOT: Record<string, string> = {
   slate:  'bg-slate-400',
   blue:   'bg-blue-500',
-  indigo: 'bg-violet-500',
+  indigo: 'bg-brand-500',
   purple: 'bg-purple-500',
   amber:  'bg-amber-400',
   orange: 'bg-orange-400',
@@ -226,7 +226,7 @@ function DealPanel({
             onClick={() => setTab('details')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'details'
-                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                ? 'text-brand-500 border-b-2 border-brand-500 -mb-px bg-white'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -236,7 +236,7 @@ function DealPanel({
             onClick={() => setTab('tasks')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'tasks'
-                ? 'text-violet-600 border-b-2 border-violet-500 -mb-px bg-white'
+                ? 'text-brand-500 border-b-2 border-brand-500 -mb-px bg-white'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -298,7 +298,7 @@ function DealPanel({
                   href={entry.deck_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-600 hover:underline"
                 >
                   <Paperclip size={13} /> View deck
                 </a>
@@ -337,7 +337,7 @@ function DealPanel({
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button
             onClick={() => { onClose(); onEdit(entry) }}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors"
           >
             <Pencil size={14} /> Edit deal
           </button>
@@ -411,7 +411,7 @@ function DealCard({
               <span className="text-xs bg-slate-100 text-slate-600 rounded-lg px-2 py-0.5">{entry.stage}</span>
             )}
             {askLabel && (
-              <span className="text-xs bg-violet-50 text-violet-600 rounded-lg px-2 py-0.5">{askLabel}</span>
+              <span className="text-xs bg-brand-50 text-brand-500 rounded-lg px-2 py-0.5">{askLabel}</span>
             )}
           </div>
           {entry.internal_score != null && entry.internal_score > 0 && (
@@ -518,7 +518,7 @@ function Column({
       <div
         ref={setNodeRef}
         className={`flex-1 flex flex-col gap-2 min-h-24 rounded-xl p-1.5 transition-colors ${
-          isOver ? 'bg-violet-50 ring-2 ring-violet-200 ring-dashed' : ''
+          isOver ? 'bg-brand-50 ring-2 ring-violet-200 ring-dashed' : ''
         }`}
       >
         {entries.map(entry => (
@@ -535,7 +535,7 @@ function Column({
         {entries.length === 0 && !isOver && (
           <button
             onClick={() => onAddCard(stage.name)}
-            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-violet-300 hover:text-violet-500 transition-colors"
+            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-brand-200 hover:text-brand-500 transition-colors"
           >
             <Plus size={12} /> Add deal
           </button>
@@ -606,13 +606,13 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
         <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
           <button
             onClick={() => setView('board')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Plus size={12} /> Board
           </button>
           <button
             onClick={() => setView('analytics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <BarChart2 size={12} /> Analytics
           </button>
@@ -653,7 +653,7 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
           <div className="flex-shrink-0 w-64">
             <button
               onClick={() => setShowAddStage(true)}
-              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-violet-300 hover:text-violet-500 transition-colors"
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-brand-200 hover:text-brand-500 transition-colors"
             >
               <Plus size={15} /> Add stage
             </button>
@@ -662,7 +662,7 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
 
         <DragOverlay>
           {activeEntry && (
-            <div className="bg-white rounded-xl border border-violet-300 shadow-xl p-3 w-64 rotate-2 opacity-95">
+            <div className="bg-white rounded-xl border border-brand-200 shadow-xl p-3 w-64 rotate-2 opacity-95">
               <p className="text-sm font-semibold text-slate-900">{activeEntry.name}</p>
               {activeEntry.sector && (
                 <p className="text-xs text-slate-400 mt-0.5">{activeEntry.sector}</p>

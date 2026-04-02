@@ -322,7 +322,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                 key={s}
                 onClick={() => setStrategy(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  strategy === s ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  strategy === s ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 {s === 'all' ? 'All' : s === 'impact' ? 'Impact' : 'Ventures'}
@@ -351,7 +351,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
           <button
             onClick={() => setOnlyWithData(v => !v)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
-              onlyWithData ? 'bg-violet-600 text-white border-transparent' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-700'
+              onlyWithData ? 'bg-brand-500 text-white border-transparent' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-700'
             }`}
           >
             <Filter size={12} /> With data
@@ -406,12 +406,12 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                           {co.logo_url ? (
                             <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
                           ) : (
-                            <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
-                              <span className="text-xs font-bold text-violet-600">{co.name[0]}</span>
+                            <div className="w-7 h-7 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-bold text-brand-500">{co.name[0]}</span>
                             </div>
                           )}
                           <div>
-                            <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-violet-600 transition-colors">
+                            <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-brand-500 transition-colors">
                               {co.name}
                             </Link>
                             <div className="flex items-center gap-1.5 mt-0.5">
@@ -448,7 +448,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                       ) : (
                         <td colSpan={8} className="px-4 py-3.5 text-center text-xs text-slate-300">
                           No KPI data —{' '}
-                          <Link href={`/companies/${co.id}`} className="text-violet-400 hover:text-violet-600 hover:underline">
+                          <Link href={`/companies/${co.id}`} className="text-brand-300 hover:text-brand-500 hover:underline">
                             add from company page
                           </Link>
                         </td>

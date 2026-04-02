@@ -260,8 +260,8 @@ function TrelloImport() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-violet-600">
+        <div className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-brand-500">
             <rect x="2" y="2" width="9" height="14" rx="2" fill="currentColor" opacity="0.8"/>
             <rect x="13" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
           </svg>
@@ -281,17 +281,17 @@ function TrelloImport() {
           className={`
             relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all
             ${dragOver
-              ? 'border-violet-400 bg-violet-50'
-              : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'}
+              ? 'border-brand-300 bg-brand-50'
+              : 'border-slate-200 hover:border-brand-200 hover:bg-slate-50'}
           `}
         >
           <input ref={inputRef} type="file" accept=".json" onChange={handleFileInput} className="hidden" />
           <div className="flex flex-col items-center gap-3">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-violet-100' : 'bg-slate-100'}`}>
-              <Upload size={22} className={dragOver ? 'text-violet-600' : 'text-slate-500'} />
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-brand-100' : 'bg-slate-100'}`}>
+              <Upload size={22} className={dragOver ? 'text-brand-500' : 'text-slate-500'} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Drop your Trello JSON here, or <span className="text-violet-600">browse</span></p>
+              <p className="text-sm font-semibold text-slate-900">Drop your Trello JSON here, or <span className="text-brand-500">browse</span></p>
               <p className="text-xs text-slate-400 mt-1">Export from Trello: Board → Share → Export as JSON</p>
             </div>
           </div>
@@ -299,10 +299,10 @@ function TrelloImport() {
       )}
 
       {status === 'uploading' && (
-        <div className="border-2 border-dashed border-violet-300 bg-violet-50/60 rounded-2xl p-10 text-center">
+        <div className="border-2 border-dashed border-brand-200 bg-brand-50/60 rounded-2xl p-10 text-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-violet-100 rounded-2xl flex items-center justify-center">
-              <Upload size={22} className="text-violet-600 animate-bounce" />
+            <div className="w-12 h-12 bg-brand-100 rounded-2xl flex items-center justify-center">
+              <Upload size={22} className="text-brand-500 animate-bounce" />
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-900">Importing {fileName}…</p>
@@ -314,20 +314,20 @@ function TrelloImport() {
 
       {status === 'success' && results && (
         <div className="space-y-4">
-          <div className="bg-violet-50 ring-1 ring-violet-200 rounded-2xl p-5">
+          <div className="bg-brand-50 ring-1 ring-violet-200 rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-4">
-              <CheckCircle2 size={20} className="text-violet-600 flex-shrink-0" />
+              <CheckCircle2 size={20} className="text-brand-500 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-violet-800">Trello import successful</p>
-                <p className="text-xs text-violet-500 mt-0.5">{fileName}</p>
+                <p className="text-xs text-brand-500 mt-0.5">{fileName}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white rounded-xl p-3 ring-1 ring-violet-100">
+              <div className="bg-white rounded-xl p-3 ring-1 ring-brand-100">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stages</p>
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">{results.stagesCreated} created</p>
               </div>
-              <div className="bg-white rounded-xl p-3 ring-1 ring-violet-100">
+              <div className="bg-white rounded-xl p-3 ring-1 ring-brand-100">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Deals</p>
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">{results.cardsCreated} imported</p>
               </div>

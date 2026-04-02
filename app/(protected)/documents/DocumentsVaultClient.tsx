@@ -19,7 +19,7 @@ const CATEGORIES: DocumentCategory[] = [
 ]
 
 const CAT_COLORS: Record<DocumentCategory, string> = {
-  'Term Sheet':           'bg-violet-100 text-violet-700',
+  'Term Sheet':           'bg-brand-100 text-brand-600',
   'SHA':                  'bg-blue-100 text-blue-700',
   'Investment Agreement': 'bg-emerald-100 text-emerald-700',
   'Board Minutes':        'bg-amber-100 text-amber-700',
@@ -43,7 +43,7 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white transition-all'
+const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-white transition-all'
 const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
 
 // ── Upload Modal ─────────────────────────────────────────────────────────────
@@ -106,9 +106,9 @@ function UploadModal({
           onChange={e => setFile(e.target.files?.[0] ?? null)}
         />
         {file ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 bg-violet-50 border border-violet-200 rounded-xl">
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-brand-50 border border-violet-200 rounded-xl">
             <span>{fileIcon(file.name)}</span>
-            <span className="text-sm text-violet-700 flex-1 truncate">{file.name}</span>
+            <span className="text-sm text-brand-600 flex-1 truncate">{file.name}</span>
             <button type="button" onClick={() => setFile(null)} className="text-slate-400 hover:text-red-500">
               <X size={14} />
             </button>
@@ -117,7 +117,7 @@ function UploadModal({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-full flex items-center justify-center gap-2 py-8 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-violet-300 hover:text-violet-500 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-8 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-brand-200 hover:text-brand-500 transition-colors"
           >
             <Upload size={18} /> Click to select file
           </button>
@@ -174,7 +174,7 @@ function PdfPreview({ url, name, onClose }: { url: string; name: string; onClose
             <span className="text-sm font-semibold text-slate-800 truncate max-w-xs">{name}</span>
           </div>
           <div className="flex items-center gap-2">
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 font-medium">
               Open <ExternalLink size={12} />
             </a>
             <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
@@ -283,7 +283,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search documents…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -293,7 +293,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         </div>
 
         {uniqueCompanies.length > 0 && (
-          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 cursor-pointer">
+          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/30 cursor-pointer">
             <option value="">All companies</option>
             {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -348,7 +348,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                       className="flex items-center gap-2.5 text-left group"
                     >
                       <span className="text-lg flex-shrink-0">{fileIcon(doc.file_name)}</span>
-                      <span className="font-medium text-slate-800 group-hover:text-violet-600 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
+                      <span className="font-medium text-slate-800 group-hover:text-brand-500 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
                     </button>
                   </td>
                   <td className="px-4 py-3.5">
@@ -389,7 +389,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-colors"
                         title="Open"
                       >
                         <ExternalLink size={13} />

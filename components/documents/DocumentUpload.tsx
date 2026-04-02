@@ -114,7 +114,7 @@ export default function DocumentUpload({ companyId, documents }: Props) {
               <div className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-slate-50/60 transition-colors">
                 <span className="text-lg flex-shrink-0">{fileIcon(doc.file_name)}</span>
                 <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                  className="flex-1 text-sm font-medium text-slate-700 hover:text-violet-600 truncate transition-colors">
+                  className="flex-1 text-sm font-medium text-slate-700 hover:text-brand-500 truncate transition-colors">
                   {doc.file_name}
                 </a>
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -124,8 +124,8 @@ export default function DocumentUpload({ companyId, documents }: Props) {
                     disabled={extracting === doc.id}
                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       doc.extracted_data
-                        ? 'text-violet-600 bg-violet-50 hover:bg-violet-100'
-                        : 'text-slate-500 hover:text-violet-600 hover:bg-violet-50'
+                        ? 'text-brand-500 bg-brand-50 hover:bg-brand-100'
+                        : 'text-slate-500 hover:text-brand-500 hover:bg-brand-50'
                     }`}
                     title={doc.extracted_data ? 'View extracted data' : 'Extract with AI'}
                   >
@@ -175,7 +175,7 @@ export default function DocumentUpload({ companyId, documents }: Props) {
                       <ul className="space-y-1.5">
                         {doc.extracted_data.key_points.map((pt, i) => (
                           <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-300 flex-shrink-0" />
                             {pt}
                           </li>
                         ))}
@@ -186,7 +186,7 @@ export default function DocumentUpload({ companyId, documents }: Props) {
                   <button
                     onClick={() => handleExtract(doc)}
                     disabled={extracting === doc.id}
-                    className="text-xs text-slate-400 hover:text-violet-600 transition-colors"
+                    className="text-xs text-slate-400 hover:text-brand-500 transition-colors"
                   >
                     Re-extract
                   </button>

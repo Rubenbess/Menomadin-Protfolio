@@ -103,7 +103,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
               {unread > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium px-2 py-1 rounded-lg hover:bg-violet-50 transition-colors"
+                  className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 font-medium px-2 py-1 rounded-lg hover:bg-brand-50 transition-colors"
                 >
                   <CheckCheck size={12} /> Mark all read
                 </button>
@@ -125,7 +125,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
               notifications.map(n => (
                 <div
                   key={n.id}
-                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50/60 ${n.read ? 'bg-white' : 'bg-violet-50/40'}`}
+                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50/60 ${n.read ? 'bg-white' : 'bg-brand-50/40'}`}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{TYPE_ICONS[n.type] ?? '🔔'}</span>
                   <div className="flex-1 min-w-0">
@@ -141,7 +141,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
                     {!n.read && (
                       <button
                         onClick={() => handleMarkRead(n.id)}
-                        className="p-1.5 text-slate-300 hover:text-violet-600 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-300 hover:text-brand-500 rounded-lg transition-colors"
                         title="Mark as read"
                       >
                         <Check size={12} />
@@ -156,7 +156,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
                     </button>
                   </div>
                   {!n.read && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 flex-shrink-0 mt-1.5" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0 mt-1.5" />
                   )}
                 </div>
               ))

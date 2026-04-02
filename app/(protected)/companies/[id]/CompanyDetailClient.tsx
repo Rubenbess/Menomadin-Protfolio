@@ -174,7 +174,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           <div
             key={label}
             className={`bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-4 border-t-2 ${
-              accent === 'violet'  ? 'border-t-violet-500'  :
+              accent === 'violet'  ? 'border-t-brand-500'  :
               accent === 'emerald' ? 'border-t-emerald-500' :
               accent === 'blue'    ? 'border-t-blue-500'    :
               accent === 'orange'  ? 'border-t-orange-400'  :
@@ -196,7 +196,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-violet-600 text-violet-600'
+                  ? 'border-brand-500 text-brand-500'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
               }`}
             >
@@ -252,7 +252,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   {company.board_seat ? (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                       company.board_seat === 'Board Seat'
-                        ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
+                        ? 'bg-brand-100 text-brand-600 ring-1 ring-violet-200'
                         : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
                     }`}>
                       {company.board_seat}
@@ -407,7 +407,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 ].map(({ label, value, highlight, accent }) => (
                                   <div key={label}>
                                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                                    <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
+                                    <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-brand-600' : 'text-slate-900'}`}>{value}</p>
                                   </div>
                                 ))}
                               </div>
@@ -417,7 +417,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 <div className="flex items-center gap-1 justify-end">
                                   <button
                                     onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-all"
                                   ><Pencil size={12} /></button>
                                   <button
                                     onClick={async e => {
@@ -459,7 +459,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               <p className="text-sm font-bold text-slate-900">{round.type}</p>
                               <p className="text-xs text-slate-400 mt-0.5">{fmtDate(round.date)}</p>
                               {instrument && (
-                                <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 ring-1 ring-violet-200">
+                                <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-600 ring-1 ring-violet-200">
                                   {instrument}
                                 </span>
                               )}
@@ -477,7 +477,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               ].map(({ label, value, highlight, accent }) => (
                                 <div key={label}>
                                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                                  <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-violet-700' : 'text-slate-900'}`}>{value}</p>
+                                  <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-brand-600' : 'text-slate-900'}`}>{value}</p>
                                 </div>
                               ))}
                             </div>
@@ -499,7 +499,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                   <div className="flex items-center gap-3 text-xs text-slate-500">
                                     <span>{fmtDate(inv.date)}</span>
                                     <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
-                                    <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
+                                    <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 ring-1 ring-violet-200">{inv.instrument}</span>
                                     {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
                                   </div>
                                   <button
@@ -525,7 +525,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                             <div className="flex items-center gap-3 text-xs text-slate-500">
                               <span>{fmtDate(inv.date)}</span>
                               <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
-                              <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">{inv.instrument}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 ring-1 ring-violet-200">{inv.instrument}</span>
                               {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
                             <button
@@ -635,8 +635,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                     })}
                     {/* Custom KPIs from latest snapshot */}
                     {latest.custom_kpis && Object.entries(latest.custom_kpis).map(([k, v]) => (
-                      <div key={k} className="bg-violet-50 rounded-xl px-4 py-3 ring-1 ring-violet-100">
-                        <p className="text-xs font-semibold text-violet-400 uppercase tracking-wider mb-0.5">{k}</p>
+                      <div key={k} className="bg-brand-50 rounded-xl px-4 py-3 ring-1 ring-brand-100">
+                        <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider mb-0.5">{k}</p>
                         <p className="text-sm font-bold text-slate-900">{v}</p>
                       </div>
                     ))}
@@ -702,7 +702,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   <div key={u.id} className="flex gap-4 group">
                     {/* Timeline line */}
                     <div className="flex flex-col items-center flex-shrink-0">
-                      <div className="w-2.5 h-2.5 rounded-full bg-violet-500 mt-1.5 flex-shrink-0 ring-2 ring-white" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0 ring-2 ring-white" />
                       {i < updates.length - 1 && <div className="w-px flex-1 bg-slate-200 my-1" />}
                     </div>
                     {/* Content */}
@@ -768,7 +768,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                         )}
                       </div>
                     </div>
-                    <Link href="/tasks" className="text-xs text-violet-600 hover:text-violet-700 font-medium">
+                    <Link href="/tasks" className="text-xs text-brand-500 hover:text-brand-600 font-medium">
                       View
                     </Link>
                   </div>
