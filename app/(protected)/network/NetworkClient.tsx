@@ -40,8 +40,8 @@ function Avatar({ co }: { co: CompanySnippet }) {
     )
   }
   return (
-    <div className="w-5 h-5 rounded-md bg-brand-100 flex items-center justify-center flex-shrink-0">
-      <span className="text-[9px] font-bold text-brand-500">{co.name[0]}</span>
+    <div className="w-5 h-5 rounded-md bg-primary-100 flex items-center justify-center flex-shrink-0">
+      <span className="text-[9px] font-bold text-primary-500">{co.name[0]}</span>
     </div>
   )
 }
@@ -70,7 +70,7 @@ function CoInvestorCard({
       onClick={onClick}
       className={`bg-white rounded-2xl p-5 cursor-pointer transition-all ring-1 ${
         selected
-          ? 'ring-brand-300 shadow-lg shadow-brand-100'
+          ? 'ring-primary-300 shadow-lg shadow-primary-100'
           : isHighlighted
           ? 'ring-black/[0.04] shadow-card-hover'
           : 'ring-black/[0.04] shadow-card hover:shadow-card-hover hover:ring-slate-200'
@@ -92,7 +92,7 @@ function CoInvestorCard({
             <p className="text-sm font-bold text-slate-900 leading-tight">{node.name}</p>
           </div>
         </div>
-        <span className="flex-shrink-0 text-xs font-semibold bg-brand-100 text-brand-600 rounded-full px-2.5 py-0.5">
+        <span className="flex-shrink-0 text-xs font-semibold bg-primary-100 text-primary-600 rounded-full px-2.5 py-0.5">
           {total} {total === 1 ? 'deal' : 'deals'}
         </span>
       </div>
@@ -140,10 +140,10 @@ function CoInvestorCard({
             key={co.id}
             href={`/companies/${co.id}`}
             onClick={e => e.stopPropagation()}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-brand-50 hover:text-brand-600 group/chip transition-colors"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-primary-50 hover:text-primary-600 group/chip transition-colors"
           >
             <Avatar co={co} />
-            <span className="text-xs font-medium text-slate-700 group-hover/chip:text-brand-600 transition-colors truncate">{co.name}</span>
+            <span className="text-xs font-medium text-slate-700 group-hover/chip:text-primary-600 transition-colors truncate">{co.name}</span>
             <span className={`ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
               co.strategy === 'impact' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'
             }`}>
@@ -246,7 +246,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search co-investors or companies…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -293,19 +293,19 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
 
       {/* Selected investor detail banner */}
       {selectedNode && (
-        <div className="mb-5 bg-brand-50 rounded-2xl border border-violet-200 px-5 py-4">
+        <div className="mb-5 bg-primary-50 rounded-2xl border border-violet-200 px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-brand-500 uppercase tracking-wider mb-0.5">Selected co-investor</p>
+              <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-0.5">Selected co-investor</p>
               <p className="text-base font-bold text-violet-900">{selectedNode.name}</p>
-              <p className="text-xs text-brand-500 mt-1">
+              <p className="text-xs text-primary-500 mt-1">
                 Co-invested in {selectedNode.companies.length} portfolio {selectedNode.companies.length === 1 ? 'company' : 'companies'}
                 {siblingInvestors.size > 0 && ` · shares deals with ${siblingInvestors.size} other investor${siblingInvestors.size !== 1 ? 's' : ''}`}
               </p>
             </div>
             <button
               onClick={() => setSelectedInvestor(null)}
-              className="p-1.5 text-brand-300 hover:text-brand-600 hover:bg-brand-100 rounded-lg transition-colors flex-shrink-0"
+              className="p-1.5 text-primary-300 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors flex-shrink-0"
             >
               <X size={14} />
             </button>
@@ -313,13 +313,13 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
 
           {siblingInvestors.size > 0 && (
             <div className="mt-3 pt-3 border-t border-violet-200">
-              <p className="text-xs text-brand-500 font-medium mb-2">Co-appears with:</p>
+              <p className="text-xs text-primary-500 font-medium mb-2">Co-appears with:</p>
               <div className="flex flex-wrap gap-1.5">
                 {[...siblingInvestors].map(inv => (
                   <button
                     key={inv}
                     onClick={() => setSelectedInvestor(inv)}
-                    className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 hover:bg-violet-200 transition-colors font-medium"
+                    className="text-xs px-2.5 py-1 rounded-full bg-primary-100 text-primary-600 hover:bg-violet-200 transition-colors font-medium"
                   >
                     {inv}
                   </button>
@@ -365,7 +365,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
               <Link
                 key={co.id}
                 href={`/companies/${co.id}`}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 hover:text-brand-500 hover:border-violet-200 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 hover:text-primary-500 hover:border-violet-200 transition-colors"
               >
                 <Avatar co={co} />
                 {co.name}

@@ -97,7 +97,7 @@ export default function TaskTemplates({ templates }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {templates.map(template => (
-          <div key={template.id} className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+          <div key={template.id} className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-500 transition-colors">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <h4 className="font-medium text-slate-900 dark:text-white">{template.name}</h4>

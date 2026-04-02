@@ -48,7 +48,7 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                   className="hover:bg-slate-50 transition-colors group cursor-pointer"
                 >
                   <td className="px-5 py-4">
-                    <p className="text-sm font-medium text-slate-900 group-hover:text-brand-500 group-hover:underline transition-colors">{task.title}</p>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-primary-500 group-hover:underline transition-colors">{task.title}</p>
                   </td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
@@ -71,7 +71,7 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onTaskClick(task)}
-                      className="hover:text-brand-500 transition-colors"
+                      className="hover:text-primary-500 transition-colors"
                       title="Click to edit due date"
                     >
                       {task.due_date ? (
@@ -103,7 +103,7 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onTaskClick(task)}
-                      className="text-sm text-slate-600 hover:text-brand-500 transition-colors"
+                      className="text-sm text-slate-600 hover:text-primary-500 transition-colors"
                       title="Click to edit company"
                     >
                       {task.company ? (

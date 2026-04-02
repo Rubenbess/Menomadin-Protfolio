@@ -161,12 +161,12 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                   const barWidth = Math.min(100, pct)
 
                   return (
-                    <tr key={s.id} className="group hover:bg-brand-50/30 transition-colors">
+                    <tr key={s.id} className="group hover:bg-primary-50/30 transition-colors">
                       <td className={td + ' font-medium text-slate-900'}>{s.holder_name}</td>
                       <td className={td}>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           s.is_preferred
-                            ? 'bg-brand-100 text-brand-600'
+                            ? 'bg-primary-100 text-primary-600'
                             : 'bg-slate-100 text-slate-600'
                         }`}>
                           {s.share_class}
@@ -183,7 +183,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                         <div className="flex items-center gap-2">
                           <div className="flex-1 max-w-[80px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${s.is_preferred ? 'bg-brand-500' : 'bg-blue-400'}`}
+                              className={`h-full rounded-full ${s.is_preferred ? 'bg-primary-500' : 'bg-blue-400'}`}
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
@@ -210,7 +210,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                         <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
                           <button
                             onClick={() => { setEditingSeries(s); setShowAddSeries(true) }}
-                            className="p-1.5 text-slate-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-all"
+                            className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-all"
                           ><Pencil size={12} /></button>
                           <button
                             onClick={() => handleDeleteSeries(s.id)}
@@ -257,7 +257,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                         <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
                           <button
                             onClick={() => { setEditingPool(pool); setShowAddPool(true) }}
-                            className="p-1.5 text-slate-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-all"
+                            className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-all"
                           ><Pencil size={12} /></button>
                           <button
                             onClick={() => handleDeletePool(pool.id)}

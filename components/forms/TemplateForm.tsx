@@ -139,7 +139,7 @@ export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
           id="isPublic"
           checked={isPublic}
           onChange={e => setIsPublic(e.target.checked)}
-          className="w-4 h-4 accent-brand-500"
+          className="w-4 h-4 accent-primary-500"
         />
         <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Make public (share with team)
@@ -150,7 +150,7 @@ export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
         <button
           type="submit"
           disabled={saving || !name.trim() || !taskTitle.trim()}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-lg text-sm font-semibold hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <Save size={16} /> {saving ? 'Saving…' : template ? 'Update' : 'Create'}
         </button>

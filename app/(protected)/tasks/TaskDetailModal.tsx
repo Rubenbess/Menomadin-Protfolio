@@ -241,7 +241,7 @@ export default function TaskDetailModal({
                 {currentTask.company && (
                   <a
                     href={`/companies/${currentTask.company.id}`}
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-200 dark:hover:border-brand-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-primary-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ export default function TaskDetailModal({
                 {currentTask.pipeline_deal && (
                   <a
                     href="/pipeline"
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-200 dark:hover:border-brand-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-primary-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ export default function TaskDetailModal({
                 {currentTask.contact && (
                   <a
                     href="/contacts"
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-200 dark:hover:border-brand-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-primary-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">

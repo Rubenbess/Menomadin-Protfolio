@@ -165,7 +165,7 @@ export default function DebugPage() {
         <div className="pt-4 border-t border-slate-700">
           <h3 className="text-slate-300 font-medium mb-2">Next Steps:</h3>
           <ol className="text-sm text-slate-400 space-y-1 list-decimal list-inside">
-            <li>Go to <a href="https://supabase.com/dashboard" target="_blank" className="text-brand-300 hover:underline">Supabase Dashboard</a></li>
+            <li>Go to <a href="https://supabase.com/dashboard" target="_blank" className="text-primary-300 hover:underline">Supabase Dashboard</a></li>
             <li>Select your project</li>
             <li>Settings → API</li>
             <li>Copy Project URL and Anon Key</li>
@@ -183,7 +183,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...`}
         <div className="pt-4">
           <a
             href="/login"
-            className="block text-center bg-brand-500 hover:bg-brand-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="block text-center bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Back to Login
           </a>

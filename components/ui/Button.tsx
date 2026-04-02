@@ -10,13 +10,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-brand-500 text-white hover:bg-brand-600 shadow-md hover:shadow-lg focus:ring-brand-400/40 border-0 font-semibold',
+    'bg-primary-500 text-white hover:bg-primary-600 shadow-subtle hover:shadow-card focus:ring-primary-500/50 border-0 font-bold',
   secondary:
-    'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 border-0 font-semibold shadow-sm',
+    'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 border-0 font-bold',
   ghost:
-    'bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-300 border-0',
+    'bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-300 border-0 font-bold',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg focus:ring-red-500/40 border-0 font-semibold',
+    'bg-accent-500 text-white hover:bg-accent-600 shadow-subtle hover:shadow-card focus:ring-accent-500/50 border-0 font-bold',
 }
 
 const sizes = {

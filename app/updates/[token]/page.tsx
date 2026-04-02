@@ -25,7 +25,7 @@ export default async function FounderUpdatePage({ params }: { params: Promise<{ 
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
             <img src="/menomadin-icon.svg" alt="" className="h-4 w-4 invert" />
             Menomadin Group
           </div>

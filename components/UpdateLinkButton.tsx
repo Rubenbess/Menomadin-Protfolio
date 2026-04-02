@@ -56,7 +56,7 @@ export default function UpdateLinkButton({ companyId, existingToken }: Props) {
               <p className="text-xs text-slate-600 flex-1 truncate font-mono">{link}</p>
               <button
                 onClick={copyLink}
-                className="flex-shrink-0 p-1.5 text-slate-500 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-colors"
+                className="flex-shrink-0 p-1.5 text-slate-500 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
               >
                 {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
               </button>

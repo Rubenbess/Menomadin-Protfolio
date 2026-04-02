@@ -21,7 +21,7 @@ const STATUSES = ['active', 'exited', 'written-off', 'watchlist']
 const ENTRY_STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Late Stage', 'Other']
 const LS_KEY = 'custom_sectors'
 
-const input = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-white transition-all'
+const input = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
 const label = 'block text-sm font-medium text-slate-700 mb-1.5'
 
 function loadCustomSectors(): string[] {
@@ -199,7 +199,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
                       key={s}
                       type="button"
                       onClick={() => { setSelectedSector(s); setSectorDropdownOpen(false) }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors ${selectedSector === s ? 'text-brand-500 font-medium bg-brand-50' : 'text-slate-700'}`}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors ${selectedSector === s ? 'text-primary-500 font-medium bg-primary-50' : 'text-slate-700'}`}
                     >
                       {s}
                     </button>
@@ -213,16 +213,16 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
                         value={customSectorInput}
                         onChange={e => setCustomSectorInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSector() } if (e.key === 'Escape') { setAddingCustom(false); setCustomSectorInput('') } }}
-                        className="flex-1 px-2.5 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                        className="flex-1 px-2.5 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="New sector name…"
                       />
-                      <button type="button" onClick={handleAddCustomSector} className="px-2.5 py-1.5 text-xs bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">Add</button>
+                      <button type="button" onClick={handleAddCustomSector} className="px-2.5 py-1.5 text-xs bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Add</button>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setAddingCustom(true)}
-                      className="w-full flex items-center gap-1.5 px-3 py-2 text-sm text-brand-500 hover:bg-brand-50 transition-colors font-medium"
+                      className="w-full flex items-center gap-1.5 px-3 py-2 text-sm text-primary-500 hover:bg-primary-50 transition-colors font-medium"
                     >
                       <Plus size={13} /> Add custom sector
                     </button>
@@ -281,7 +281,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-sm text-slate-400 hover:border-brand-300 hover:text-brand-500 transition-all"
+              className="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-sm text-slate-400 hover:border-primary-300 hover:text-primary-500 transition-all"
             >
               <Upload size={14} /> Upload image…
             </button>
@@ -327,7 +327,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           <button
             type="button"
             onClick={() => setCoInvestors(prev => [...prev, ''])}
-            className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 font-medium"
+            className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
           >
             <Plus size={12} /> Add
           </button>
@@ -363,7 +363,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           <button
             type="button"
             onClick={addContact}
-            className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 font-medium"
+            className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
           >
             <Plus size={12} /> Add contact
           </button>

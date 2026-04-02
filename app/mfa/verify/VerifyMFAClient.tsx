@@ -58,7 +58,7 @@ export default function VerifyMFAClient() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-card ring-1 ring-black/[0.06] mb-4 mx-auto">
-            <ShieldCheck size={28} className="text-brand-500" />
+            <ShieldCheck size={28} className="text-primary-500" />
           </div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Two-factor authentication</h1>
           <p className="text-sm text-slate-400 mt-1">Enter the 6-digit code from your authenticator app</p>
@@ -77,7 +77,7 @@ export default function VerifyMFAClient() {
                 value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
-                className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xl font-mono text-center tracking-[0.4em] text-slate-900 placeholder:text-slate-300 placeholder:tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-white transition-all"
+                className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xl font-mono text-center tracking-[0.4em] text-slate-900 placeholder:text-slate-300 placeholder:tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all"
               />
             </div>
 
@@ -90,7 +90,7 @@ export default function VerifyMFAClient() {
             <button
               type="submit"
               disabled={loading || code.length !== 6}
-              className="w-full py-2.5 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl hover:bg-primary-600 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Verifying…' : 'Verify'}
             </button>

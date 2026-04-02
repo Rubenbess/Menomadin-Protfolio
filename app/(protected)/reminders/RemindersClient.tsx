@@ -17,7 +17,7 @@ type Item = { type: 'reminder'; data: Reminder } | { type: 'task'; data: Task }
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Follow-up':        'bg-brand-100 text-brand-600',
+  'Follow-up':        'bg-primary-100 text-primary-600',
   'Board Meeting':    'bg-blue-100 text-blue-700',
   'Report Due':       'bg-amber-100 text-amber-700',
   'KPI Review':       'bg-emerald-100 text-emerald-700',
@@ -97,7 +97,7 @@ function ReminderRow({
         className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors mt-0.5 ${
           reminder.completed
             ? 'bg-emerald-500 border-emerald-500 text-white'
-            : 'border-slate-300 hover:border-brand-300'
+            : 'border-slate-300 hover:border-primary-300'
         }`}
       >
         {reminder.completed && <Check size={10} />}
@@ -116,7 +116,7 @@ function ReminderRow({
 
         <div className="flex items-center gap-3 mt-1 flex-wrap">
           {companyName && (
-            <span className="text-xs text-brand-500 font-medium">{companyName}</span>
+            <span className="text-xs text-primary-500 font-medium">{companyName}</span>
           )}
           <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${dueBadge}`}>
             {status === 'overdue'
@@ -188,7 +188,7 @@ function TaskRow({
         className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors mt-0.5 ${
           isCompleted
             ? 'bg-emerald-500 border-emerald-500 text-white'
-            : 'border-slate-300 hover:border-brand-300'
+            : 'border-slate-300 hover:border-primary-300'
         }`}
       >
         {isCompleted && <Check size={10} />}
@@ -200,14 +200,14 @@ function TaskRow({
           <p className={`text-sm font-semibold ${isCompleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
             {task.title}
           </p>
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-brand-100 text-brand-600">
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-primary-100 text-primary-600">
             Task
           </span>
         </div>
 
         <div className="flex items-center gap-3 mt-1 flex-wrap">
           {companyName && (
-            <span className="text-xs text-brand-500 font-medium">{companyName}</span>
+            <span className="text-xs text-primary-500 font-medium">{companyName}</span>
           )}
           {task.priority && (
             <TaskPriorityBadge priority={task.priority} />

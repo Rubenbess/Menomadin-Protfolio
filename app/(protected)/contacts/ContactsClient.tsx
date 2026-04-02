@@ -32,7 +32,7 @@ interface Props {
 
 function avatarColor(name: string) {
   const colors = [
-    'bg-brand-100 text-brand-600',
+    'bg-primary-100 text-primary-600',
     'bg-blue-100 text-blue-700',
     'bg-emerald-100 text-emerald-700',
     'bg-amber-100 text-amber-700',
@@ -81,7 +81,7 @@ function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: 
     onDone()
   }
 
-  const inp = 'px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-white transition-all'
+  const inp = 'px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
 
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-3">
@@ -100,7 +100,7 @@ function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: 
         placeholder="What was discussed…"
       />
       <div className="flex gap-2">
-        <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-brand-500 text-white rounded-xl text-xs font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors">
+        <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-primary-500 text-white rounded-xl text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors">
           {saving ? 'Saving…' : 'Log interaction'}
         </button>
         <button type="button" onClick={onDone} className="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
@@ -151,7 +151,7 @@ function ContactPanel({
               {contact.position && <p className="text-sm text-slate-500 mt-0.5">{contact.position}</p>}
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {contact.companies && (
-                  <p className="text-xs text-brand-500 font-medium flex items-center gap-1">
+                  <p className="text-xs text-primary-500 font-medium flex items-center gap-1">
                     <Building2 size={11} /> {contact.companies.name}
                   </p>
                 )}
@@ -177,7 +177,7 @@ function ContactPanel({
             onClick={() => setTab('interactions')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'interactions'
-                ? 'text-brand-500 border-b-2 border-brand-500 -mb-px bg-white'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -187,7 +187,7 @@ function ContactPanel({
             onClick={() => setTab('tasks')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'tasks'
-                ? 'text-brand-500 border-b-2 border-brand-500 -mb-px bg-white'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -204,15 +204,15 @@ function ContactPanel({
           {/* Contact info */}
           <div className="space-y-2.5">
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors group">
-                <Mail size={15} className="text-slate-400 group-hover:text-brand-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 group-hover:text-brand-600 truncate">{contact.email}</span>
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-primary-50 hover:text-primary-600 transition-colors group">
+                <Mail size={15} className="text-slate-400 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-slate-700 group-hover:text-primary-600 truncate">{contact.email}</span>
               </a>
             )}
             {contact.phone && (
-              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors group">
-                <Phone size={15} className="text-slate-400 group-hover:text-brand-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 group-hover:text-brand-600">{contact.phone}</span>
+              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-primary-50 hover:text-primary-600 transition-colors group">
+                <Phone size={15} className="text-slate-400 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-slate-700 group-hover:text-primary-600">{contact.phone}</span>
               </a>
             )}
             {contact.address && (
@@ -261,7 +261,7 @@ function ContactPanel({
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Interaction Log</p>
               <button
                 onClick={() => setShowAddInteraction(v => !v)}
-                className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 font-medium"
+                className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
               >
                 <Plus size={12} /> Log
               </button>
@@ -318,7 +318,7 @@ function ContactPanel({
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button
             onClick={() => { onClose(); onEdit(contact) }}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-xl text-sm font-semibold hover:bg-primary-600 transition-colors"
           >
             <Pencil size={14} /> Edit contact
           </button>
@@ -396,7 +396,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, email, company…"
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -406,14 +406,14 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
           </div>
 
           {/* Contact type filter */}
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 cursor-pointer">
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 cursor-pointer">
             <option value="">All types</option>
             {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
 
           {/* Company filter */}
           {uniqueCompanies.length > 0 && (
-            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 cursor-pointer">
+            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 cursor-pointer">
               <option value="">All companies</option>
               {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -421,7 +421,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
 
           {/* Owner filter */}
           {uniqueOwners.length > 0 && (
-            <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 cursor-pointer">
+            <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 cursor-pointer">
               <option value="">All owners</option>
               {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
@@ -505,7 +505,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                     </td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">
                       {contact.email ? (
-                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-slate-600 hover:text-brand-500 transition-colors flex items-center gap-1.5">
+                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-slate-600 hover:text-primary-500 transition-colors flex items-center gap-1.5">
                           <Mail size={12} className="text-slate-300 flex-shrink-0" />
                           {contact.email}
                         </a>
@@ -530,7 +530,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => { setEditContact(contact); setShowForm(true) }}
-                          className="p-1.5 text-slate-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
                         >
                           <Pencil size={13} />
                         </button>

@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-white transition-all'
+const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white transition-all'
 
 export default function OptionPoolForm({ companyId, pool, onClose }: Props) {
   const [name, setName]               = useState(pool?.name ?? 'ESOP')

@@ -6,7 +6,7 @@ interface MetricCardProps {
 }
 
 const accentBorder: Record<string, string> = {
-  violet:  'border-t-brand-500',
+  violet:  'border-t-primary-500',
   emerald: 'border-t-emerald-500',
   blue:    'border-t-blue-500',
   amber:   'border-t-amber-500',
