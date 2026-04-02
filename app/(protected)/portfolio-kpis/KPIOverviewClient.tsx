@@ -305,8 +305,8 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
   const totalArr = Object.values(latestKPIs).reduce((s, k) => s + (k.arr ?? 0), 0)
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header mb-6">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Portfolio KPIs</h1>
           <p className="text-sm text-slate-400 mt-0.5">
@@ -361,32 +361,34 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
         </div>
       </div>
 
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+
       {view === 'chart' ? (
         /* ── Chart view ─────────────────────────────────────────────────── */
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6">
+        <div className="card p-6">
           <h2 className="text-sm font-semibold text-slate-900 mb-1">Portfolio ARR Over Time</h2>
           <p className="text-xs text-slate-400 mb-5">Stacked area — each layer = one company's ARR</p>
           <PortfolioArrChart companies={companies} kpisByCompany={kpisByCompany} />
         </div>
       ) : (
         /* ── Table view ─────────────────────────────────────────────────── */
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
+        <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider sticky left-0 bg-slate-50/70">Company</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">ARR</th>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest sticky left-0 bg-slate-50 dark:bg-slate-900/50">Company</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">ARR</th>
                   <th className="px-2 py-3 w-14" />
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Revenue</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Burn /mo</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Runway</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Headcount</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Gross Margin</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Updated</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Revenue</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Burn /mo</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Runway</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Headcount</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Gross Margin</th>
+                  <th className="text-right px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Updated</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody>
                 {filtered.map(co => {
                   const kpi    = latestKPIs[co.id]
                   const allKpis = kpisByCompany[co.id] ?? []
@@ -400,7 +402,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                     .filter((v): v is number => v != null)
 
                   return (
-                    <tr key={co.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={co.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
                       <td className="px-5 py-3.5 sticky left-0 bg-white">
                         <div className="flex items-center gap-3">
                           {co.logo_url ? (
@@ -488,6 +490,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
       <p className="text-xs text-slate-400 mt-3">
         CSV import format: <code className="bg-slate-100 px-1 rounded text-slate-600">company, date, arr, revenue, burn_rate, cash_runway, headcount, gross_margin</code>
       </p>
+      </div>
     </div>
   )
 }

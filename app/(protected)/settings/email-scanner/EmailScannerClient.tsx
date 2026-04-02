@@ -62,8 +62,8 @@ export default function EmailScannerClient({ searchParams }: Props) {
   }
 
   return (
-    <div className="max-w-xl animate-fade-in">
-      <div className="page-header mb-6">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Email Scanner</h1>
           <p className="text-sm text-slate-400 mt-0.5">
@@ -71,6 +71,8 @@ export default function EmailScannerClient({ searchParams }: Props) {
           </p>
         </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {alert && (
         <div className={`mb-5 flex items-center gap-3 rounded-2xl px-4 py-3 ring-1 ${
@@ -109,7 +111,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
       </div>
 
       {/* How it works */}
-      <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-5 mb-5">
+      <div className="card p-5 mb-5">
         <h2 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
           <Zap size={15} className="text-gold-500" />
           How it works
@@ -134,7 +136,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
 
       {/* Action */}
       {!loading && (
-        <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-5">
+        <div className="card p-5">
           {integration ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -196,6 +198,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
           )}
         </div>
       )}
+      </div>
     </div>
   )
 }

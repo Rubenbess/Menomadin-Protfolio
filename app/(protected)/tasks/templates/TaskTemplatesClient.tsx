@@ -65,7 +65,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
 
   if (templates.length === 0 && !showForm && !editTemplate) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
         <div className="page-header border-b border-slate-200 dark:border-slate-800">
           <div>
             <h1 className="page-title">Task Templates</h1>
@@ -76,6 +76,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
           </Button>
         </div>
 
+        <div className="flex-1 overflow-y-auto px-6 py-6">
         {showForm ? (
           <TemplateForm onSuccess={handleCreateTemplate} onCancel={() => setShowForm(false)} />
         ) : (
@@ -90,12 +91,13 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
             }
           />
         )}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
       <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -109,7 +111,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
         )}
       </div>
 
-      <div className="flex-1 overflow-auto px-6 py-8">
+      <div className="flex-1 overflow-y-auto px-6 py-8">
         {/* Form */}
         {(showForm || editTemplate) && (
           <div className="card p-6 mb-8">

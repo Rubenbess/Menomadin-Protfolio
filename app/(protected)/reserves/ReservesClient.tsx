@@ -68,7 +68,7 @@ function ReserveRow({
   const overDep  = reserve.deployed_amount > reserve.reserved_amount
 
   return (
-    <tr className="hover:bg-slate-50/60 transition-colors group">
+    <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200 group">
       {/* Company */}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2.5">
@@ -177,13 +177,15 @@ export default function ReservesClient({ companies, reserves }: Props) {
   const editReserve = editTarget ? reserveMap.get(editTarget.id) : undefined
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Follow-on Reserves</h1>
           <p className="text-sm text-slate-400 mt-0.5">Planned vs deployed capital per portfolio company</p>
         </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -203,7 +205,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
 
       {/* Overall progress bar */}
       {totalPlanned > 0 && (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 mb-5">
+        <div className="card p-5 mb-5">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="font-semibold text-slate-700">Portfolio Reserve Deployment</span>
             <span className="font-bold text-gold-500">{overallPct}% deployed</span>
@@ -223,25 +225,25 @@ export default function ReservesClient({ companies, reserves }: Props) {
 
       {/* Reserves table */}
       {withReserve.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden mb-6">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900">Reserve Allocations</h2>
-            <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded-full px-2.5 py-0.5">{withReserve.length}</span>
+        <div className="card overflow-hidden mb-6">
+          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Reserve Allocations</h2>
+            <span className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full px-2.5 py-0.5">{withReserve.length}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Company</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Strategy</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Round</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Planned</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Deployed</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Remaining</th>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Company</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Strategy</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Target Round</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Planned</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Deployed</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Remaining</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody>
                 {withReserve.map(co => (
                   <ReserveRow
                     key={co.id}
@@ -290,7 +292,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
 
       {/* Empty state */}
       {withReserve.length === 0 && withoutReserve.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-20 text-center">
+        <div className="card px-5 py-20 text-center">
           <p className="text-sm text-slate-400 mb-4">No portfolio companies yet.</p>
           <Link href="/companies" className="text-sm font-semibold text-gold-500 hover:underline">
             Add companies →
@@ -320,6 +322,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
           />
         )}
       </Modal>
+      </div>
     </div>
   )
 }

@@ -214,13 +214,15 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
   const mostActive = nodes[0]
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Co-investor Network</h1>
           <p className="text-sm text-slate-400 mt-0.5">Syndicate relationships across portfolio</p>
         </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -332,7 +334,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
 
       {/* Cards grid */}
       {filteredNodes.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] px-5 py-16 text-center">
+        <div className="card px-5 py-16 text-center">
           <p className="text-sm text-slate-400">
             {nodes.length === 0
               ? 'No co-investor data yet. Add co-investors to companies to see the network.'
@@ -374,6 +376,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

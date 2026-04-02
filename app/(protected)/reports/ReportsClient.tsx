@@ -421,16 +421,18 @@ export default function ReportsClient({ companies, rounds, investments, capTable
   const overallMoic      = totalInvested > 0 ? totalValue / totalInvested : 0
 
   return (
-    <div className="max-w-3xl animate-fade-in">
-      <div className="page-header">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Reports</h1>
           <p className="text-sm text-slate-400 mt-1">Download portfolio reports as Excel or PDF</p>
         </div>
       </div>
 
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+
       {/* Summary bar */}
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="card p-5 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Companies',       value: companies.length },
           { label: 'Total Invested',  value: fmt$(totalInvested) },
@@ -448,7 +450,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
       <div className="mb-4">
         <Link
           href="/reports/lp-update"
-          className="flex items-center justify-between bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 hover:shadow-card-hover transition-shadow group"
+          className="flex items-center justify-between card p-5 hover:shadow-md transition-shadow group"
         >
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 bg-gold-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -506,6 +508,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
           onExcel={capTableExcel}
           onPDF={capTablePDF}
         />
+      </div>
       </div>
     </div>
   )

@@ -124,35 +124,39 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const td = 'px-5 py-3.5'
 
   return (
-    <div className="animate-fade-in">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Back + header */}
-      <div className="mb-7">
-        <Link
-          href="/companies"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 transition-colors mb-4"
-        >
-          <ArrowLeft size={14} /> Companies
-        </Link>
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+        <div className="flex-1">
+          <Link
+            href="/companies"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mb-3"
+          >
+            <ArrowLeft size={14} /> Companies
+          </Link>
 
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{company.name}</h1>
-              <Badge value={company.status} />
-              <Badge value={company.strategy} type="strategy" />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="page-title">{company.name}</h1>
+                <Badge value={company.status} />
+                <Badge value={company.strategy} type="strategy" />
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                {company.sector}{company.hq ? ` · ${company.hq}` : ''}
+              </p>
             </div>
-            <p className="text-sm text-slate-400 mt-1">
-              {company.sector}{company.hq ? ` · ${company.hq}` : ''}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <UpdateLinkButton companyId={company.id} existingToken={company.update_token ?? null} />
-            <Button variant="secondary" size="sm" onClick={() => setShowEdit(true)}>
-              <Pencil size={13} /> Edit
-            </Button>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <UpdateLinkButton companyId={company.id} existingToken={company.update_token ?? null} />
+          <Button variant="secondary" size="sm" onClick={() => setShowEdit(true)}>
+            <Pencil size={13} /> Edit
+          </Button>
+        </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {/* KPI bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
@@ -173,7 +177,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         ].map(({ label, value, accent }) => (
           <div
             key={label}
-            className={`bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-4 border-t-2 ${
+            className={`card p-4 border-t-2 ${
               accent === 'violet'  ? 'border-t-gold-500'  :
               accent === 'emerald' ? 'border-t-emerald-500' :
               accent === 'blue'    ? 'border-t-blue-500'    :
@@ -181,8 +185,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                      'border-t-amber-500'
             }`}
           >
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
-            <p className="mt-1.5 text-xl font-bold text-slate-900">{value}</p>
+            <p className="section-title">{label}</p>
+            <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-white">{value}</p>
           </div>
         ))}
       </div>
@@ -212,7 +216,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       </div>
 
       {/* Tab content */}
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04]">
+      <div className="card">
 
         {/* OVERVIEW */}
         {activeTab === 'overview' && (
@@ -777,6 +781,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             )}
           </div>
         )}
+      </div>
       </div>
 
       {/* Modals */}

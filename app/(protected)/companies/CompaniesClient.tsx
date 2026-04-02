@@ -154,16 +154,20 @@ export default function CompaniesClient({
   }
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Companies</h1>
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+        <div className="flex-1">
+          <h1 className="page-title">Companies</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Manage your portfolio companies</p>
+        </div>
         <Button onClick={() => setShowAdd(true)}>
           <Plus size={15} /> Add Company
         </Button>
       </div>
 
-      {/* Strategy filter tabs */}
-      <div className="flex gap-1.5 mb-4 bg-white rounded-xl p-1 shadow-card ring-1 ring-black/[0.04] w-fit">
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* Strategy filter tabs */}
+        <div className="flex gap-1.5 mb-4 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-refined dark:shadow-slate-900/30 ring-1 ring-black/[0.04] dark:ring-white/[0.06] w-fit">
         {STRATEGY_FILTERS.map(({ value, label }) => (
           <button
             key={value}
@@ -247,7 +251,7 @@ export default function CompaniesClient({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-card ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
+        <div className="card">
           <EmptyState
             type="companies"
             title={hasActiveFilters ? 'No companies found' : 'No companies yet'}
@@ -274,7 +278,7 @@ export default function CompaniesClient({
             return (
               <div
                 key={co.id}
-                className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 flex flex-col gap-3 group hover:shadow-card-hover transition-shadow"
+                className="card p-5 flex flex-col gap-3 group hover:shadow-elevated transition-shadow"
               >
                 {/* Header */}
                 <div className="flex flex-col gap-1.5">
@@ -357,17 +361,17 @@ export default function CompaniesClient({
         </div>
       ) : (
         /* ── Table view ─────────────────────────────────────────────────────── */
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
+        <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sector</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">HQ</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Stage</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Strategy</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Health</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Company</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Sector</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">HQ</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Stage</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Strategy</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Health</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -375,7 +379,7 @@ export default function CompaniesClient({
               {filtered.map(co => {
                 const hs = healthScores[co.id]
                 return (
-                  <tr key={co.id} className="border-t border-slate-50 hover:bg-slate-50/60 transition-colors">
+                  <tr key={co.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         {co.logo_url ? (
@@ -422,19 +426,20 @@ export default function CompaniesClient({
         </div>
       )}
 
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Company">
-        <CompanyForm onClose={() => setShowAdd(false)} />
-      </Modal>
+        <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Company">
+          <CompanyForm onClose={() => setShowAdd(false)} />
+        </Modal>
 
-      <Modal open={!!editCompany} onClose={() => setEditCompany(null)} title="Edit Company">
-        {editCompany && (
-          <CompanyForm
-            company={editCompany}
-            contacts={contactsFor(editCompany.id)}
-            onClose={() => setEditCompany(null)}
-          />
-        )}
-      </Modal>
+        <Modal open={!!editCompany} onClose={() => setEditCompany(null)} title="Edit Company">
+          {editCompany && (
+            <CompanyForm
+              company={editCompany}
+              contacts={contactsFor(editCompany.id)}
+              onClose={() => setEditCompany(null)}
+            />
+          )}
+        </Modal>
+      </div>
     </div>
   )
 }

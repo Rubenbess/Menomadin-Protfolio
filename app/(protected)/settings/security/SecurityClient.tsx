@@ -93,13 +93,15 @@ export default function SecurityClient({ required = false }: { required?: boolea
   const hasActiveFactor = factors.some(f => f.status === 'verified')
 
   return (
-    <div className="max-w-xl animate-fade-in">
-      <div className="page-header mb-6">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Security</h1>
           <p className="text-sm text-slate-400 mt-0.5">Manage two-factor authentication for your account</p>
         </div>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {/* Required banner */}
       {required && !hasActiveFactor && (
@@ -151,7 +153,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
 
       {/* Active factors */}
       {hasActiveFactor && (
-        <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-5 mb-5">
+        <div className="card p-5 mb-5">
           <h2 className="text-sm font-semibold text-slate-900 mb-3">Active authenticators</h2>
           <div className="space-y-2">
             {factors.filter(f => f.status === 'verified').map(f => (
@@ -180,7 +182,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
 
       {/* Enroll flow */}
       {!hasActiveFactor && step === 'idle' && (
-        <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-6">
+        <div className="card p-6">
           <h2 className="text-sm font-semibold text-slate-900 mb-1">Set up authenticator app</h2>
           <p className="text-xs text-slate-400 mb-5">
             Use Google Authenticator, Authy, or any TOTP app. You'll scan a QR code to link your account.
@@ -192,7 +194,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
       )}
 
       {step === 'enrolling' && enrollData && (
-        <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-6 space-y-5">
+        <div className="card p-6 space-y-5">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 mb-1">Scan this QR code</h2>
             <p className="text-xs text-slate-400">Open your authenticator app and scan the QR code below.</p>
@@ -238,7 +240,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
       )}
 
       {step === 'enrolled' && (
-        <div className="bg-white rounded-2xl ring-1 ring-black/[0.04] shadow-card p-6 text-center">
+        <div className="card p-6 text-center">
           <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 size={22} className="text-emerald-600" />
           </div>
@@ -246,6 +248,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
           <p className="text-xs text-slate-400">Every login will now require your authenticator code.</p>
         </div>
       )}
+      </div>
     </div>
   )
 }

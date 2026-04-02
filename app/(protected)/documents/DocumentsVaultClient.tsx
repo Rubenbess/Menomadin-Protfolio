@@ -241,8 +241,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
   }, [documents])
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Document Vault</h1>
           <p className="text-sm text-slate-400 mt-0.5">{documents.length} documents</p>
@@ -251,6 +251,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
           <Upload size={15} /> Upload Document
         </Button>
       </div>
+
+      <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {/* Category chips */}
       <div className="flex flex-wrap gap-2 mb-5">
@@ -312,7 +314,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-card ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
+        <div className="card">
           <EmptyState
             type="documents"
             title={hasFilters ? 'No documents found' : 'No documents yet'}
@@ -327,21 +329,21 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
+        <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Document</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden xl:table-cell">Notes</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Document</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Category</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden md:table-cell">Company</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden lg:table-cell">Date</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden xl:table-cell">Notes</th>
                 <th className="px-4 py-3 w-24" />
               </tr>
             </thead>
             <tbody>
               {filtered.map(doc => (
-                <tr key={doc.id} className="border-t border-slate-50 hover:bg-slate-50/60 transition-colors">
+                <tr key={doc.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
                   <td className="px-5 py-3.5">
                     <button
                       onClick={() => doc.file_name.toLowerCase().endsWith('.pdf') ? setPreviewDoc(doc) : window.open(doc.file_url, '_blank')}
@@ -409,6 +411,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
           </table>
         </div>
       )}
+
+      </div>
 
       {/* Upload modal */}
       <Modal open={showUpload} onClose={() => setShowUpload(false)} title="Upload Document">

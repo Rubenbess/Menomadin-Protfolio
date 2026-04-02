@@ -380,72 +380,73 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
   const hasFilters = !!(search || filterCompany || filterType || filterOwner)
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
 
       {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Contacts</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+        <div className="flex-1">
+          <h1 className="page-title">Contacts</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
         </div>
-        <div className="flex-1 flex items-center gap-2 flex-wrap">
-          {/* Search */}
-          <div className="relative min-w-[200px] max-w-sm flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by name, email, company…"
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={13} />
-              </button>
-            )}
-          </div>
-
-          {/* Contact type filter */}
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
-            <option value="">All types</option>
-            {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-
-          {/* Company filter */}
-          {uniqueCompanies.length > 0 && (
-            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
-              <option value="">All companies</option>
-              {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          )}
-
-          {/* Owner filter */}
-          {uniqueOwners.length > 0 && (
-            <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
-              <option value="">All owners</option>
-              {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-          )}
-
-          {hasFilters && (
-            <button
-              onClick={() => { setSearch(''); setFilterCompany(''); setFilterType(''); setFilterOwner('') }}
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100"
-            >
-              <X size={12} /> Clear
-            </button>
-          )}
-        </div>
-
         <Button onClick={() => { setEditContact(null); setShowForm(true) }}>
           <Plus size={15} className="mr-1.5" /> Add contact
         </Button>
       </div>
 
+      {/* Search and filters */}
+      <div className="px-6 py-4 flex items-center gap-2 flex-wrap border-b border-slate-200 dark:border-slate-800">
+        {/* Search */}
+        <div className="relative min-w-[200px] max-w-sm flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, email, company…"
+            className="field-input w-full"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        {/* Contact type filter */}
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+          <option value="">All types</option>
+          {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+
+        {/* Company filter */}
+        {uniqueCompanies.length > 0 && (
+          <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+            <option value="">All companies</option>
+            {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        )}
+
+        {/* Owner filter */}
+        {uniqueOwners.length > 0 && (
+          <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+            <option value="">All owners</option>
+            {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        )}
+
+        {hasFilters && (
+          <button
+            onClick={() => { setSearch(''); setFilterCompany(''); setFilterType(''); setFilterOwner('') }}
+            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <X size={12} /> Clear
+          </button>
+        )}
+      </div>
+
       {/* Table */}
-      <div className="flex-1 overflow-auto px-6 py-5">
+      <div className="flex-1 overflow-auto px-6 py-6">
         {filtered.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div className="card">
             <EmptyState
               type="contacts"
               title={hasFilters ? 'No contacts found' : 'No contacts yet'}
@@ -460,25 +461,25 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
             />
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="card overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Name</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden md:table-cell">Type</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden md:table-cell">Company</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Email</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Owner</th>
-                  <th className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Last Touch</th>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3">Name</th>
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Type</th>
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Company</th>
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden lg:table-cell">Email</th>
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Owner</th>
+                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Last Touch</th>
                   <th className="px-5 py-3 w-20" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map(contact => (
                   <tr
                     key={contact.id}
                     onClick={() => setPanelContact(contact)}
-                    className="hover:bg-slate-50/80 cursor-pointer transition-colors"
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors duration-200"
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
