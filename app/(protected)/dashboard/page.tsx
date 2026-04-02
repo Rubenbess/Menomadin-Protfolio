@@ -105,7 +105,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-10 md:mb-12">
         <MetricCard label="Total Invested"    value={fmt$$(totalInvested)}      accent="violet" />
         <MetricCard label="Portfolio Value"   value={fmt$$(totalCurrentValue)}  accent="emerald" />
         <MetricCard label="TVPI"              value={fmtMultiple(tvpi)}         accent="blue" />
