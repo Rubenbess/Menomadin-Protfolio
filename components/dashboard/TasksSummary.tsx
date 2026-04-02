@@ -12,7 +12,7 @@ export default async function TasksSummary() {
 
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6 text-center">
+      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6 text-center -mt-6">
         <CheckSquare size={32} className="mx-auto mb-3 text-slate-300" />
         <p className="text-sm text-slate-500 mb-4">No tasks yet</p>
         <Link href="/tasks" className="inline-flex items-center text-sm font-semibold text-gold-500 hover:text-gold-600">
