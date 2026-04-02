@@ -73,59 +73,55 @@ export default function TasksFilters({
   const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || companyFilter
 
   return (
-    <aside className="w-56 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 overflow-y-auto flex flex-col">
-      {/* Stats */}
-      <div className="p-5 border-b border-slate-200 dark:border-slate-800">
-        <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4">Summary</p>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Active</p>
-            <p className="text-2xl font-display font-semibold text-slate-900 dark:text-white mt-1">{stats.active}</p>
+    <aside className="w-64 bg-white dark:bg-slate-900/30 border-r border-slate-200 dark:border-slate-800 overflow-y-auto flex flex-col">
+      {/* Header */}
+      <div className="px-6 py-6 border-b border-slate-200 dark:border-slate-800">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6">Filters</h2>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Active</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.active}</p>
           </div>
-          <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Done</p>
-            <p className="text-2xl font-display font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{stats.completed}</p>
+          <div className="p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Done</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
           </div>
-          {stats.overdue > 0 && (
-            <div className="col-span-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900">
-              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Overdue</p>
-              <p className="text-lg font-display font-semibold text-red-600 dark:text-red-400 mt-1">{stats.overdue}</p>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex-1 p-5 space-y-6">
-        {/* Status Filter */}
+      <div className="flex-1 px-6 py-6 space-y-8">
+        {/* Status */}
         <div>
-          <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Status</h3>
-          <div className="space-y-2.5">
+          <h3 className="section-title">Status</h3>
+          <div className="space-y-3">
             {STATUSES.map(status => (
-              <label key={status} className="flex items-center gap-3 cursor-pointer group">
+              <label key={status} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                 <input
                   type="checkbox"
                   checked={statusFilter.includes(status)}
                   onChange={() => toggleStatus(status)}
-                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  className="w-4 h-4 accent-brand-500"
                 />
-                <span className={`text-sm font-medium transition-colors ${STATUS_COLORS[status]}`}>{status}</span>
+                <span className={`text-sm font-medium ${STATUS_COLORS[status]}`}>{status}</span>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Priority Filter */}
+        {/* Priority */}
         <div>
-          <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Priority</h3>
-          <div className="space-y-2.5">
+          <h3 className="section-title">Priority</h3>
+          <div className="space-y-3">
             {PRIORITIES.map(p => (
-              <label key={p.value} className="flex items-center gap-3 cursor-pointer group">
+              <label key={p.value} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                 <input
                   type="checkbox"
                   checked={priorityFilter.includes(p.value)}
                   onChange={() => togglePriority(p.value)}
-                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  className="w-4 h-4 accent-brand-500"
                 />
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.label}</span>
               </label>
@@ -133,14 +129,14 @@ export default function TasksFilters({
           </div>
         </div>
 
-        {/* Company Filter */}
+        {/* Company */}
         {companies.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-50 mb-3 uppercase tracking-widest">Company</h3>
+            <h3 className="section-title">Company</h3>
             <select
               value={companyFilter}
               onChange={(e) => onCompanyChange(e.target.value)}
-              className="field-select"
+              className="field-select text-sm"
             >
               <option value="">All companies</option>
               {companies.map(company => (
@@ -152,28 +148,26 @@ export default function TasksFilters({
           </div>
         )}
 
-        {/* Completed Filter */}
-        <div className="pt-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={includeCompleted}
-              onChange={(e) => onIncludeCompletedChange(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show completed</span>
-          </label>
-        </div>
+        {/* Show Completed */}
+        <label className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+          <input
+            type="checkbox"
+            checked={includeCompleted}
+            onChange={(e) => onIncludeCompletedChange(e.target.checked)}
+            className="w-4 h-4 accent-brand-500"
+          />
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show completed</span>
+        </label>
       </div>
 
-      {/* Clear Filters */}
+      {/* Clear Button */}
       {hasActiveFilters && (
-        <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800">
           <button
             onClick={clearAllFilters}
-            className="w-full text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-semibold transition-colors"
+            className="w-full px-4 py-2 text-sm font-semibold text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20 rounded-lg transition-colors"
           >
-            Clear all filters
+            Clear filters
           </button>
         </div>
       )}

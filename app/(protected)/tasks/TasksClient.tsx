@@ -184,78 +184,81 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   }
 
   return (
-    <div className="animate-fade-in flex flex-col h-full">
-      {/* Page Header */}
-      <div className="page-header">
-        <div>
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      {/* Header */}
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+        <div className="flex-1">
           <h1 className="page-title">Tasks</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and track your team's work</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Organize and track your work in real time</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-card">
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-lg bg-slate-200 dark:bg-slate-800 p-1">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${view === 'list' ? 'bg-brand-600 text-white shadow-card' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'}`}
-              title="List view (B)"
+              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'list' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
             >
-              <LayoutList size={14} /> List
+              <LayoutList size={16} />
             </button>
             <button
               onClick={() => setView('board')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${view === 'board' ? 'bg-brand-600 text-white shadow-card' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'}`}
-              title="Board view (B)"
+              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'board' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
             >
-              <Kanban size={14} /> Board
+              <Kanban size={16} />
             </button>
           </div>
           <button
             onClick={() => router.refresh()}
-            className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors duration-150"
-            title="Refresh (R)"
+            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            title="Refresh"
           >
             <RefreshCw size={16} />
           </button>
+          <Button onClick={() => setShowCreateForm(true)} size="sm">
+            <Plus size={16} /> New task
+          </Button>
         </div>
-        <Button onClick={() => setShowCreateForm(true)} size="sm">
-          <Plus size={14} /> New task
-        </Button>
       </div>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-4 gap-4 mb-6 px-6">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-3 mb-8 px-6">
         {[
-          { label: 'Total',      count: stats.total,      color: 'text-brand-600 dark:text-brand-400',     bg: 'bg-brand-50 dark:bg-brand-950/20 border-brand-200 dark:border-brand-900' },
-          { label: 'Active',     count: stats.active,     color: 'text-blue-600 dark:text-blue-400',       bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900' },
-          { label: 'Completed',  count: stats.completed,  color: 'text-emerald-600 dark:text-emerald-400',    bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900' },
-          { label: 'Overdue',    count: stats.overdue,    color: stats.overdue > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-500', bg: stats.overdue > 0 ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800' },
+          { label: 'Total', count: stats.total, icon: '📊' },
+          { label: 'Active', count: stats.active, icon: '⚡' },
+          { label: 'Done', count: stats.completed, icon: '✓' },
+          { label: 'Overdue', count: stats.overdue, icon: '⚠️' },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl border px-4 py-4 card ${s.bg}`}>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-widest">{s.label}</p>
-            <p className={`text-3xl font-display font-semibold mt-2 ${s.color}`}>{s.count}</p>
+          <div key={s.label} className="card px-4 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="section-title">{s.label}</p>
+              <span className="text-xl">{s.icon}</span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">{s.count}</p>
           </div>
         ))}
       </div>
 
-      {/* Quick Filter Tabs */}
-      <div className="flex gap-2 px-6 mb-6 overflow-x-auto pb-2">
-        {[
-          { id: 'all', label: 'All', count: filteredTasks.length },
-          { id: 'overdue', label: 'Overdue', count: tasks.filter(t => isTaskOverdue(t)).length },
-          { id: 'today', label: 'Today', count: tasks.filter(t => isTaskDueToday(t)).length },
-          { id: 'this-week', label: 'This Week', count: tasks.filter(t => isTaskDueThisWeek(t)).length },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setQuickFilter(tab.id as QuickFilter)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
-              quickFilter === tab.id
-                ? 'bg-brand-600 text-white shadow-card'
-                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
-            }`}
-          >
-            {tab.label} <span className={`text-xs font-normal ${quickFilter === tab.id ? 'text-brand-100' : 'text-slate-400 dark:text-slate-500'}`}>({tab.count})</span>
-          </button>
-        ))}
+      {/* Filter Tabs */}
+      <div className="px-6 mb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex gap-6 overflow-x-auto pb-4">
+          {[
+            { id: 'all', label: 'All Tasks', count: filteredTasks.length },
+            { id: 'overdue', label: 'Overdue', count: tasks.filter(t => isTaskOverdue(t)).length },
+            { id: 'today', label: 'Today', count: tasks.filter(t => isTaskDueToday(t)).length },
+            { id: 'this-week', label: 'This Week', count: tasks.filter(t => isTaskDueThisWeek(t)).length },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setQuickFilter(tab.id as QuickFilter)}
+              className={`px-1 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
+                quickFilter === tab.id
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
+              }`}
+            >
+              {tab.label} <span className="text-xs font-normal ml-1 opacity-60">({tab.count})</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Main Content - Sidebar + Tasks View */}
@@ -274,42 +277,46 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
           stats={stats}
         />
 
-        {/* Tasks Content Area */}
+        {/* Tasks Content */}
         <div className="flex-1 flex flex-col overflow-hidden px-6 py-6">
-          {/* Search Bar */}
-          <div className="mb-5">
+          {/* Search */}
+          <div className="mb-6">
             <input
               type="text"
-              placeholder="Search tasks (/ to focus)"
+              placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="field-input w-full"
             />
           </div>
+
           {filteredTasks.length === 0 && tasks.length === 0 ? (
-            <div className="card flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-              <div className="mb-4 p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
-                <CheckSquare size={28} className="text-slate-400 dark:text-slate-500" />
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">📋</div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No tasks yet</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-8">Create your first task to get started</p>
+                <Button onClick={() => setShowCreateForm(true)}>
+                  <Plus size={16} /> Create task
+                </Button>
               </div>
-              <h3 className="text-lg font-display font-semibold text-slate-900 dark:text-slate-50 mb-2">No tasks yet</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Get started by creating your first task</p>
-              <Button onClick={() => setShowCreateForm(true)} variant="secondary">
-                <Plus size={14} /> Create task
-              </Button>
             </div>
           ) : filteredTasks.length === 0 ? (
-            <div className="card flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-              <h3 className="text-lg font-display font-semibold text-slate-900 dark:text-slate-50 mb-2">No matches</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Try adjusting your filters or search</p>
-              <Button onClick={() => {
-                setSearchQuery('')
-                setQuickFilter('all')
-                setStatusFilter([])
-                setPriorityFilter([])
-                setCompanyFilter(null)
-              }} variant="secondary">
-                Clear all filters
-              </Button>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No matches found</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-8">Try adjusting your filters</p>
+                <Button onClick={() => {
+                  setSearchQuery('')
+                  setQuickFilter('all')
+                  setStatusFilter([])
+                  setPriorityFilter([])
+                  setCompanyFilter(null)
+                }} variant="secondary">
+                  Clear all
+                </Button>
+              </div>
             </div>
           ) : view === 'list' ? (
             <TasksList

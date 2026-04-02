@@ -49,7 +49,9 @@
       "Bash(grep -n \"activeTab.*overview\\\\|Tab.*history\\\\|investments.*captable\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
       "Bash(grep -n \"const tabs = \\\\|tabs.*map\\\\\\(\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
       "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/contacts/)",
-      "Bash(wc -l c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/TaskDetailModal.tsx)"
+      "Bash(wc -l c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/TaskDetailModal.tsx)",
+      "Bash(curl -s -m 5 http://localhost:3000/login)",
+      "Read(//tmp/**)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

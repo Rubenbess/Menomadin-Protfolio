@@ -65,14 +65,14 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
 
   if (templates.length === 0 && !showForm && !editTemplate) {
     return (
-      <div className="flex flex-col h-full px-6 pt-6">
-        <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col h-full">
+        <div className="page-header border-b border-slate-200 dark:border-slate-800">
           <div>
             <h1 className="page-title">Task Templates</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Create reusable task templates for common workflows</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Reusable templates for quick task creation</p>
           </div>
           <Button onClick={() => setShowForm(true)}>
-            <Plus size={16} /> Create Template
+            <Plus size={16} /> New template
           </Button>
         </div>
 
@@ -95,80 +95,81 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
   }
 
   return (
-    <div className="space-y-8 px-6 py-6">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-header border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="page-title">Task Templates</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{templates.length} {templates.length === 1 ? 'template' : 'templates'} saved</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{templates.length} {templates.length === 1 ? 'template' : 'templates'}</p>
         </div>
         {!showForm && !editTemplate && (
           <Button onClick={() => setShowForm(true)}>
-            <Plus size={16} /> Create Template
+            <Plus size={16} /> New template
           </Button>
         )}
       </div>
 
-      {/* Form */}
-      {(showForm || editTemplate) && (
-        <div className="card p-6 animate-fade-in-delay">
-          <TemplateForm
-            template={editTemplate}
-            onSuccess={editTemplate ? handleUpdateTemplate : handleCreateTemplate}
-            onCancel={() => {
-              setShowForm(false)
-              setEditTemplate(undefined)
-            }}
-          />
-        </div>
-      )}
+      <div className="flex-1 overflow-auto px-6 py-8">
+        {/* Form */}
+        {(showForm || editTemplate) && (
+          <div className="card p-6 mb-8">
+            <TemplateForm
+              template={editTemplate}
+              onSuccess={editTemplate ? handleUpdateTemplate : handleCreateTemplate}
+              onCancel={() => {
+                setShowForm(false)
+                setEditTemplate(undefined)
+              }}
+            />
+          </div>
+        )}
 
-      {/* Templates Grid */}
-      {templates.length > 0 && !showForm && !editTemplate && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {templates.map((template, idx) => (
-            <div
-              key={template.id}
-              className="card p-6 hover:shadow-card-hover transition-all duration-300 flex flex-col animate-fade-in-delay"
-              style={{ animationDelay: `${idx * 50}ms` }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-display font-semibold text-slate-900 dark:text-slate-50 line-clamp-2 text-lg">{template.name}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium uppercase tracking-widest">
-                    {getCategoryLabel(template.category)}
-                  </p>
+        {/* Templates Grid */}
+        {templates.length > 0 && !showForm && !editTemplate && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {templates.map((template, idx) => (
+              <div
+                key={template.id}
+                className="card p-6 flex flex-col hover:shadow-lg transition-all duration-200 group"
+                style={{ animationDelay: `${idx * 30}ms` }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-lg line-clamp-2">{template.name}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-semibold uppercase tracking-wider">
+                      {getCategoryLabel(template.category)}
+                    </p>
+                  </div>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold whitespace-nowrap ${template.is_public ? 'badge badge-primary' : 'badge badge-secondary'}`}>
+                    {template.is_public ? 'Public' : 'Private'}
+                  </span>
                 </div>
-                <span className={`text-xs px-3 py-1 rounded-full font-medium ${template.is_public ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
-                  {template.is_public ? 'Public' : 'Private'}
-                </span>
-              </div>
 
-              {template.description && (
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 flex-1">
-                  {template.description}
-                </p>
-              )}
+                {template.description && (
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-2">
+                    {template.description}
+                  </p>
+                )}
 
-              <div className="flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <button
-                  onClick={() => setEditTemplate(template)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200"
-                >
-                  <Edit2 size={14} /> Edit
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(template)}
-                  className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors duration-200"
-                  title="Delete template"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={() => setEditTemplate(template)}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(template)}
+                    className="px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation */}
       {deleteTarget && (
