@@ -60,7 +60,8 @@
       "Bash(find /c/Users/rubenb/Portfolio/supabase -type f -name *.sql)",
       "Bash(supabase db:*)",
       "Bash(npm list:*)",
-      "Bash(\"c:/Users/rubenb/Portfolio/app/\\(protected\\)/import/page.tsx\":*)"
+      "Bash(\"c:/Users/rubenb/Portfolio/app/\\(protected\\)/import/page.tsx\":*)",
+      "Bash(cat c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/import/page.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
