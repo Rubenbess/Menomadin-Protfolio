@@ -76,6 +76,7 @@ export function getMainNavItems(): NavItem[] {
       href: '/analytics',
       icon: <BarChart3 size={20} />,
       section: 'insights',
+      badge: undefined, // New feature badge when needed
     },
     {
       label: 'Reports',
@@ -88,6 +89,7 @@ export function getMainNavItems(): NavItem[] {
       href: '/import',
       icon: <Upload size={20} />,
       section: 'tools',
+      badge: undefined, // New feature badge when needed
     },
     {
       label: 'Settings',
