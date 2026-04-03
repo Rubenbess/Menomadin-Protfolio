@@ -202,7 +202,7 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
             </thead>
             <tbody>
               {sectorData.map((sector, idx) => {
-                const gain = sector.value - sector.invested
+                const gain = sector.currentValue - sector.invested
                 const gainPercent = sector.invested > 0 ? (gain / sector.invested) * 100 : 0
                 return (
                   <tr
@@ -219,7 +219,7 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
                       {formatCurrency(sector.invested)}
                     </td>
                     <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-medium">
-                      {formatCurrency(sector.value)}
+                      {formatCurrency(sector.currentValue)}
                     </td>
                     <td
                       className={`px-4 py-3 text-right font-medium ${
