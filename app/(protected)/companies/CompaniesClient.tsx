@@ -11,6 +11,8 @@ import CompanyForm from '@/components/forms/CompanyForm'
 import EmptyState from '@/components/EmptyState'
 import { deleteCompany } from '@/actions/companies'
 import { HealthScorePill } from '@/components/HealthScoreBadge'
+import { AdvancedFilterPanel } from '@/components/AdvancedFilterPanel'
+import { applyFilters, FilterGroup } from '@/lib/filter-utils'
 import type { Company, Contact, HealthScore } from '@/lib/types'
 
 const STRATEGY_FILTERS = [
@@ -105,6 +107,8 @@ export default function CompaniesClient({
   const [stageFilter, setStageFilter] = useState('')
   const [hqFilter, setHqFilter] = useState('')
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false)
+  const [advancedFilterGroup, setAdvancedFilterGroup] = useState<FilterGroup | null>(null)
 
   const sectors = useMemo(() =>
     [...new Set(companies.map(c => c.sector).filter(Boolean))].sort(), [companies])
@@ -140,8 +144,11 @@ export default function CompaniesClient({
     if (statusFilter) list = list.filter(c => (STATUS_LABELS[c.status] ?? c.status) === statusFilter)
     if (stageFilter)  list = list.filter(c => c.entry_stage === stageFilter)
     if (hqFilter)     list = list.filter(c => c.hq === hqFilter)
+    if (advancedFilterGroup) {
+      list = applyFilters(list, advancedFilterGroup)
+    }
     return list
-  }, [companies, strategyFilter, search, sectorFilter, statusFilter, stageFilter, hqFilter])
+  }, [companies, strategyFilter, search, sectorFilter, statusFilter, stageFilter, hqFilter, advancedFilterGroup])
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
@@ -218,9 +225,19 @@ export default function CompaniesClient({
           <FilterSelect label="HQ" value={hqFilter} options={hqs} onChange={setHqFilter} />
         )}
 
-        {hasActiveFilters && (
+        <button
+          onClick={() => setShowAdvancedFilter(true)}
+          className="text-xs text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
+        >
+          Advanced Filter
+        </button>
+
+        {(hasActiveFilters || advancedFilterGroup) && (
           <button
-            onClick={clearAll}
+            onClick={() => {
+              clearAll()
+              setAdvancedFilterGroup(null)
+            }}
             className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <X size={12} /> Clear all
@@ -439,6 +456,17 @@ export default function CompaniesClient({
             />
           )}
         </Modal>
+
+        {showAdvancedFilter && (
+          <AdvancedFilterPanel
+            entityType="company"
+            onApply={(filterGroup) => {
+              setAdvancedFilterGroup(filterGroup)
+              setShowAdvancedFilter(false)
+            }}
+            onClose={() => setShowAdvancedFilter(false)}
+          />
+        )}
       </div>
     </div>
   )
