@@ -25,10 +25,16 @@ interface AnalyticsClientProps {
 
 export default function AnalyticsClient({ companies, investments }: AnalyticsClientProps) {
   const metrics = calculatePortfolioMetrics(companies)
-  const stageData = getInvestmentsByStage(companies)
+  const rawStageData = getInvestmentsByStage(companies)
   const sectorData = getInvestmentsBySector(companies)
   const topPerformers = getTopPerformers(companies, 5)
   const underperformers = getUnderperformers(companies, 5)
+
+  // Transform stage data for pie chart
+  const stageData = rawStageData.map(stage => ({
+    name: stage.stage,
+    value: stage.amount,
+  }))
 
   return (
     <div className="space-y-8">
