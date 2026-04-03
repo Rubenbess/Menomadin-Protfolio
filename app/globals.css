@@ -16,7 +16,7 @@
   }
 
   body {
-    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50;
+    @apply bg-neutral-0 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -44,30 +44,30 @@
 }
 
 @layer components {
-  /* Page header - refined */
+  /* Page header - modern professional */
   .page-header {
-    @apply px-8 py-10 border-b border-slate-200 dark:border-slate-800;
+    @apply px-8 py-8 border-b border-neutral-200 dark:border-neutral-700;
     @apply flex items-end justify-between gap-8;
   }
 
   .page-title {
-    @apply text-5xl md:text-6xl font-display font-bold text-slate-900 dark:text-slate-50 tracking-tight;
+    @apply text-4xl md:text-5xl font-sans font-bold text-neutral-900 dark:text-neutral-50 tracking-tight;
   }
 
   .section-title {
-    @apply text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-3;
+    @apply text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mb-3;
   }
 
-  /* Refined card with subtle gradient */
+  /* Modern professional card */
   .card {
-    @apply bg-white dark:bg-slate-900 rounded-lg;
-    @apply border border-slate-200 dark:border-slate-800;
-    @apply shadow-refined hover:shadow-elevated;
-    @apply transition-all duration-300;
+    @apply bg-neutral-0 dark:bg-neutral-800 rounded-lg;
+    @apply border border-neutral-200 dark:border-neutral-700;
+    @apply shadow-sm dark:shadow-md hover:shadow-md dark:hover:shadow-lg;
+    @apply transition-shadow duration-200;
   }
 
   .card:hover {
-    @apply border-slate-300 dark:border-slate-700;
+    @apply border-neutral-300 dark:border-neutral-600;
   }
 
   /* Data table */
@@ -75,70 +75,71 @@
     @apply w-full text-sm;
   }
   .data-table thead tr {
-    @apply border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50;
+    @apply border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50;
   }
   .data-table thead th {
-    @apply px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400;
+    @apply px-6 py-4 text-left text-xs font-semibold text-neutral-700 dark:text-neutral-300;
     @apply uppercase tracking-widest;
   }
   .data-table tbody tr {
-    @apply border-b border-slate-100 dark:border-slate-800;
-    @apply hover:bg-slate-50 dark:hover:bg-slate-800/50;
+    @apply border-b border-neutral-100 dark:border-neutral-700;
+    @apply hover:bg-neutral-50 dark:hover:bg-neutral-800/50;
     @apply transition-colors duration-200;
   }
   .data-table tbody td {
     @apply px-6 py-4;
   }
 
-  /* Form fields - minimal with accent underline */
+  /* Form fields - modern professional style */
   .field-label {
-    @apply block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2;
+    @apply block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2;
   }
 
   .field-input,
   .field-select {
     @apply w-full px-4 py-3 text-base;
-    @apply bg-white dark:bg-slate-900;
-    @apply border-b-2 border-slate-300 dark:border-slate-700;
-    @apply border-t-0 border-x-0 rounded-none;
-    @apply text-slate-900 dark:text-slate-100;
-    @apply placeholder:text-slate-400 dark:placeholder:text-slate-600;
-    @apply focus:outline-none focus:border-b-gold-500;
-    @apply transition-colors duration-200;
+    @apply bg-neutral-50 dark:bg-neutral-700;
+    @apply border border-neutral-300 dark:border-neutral-600;
+    @apply rounded-lg;
+    @apply text-neutral-900 dark:text-neutral-50;
+    @apply placeholder:text-neutral-500 dark:placeholder:text-neutral-400;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500;
+    @apply dark:focus:ring-primary-400/30 dark:focus:border-primary-400;
+    @apply transition-all duration-200;
   }
 
-  /* Badge system - sophisticated */
+  /* Badge system - modern professional */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold;
     @apply transition-all duration-200;
   }
 
   .badge-primary {
-    @apply bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50;
+    @apply bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300;
   }
 
   .badge-secondary {
-    @apply bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300;
+    @apply bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300;
   }
 
   /* Stage badges - custom colors */
   .badge-navy {
-    @apply bg-blue-100 dark:bg-blue-900/30 text-stage-navy;
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300;
   }
 
   .badge-sage {
-    @apply bg-green-100 dark:bg-green-900/30 text-stage-sage;
+    @apply bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300;
   }
 
   .badge-gold {
-    @apply bg-yellow-100 dark:bg-yellow-900/30 text-gold-700;
+    @apply bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300;
   }
 
   .badge-coral {
-    @apply bg-red-100 dark:bg-red-900/30 text-stage-coral;
+    @apply bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300;
   }
 
   .badge-slate {
-    @apply bg-slate-100 dark:bg-slate-800 text-stage-slate;
+    @apply bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300;
   }
 }
