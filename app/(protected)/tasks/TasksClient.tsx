@@ -2,8 +2,9 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import Link from 'next/link'
 import TasksBoard from './TasksBoard'
 import TasksList from './TasksList'
 import TaskDetailModal from './TaskDetailModal'
@@ -206,6 +207,20 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               <Kanban size={16} />
             </button>
           </div>
+          <Link
+            href="/tasks/templates"
+            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            title="Task Templates"
+          >
+            <BookTemplate size={16} />
+          </Link>
+          <Link
+            href="/tasks/automations"
+            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            title="Automations"
+          >
+            <Zap size={16} />
+          </Link>
           <button
             onClick={() => router.refresh()}
             className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"

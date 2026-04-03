@@ -1,0 +1,166 @@
+'use client'
+
+import { useState } from 'react'
+import { Plus, X, Clock } from 'lucide-react'
+
+type RecurrenceFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly'
+
+interface TaskRecurrenceFormProps {
+  onSave: (recurrence: {
+    frequency: RecurrenceFrequency
+    interval: number
+    daysOfWeek?: number[]
+    dayOfMonth?: number
+    isActive: boolean
+  }) => void
+  onCancel: () => void
+  initialData?: any
+}
+
+export function TaskRecurrenceForm({
+  onSave,
+  onCancel,
+  initialData,
+}: TaskRecurrenceFormProps) {
+  const [frequency, setFrequency] = useState<RecurrenceFrequency>(
+    initialData?.frequency || 'weekly'
+  )
+  const [interval, setInterval] = useState(initialData?.interval || 1)
+  const [dayOfMonth, setDayOfMonth] = useState(initialData?.dayOfMonth || 1)
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>(
+    initialData?.daysOfWeek || [1] // Monday by default
+  )
+  const [isActive, setIsActive] = useState(initialData?.isActive !== false)
+
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+  const handleDayToggle = (dayIndex: number) => {
+    setDaysOfWeek((prev) =>
+      prev.includes(dayIndex)
+        ? prev.filter((d) => d !== dayIndex)
+        : [...prev, dayIndex].sort()
+    )
+  }
+
+  const handleSave = () => {
+    onSave({
+      frequency,
+      interval,
+      dayOfMonth: frequency === 'monthly' ? dayOfMonth : undefined,
+      daysOfWeek: frequency === 'weekly' ? daysOfWeek : undefined,
+      isActive,
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Frequency Select */}
+      <div>
+        <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+          Frequency
+        </label>
+        <select
+          value={frequency}
+          onChange={(e) => setFrequency(e.target.value as RecurrenceFrequency)}
+          className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+        >
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Biweekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      {/* Interval */}
+      {(frequency === 'daily' || frequency === 'weekly' || frequency === 'monthly') && (
+        <div>
+          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+            Every {frequency === 'weekly' ? 'N weeks' : frequency === 'monthly' ? 'N months' : 'N days'}
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="52"
+            value={interval}
+            onChange={(e) => setInterval(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+          />
+        </div>
+      )}
+
+      {/* Days of Week (for weekly recurrence) */}
+      {frequency === 'weekly' && (
+        <div>
+          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-3">
+            Repeat on days
+          </label>
+          <div className="grid grid-cols-7 gap-2">
+            {days.map((day, index) => (
+              <button
+                key={index}
+                onClick={() => handleDayToggle(index)}
+                className={`p-2 rounded-lg font-medium text-sm transition-colors ${
+                  daysOfWeek.includes(index)
+                    ? 'bg-amber-700 text-white'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Day of Month (for monthly recurrence) */}
+      {frequency === 'monthly' && (
+        <div>
+          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+            Day of month
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="31"
+            value={dayOfMonth}
+            onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
+            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+          />
+        </div>
+      )}
+
+      {/* Active Toggle */}
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="active"
+          checked={isActive}
+          onChange={(e) => setIsActive(e.target.checked)}
+          className="w-4 h-4 rounded"
+        />
+        <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">
+          Activate this recurring task
+        </label>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button
+          onClick={handleSave}
+          className="flex-1 px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <Clock size={16} />
+          Set Recurrence
+        </button>
+        <button
+          onClick={onCancel}
+          className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}

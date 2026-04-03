@@ -61,7 +61,10 @@
       "Bash(supabase db:*)",
       "Bash(npm list:*)",
       "Bash(\"c:/Users/rubenb/Portfolio/app/\\(protected\\)/import/page.tsx\":*)",
-      "Bash(cat c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/import/page.tsx)"
+      "Bash(cat c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/import/page.tsx)",
+      "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/companies/\")",
+      "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/\")",
+      "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/tasks/\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
