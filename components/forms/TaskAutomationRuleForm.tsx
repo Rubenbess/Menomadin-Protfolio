@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createAutomationRule } from '@/actions/task-automations'
@@ -29,7 +29,7 @@ const actions: { value: AutomationAction; label: string }[] = [
   { value: 'assign_to', label: 'Assign to user' },
 ]
 
-export default function TaskAutomationRuleForm({
+const TaskAutomationRuleForm = memo(function TaskAutomationRuleForm({
   onClose,
   onRuleCreated,
   templates,
@@ -41,7 +41,7 @@ export default function TaskAutomationRuleForm({
   const [actionType, setActionType] = useState<AutomationAction>('create_task')
   const [isActive, setIsActive] = useState(true)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -98,7 +98,7 @@ export default function TaskAutomationRuleForm({
       setError('An unexpected error occurred')
       setLoading(false)
     }
-  }
+  }, [actionType, triggerType, onRuleCreated, onClose])
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-0">
@@ -252,4 +252,6 @@ export default function TaskAutomationRuleForm({
       </div>
     </div>
   )
-}
+})
+
+export default TaskAutomationRuleForm

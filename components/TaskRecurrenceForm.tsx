@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { Plus, X, Clock } from 'lucide-react'
 
 type RecurrenceFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly'
@@ -17,7 +17,7 @@ interface TaskRecurrenceFormProps {
   initialData?: any
 }
 
-export function TaskRecurrenceForm({
+const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
   onSave,
   onCancel,
   initialData,
@@ -34,15 +34,15 @@ export function TaskRecurrenceForm({
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-  const handleDayToggle = (dayIndex: number) => {
+  const handleDayToggle = useCallback((dayIndex: number) => {
     setDaysOfWeek((prev) =>
       prev.includes(dayIndex)
         ? prev.filter((d) => d !== dayIndex)
         : [...prev, dayIndex].sort()
     )
-  }
+  }, [])
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     onSave({
       frequency,
       interval,
@@ -50,7 +50,7 @@ export function TaskRecurrenceForm({
       daysOfWeek: frequency === 'weekly' ? daysOfWeek : undefined,
       isActive,
     })
-  }
+  }, [frequency, interval, dayOfMonth, daysOfWeek, isActive, onSave])
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -163,4 +163,6 @@ export function TaskRecurrenceForm({
       </div>
     </div>
   )
-}
+})
+
+export default TaskRecurrenceForm
