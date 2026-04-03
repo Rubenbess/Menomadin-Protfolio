@@ -57,7 +57,10 @@
       "Bash(find /c/Users/rubenb/Portfolio -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\) -not -path */node_modules/* -not -path */.next/*)",
       "Bash(xargs cat:*)",
       "Bash(grep -r \"activity\\\\|audit\\\\|changelog\\\\|change_log\" /c/Users/rubenb/Portfolio/lib /c/Users/rubenb/Portfolio/app --include=*.ts --include=*.tsx)",
-      "Bash(find /c/Users/rubenb/Portfolio/supabase -type f -name *.sql)"
+      "Bash(find /c/Users/rubenb/Portfolio/supabase -type f -name *.sql)",
+      "Bash(supabase db:*)",
+      "Bash(npm list:*)",
+      "Bash(\"c:/Users/rubenb/Portfolio/app/\\(protected\\)/import/page.tsx\":*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
