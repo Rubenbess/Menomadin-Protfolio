@@ -110,14 +110,14 @@ export function getInvestmentsByStage(companies: any[]): InvestmentByStage[] {
  * Group investments by sector
  */
 export function getInvestmentsBySector(companies: any[]): SectorMetrics[] {
-  const sectors = new Map<string, { invested: number; value: number; count: number }>()
+  const sectors = new Map<string, { invested: number; currentValue: number; count: number }>()
 
   companies.forEach(c => {
     const sector = c.sector || 'Unknown'
-    const current = sectors.get(sector) || { invested: 0, value: 0, count: 0 }
+    const current = sectors.get(sector) || { invested: 0, currentValue: 0, count: 0 }
     sectors.set(sector, {
       invested: current.invested + (c.totalInvested || 0),
-      value: current.value + (c.currentValue || 0),
+      currentValue: current.currentValue + (c.currentValue || 0),
       count: current.count + 1,
     })
   })
