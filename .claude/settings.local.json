@@ -52,7 +52,12 @@
       "Bash(wc -l c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/TaskDetailModal.tsx)",
       "Bash(curl -s -m 5 http://localhost:3000/login)",
       "Read(//tmp/**)",
-      "Bash(curl -s http://localhost:3006/tasks)"
+      "Bash(curl -s http://localhost:3006/tasks)",
+      "Bash(find /c/Users/rubenb/Portfolio/lib -type f -name *.ts -not -path */node_modules/*)",
+      "Bash(find /c/Users/rubenb/Portfolio -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\) -not -path */node_modules/* -not -path */.next/*)",
+      "Bash(xargs cat:*)",
+      "Bash(grep -r \"activity\\\\|audit\\\\|changelog\\\\|change_log\" /c/Users/rubenb/Portfolio/lib /c/Users/rubenb/Portfolio/app --include=*.ts --include=*.tsx)",
+      "Bash(find /c/Users/rubenb/Portfolio/supabase -type f -name *.sql)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

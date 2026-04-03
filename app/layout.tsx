@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme-context'
+import { ToastProvider } from '@/components/ToastProvider'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export const metadata: Metadata = {
   title: 'Menomadin Portfolio',
@@ -26,7 +28,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/menomadin-icon.svg" />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <ToastProvider />
+            {children}
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )
