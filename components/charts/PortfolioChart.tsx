@@ -58,7 +58,7 @@ export function InvestmentsByStageChart({ data, height = 300 }: { data: PieChart
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => `$${(value / 1_000_000).toFixed(2)}M`}
+            formatter={(value: any) => `$${(value / 1_000_000).toFixed(2)}M`}
           />
           <Legend />
         </PieChart>
@@ -71,7 +71,7 @@ export function SectorDistributionChart({ data, height = 300 }: { data: any[]; h
   const chartData = data.map(sector => ({
     name: sector.sector,
     invested: sector.invested,
-    value: sector.value,
+    value: sector.currentValue,
   }))
 
   return (
@@ -85,7 +85,7 @@ export function SectorDistributionChart({ data, height = 300 }: { data: any[]; h
           <XAxis dataKey="name" stroke="#94a3b8" />
           <YAxis stroke="#94a3b8" />
           <Tooltip
-            formatter={(value: number) => `$${(value / 1_000_000).toFixed(2)}M`}
+            formatter={(value: any) => `$${(value / 1_000_000).toFixed(2)}M`}
             contentStyle={{
               backgroundColor: '#1e293b',
               border: '1px solid #475569',
@@ -117,7 +117,7 @@ export function PerformanceChart({ data, height = 300 }: { data: any[]; height?:
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="name" stroke="#94a3b8" angle={-45} textAnchor="end" height={80} />
           <YAxis stroke="#94a3b8" />
-          <Tooltip formatter={(value: number) => value.toFixed(2) + 'x'} />
+          <Tooltip formatter={(value: any) => value.toFixed(2) + 'x'} />
           <Bar
             dataKey="moic"
             fill="#3b82f6"
