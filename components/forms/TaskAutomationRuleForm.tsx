@@ -101,8 +101,8 @@ export default function TaskAutomationRuleForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-0">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-xl w-full mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Create Automation Rule</h2>
@@ -115,9 +115,9 @@ export default function TaskAutomationRuleForm({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {/* Name */}
-          <div>
+          <div className="space-y-1.5">
             <label className={lbl}>Rule Name *</label>
             <input
               name="name"
@@ -129,7 +129,7 @@ export default function TaskAutomationRuleForm({
           </div>
 
           {/* Trigger Type */}
-          <div>
+          <div className="space-y-1.5">
             <label className={lbl}>When this happens *</label>
             <select
               value={triggerType}
@@ -232,7 +232,7 @@ export default function TaskAutomationRuleForm({
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
             <Button
               type="submit"
               disabled={loading}
@@ -243,7 +243,7 @@ export default function TaskAutomationRuleForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation"
             >
               Cancel
             </button>

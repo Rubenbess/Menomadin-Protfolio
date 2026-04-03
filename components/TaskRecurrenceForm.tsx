@@ -53,9 +53,9 @@ export function TaskRecurrenceForm({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Frequency Select */}
-      <div>
+      <div className="space-y-2">
         <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
           Frequency
         </label>
@@ -75,8 +75,8 @@ export function TaskRecurrenceForm({
 
       {/* Interval */}
       {(frequency === 'daily' || frequency === 'weekly' || frequency === 'monthly') && (
-        <div>
-          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-900 dark:text-white">
             Every {frequency === 'weekly' ? 'N weeks' : frequency === 'monthly' ? 'N months' : 'N days'}
           </label>
           <input
@@ -92,16 +92,16 @@ export function TaskRecurrenceForm({
 
       {/* Days of Week (for weekly recurrence) */}
       {frequency === 'weekly' && (
-        <div>
-          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-3">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-900 dark:text-white">
             Repeat on days
           </label>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
             {days.map((day, index) => (
               <button
                 key={index}
                 onClick={() => handleDayToggle(index)}
-                className={`p-2 rounded-lg font-medium text-sm transition-colors ${
+                className={`p-2 sm:p-2 rounded-lg font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
                   daysOfWeek.includes(index)
                     ? 'bg-amber-700 text-white'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -116,8 +116,8 @@ export function TaskRecurrenceForm({
 
       {/* Day of Month (for monthly recurrence) */}
       {frequency === 'monthly' && (
-        <div>
-          <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-900 dark:text-white">
             Day of month
           </label>
           <input
@@ -146,17 +146,17 @@ export function TaskRecurrenceForm({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
         <button
           onClick={handleSave}
-          className="flex-1 px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 sm:py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation"
         >
           <Clock size={16} />
           Set Recurrence
         </button>
         <button
           onClick={onCancel}
-          className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="flex-1 px-4 py-2.5 sm:py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation"
         >
           Cancel
         </button>

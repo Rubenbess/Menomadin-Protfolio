@@ -80,8 +80,8 @@ export default function TaskAutomations({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-1">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Zap size={24} className="text-amber-600" />
             Automation Rules
@@ -92,7 +92,7 @@ export default function TaskAutomations({
         </div>
         <Button
           onClick={() => setShowForm(true)}
-          className="w-auto"
+          className="w-full md:w-auto"
         >
           <Plus size={16} />
           New Rule
@@ -115,14 +115,14 @@ export default function TaskAutomations({
               key={rule.id}
               className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-medium text-slate-900 dark:text-white truncate">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 mb-3 sm:mb-2">
+                    <h3 className="font-medium text-slate-900 dark:text-white break-words max-w-[200px]">
                       {rule.name}
                     </h3>
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${
                         rule.is_active
                           ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
@@ -133,10 +133,10 @@ export default function TaskAutomations({
                   </div>
 
                   <div className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
-                    <p>
+                    <p className="break-words">
                       <span className="font-medium">When:</span> {triggerLabels[rule.trigger_type]}
                     </p>
-                    <p>
+                    <p className="break-words">
                       <span className="font-medium">Then:</span> {actionLabels[rule.action_type]}
                       {rule.action_type === 'create_task' && rule.config.template_id && (
                         <span> (Template: {rule.config.template_id})</span>
@@ -149,10 +149,10 @@ export default function TaskAutomations({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 md:flex-col md:gap-1">
                   <button
                     onClick={() => handleToggleActive(rule)}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 md:flex-none md:w-full p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     title={rule.is_active ? 'Disable rule' : 'Enable rule'}
                   >
                     <span className="text-xs">{rule.is_active ? '✓' : '✗'}</span>
@@ -162,18 +162,18 @@ export default function TaskAutomations({
                       // TODO: Implement edit mode
                       showError('Edit not yet implemented')
                     }}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 md:flex-none md:w-full p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     title="Edit rule"
                   >
-                    <Edit2 size={16} />
+                    <Edit2 size={16} className="mx-auto md:mx-0" />
                   </button>
                   <button
                     onClick={() => handleDeleteRule(rule.id)}
                     disabled={deleting === rule.id}
-                    className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                    className="flex-1 md:flex-none md:w-full p-2 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                     title="Delete rule"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} className="mx-auto md:mx-0" />
                   </button>
                 </div>
               </div>
