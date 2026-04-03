@@ -17,8 +17,8 @@ interface Props {
   onClose: () => void
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 export default function ReminderForm({ reminder, companies, defaultCompanyId, onClose }: Props) {
   const router = useRouter()
@@ -105,7 +105,7 @@ export default function ReminderForm({ reminder, companies, defaultCompanyId, on
         />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-1">
         <Button type="submit" loading={loading} className="flex-1">

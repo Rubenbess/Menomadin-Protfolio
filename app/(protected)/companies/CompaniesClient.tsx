@@ -48,10 +48,10 @@ function FilterSelect({
     <div className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
           active
-            ? 'bg-gold-500 text-white border-gold-500 shadow-sm'
-            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-800'
+            ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
+            : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300 hover:text-slate-800'
         }`}
       >
         {active ? value : label}
@@ -64,15 +64,15 @@ function FilterSelect({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full mt-1.5 z-20 bg-white rounded-xl shadow-xl ring-1 ring-black/[0.06] py-1 min-w-[160px]">
+          <div className="absolute left-0 top-full mt-1.5 z-20 bg-white rounded-lg shadow-xl ring-1 ring-black/[0.06] py-1 min-w-[160px]">
             {options.map(opt => (
               <button
                 key={opt}
                 onClick={() => { onChange(opt === value ? '' : opt); setOpen(false) }}
                 className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                   opt === value
-                    ? 'bg-gold-50 text-gold-600 font-medium'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    ? 'bg-gold-50 text-primary-600 font-medium'
+                    : 'text-neutral-800 hover:bg-neutral-50'
                 }`}
               >
                 {opt}
@@ -162,10 +162,10 @@ export default function CompaniesClient({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex-1">
           <h1 className="page-title">Companies</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Manage your portfolio companies</p>
+          <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">Manage your portfolio companies</p>
         </div>
         <Button onClick={() => setShowAdd(true)}>
           <Plus size={15} /> Add Company
@@ -174,7 +174,7 @@ export default function CompaniesClient({
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {/* Strategy filter tabs */}
-        <div className="flex gap-1.5 mb-4 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-refined dark:shadow-slate-900/30 ring-1 ring-black/[0.04] dark:ring-white/[0.06] w-fit">
+        <div className="flex gap-1.5 mb-4 bg-white dark:bg-neutral-800 rounded-lg p-1 shadow-sm dark:shadow-md dark:shadow-slate-900/30 border border-neutral-200 dark:border-neutral-700 dark:ring-white/[0.06] w-fit">
         {STRATEGY_FILTERS.map(({ value, label }) => (
           <button
             key={value}
@@ -182,7 +182,7 @@ export default function CompaniesClient({
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
               strategyFilter === value
                 ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-neutral-600 hover:text-neutral-800'
             }`}
           >
             {value !== 'all' && (
@@ -198,15 +198,15 @@ export default function CompaniesClient({
       {/* Search + filter row */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search companies…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 transition-all"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700">
               <X size={13} />
             </button>
           )}
@@ -227,7 +227,7 @@ export default function CompaniesClient({
 
         <button
           onClick={() => setShowAdvancedFilter(true)}
-          className="text-xs text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
+          className="text-xs text-neutral-700 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors border border-neutral-200"
         >
           Advanced Filter
         </button>
@@ -238,28 +238,28 @@ export default function CompaniesClient({
               clearAll()
               setAdvancedFilterGroup(null)
             }}
-            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
           >
             <X size={12} /> Clear all
           </button>
         )}
 
-        <span className="text-xs text-slate-400 ml-auto">
+        <span className="text-xs text-neutral-500 ml-auto">
           {filtered.length} {filtered.length === 1 ? 'company' : 'companies'}
         </span>
 
         {/* View toggle */}
-        <div className="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="flex items-center bg-white border border-neutral-200 rounded-lg overflow-hidden">
           <button
             onClick={() => setViewMode('card')}
-            className={`p-1.5 transition-colors ${viewMode === 'card' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+            className={`p-1.5 transition-colors ${viewMode === 'card' ? 'bg-slate-900 text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
             title="Card view"
           >
             <LayoutGrid size={14} />
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`p-1.5 transition-colors ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+            className={`p-1.5 transition-colors ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
             title="Table view"
           >
             <List size={14} />
@@ -275,7 +275,7 @@ export default function CompaniesClient({
             description={hasActiveFilters ? 'Try adjusting your filters to find what you\'re looking for.' : 'Start building your portfolio by adding your first company.'}
             action={
               hasActiveFilters ? (
-                <button onClick={clearAll} className="text-sm text-gold-500 dark:text-gold-300 hover:underline">
+                <button onClick={clearAll} className="text-sm text-primary-500 dark:text-gold-300 hover:underline">
                   Clear filters
                 </button>
               ) : (
@@ -295,18 +295,18 @@ export default function CompaniesClient({
             return (
               <div
                 key={co.id}
-                className="card p-5 flex flex-col gap-3 group hover:shadow-elevated transition-shadow"
+                className="card p-5 flex flex-col gap-3 group hover:shadow-md dark:shadow-lg transition-shadow"
               >
                 {/* Header */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {co.logo_url && (
-                        <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                        <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
                       )}
                       <Link
                         href={`/companies/${co.id}`}
-                        className="text-base font-semibold text-slate-900 hover:text-gold-500 transition-colors leading-snug"
+                        className="text-base font-semibold text-neutral-900 hover:text-primary-500 transition-colors leading-snug"
                       >
                         {co.name}
                       </Link>
@@ -318,7 +318,7 @@ export default function CompaniesClient({
                     </div>
                   </div>
                   {co.hq && (
-                    <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <div className="flex items-center gap-1 text-xs text-neutral-500">
                       <MapPin size={11} />
                       {co.hq}
                     </div>
@@ -327,30 +327,30 @@ export default function CompaniesClient({
 
                 {/* Sector + Stage */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{co.sector}</p>
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{co.sector}</p>
                   {co.entry_stage && (
                     <>
                       <span className="text-slate-200 text-xs">·</span>
-                      <span className="text-xs text-slate-400">{co.entry_stage}</span>
+                      <span className="text-xs text-neutral-500">{co.entry_stage}</span>
                     </>
                   )}
                 </div>
 
                 {co.description && (
-                  <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{co.description}</p>
+                  <p className="text-sm text-neutral-700 leading-relaxed line-clamp-3">{co.description}</p>
                 )}
 
                 {coContacts.length > 0 && (
-                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                  <div className="pt-2 border-t border-neutral-200 space-y-1.5">
                     {coContacts.map(contact => (
                       <div key={contact.id} className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gold-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User size={11} className="text-gold-500" />
+                          <User size={11} className="text-primary-500" />
                         </div>
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-slate-800">{contact.name}</span>
                           {contact.position && (
-                            <span className="text-xs text-slate-400"> · {contact.position}</span>
+                            <span className="text-xs text-neutral-500"> · {contact.position}</span>
                           )}
                         </div>
                       </div>
@@ -361,13 +361,13 @@ export default function CompaniesClient({
                 <div className="flex items-center gap-1.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setEditCompany(co)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
                   >
                     <Pencil size={12} /> Edit
                   </button>
                   <button
                     onClick={() => handleDelete(co.id, co.name)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={12} /> Delete
                   </button>
@@ -381,14 +381,14 @@ export default function CompaniesClient({
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Sector</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">HQ</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Stage</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Strategy</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Health</th>
+              <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Company</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Sector</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">HQ</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Stage</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Strategy</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Health</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -396,24 +396,24 @@ export default function CompaniesClient({
               {filtered.map(co => {
                 const hs = healthScores[co.id]
                 return (
-                  <tr key={co.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
+                  <tr key={co.id} className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         {co.logo_url ? (
-                          <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                          <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
                         ) : (
                           <div className="w-6 h-6 rounded-md bg-gold-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-bold text-gold-500">{co.name[0]}</span>
+                            <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
                           </div>
                         )}
-                        <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-gold-500 transition-colors">
+                        <Link href={`/companies/${co.id}`} className="font-semibold text-neutral-900 hover:text-primary-500 transition-colors">
                           {co.name}
                         </Link>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{co.sector ?? '—'}</td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{co.hq ?? '—'}</td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{co.entry_stage ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">{co.sector ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">{co.hq ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">{co.entry_stage ?? '—'}</td>
                     <td className="px-4 py-3"><Badge value={co.status} /></td>
                     <td className="px-4 py-3"><Badge value={co.strategy} type="strategy" /></td>
                     <td className="px-4 py-3 text-center">
@@ -423,7 +423,7 @@ export default function CompaniesClient({
                       <div className="flex items-center gap-1 justify-end">
                         <button
                           onClick={() => setEditCompany(co)}
-                          className="p-1.5 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-300 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
                         >
                           <Pencil size={13} />
                         </button>

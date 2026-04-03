@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
+const fi = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
 
 export default function OptionPoolForm({ companyId, pool, onClose }: Props) {
   const [name, setName]               = useState(pool?.name ?? 'ESOP')
@@ -69,7 +69,7 @@ export default function OptionPoolForm({ companyId, pool, onClose }: Props) {
         <label className="field-label">Exercise Price / Strike ($)</label>
         <input type="number" className={fi} value={pps} onChange={e => setPps(e.target.value)}
           placeholder="e.g. 0.10" min="0" step="any" />
-        <p className="text-[11px] text-slate-400 mt-1">Leave blank if not yet set or mixed</p>
+        <p className="text-[11px] text-neutral-500 mt-1">Leave blank if not yet set or mixed</p>
       </div>
 
       {error && <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>}

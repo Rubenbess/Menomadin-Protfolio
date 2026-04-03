@@ -63,21 +63,21 @@ export function HealthScoreBreakdown({ score }: { score: HealthScore }) {
   ]
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
+    <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Health Score</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Automated assessment based on KPIs, runway, updates &amp; MOIC</p>
+          <h3 className="text-sm font-semibold text-neutral-900">Health Score</h3>
+          <p className="text-xs text-neutral-500 mt-0.5">Automated assessment based on KPIs, runway, updates &amp; MOIC</p>
         </div>
         <div className="text-right">
           <span className={`text-3xl font-bold ${c.text}`}>{score.total}</span>
-          <span className="text-sm text-slate-400">/100</span>
+          <span className="text-sm text-neutral-500">/100</span>
           <p className={`text-xs font-semibold mt-0.5 ${c.text}`}>{c.label}</p>
         </div>
       </div>
 
       {/* Overall bar */}
-      <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-5">
+      <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mb-5">
         <div
           className={`h-full rounded-full transition-all ${c.bar}`}
           style={{ width: `${score.total}%` }}
@@ -89,10 +89,10 @@ export function HealthScoreBreakdown({ score }: { score: HealthScore }) {
         {rows.map(row => (
           <div key={row.label}>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-slate-600">{row.label}</span>
-              <span className="text-xs text-slate-500 tabular-nums">{row.score}/{row.max}</span>
+              <span className="text-xs font-medium text-neutral-700">{row.label}</span>
+              <span className="text-xs text-neutral-600 tabular-nums">{row.score}/{row.max}</span>
             </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${
                   row.score / row.max >= 0.7 ? 'bg-emerald-500' :
@@ -101,7 +101,7 @@ export function HealthScoreBreakdown({ score }: { score: HealthScore }) {
                 style={{ width: `${(row.score / row.max) * 100}%` }}
               />
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">{row.detail}</p>
+            <p className="text-xs text-neutral-500 mt-0.5">{row.detail}</p>
           </div>
         ))}
       </div>

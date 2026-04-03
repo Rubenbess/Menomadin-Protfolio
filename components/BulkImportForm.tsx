@@ -105,19 +105,19 @@ export function BulkImportForm({
         className={`border-2 border-dashed rounded-lg p-12 transition-colors ${
           isDragging
             ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-            : 'border-slate-300 dark:border-slate-600 hover:border-amber-400'
+            : 'border-neutral-300 dark:border-neutral-600 hover:border-amber-400'
         }`}
       >
         <div className="flex flex-col items-center gap-4">
           <Upload
             size={32}
-            className={isDragging ? 'text-amber-600' : 'text-slate-400'}
+            className={isDragging ? 'text-amber-600' : 'text-neutral-500'}
           />
           <div className="text-center">
-            <p className="font-medium text-slate-900 dark:text-white">
+            <p className="font-medium text-neutral-900 dark:text-white">
               Drag and drop your CSV file
             </p>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-sm text-neutral-700 dark:text-neutral-500 mt-1">
               or click to browse
             </p>
           </div>
@@ -166,11 +166,11 @@ export function BulkImportForm({
         <div className="space-y-4">
           {/* Summary */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+              <p className="text-sm text-neutral-700 dark:text-neutral-500">
                 Total Rows
               </p>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white mt-1">
                 {result.total}
               </p>
             </div>

@@ -127,21 +127,21 @@ function ReportCard({ title, description, onExcel, onPDF }: ReportCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5">
+    <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5">
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-9 h-9 bg-gold-100 rounded-xl flex items-center justify-center flex-shrink-0">
-          <FileText size={16} className="text-gold-500" />
+        <div className="w-9 h-9 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <FileText size={16} className="text-primary-500" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+          <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
+          <p className="text-xs text-neutral-500 mt-0.5">{description}</p>
         </div>
       </div>
       <div className="flex gap-2">
         <button
           onClick={() => handle('excel')}
           disabled={!!loading}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all disabled:opacity-50"
         >
           {excelDone
             ? <><CheckCircle2 size={13} /> Downloaded</>
@@ -152,7 +152,7 @@ function ReportCard({ title, description, onExcel, onPDF }: ReportCardProps) {
         <button
           onClick={() => handle('pdf')}
           disabled={!!loading}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold border border-violet-200 text-gold-600 bg-gold-50 hover:bg-gold-100 transition-all disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold border border-violet-200 text-primary-600 bg-gold-50 hover:bg-gold-100 transition-all disabled:opacity-50"
         >
           {pdfDone
             ? <><CheckCircle2 size={13} /> Downloaded</>
@@ -422,10 +422,10 @@ export default function ReportsClient({ companies, rounds, investments, capTable
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Reports</h1>
-          <p className="text-sm text-slate-400 mt-1">Download portfolio reports as Excel or PDF</p>
+          <p className="text-sm text-neutral-500 mt-1">Download portfolio reports as Excel or PDF</p>
         </div>
       </div>
 
@@ -440,8 +440,8 @@ export default function ReportsClient({ companies, rounds, investments, capTable
           { label: 'Overall MOIC',    value: `${overallMoic.toFixed(2)}x` },
         ].map(({ label, value }) => (
           <div key={label} className="text-center">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</p>
-            <p className="text-base font-bold text-slate-900 mt-1">{value}</p>
+            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{label}</p>
+            <p className="text-base font-bold text-neutral-900 mt-1">{value}</p>
           </div>
         ))}
       </div>
@@ -453,21 +453,21 @@ export default function ReportsClient({ companies, rounds, investments, capTable
           className="flex items-center justify-between card p-5 hover:shadow-md transition-shadow group"
         >
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-gold-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Users size={16} className="text-gold-500" />
+            <div className="w-9 h-9 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Users size={16} className="text-primary-500" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">LP Portfolio Update</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Live report with highlights, KPIs and portfolio metrics — export to PDF</p>
+              <h3 className="text-sm font-semibold text-neutral-900">LP Portfolio Update</h3>
+              <p className="text-xs text-neutral-500 mt-0.5">Live report with highlights, KPIs and portfolio metrics — export to PDF</p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-gold-500 group-hover:text-gold-600 flex-shrink-0 ml-4">Open →</span>
+          <span className="text-xs font-semibold text-primary-500 group-hover:text-primary-600 flex-shrink-0 ml-4">Open →</span>
         </Link>
       </div>
 
       {/* Full pack */}
       <div className="mb-4">
-        <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-lg p-5 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
             <div>
               <h3 className="text-sm font-bold">Full Portfolio Pack</h3>
@@ -482,7 +482,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
       </div>
 
       {/* Individual reports */}
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Individual Reports</h2>
+      <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Individual Reports</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ReportCard
           title="Portfolio Overview"
@@ -529,8 +529,8 @@ function DownloadButton({ label, onClick, color }: { label: string; onClick: () 
 
   const base = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all'
   const cls  = color === 'white'
-    ? `${base} bg-white text-gold-600 hover:bg-gold-50`
-    : `${base} bg-gold-500 text-white hover:bg-gold-300 ring-1 ring-white/20`
+    ? `${base} bg-white text-primary-600 hover:bg-gold-50`
+    : `${base} bg-primary-500 text-white hover:bg-gold-300 ring-1 ring-white/20`
 
   return (
     <button onClick={handle} disabled={loading} className={cls}>

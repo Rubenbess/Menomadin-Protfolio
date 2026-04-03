@@ -21,8 +21,8 @@ const STATUSES = ['active', 'exited', 'written-off', 'watchlist']
 const ENTRY_STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Late Stage', 'Other']
 const LS_KEY = 'custom_sectors'
 
-const input = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const label = 'block text-sm font-medium text-slate-700 mb-1.5'
+const input = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const label = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 function loadCustomSectors(): string[] {
   try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] }
@@ -186,26 +186,26 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
             <button
               type="button"
               onClick={() => { setSectorDropdownOpen(o => !o); setAddingCustom(false) }}
-              className={`${input} flex items-center justify-between text-left ${!selectedSector ? 'text-slate-400' : 'text-slate-900'}`}
+              className={`${input} flex items-center justify-between text-left ${!selectedSector ? 'text-neutral-500' : 'text-neutral-900'}`}
             >
               <span>{selectedSector || 'Select…'}</span>
-              <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />
+              <ChevronDown size={14} className="text-neutral-500 flex-shrink-0" />
             </button>
             {sectorDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute z-50 mt-1 w-full bg-white border border-neutral-200 rounded-lg shadow-lg overflow-hidden">
                 <div className="max-h-52 overflow-y-auto">
                   {allSectors.map(s => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => { setSelectedSector(s); setSectorDropdownOpen(false) }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors ${selectedSector === s ? 'text-gold-500 font-medium bg-gold-50' : 'text-slate-700'}`}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 transition-colors ${selectedSector === s ? 'text-primary-500 font-medium bg-gold-50' : 'text-neutral-800'}`}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-slate-100">
+                <div className="border-t border-neutral-200">
                   {addingCustom ? (
                     <div className="flex gap-1.5 p-2">
                       <input
@@ -213,16 +213,16 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
                         value={customSectorInput}
                         onChange={e => setCustomSectorInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSector() } if (e.key === 'Escape') { setAddingCustom(false); setCustomSectorInput('') } }}
-                        className="flex-1 px-2.5 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
+                        className="flex-1 px-2.5 py-1.5 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500"
                         placeholder="New sector name…"
                       />
-                      <button type="button" onClick={handleAddCustomSector} className="px-2.5 py-1.5 text-xs bg-gold-500 text-white rounded-lg hover:bg-gold-600 transition-colors">Add</button>
+                      <button type="button" onClick={handleAddCustomSector} className="px-2.5 py-1.5 text-xs bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Add</button>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setAddingCustom(true)}
-                      className="w-full flex items-center gap-1.5 px-3 py-2 text-sm text-gold-500 hover:bg-gold-50 transition-colors font-medium"
+                      className="w-full flex items-center gap-1.5 px-3 py-2 text-sm text-primary-500 hover:bg-gold-50 transition-colors font-medium"
                     >
                       <Plus size={13} /> Add custom sector
                     </button>
@@ -270,10 +270,10 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           <label className={label}>Logo</label>
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
           {logoPreview ? (
-            <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div className="flex items-center gap-3 p-2 bg-neutral-50 border border-neutral-200 rounded-xl">
               <img src={logoPreview} alt="Logo" className="w-10 h-10 rounded-lg object-contain bg-white ring-1 ring-slate-100" />
-              <span className="text-xs text-slate-500 flex-1 truncate">{logoFile?.name ?? 'Current logo'}</span>
-              <button type="button" onClick={removeLogo} className="p-1 text-slate-400 hover:text-red-500 transition-colors">
+              <span className="text-xs text-neutral-600 flex-1 truncate">{logoFile?.name ?? 'Current logo'}</span>
+              <button type="button" onClick={removeLogo} className="p-1 text-neutral-500 hover:text-red-500 transition-colors">
                 <X size={14} />
               </button>
             </div>
@@ -281,7 +281,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-sm text-slate-400 hover:border-gold-300 hover:text-gold-500 transition-all"
+              className="w-full flex items-center gap-2 px-3 py-2.5 bg-neutral-50 border border-dashed border-neutral-300 rounded-lg text-sm text-neutral-500 hover:border-gold-300 hover:text-primary-500 transition-all"
             >
               <Upload size={14} /> Upload image…
             </button>
@@ -327,13 +327,13 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           <button
             type="button"
             onClick={() => setCoInvestors(prev => [...prev, ''])}
-            className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium"
+            className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
           >
             <Plus size={12} /> Add
           </button>
         </div>
         {coInvestors.length === 0 && (
-          <p className="text-xs text-slate-400 py-2">No co-investors yet — click &quot;Add&quot; to add one.</p>
+          <p className="text-xs text-neutral-500 py-2">No co-investors yet — click &quot;Add&quot; to add one.</p>
         )}
         <div className="space-y-2">
           {coInvestors.map((name, i) => (
@@ -347,7 +347,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
               <button
                 type="button"
                 onClick={() => setCoInvestors(prev => prev.filter((_, idx) => idx !== i))}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
               >
                 <Trash2 size={14} />
               </button>
@@ -363,13 +363,13 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
           <button
             type="button"
             onClick={addContact}
-            className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium"
+            className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
           >
             <Plus size={12} /> Add contact
           </button>
         </div>
         {contacts.length === 0 && (
-          <p className="text-xs text-slate-400 py-2">No contacts yet — click &quot;Add contact&quot; to add one.</p>
+          <p className="text-xs text-neutral-500 py-2">No contacts yet — click &quot;Add contact&quot; to add one.</p>
         )}
         <div className="space-y-2">
           {contacts.map((c, i) => (
@@ -389,7 +389,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
               <button
                 type="button"
                 onClick={() => removeContact(i)}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
               >
                 <Trash2 size={14} />
               </button>
@@ -399,7 +399,7 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>
+        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>
       )}
 
       <div className="flex gap-3 pt-2">

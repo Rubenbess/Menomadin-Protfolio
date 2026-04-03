@@ -9,8 +9,8 @@ import type { Contact } from '@/lib/types'
 
 const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 'Other'] as const
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 interface Props {
   contact?: Contact
@@ -151,7 +151,7 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
                 setNewCompanyName('')
                 setSelectedCompany('')
               }}
-              className="text-xs text-slate-500 hover:text-slate-700 mt-1"
+              className="text-xs text-neutral-600 hover:text-neutral-800 mt-1"
             >
               ← Back to list
             </button>
@@ -189,7 +189,7 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
         <textarea name="notes" rows={3} defaultValue={contact?.notes ?? ''} className={`${inp} resize-none`} placeholder="Any context about this contact…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={loading} className="flex-1">

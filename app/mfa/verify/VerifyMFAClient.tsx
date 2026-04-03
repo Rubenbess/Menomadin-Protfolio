@@ -57,17 +57,17 @@ export default function VerifyMFAClient() {
     >
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-card ring-1 ring-black/[0.06] mb-4 mx-auto">
-            <ShieldCheck size={28} className="text-gold-500" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-white shadow-sm dark:shadow-md ring-1 ring-black/[0.06] mb-4 mx-auto">
+            <ShieldCheck size={28} className="text-primary-500" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Two-factor authentication</h1>
-          <p className="text-sm text-slate-400 mt-1">Enter the 6-digit code from your authenticator app</p>
+          <h1 className="text-xl font-bold text-neutral-900 tracking-tight">Two-factor authentication</h1>
+          <p className="text-sm text-neutral-500 mt-1">Enter the 6-digit code from your authenticator app</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-7">
+        <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-7">
           <form onSubmit={handleVerify} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Authentication code</label>
+              <label className="block text-sm font-medium text-neutral-800 mb-1.5">Authentication code</label>
               <input
                 ref={inputRef}
                 type="text"
@@ -77,12 +77,12 @@ export default function VerifyMFAClient() {
                 value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
-                className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xl font-mono text-center tracking-[0.4em] text-slate-900 placeholder:text-slate-300 placeholder:tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all"
+                className="w-full px-3.5 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-xl font-mono text-center tracking-[0.4em] text-neutral-900 placeholder:text-slate-300 placeholder:tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all"
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3 ring-1 ring-red-200">
+              <div className="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-3 ring-1 ring-red-200">
                 {error}
               </div>
             )}
@@ -90,7 +90,7 @@ export default function VerifyMFAClient() {
             <button
               type="submit"
               disabled={loading || code.length !== 6}
-              className="w-full py-2.5 bg-gold-500 text-white text-sm font-semibold rounded-xl hover:bg-gold-600 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-lg hover:bg-primary-600 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Verifying…' : 'Verify'}
             </button>
@@ -99,7 +99,7 @@ export default function VerifyMFAClient() {
 
         <button
           onClick={handleSignOut}
-          className="mt-4 w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+          className="mt-4 w-full flex items-center justify-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
         >
           <LogOut size={13} /> Sign out and try another account
         </button>

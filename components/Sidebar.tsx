@@ -86,16 +86,16 @@ function NavLinks() {
             key={href}
             href={to}
             className={`
-              group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+              group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
               ${active
-                ? 'bg-gold-500/15 text-gold-200 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                ? 'bg-primary-500/15 text-gold-200 shadow-sm'
+                : 'text-neutral-500 hover:text-slate-200 hover:bg-white/5'
               }
             `}
           >
             <Icon
               size={16}
-              className={active ? 'text-gold-300' : 'text-slate-500 group-hover:text-slate-300 transition-colors'}
+              className={active ? 'text-gold-300' : 'text-neutral-600 group-hover:text-slate-300 transition-colors'}
             />
             {label}
             {href === '/reminders' && !active && <ReminderBadge />}
@@ -121,7 +121,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-56 flex-shrink-0 flex flex-col border-r border-white/[0.06] dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950"
+      className="w-56 flex-shrink-0 flex flex-col border-r border-white/[0.06] dark:border-neutral-700 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950"
       style={{
         background: 'linear-gradient(180deg, #0f0f1e 0%, #0d0d1a 100%)',
       }}
@@ -129,7 +129,7 @@ export default function Sidebar() {
       {/* Brand */}
       <div className="h-16 flex items-center px-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-500/30">
+          <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-500/30">
             <img
               src="/menomadin-icon.svg"
               alt="Menomadin Group"
@@ -140,7 +140,7 @@ export default function Sidebar() {
             <p className="text-white font-bold text-sm tracking-tight leading-none">
               Menomadin
             </p>
-            <p className="text-slate-500 text-[10px] tracking-widest uppercase leading-none mt-1">
+            <p className="text-neutral-600 text-[10px] tracking-widest uppercase leading-none mt-1">
               Portfolio
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function Sidebar() {
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500">
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-600">
               <Icon size={16} />{label}
             </Link>
           ))}
@@ -172,7 +172,7 @@ export default function Sidebar() {
       <div className="px-3 pb-4 border-t border-white/[0.06] pt-3">
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-600 hover:text-slate-200 hover:bg-white/5 transition-all"
         >
           <LogOut size={15} />
           Sign out

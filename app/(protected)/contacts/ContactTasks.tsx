@@ -82,7 +82,7 @@ export default function ContactTasks({ contactId, contactName }: Props) {
   }
 
   const statusColors: Record<string, { icon: React.ReactNode; color: string }> = {
-    'To do': { icon: <AlertCircle size={14} />, color: 'text-slate-400' },
+    'To do': { icon: <AlertCircle size={14} />, color: 'text-neutral-500' },
     'In progress': { icon: <Clock size={14} />, color: 'text-amber-500' },
     'Done': { icon: <CheckCircle2 size={14} />, color: 'text-emerald-500' },
     'Waiting': { icon: <Clock size={14} />, color: 'text-blue-500' },
@@ -90,42 +90,42 @@ export default function ContactTasks({ contactId, contactName }: Props) {
   }
 
   if (loading) {
-    return <div className="text-xs text-slate-400 text-center py-4">Loading tasks…</div>
+    return <div className="text-xs text-neutral-500 text-center py-4">Loading tasks…</div>
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Follow-up Tasks ({tasks.length})</p>
+        <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Follow-up Tasks ({tasks.length})</p>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium"
+          className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
         >
           <Plus size={12} /> New
         </button>
       </div>
 
       {showCreateForm && (
-        <div className="bg-slate-50 rounded-xl p-3 ring-1 ring-slate-200 space-y-2">
+        <div className="bg-neutral-50 rounded-lg p-3 ring-1 ring-slate-200 space-y-2">
           <input
             type="text"
             value={newTaskTitle}
             onChange={e => setNewTaskTitle(e.target.value)}
             placeholder={`Follow-up task for ${contactName}…`}
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
+            className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500"
             onKeyPress={e => e.key === 'Enter' && handleCreateTask()}
           />
           <div className="flex gap-2">
             <button
               onClick={handleCreateTask}
               disabled={creating || !newTaskTitle.trim()}
-              className="flex-1 px-3 py-1.5 bg-gold-500 text-white rounded-lg text-xs font-semibold hover:bg-gold-600 disabled:opacity-50 transition-colors"
+              className="flex-1 px-3 py-1.5 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors"
             >
               {creating ? 'Creating…' : 'Create'}
             </button>
             <button
               onClick={() => setShowCreateForm(false)}
-              className="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs"
+              className="px-3 py-1.5 text-neutral-600 hover:text-neutral-800 text-xs"
             >
               Cancel
             </button>
@@ -134,7 +134,7 @@ export default function ContactTasks({ contactId, contactName }: Props) {
       )}
 
       {tasks.length === 0 ? (
-        <p className="text-xs text-slate-400 text-center py-4">No follow-up tasks yet.</p>
+        <p className="text-xs text-neutral-500 text-center py-4">No follow-up tasks yet.</p>
       ) : (
         <div className="space-y-2">
           {tasks.map(task => {
@@ -142,15 +142,15 @@ export default function ContactTasks({ contactId, contactName }: Props) {
             return (
               <div
                 key={task.id}
-                className="flex items-start gap-3 p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                className="flex items-start gap-3 p-2.5 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
               >
                 <div className={`mt-0.5 flex-shrink-0 ${statusInfo.color}`}>
                   {statusInfo.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate">{task.title}</p>
+                  <p className="text-xs font-medium text-neutral-800 truncate">{task.title}</p>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className="inline-block px-1.5 py-0.5 bg-white text-slate-600 border border-slate-200 rounded text-xs">
+                    <span className="inline-block px-1.5 py-0.5 bg-white text-neutral-700 border border-neutral-200 rounded text-xs">
                       {task.status}
                     </span>
                     {task.priority && (

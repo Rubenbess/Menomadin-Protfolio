@@ -12,10 +12,10 @@ export default async function TasksSummary() {
 
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-6 text-center -mt-6">
+      <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-6 text-center -mt-6">
         <CheckSquare size={32} className="mx-auto mb-3 text-slate-300" />
-        <p className="text-sm text-slate-500 mb-4">No tasks yet</p>
-        <Link href="/tasks" className="inline-flex items-center text-sm font-semibold text-gold-500 hover:text-gold-600">
+        <p className="text-sm text-neutral-600 mb-4">No tasks yet</p>
+        <Link href="/tasks" className="inline-flex items-center text-sm font-semibold text-primary-500 hover:text-primary-600">
           Create your first task →
         </Link>
       </div>
@@ -47,11 +47,11 @@ export default async function TasksSummary() {
   return (
     <div className="space-y-4 mb-6 md:mb-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-          <CheckSquare size={16} className="text-gold-500" />
+        <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+          <CheckSquare size={16} className="text-primary-500" />
           Tasks Overview
         </h2>
-        <Link href="/tasks" className="text-xs font-medium text-gold-500 hover:text-gold-600">
+        <Link href="/tasks" className="text-xs font-medium text-primary-500 hover:text-primary-600">
           View all →
         </Link>
       </div>
@@ -62,10 +62,10 @@ export default async function TasksSummary() {
         <MetricCard label="Completed" value={stats.completed.toString()} accent="emerald" />
         <MetricCard label="Due Today" value={stats.dueToday.toString()} accent={stats.dueToday > 0 ? 'amber' : 'violet'} />
         {stats.overdue > 0 && (
-          <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-4 flex flex-col items-center justify-center border-t-2 border-red-500">
+          <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-4 flex flex-col items-center justify-center border-t-2 border-red-500">
             <div className="flex items-center gap-1.5 mb-1">
               <AlertCircle size={14} className="text-red-600" />
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Overdue</p>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Overdue</p>
             </div>
             <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
           </div>

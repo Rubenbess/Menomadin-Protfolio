@@ -18,17 +18,17 @@ export function MetricCard({
   icon,
 }: MetricCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+          <p className="text-sm font-medium text-neutral-700 dark:text-neutral-500">
             {title}
           </p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-2">
+          <p className="text-2xl font-bold text-neutral-900 dark:text-white mt-2">
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-neutral-600 dark:text-neutral-500 mt-1">
               {subtitle}
             </p>
           )}
@@ -56,7 +56,7 @@ export function MetricCard({
           )}
         </div>
         {icon && (
-          <div className="text-slate-400 dark:text-slate-600">
+          <div className="text-neutral-500 dark:text-neutral-700">
             {icon}
           </div>
         )}

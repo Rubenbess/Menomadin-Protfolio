@@ -187,43 +187,43 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex-1">
           <h1 className="page-title">Tasks</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Organize and track your work in real time</p>
+          <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">Organize and track your work in real time</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg bg-slate-200 dark:bg-slate-800 p-1">
+          <div className="inline-flex rounded-lg bg-neutral-200 dark:bg-neutral-800 p-1">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'list' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
+              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'list' ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-700 dark:text-neutral-500'}`}
             >
               <LayoutList size={16} />
             </button>
             <button
               onClick={() => setView('board')}
-              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'board' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
+              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'board' ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-700 dark:text-neutral-500'}`}
             >
               <Kanban size={16} />
             </button>
           </div>
           <Link
             href="/tasks/templates"
-            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            className="p-2.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-500 transition-colors"
             title="Task Templates"
           >
             <BookTemplate size={16} />
           </Link>
           <Link
             href="/tasks/automations"
-            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            className="p-2.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-500 transition-colors"
             title="Automations"
           >
             <Zap size={16} />
           </Link>
           <button
             onClick={() => router.refresh()}
-            className="p-2.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+            className="p-2.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-500 transition-colors"
             title="Refresh"
           >
             <RefreshCw size={16} />
@@ -247,13 +247,13 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               <p className="section-title">{s.label}</p>
               <span className="text-xl">{s.icon}</span>
             </div>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">{s.count}</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-white">{s.count}</p>
           </div>
         ))}
       </div>
 
       {/* Filter Tabs */}
-      <div className="px-6 mb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="px-6 mb-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex gap-6 overflow-x-auto pb-4">
           {[
             { id: 'all', label: 'All Tasks', count: filteredTasks.length },
@@ -266,8 +266,8 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               onClick={() => setQuickFilter(tab.id as QuickFilter)}
               className={`px-1 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
                 quickFilter === tab.id
-                  ? 'border-gold-500 text-gold-600 dark:text-gold-400'
-                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-gold-400'
+                  : 'border-transparent text-neutral-700 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-slate-300'
               }`}
             >
               {tab.label} <span className="text-xs font-normal ml-1 opacity-60">({tab.count})</span>
@@ -309,8 +309,8 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-6xl mb-4">📋</div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No tasks yet</h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-8">Create your first task to get started</p>
+                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">No tasks yet</h3>
+                <p className="text-neutral-600 dark:text-neutral-500 mb-8">Create your first task to get started</p>
                 <Button onClick={() => setShowCreateForm(true)}>
                   <Plus size={16} /> Create task
                 </Button>
@@ -320,8 +320,8 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No matches found</h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-8">Try adjusting your filters</p>
+                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">No matches found</h3>
+                <p className="text-neutral-600 dark:text-neutral-500 mb-8">Try adjusting your filters</p>
                 <Button onClick={() => {
                   setSearchQuery('')
                   setQuickFilter('all')
@@ -376,12 +376,12 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
       {/* Keyboard Help */}
       {showKeyboardHelp && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Keyboard Shortcuts</h3>
+              <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Keyboard Shortcuts</h3>
               <button
                 onClick={() => setShowKeyboardHelp(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300"
               >
                 ✕
               </button>
@@ -394,8 +394,8 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
                 { key: '?', action: 'Show this help' },
               ].map(({ key, action }) => (
                 <div key={key} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">{action}</span>
-                  <kbd className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs">
+                  <span className="text-neutral-700 dark:text-neutral-500">{action}</span>
+                  <kbd className="px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white font-mono text-xs">
                     {key}
                   </kbd>
                 </div>

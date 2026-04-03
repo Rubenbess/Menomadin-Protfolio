@@ -67,7 +67,7 @@ export default function DebugPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-6">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-lg w-full space-y-4">
+      <div className="bg-neutral-800 border border-slate-700 rounded-lg p-8 max-w-lg w-full space-y-4">
         <h1 className="text-2xl font-bold text-white mb-6">🔍 Supabase Configuration Diagnostic</h1>
 
         {/* Supabase URL */}
@@ -78,7 +78,7 @@ export default function DebugPage() {
               {status.urlValid ? '✅' : '❌'}
             </span>
           </div>
-          <p className="text-xs text-slate-400 bg-slate-700/50 p-2 rounded break-all">
+          <p className="text-xs text-neutral-500 bg-slate-700/50 p-2 rounded break-all">
             {status.supabaseUrl}
           </p>
           {!status.urlValid && (
@@ -96,7 +96,7 @@ export default function DebugPage() {
               {status.keyValid ? '✅' : '❌'}
             </span>
           </div>
-          <p className="text-xs text-slate-400 bg-slate-700/50 p-2 rounded break-all">
+          <p className="text-xs text-neutral-500 bg-slate-700/50 p-2 rounded break-all">
             {status.supabaseKey}
           </p>
           {!status.keyValid && (
@@ -164,7 +164,7 @@ export default function DebugPage() {
         {/* Instructions */}
         <div className="pt-4 border-t border-slate-700">
           <h3 className="text-slate-300 font-medium mb-2">Next Steps:</h3>
-          <ol className="text-sm text-slate-400 space-y-1 list-decimal list-inside">
+          <ol className="text-sm text-neutral-500 space-y-1 list-decimal list-inside">
             <li>Go to <a href="https://supabase.com/dashboard" target="_blank" className="text-gold-300 hover:underline">Supabase Dashboard</a></li>
             <li>Select your project</li>
             <li>Settings → API</li>
@@ -183,7 +183,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...`}
         <div className="pt-4">
           <a
             href="/login"
-            className="block text-center bg-gold-500 hover:bg-gold-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="block text-center bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Back to Login
           </a>

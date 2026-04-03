@@ -96,7 +96,7 @@ function TrendBadge({ current, prev }: { current: number | null; prev: number | 
   const up  = pct > 0
   const flat = Math.abs(pct) < 1
   return (
-    <span className={`text-[10px] font-semibold ml-1 ${flat ? 'text-slate-400' : up ? 'text-emerald-600' : 'text-red-500'}`}>
+    <span className={`text-[10px] font-semibold ml-1 ${flat ? 'text-neutral-500' : up ? 'text-emerald-600' : 'text-red-500'}`}>
       {flat ? '' : up ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`}
     </span>
   )
@@ -180,13 +180,13 @@ function CsvImportButton({ companies }: { companies: { id: string; name: string 
       <button
         onClick={() => fileRef.current?.click()}
         disabled={importing}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border bg-white text-slate-500 border-slate-200 hover:text-slate-700 hover:border-slate-300 transition-all disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border bg-white text-neutral-600 border-neutral-200 hover:text-neutral-800 hover:border-neutral-300 transition-all disabled:opacity-50"
       >
         <Upload size={12} />
         {importing ? 'Importing…' : 'Import CSV'}
       </button>
       {result && (
-        <p className="absolute right-0 top-full mt-1 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow whitespace-nowrap z-10">
+        <p className="absolute right-0 top-full mt-1 text-xs text-neutral-700 bg-white border border-neutral-200 rounded-lg px-2 py-1 shadow whitespace-nowrap z-10">
           {result}
         </p>
       )}
@@ -217,7 +217,7 @@ function PortfolioArrChart({
   }
   const dates = [...dateSet].sort()
   if (dates.length < 2) return (
-    <div className="flex items-center justify-center h-40 text-sm text-slate-400">
+    <div className="flex items-center justify-center h-40 text-sm text-neutral-500">
       Not enough ARR data to display chart. Add KPIs with ARR values to companies.
     </div>
   )
@@ -306,23 +306,23 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Portfolio KPIs</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-500 mt-0.5">
             {withData} of {filtered.length} companies with data
             {totalArr > 0 && ` · ${fmt$(totalArr)} total ARR`}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Strategy toggle */}
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-white border border-neutral-200 rounded-lg p-1 shadow-sm">
             {(['all', 'impact', 'venture'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setStrategy(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  strategy === s ? 'bg-gold-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  strategy === s ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-800'
                 }`}
               >
                 {s === 'all' ? 'All' : s === 'impact' ? 'Impact' : 'Ventures'}
@@ -331,17 +331,17 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
           </div>
 
           {/* Table / Chart toggle */}
-          <div className="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div className="flex items-center bg-white border border-neutral-200 rounded-lg overflow-hidden">
             <button
               onClick={() => setView('table')}
-              className={`p-2 transition-colors ${view === 'table' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+              className={`p-2 transition-colors ${view === 'table' ? 'bg-slate-900 text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
               title="Table view"
             >
               <Table size={14} />
             </button>
             <button
               onClick={() => setView('chart')}
-              className={`p-2 transition-colors ${view === 'chart' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`}
+              className={`p-2 transition-colors ${view === 'chart' ? 'bg-slate-900 text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
               title="ARR Chart"
             >
               <AreaChartIcon size={14} />
@@ -350,8 +350,8 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
 
           <button
             onClick={() => setOnlyWithData(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
-              onlyWithData ? 'bg-gold-500 text-white border-transparent' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-700'
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+              onlyWithData ? 'bg-primary-500 text-white border-transparent' : 'bg-white text-neutral-600 border-neutral-200 hover:text-neutral-800'
             }`}
           >
             <Filter size={12} /> With data
@@ -366,8 +366,8 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
       {view === 'chart' ? (
         /* ── Chart view ─────────────────────────────────────────────────── */
         <div className="card p-6">
-          <h2 className="text-sm font-semibold text-slate-900 mb-1">Portfolio ARR Over Time</h2>
-          <p className="text-xs text-slate-400 mb-5">Stacked area — each layer = one company's ARR</p>
+          <h2 className="text-sm font-semibold text-neutral-900 mb-1">Portfolio ARR Over Time</h2>
+          <p className="text-xs text-neutral-500 mb-5">Stacked area — each layer = one company's ARR</p>
           <PortfolioArrChart companies={companies} kpisByCompany={kpisByCompany} />
         </div>
       ) : (
@@ -376,16 +376,16 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest sticky left-0 bg-slate-50 dark:bg-slate-900/50">Company</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">ARR</th>
+                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest sticky left-0 bg-neutral-50 dark:bg-neutral-800/50">Company</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">ARR</th>
                   <th className="px-2 py-3 w-14" />
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Revenue</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Burn /mo</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Runway</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Headcount</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Gross Margin</th>
-                  <th className="text-right px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Updated</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Revenue</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Burn /mo</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Runway</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Headcount</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Gross Margin</th>
+                  <th className="text-right px-5 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -402,22 +402,22 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                     .filter((v): v is number => v != null)
 
                   return (
-                    <tr key={co.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
+                    <tr key={co.id} className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200">
                       <td className="px-5 py-3.5 sticky left-0 bg-white">
                         <div className="flex items-center gap-3">
                           {co.logo_url ? (
-                            <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                            <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
                           ) : (
                             <div className="w-7 h-7 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
-                              <span className="text-xs font-bold text-gold-500">{co.name[0]}</span>
+                              <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
                             </div>
                           )}
                           <div>
-                            <Link href={`/companies/${co.id}`} className="font-semibold text-slate-900 hover:text-gold-500 transition-colors">
+                            <Link href={`/companies/${co.id}`} className="font-semibold text-neutral-900 hover:text-primary-500 transition-colors">
                               {co.name}
                             </Link>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              {co.sector && <p className="text-xs text-slate-400">{co.sector}</p>}
+                              {co.sector && <p className="text-xs text-neutral-500">{co.sector}</p>}
                               {statusCfg && (
                                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${statusCfg.cls}`}>
                                   {statusCfg.label}
@@ -429,28 +429,28 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                       </td>
                       {kpi ? (
                         <>
-                          <td className="px-4 py-3.5 text-right font-medium text-slate-700">
+                          <td className="px-4 py-3.5 text-right font-medium text-neutral-800">
                             {fmt$(kpi.arr) ?? <span className="text-slate-300">—</span>}
                             <TrendBadge current={kpi.arr} prev={prevKpi?.arr ?? null} />
                           </td>
                           <td className="px-2 py-3.5">
                             {sparkVals.length >= 2 && <Sparkline values={sparkVals} />}
                           </td>
-                          <td className="px-4 py-3.5 text-right text-slate-600">{fmt$(kpi.revenue) ?? <span className="text-slate-300">—</span>}</td>
-                          <td className="px-4 py-3.5 text-right text-slate-600">{fmt$(kpi.burn_rate) ?? <span className="text-slate-300">—</span>}</td>
+                          <td className="px-4 py-3.5 text-right text-neutral-700">{fmt$(kpi.revenue) ?? <span className="text-slate-300">—</span>}</td>
+                          <td className="px-4 py-3.5 text-right text-neutral-700">{fmt$(kpi.burn_rate) ?? <span className="text-slate-300">—</span>}</td>
                           <td className="px-4 py-3.5 text-right"><RunwayBadge months={kpi.cash_runway} /></td>
-                          <td className="px-4 py-3.5 text-right text-slate-600">{kpi.headcount ?? <span className="text-slate-300">—</span>}</td>
-                          <td className="px-4 py-3.5 text-right text-slate-600">
+                          <td className="px-4 py-3.5 text-right text-neutral-700">{kpi.headcount ?? <span className="text-slate-300">—</span>}</td>
+                          <td className="px-4 py-3.5 text-right text-neutral-700">
                             {kpi.gross_margin != null ? `${kpi.gross_margin.toFixed(1)}%` : <span className="text-slate-300">—</span>}
                           </td>
-                          <td className="px-5 py-3.5 text-right text-xs text-slate-400">
+                          <td className="px-5 py-3.5 text-right text-xs text-neutral-500">
                             {new Date(kpi.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                           </td>
                         </>
                       ) : (
                         <td colSpan={8} className="px-4 py-3.5 text-center text-xs text-slate-300">
                           No KPI data —{' '}
-                          <Link href={`/companies/${co.id}`} className="text-gold-300 hover:text-gold-500 hover:underline">
+                          <Link href={`/companies/${co.id}`} className="text-gold-300 hover:text-primary-500 hover:underline">
                             add from company page
                           </Link>
                         </td>
@@ -463,18 +463,18 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
               {/* Portfolio total row */}
               {withData > 0 && (
                 <tfoot>
-                  <tr className="border-t-2 border-slate-200 bg-slate-50">
-                    <td className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-0 bg-slate-50">
+                  <tr className="border-t-2 border-neutral-200 bg-neutral-50">
+                    <td className="px-5 py-3 text-xs font-semibold text-neutral-600 uppercase sticky left-0 bg-neutral-50">
                       Portfolio Total
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-slate-900">
+                    <td className="px-4 py-3 text-right font-bold text-neutral-900">
                       {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.arr ?? 0), 0)) ?? '—'}
                     </td>
                     <td />
-                    <td className="px-4 py-3 text-right font-bold text-slate-900">
+                    <td className="px-4 py-3 text-right font-bold text-neutral-900">
                       {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.revenue ?? 0), 0)) ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-slate-900">
+                    <td className="px-4 py-3 text-right font-bold text-neutral-900">
                       {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.burn_rate ?? 0), 0)) ?? '—'}
                     </td>
                     <td colSpan={4} />
@@ -487,8 +487,8 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
       )}
 
       {/* CSV format hint */}
-      <p className="text-xs text-slate-400 mt-3">
-        CSV import format: <code className="bg-slate-100 px-1 rounded text-slate-600">company, date, arr, revenue, burn_rate, cash_runway, headcount, gross_margin</code>
+      <p className="text-xs text-neutral-500 mt-3">
+        CSV import format: <code className="bg-neutral-100 px-1 rounded text-neutral-700">company, date, arr, revenue, burn_rate, cash_runway, headcount, gross_margin</code>
       </p>
       </div>
     </div>

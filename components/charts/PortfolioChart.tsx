@@ -37,8 +37,8 @@ const COLORS = ['#b8956a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'
 
 export function InvestmentsByStageChart({ data, height = 300 }: { data: PieChartData[]; height?: number }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
         Investments by Stage
       </h3>
       <ResponsiveContainer width="100%" height={height}>
@@ -75,8 +75,8 @@ export function SectorDistributionChart({ data, height = 300 }: { data: any[]; h
   }))
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
         Sector Distribution (Invested vs Current Value)
       </h3>
       <ResponsiveContainer width="100%" height={height}>
@@ -108,8 +108,8 @@ export function PerformanceChart({ data, height = 300 }: { data: any[]; height?:
   }))
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
         Company Performance (MOIC)
       </h3>
       <ResponsiveContainer width="100%" height={height}>

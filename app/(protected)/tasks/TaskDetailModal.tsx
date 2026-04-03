@@ -92,23 +92,23 @@ export default function TaskDetailModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white truncate pr-4">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white truncate pr-4">
             {currentTask.title}
           </h2>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setShowEditModal(true)}
-              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
               title="Edit task"
             >
               <Edit2 size={18} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <X size={20} />
             </button>
@@ -119,7 +119,7 @@ export default function TaskDetailModal({
         <div className="p-6 space-y-6">
           {/* Status Section */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Status</h3>
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Status</h3>
             <div className="flex items-center gap-3">
               <TaskStatusBadge status={currentTask.status} />
               <div className="flex gap-2">
@@ -150,7 +150,7 @@ export default function TaskDetailModal({
           {/* Priority & Due Date */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
                 <Flag size={16} />
                 Priority
               </label>
@@ -158,32 +158,32 @@ export default function TaskDetailModal({
             </div>
 
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
                 <Calendar size={16} />
                 Due Date
               </label>
               {currentTask.due_date ? (
                 <div>
-                  <p className="text-sm text-slate-900 dark:text-white">
+                  <p className="text-sm text-neutral-900 dark:text-white">
                     {new Date(currentTask.due_date).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
                       year: 'numeric',
                     })}
                   </p>
-                  <p className={`text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                  <p className={`text-xs font-medium ${overdue ? 'text-red-600 dark:text-red-400' : 'text-neutral-600 dark:text-neutral-500'}`}>
                     {formatDueDate(currentTask)}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-slate-400 dark:text-slate-500">No due date</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-600">No due date</p>
               )}
             </div>
           </div>
 
           {/* Assignees */}
           <div className="space-y-3">
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
               <User size={16} />
               Assignees
             </label>
@@ -194,14 +194,14 @@ export default function TaskDetailModal({
                   {currentTask.assignees.map(assignee => (
                     <div
                       key={assignee.id}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800"
                     >
-                      <span className="text-sm text-slate-900 dark:text-white">
+                      <span className="text-sm text-neutral-900 dark:text-white">
                         {assignee.team_member?.name}
                       </span>
                       <button
                         onClick={() => handleRemoveAssignee(assignee.assigned_to)}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300"
                       >
                         <X size={14} />
                       </button>
@@ -210,7 +210,7 @@ export default function TaskDetailModal({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-400 dark:text-slate-500">No assignees</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-600">No assignees</p>
             )}
 
             <div className="pt-2">
@@ -221,7 +221,7 @@ export default function TaskDetailModal({
                     e.target.value = ''
                   }
                 }}
-                className="text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                className="text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               >
                 <option value="">+ Add assignee</option>
                 {teamMembers.map(member => (
@@ -235,57 +235,57 @@ export default function TaskDetailModal({
 
           {/* Linked Entities */}
           {(currentTask.company || currentTask.pipeline_deal || currentTask.contact) && (
-            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Related Items</p>
+            <div className="space-y-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+              <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-500 uppercase">Related Items</p>
               <div className="space-y-2">
                 {currentTask.company && (
                   <a
                     href={`/companies/${currentTask.company.id}`}
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-gold-200 dark:hover:border-gold-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-gold-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Building2 size={14} className="text-slate-400" />
+                        <Building2 size={14} className="text-neutral-500" />
                         <div>
-                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Company</p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{currentTask.company.name}</p>
+                          <p className="text-xs font-medium text-neutral-600 dark:text-neutral-500">Company</p>
+                          <p className="text-sm font-medium text-neutral-900 dark:text-white">{currentTask.company.name}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400">→</span>
+                      <span className="text-xs text-neutral-500">→</span>
                     </div>
                   </a>
                 )}
                 {currentTask.pipeline_deal && (
                   <a
                     href="/pipeline"
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-gold-200 dark:hover:border-gold-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-gold-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Building2 size={14} className="text-slate-400" />
+                        <Building2 size={14} className="text-neutral-500" />
                         <div>
-                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Deal</p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{currentTask.pipeline_deal.name}</p>
+                          <p className="text-xs font-medium text-neutral-600 dark:text-neutral-500">Deal</p>
+                          <p className="text-sm font-medium text-neutral-900 dark:text-white">{currentTask.pipeline_deal.name}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400">→</span>
+                      <span className="text-xs text-neutral-500">→</span>
                     </div>
                   </a>
                 )}
                 {currentTask.contact && (
                   <a
                     href="/contacts"
-                    className="block p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-gold-200 dark:hover:border-gold-500 hover:shadow-sm transition-all"
+                    className="block p-2 rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-gold-200 dark:hover:border-primary-500 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <User size={14} className="text-slate-400" />
+                        <User size={14} className="text-neutral-500" />
                         <div>
-                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Contact</p>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{currentTask.contact.name}</p>
+                          <p className="text-xs font-medium text-neutral-600 dark:text-neutral-500">Contact</p>
+                          <p className="text-sm font-medium text-neutral-900 dark:text-white">{currentTask.contact.name}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400">→</span>
+                      <span className="text-xs text-neutral-500">→</span>
                     </div>
                   </a>
                 )}
@@ -296,10 +296,10 @@ export default function TaskDetailModal({
           {/* Description */}
           {currentTask.description && (
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-900 dark:text-white">
+              <label className="text-sm font-semibold text-neutral-900 dark:text-white">
                 Description
               </label>
-              <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+              <p className="text-sm text-neutral-700 dark:text-neutral-500 whitespace-pre-wrap">
                 {currentTask.description}
               </p>
             </div>
@@ -308,7 +308,7 @@ export default function TaskDetailModal({
           {/* Labels */}
           {task.labels && task.labels.length > 0 && (
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+              <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
                 <Tag size={16} />
                 Labels
               </label>
@@ -327,8 +327,8 @@ export default function TaskDetailModal({
           )}
 
           {/* Comments Section */}
-          <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+          <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
               <MessageSquare size={16} />
               Comments
             </label>
@@ -341,16 +341,16 @@ export default function TaskDetailModal({
                 {task.comments
                   .filter(c => !c.is_activity)
                   .map(comment => (
-                    <div key={comment.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <div key={comment.id} className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        <p className="text-sm font-medium text-neutral-900 dark:text-white">
                           {comment.author?.name}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-neutral-600 dark:text-neutral-500">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                      <p className="text-sm text-neutral-700 dark:text-neutral-500">
                         {comment.content}
                       </p>
                     </div>
@@ -361,11 +361,11 @@ export default function TaskDetailModal({
 
           {/* Activity Timeline */}
           {currentTask.activities && currentTask.activities.length > 0 && (
-            <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Activity</h4>
+            <div className="space-y-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+              <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">Activity</h4>
               <div className="space-y-2 text-sm">
                 {currentTask.activities.slice(0, 5).map(activity => (
-                  <div key={activity.id} className="text-xs text-slate-500 dark:text-slate-400">
+                  <div key={activity.id} className="text-xs text-neutral-600 dark:text-neutral-500">
                     <strong>{activity.action_type.replace(/_/g, ' ')}</strong> •{' '}
                     {new Date(activity.created_at).toLocaleDateString()}
                   </div>
@@ -376,7 +376,7 @@ export default function TaskDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between">
+        <div className="sticky bottom-0 px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex justify-between">
           <Button
             variant="danger"
             onClick={handleDelete}

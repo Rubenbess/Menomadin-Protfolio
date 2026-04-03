@@ -44,25 +44,25 @@ const RuleCard = memo(function RuleCard({
   onEdit,
 }: RuleCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 mb-3 sm:mb-2">
-            <h3 className="font-medium text-slate-900 dark:text-white break-words max-w-[200px]">
+            <h3 className="font-medium text-neutral-900 dark:text-white break-words max-w-[200px]">
               {rule.name}
             </h3>
             <span
               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${
                 rule.is_active
                   ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                  : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-500'
               }`}
             >
               {rule.is_active ? 'Active' : 'Inactive'}
             </span>
           </div>
 
-          <div className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
+          <div className="text-sm text-neutral-700 dark:text-neutral-300 space-y-1">
             <p className="break-words">
               <span className="font-medium">When:</span> {triggerLabels[rule.trigger_type]}
             </p>
@@ -82,14 +82,14 @@ const RuleCard = memo(function RuleCard({
         <div className="flex items-center gap-2 md:flex-col md:gap-1">
           <button
             onClick={() => onToggleActive(rule)}
-            className="flex-1 md:flex-none md:w-full p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1 md:flex-none md:w-full p-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-700 transition-colors"
             title={rule.is_active ? 'Disable rule' : 'Enable rule'}
           >
             <span className="text-xs">{rule.is_active ? '✓' : '✗'}</span>
           </button>
           <button
             onClick={onEdit}
-            className="flex-1 md:flex-none md:w-full p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1 md:flex-none md:w-full p-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-700 transition-colors"
             title="Edit rule"
           >
             <Edit2 size={16} className="mx-auto md:mx-0" />
@@ -172,11 +172,11 @@ export default function TaskAutomations({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex-1">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
             <Zap size={24} className="text-amber-600" />
             Automation Rules
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-neutral-600 dark:text-neutral-500 mt-1">
             Automatically create tasks, notify teams, or assign tasks when events occur
           </p>
         </div>
@@ -191,10 +191,10 @@ export default function TaskAutomations({
 
       {/* Rules List */}
       {rules.length === 0 ? (
-        <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <Zap size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="text-slate-600 dark:text-slate-400">No automation rules yet</p>
-          <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
+        <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+          <Zap size={32} className="mx-auto text-slate-300 dark:text-neutral-700 mb-3" />
+          <p className="text-neutral-700 dark:text-neutral-500">No automation rules yet</p>
+          <p className="text-sm text-neutral-600 dark:text-neutral-600 mt-1">
             Create your first rule to automate task management
           </p>
         </div>

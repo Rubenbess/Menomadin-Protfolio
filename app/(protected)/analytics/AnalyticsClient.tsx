@@ -40,7 +40,7 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
     <div className="space-y-8">
       {/* Key Metrics */}
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
           Portfolio Summary
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -103,19 +103,19 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
       {/* Performance Analysis */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Performers */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
             Top Performers
           </h3>
           <div className="space-y-4">
             {topPerformers.length > 0 ? (
               topPerformers.map((company, idx) => (
-                <div key={idx} className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700 last:border-0 last:pb-0">
+                <div key={idx} className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-700 last:border-0 last:pb-0">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">
+                    <p className="font-medium text-neutral-900 dark:text-white">
                       {company.name}
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-500">
                       Invested: {formatCurrency(company.invested)}
                     </p>
                   </div>
@@ -123,32 +123,32 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
                     <p className="text-lg font-semibold text-emerald-600">
                       {company.moic.toFixed(2)}x
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-neutral-600 dark:text-neutral-500">
                       {company.status}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-slate-500 dark:text-slate-400">No performers yet</p>
+              <p className="text-neutral-600 dark:text-neutral-500">No performers yet</p>
             )}
           </div>
         </div>
 
         {/* Underperformers */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
             Underperformers
           </h3>
           <div className="space-y-4">
             {underperformers.length > 0 ? (
               underperformers.map((company, idx) => (
-                <div key={idx} className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700 last:border-0 last:pb-0">
+                <div key={idx} className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-700 last:border-0 last:pb-0">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">
+                    <p className="font-medium text-neutral-900 dark:text-white">
                       {company.name}
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-500">
                       Invested: {formatCurrency(company.invested)}
                     </p>
                   </div>
@@ -156,14 +156,14 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
                     <p className="text-lg font-semibold text-red-600">
                       {company.moic.toFixed(2)}x
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-neutral-600 dark:text-neutral-500">
                       {company.status}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-slate-500 dark:text-slate-400">No underperformers</p>
+              <p className="text-neutral-600 dark:text-neutral-500">No underperformers</p>
             )}
           </div>
         </div>
@@ -175,27 +175,27 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
       </section>
 
       {/* Sector Breakdown Table */}
-      <section className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">
+      <section className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">
           Sector Breakdown
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">
+              <tr className="border-b border-neutral-200 dark:border-neutral-700">
+                <th className="px-4 py-3 text-left font-medium text-neutral-700 dark:text-neutral-500">
                   Sector
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-neutral-700 dark:text-neutral-500">
                   Companies
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-neutral-700 dark:text-neutral-500">
                   Invested
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-neutral-700 dark:text-neutral-500">
                   Current Value
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-neutral-700 dark:text-neutral-500">
                   Return
                 </th>
               </tr>
@@ -207,18 +207,18 @@ export default function AnalyticsClient({ companies, investments }: AnalyticsCli
                 return (
                   <tr
                     key={idx}
-                    className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
+                    <td className="px-4 py-3 font-medium text-neutral-900 dark:text-white">
                       {sector.sector}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
+                    <td className="px-4 py-3 text-right text-neutral-700 dark:text-neutral-500">
                       {sector.count}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-medium">
+                    <td className="px-4 py-3 text-right text-neutral-900 dark:text-white font-medium">
                       {formatCurrency(sector.invested)}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-medium">
+                    <td className="px-4 py-3 text-right text-neutral-900 dark:text-white font-medium">
                       {formatCurrency(sector.currentValue)}
                     </td>
                     <td

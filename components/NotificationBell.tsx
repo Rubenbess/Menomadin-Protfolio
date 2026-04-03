@@ -75,7 +75,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+        className="relative p-2 text-neutral-600 hover:text-slate-800 hover:bg-neutral-100 rounded-lg transition-colors"
         title="Notifications"
       >
         <Bell size={18} />
@@ -87,12 +87,12 @@ export default function NotificationBell({ initialNotifications }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[380px] bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.06] z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-[380px] bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.06] z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
             <div className="flex items-center gap-2">
-              <Bell size={15} className="text-slate-500" />
-              <span className="text-sm font-semibold text-slate-900">Notifications</span>
+              <Bell size={15} className="text-neutral-600" />
+              <span className="text-sm font-semibold text-neutral-900">Notifications</span>
               {unread > 0 && (
                 <span className="text-xs font-bold text-white bg-red-500 rounded-full px-1.5 py-0.5 leading-none">
                   {unread}
@@ -103,12 +103,12 @@ export default function NotificationBell({ initialNotifications }: Props) {
               {unread > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium px-2 py-1 rounded-lg hover:bg-gold-50 transition-colors"
+                  className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium px-2 py-1 rounded-lg hover:bg-gold-50 transition-colors"
                 >
                   <CheckCheck size={12} /> Mark all read
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors">
+              <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 hover:text-neutral-700 rounded-lg transition-colors">
                 <X size={14} />
               </button>
             </div>
@@ -119,29 +119,29 @@ export default function NotificationBell({ initialNotifications }: Props) {
             {notifications.length === 0 ? (
               <div className="py-8 text-center">
                 <Bell size={24} className="text-slate-200 mx-auto mb-2" />
-                <p className="text-xs text-slate-400">No notifications yet</p>
+                <p className="text-xs text-neutral-500">No notifications yet</p>
               </div>
             ) : (
               notifications.map(n => (
                 <div
                   key={n.id}
-                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50/60 ${n.read ? 'bg-white' : 'bg-gold-50/40'}`}
+                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-50/60 ${n.read ? 'bg-white' : 'bg-gold-50/40'}`}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{TYPE_ICONS[n.type] ?? '🔔'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm leading-snug ${n.read ? 'text-slate-600' : 'text-slate-900 font-medium'}`}>
+                    <p className={`text-sm leading-snug ${n.read ? 'text-neutral-700' : 'text-neutral-900 font-medium'}`}>
                       {n.title}
                     </p>
                     {n.body && (
-                      <p className="text-xs text-slate-400 mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
                     )}
-                    <p className="text-[10px] text-slate-400 mt-1">{fmtRelative(n.created_at)}</p>
+                    <p className="text-[10px] text-neutral-500 mt-1">{fmtRelative(n.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 ml-1">
                     {!n.read && (
                       <button
                         onClick={() => handleMarkRead(n.id)}
-                        className="p-1.5 text-slate-300 hover:text-gold-500 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-300 hover:text-primary-500 rounded-lg transition-colors"
                         title="Mark as read"
                       >
                         <Check size={12} />
@@ -156,7 +156,7 @@ export default function NotificationBell({ initialNotifications }: Props) {
                     </button>
                   </div>
                   {!n.read && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-500 flex-shrink-0 mt-1.5" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0 mt-1.5" />
                   )}
                 </div>
               ))
@@ -164,8 +164,8 @@ export default function NotificationBell({ initialNotifications }: Props) {
           </div>
 
           {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-slate-100 text-center">
-              <p className="text-xs text-slate-400">{notifications.length} notification{notifications.length !== 1 ? 's' : ''}</p>
+            <div className="px-4 py-2.5 border-t border-neutral-200 text-center">
+              <p className="text-xs text-neutral-500">{notifications.length} notification{notifications.length !== 1 ? 's' : ''}</p>
             </div>
           )}
         </div>

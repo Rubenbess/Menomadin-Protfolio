@@ -5,8 +5,8 @@ import { CheckCircle2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { submitFounderUpdate } from '@/actions/founder-updates'
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 interface Props {
   companyId: string
@@ -21,11 +21,11 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
   if (done) {
     return (
       <div className="text-center py-8">
-        <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 size={26} className="text-emerald-600" />
         </div>
-        <h2 className="text-lg font-bold text-slate-900 mb-2">Update submitted!</h2>
-        <p className="text-sm text-slate-500">
+        <h2 className="text-lg font-bold text-neutral-900 mb-2">Update submitted!</h2>
+        <p className="text-sm text-neutral-600">
           Thank you — the Menomadin team will review your update shortly.
         </p>
       </div>
@@ -65,8 +65,8 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="bg-gold-50 rounded-xl px-4 py-3">
-        <p className="text-xs text-gold-500 font-semibold">
+      <div className="bg-gold-50 rounded-lg px-4 py-3">
+        <p className="text-xs text-primary-500 font-semibold">
           Submitting update for <span className="text-violet-800">{companyName}</span>
         </p>
       </div>
@@ -96,8 +96,8 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
         <textarea name="ask" rows={2} className={`${inp} resize-none`} placeholder="Any specific help or introductions needed?" />
       </div>
 
-      <hr className="border-slate-100" />
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Key Metrics (optional)</p>
+      <hr className="border-neutral-200" />
+      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Key Metrics (optional)</p>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -127,7 +127,7 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
         <textarea name="notes" rows={2} className={`${inp} resize-none`} placeholder="Anything else you'd like to share…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5">{error}</p>}
 
       <Button type="submit" loading={loading} className="w-full">
         Submit update

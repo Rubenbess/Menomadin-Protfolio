@@ -28,7 +28,7 @@ interface Props {
 }
 
 const COMPLETENESS_CONFIG: Record<DataCompleteness, { label: string; color: string; desc: string }> = {
-  minimal:         { label: 'Minimal',         color: 'bg-slate-100 text-slate-600',   desc: 'No share data — using cap table % only' },
+  minimal:         { label: 'Minimal',         color: 'bg-neutral-100 text-neutral-700',   desc: 'No share data — using cap table % only' },
   partial:         { label: 'Partial',          color: 'bg-amber-100 text-amber-700',   desc: 'Share data present but missing PPS or amounts' },
   high_confidence: { label: 'High Confidence',  color: 'bg-blue-100 text-blue-700',     desc: 'Full share data with PPS and liquidation stack' },
   fully_modeled:   { label: 'Fully Modeled',    color: 'bg-emerald-100 text-emerald-700', desc: 'Complete: shares, PPS, liq prefs, option pools' },
@@ -74,16 +74,16 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
     router.refresh()
   }
 
-  const th = 'px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider text-left'
+  const th = 'px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-left'
   const td = 'px-4 py-3'
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Ownership Structure</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Issued shares · fully diluted · liquidation stack</p>
+          <h3 className="text-sm font-semibold text-neutral-900">Ownership Structure</h3>
+          <p className="text-xs text-neutral-500 mt-0.5">Issued shares · fully diluted · liquidation stack</p>
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cc.color}`} title={cc.desc}>
@@ -101,8 +101,8 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
       {shareSeries.length === 0 ? (
         <div className="p-6 text-center">
           <Shield size={28} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-sm font-medium text-slate-600 mb-1">No share data recorded</p>
-          <p className="text-xs text-slate-400 mb-4">
+          <p className="text-sm font-medium text-neutral-700 mb-1">No share data recorded</p>
+          <p className="text-xs text-neutral-500 mb-4">
             Add shareholder positions with share counts to unlock institutional ownership analysis,
             fully-diluted calculations, and exit waterfall modeling.
           </p>
@@ -114,22 +114,22 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
         <>
           {/* View toggle */}
           <div className="px-5 pt-4 pb-2 flex items-center gap-2">
-            <div className="flex bg-slate-100 rounded-lg p-0.5 gap-0.5">
+            <div className="flex bg-neutral-100 rounded-lg p-0.5 gap-0.5">
               {(['issued', 'fd'] as const).map(v => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                     view === v
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-600 hover:text-neutral-800'
                   }`}
                 >
                   {v === 'issued' ? 'Issued Shares' : 'Fully Diluted'}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 ml-2">
+            <div className="flex items-center gap-1.5 text-xs text-neutral-500 ml-2">
               <Info size={11} />
               {view === 'issued'
                 ? `${fmtShares(totalIssuedShares)} issued shares`
@@ -141,7 +141,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-y border-slate-100 bg-slate-50/70">
+                <tr className="border-y border-neutral-200 bg-neutral-50/70">
                   <th className={th}>Holder</th>
                   <th className={th}>Share Class</th>
                   <th className={th}>Shares</th>
@@ -162,37 +162,37 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
 
                   return (
                     <tr key={s.id} className="group hover:bg-gold-50/30 transition-colors">
-                      <td className={td + ' font-medium text-slate-900'}>{s.holder_name}</td>
+                      <td className={td + ' font-medium text-neutral-900'}>{s.holder_name}</td>
                       <td className={td}>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           s.is_preferred
-                            ? 'bg-gold-100 text-gold-600'
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-gold-100 text-primary-600'
+                            : 'bg-neutral-100 text-neutral-700'
                         }`}>
                           {s.share_class}
                         </span>
                       </td>
-                      <td className={td + ' font-mono text-slate-700'}>{fmtShares(s.shares)}</td>
-                      <td className={td + ' text-slate-600'}>
+                      <td className={td + ' font-mono text-neutral-800'}>{fmtShares(s.shares)}</td>
+                      <td className={td + ' text-neutral-700'}>
                         {s.price_per_share ? `$${s.price_per_share.toFixed(4)}` : '—'}
                       </td>
-                      <td className={td + ' text-slate-600'}>
+                      <td className={td + ' text-neutral-700'}>
                         {s.invested_amount ? fmt$$(s.invested_amount) : '—'}
                       </td>
                       <td className={td}>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 max-w-[80px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="flex-1 max-w-[80px] h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${s.is_preferred ? 'bg-gold-500' : 'bg-blue-400'}`}
+                              className={`h-full rounded-full ${s.is_preferred ? 'bg-primary-500' : 'bg-blue-400'}`}
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
-                          <span className="text-xs font-semibold text-slate-700 tabular-nums">
+                          <span className="text-xs font-semibold text-neutral-800 tabular-nums">
                             {fmtPct(pct)}
                           </span>
                         </div>
                       </td>
-                      <td className={td + ' text-slate-600 text-xs'}>
+                      <td className={td + ' text-neutral-700 text-xs'}>
                         {s.is_preferred ? (
                           <span>
                             {s.liquidation_pref_mult}×
@@ -201,7 +201,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                                 Participating{s.participation_cap_mult ? ` (${s.participation_cap_mult}× cap)` : ' (uncapped)'}
                               </span>
                             ) : (
-                              <span className="ml-1 text-slate-400">Non-participating</span>
+                              <span className="ml-1 text-neutral-500">Non-participating</span>
                             )}
                           </span>
                         ) : '—'}
@@ -210,11 +210,11 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                         <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
                           <button
                             onClick={() => { setEditingSeries(s); setShowAddSeries(true) }}
-                            className="p-1.5 text-slate-400 hover:text-gold-500 hover:bg-gold-50 rounded-lg transition-all"
+                            className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
                           ><Pencil size={12} /></button>
                           <button
                             onClick={() => handleDeleteSeries(s.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                           ><Trash2 size={12} /></button>
                         </div>
                       </td>
@@ -228,40 +228,40 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
                   const pct = calcFullyDilutedOwnershipPct(pool.shares_authorized, totalFDShares)
                   return (
                     <tr key={pool.id} className="group hover:bg-emerald-50/20 transition-colors opacity-70">
-                      <td className={td + ' text-slate-500 italic'}>{pool.name} (pool)</td>
+                      <td className={td + ' text-neutral-600 italic'}>{pool.name} (pool)</td>
                       <td className={td}>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
                           Option Pool
                         </span>
                       </td>
-                      <td className={td + ' font-mono text-slate-500'}>
+                      <td className={td + ' font-mono text-neutral-600'}>
                         {fmtShares(pool.shares_authorized)}
-                        <span className="text-xs text-slate-400 ml-1">
+                        <span className="text-xs text-neutral-500 ml-1">
                           ({fmtShares(pool.shares_issued)} issued, {fmtShares(unissued)} reserved)
                         </span>
                       </td>
-                      <td className={td + ' text-slate-500'}>
+                      <td className={td + ' text-neutral-600'}>
                         {pool.price_per_share ? `$${pool.price_per_share.toFixed(4)}` : '—'}
                       </td>
-                      <td className={td + ' text-slate-400 text-xs italic'}>Pool</td>
+                      <td className={td + ' text-neutral-500 text-xs italic'}>Pool</td>
                       <td className={td}>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 max-w-[80px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="flex-1 max-w-[80px] h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-emerald-400" style={{ width: `${Math.min(100, pct)}%` }} />
                           </div>
-                          <span className="text-xs font-semibold text-slate-500 tabular-nums">{fmtPct(pct)}</span>
+                          <span className="text-xs font-semibold text-neutral-600 tabular-nums">{fmtPct(pct)}</span>
                         </div>
                       </td>
-                      <td className={td + ' text-slate-400 text-xs'}>—</td>
+                      <td className={td + ' text-neutral-500 text-xs'}>—</td>
                       <td className={td + ' text-right'}>
                         <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100">
                           <button
                             onClick={() => { setEditingPool(pool); setShowAddPool(true) }}
-                            className="p-1.5 text-slate-400 hover:text-gold-500 hover:bg-gold-50 rounded-lg transition-all"
+                            className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
                           ><Pencil size={12} /></button>
                           <button
                             onClick={() => handleDeletePool(pool.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                           ><Trash2 size={12} /></button>
                         </div>
                       </td>
@@ -272,15 +272,15 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
 
               {/* Totals footer */}
               <tfoot>
-                <tr className="border-t border-slate-200 bg-slate-50/70">
-                  <td className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider" colSpan={2}>
+                <tr className="border-t border-neutral-200 bg-neutral-50/70">
+                  <td className="px-4 py-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider" colSpan={2}>
                     Total
                   </td>
-                  <td className="px-4 py-3 text-sm font-bold text-slate-900 font-mono">
+                  <td className="px-4 py-3 text-sm font-bold text-neutral-900 font-mono">
                     {fmtShares(view === 'issued' ? totalIssuedShares : totalFDShares)}
                   </td>
                   <td colSpan={2} />
-                  <td className="px-4 py-3 text-xs font-bold text-slate-700">100%</td>
+                  <td className="px-4 py-3 text-xs font-bold text-neutral-800">100%</td>
                   <td colSpan={2} />
                 </tr>
               </tfoot>

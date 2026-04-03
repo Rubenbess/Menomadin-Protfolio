@@ -29,9 +29,9 @@ function pct(deployed: number, planned: number) {
 
 function barColor(p: number) {
   if (p >= 100) return 'bg-emerald-500'
-  if (p >= 75)  return 'bg-gold-500'
+  if (p >= 75)  return 'bg-primary-500'
   if (p >= 40)  return 'bg-blue-400'
-  return 'bg-slate-300'
+  return 'bg-neutral-300'
 }
 
 function remaining(planned: number, deployed: number) {
@@ -41,11 +41,11 @@ function remaining(planned: number, deployed: number) {
 
 function CompanyAvatar({ co }: { co: CompanySnippet }) {
   if (co.logo_url) return (
-    <img src={co.logo_url} alt={co.name} className="w-8 h-8 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-200 flex-shrink-0" />
+    <img src={co.logo_url} alt={co.name} className="w-8 h-8 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-200 flex-shrink-0" />
   )
   return (
     <div className="w-8 h-8 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
-      <span className="text-xs font-bold text-gold-500">{co.name[0]}</span>
+      <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
     </div>
   )
 }
@@ -68,16 +68,16 @@ function ReserveRow({
   const overDep  = reserve.deployed_amount > reserve.reserved_amount
 
   return (
-    <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200 group">
+    <tr className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200 group">
       {/* Company */}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <CompanyAvatar co={co} />
           <div>
-            <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-gold-500 transition-colors">
+            <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-neutral-900 hover:text-primary-500 transition-colors">
               {co.name}
             </Link>
-            <p className="text-xs text-slate-400">{co.sector}</p>
+            <p className="text-xs text-neutral-500">{co.sector}</p>
           </div>
         </div>
       </td>
@@ -91,7 +91,7 @@ function ReserveRow({
       </td>
 
       {/* Target Round */}
-      <td className="px-4 py-3.5 text-xs text-slate-500">
+      <td className="px-4 py-3.5 text-xs text-neutral-600">
         {reserve.target_round ?? <span className="text-slate-300">—</span>}
       </td>
 
@@ -104,14 +104,14 @@ function ReserveRow({
       <td className="px-4 py-3.5 w-40">
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className={overDep ? 'text-red-600 font-semibold' : 'text-slate-600'}>
+            <span className={overDep ? 'text-red-600 font-semibold' : 'text-neutral-700'}>
               {fmt$$(reserve.deployed_amount)}
             </span>
-            <span className={`font-semibold text-[11px] ${overDep ? 'text-red-500' : 'text-slate-400'}`}>
+            <span className={`font-semibold text-[11px] ${overDep ? 'text-red-500' : 'text-neutral-500'}`}>
               {overDep ? 'Over' : `${p}%`}
             </span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5">
+          <div className="w-full bg-neutral-100 rounded-full h-1.5">
             <div
               className={`h-1.5 rounded-full transition-all ${overDep ? 'bg-red-400' : barColor(p)}`}
               style={{ width: `${p}%` }}
@@ -134,13 +134,13 @@ function ReserveRow({
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={onEdit}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             <Pencil size={13} />
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -178,10 +178,10 @@ export default function ReservesClient({ companies, reserves }: Props) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Follow-on Reserves</h1>
-          <p className="text-sm text-slate-400 mt-0.5">Planned vs deployed capital per portfolio company</p>
+          <p className="text-sm text-neutral-500 mt-0.5">Planned vs deployed capital per portfolio company</p>
         </div>
       </div>
 
@@ -190,15 +190,15 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Total Planned',   value: fmt$$(totalPlanned),  sub: `${withReserve.length} companies`, accent: 'text-gold-500' },
+          { label: 'Total Planned',   value: fmt$$(totalPlanned),  sub: `${withReserve.length} companies`, accent: 'text-primary-500' },
           { label: 'Total Deployed',  value: fmt$$(totalDeployed), sub: `${overallPct}% of reserves`,      accent: 'text-blue-600' },
           { label: 'Remaining',       value: fmt$$(totalRemain),   sub: 'available to deploy',              accent: 'text-emerald-600' },
-          { label: 'No Reserve Set',  value: String(withoutReserve.length), sub: 'companies',              accent: 'text-slate-400' },
+          { label: 'No Reserve Set',  value: String(withoutReserve.length), sub: 'companies',              accent: 'text-neutral-500' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3 shadow-sm">
-            <p className="text-xs text-slate-400 font-medium mb-1">{s.label}</p>
+          <div key={s.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 shadow-sm">
+            <p className="text-xs text-neutral-500 font-medium mb-1">{s.label}</p>
             <p className={`text-xl font-bold ${s.accent}`}>{s.value}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{s.sub}</p>
+            <p className="text-xs text-neutral-500 mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -207,16 +207,16 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {totalPlanned > 0 && (
         <div className="card p-5 mb-5">
           <div className="flex items-center justify-between text-sm mb-2">
-            <span className="font-semibold text-slate-700">Portfolio Reserve Deployment</span>
-            <span className="font-bold text-gold-500">{overallPct}% deployed</span>
+            <span className="font-semibold text-neutral-800">Portfolio Reserve Deployment</span>
+            <span className="font-bold text-primary-500">{overallPct}% deployed</span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-3">
+          <div className="w-full bg-neutral-100 rounded-full h-3">
             <div
               className={`h-3 rounded-full transition-all ${barColor(overallPct)}`}
               style={{ width: `${overallPct}%` }}
             />
           </div>
-          <div className="flex justify-between text-xs text-slate-400 mt-1.5">
+          <div className="flex justify-between text-xs text-neutral-500 mt-1.5">
             <span>{fmt$$(totalDeployed)} deployed</span>
             <span>{fmt$$(totalRemain)} remaining</span>
           </div>
@@ -226,20 +226,20 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {/* Reserves table */}
       {withReserve.length > 0 && (
         <div className="card overflow-hidden mb-6">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Reserve Allocations</h2>
-            <span className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full px-2.5 py-0.5">{withReserve.length}</span>
+          <div className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">Reserve Allocations</h2>
+            <span className="text-xs font-medium text-neutral-500 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2.5 py-0.5">{withReserve.length}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Company</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Strategy</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Target Round</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Planned</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Deployed</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Remaining</th>
+                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Company</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Strategy</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Target Round</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Planned</th>
+                  <th className="px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Deployed</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Remaining</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
@@ -262,25 +262,25 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {/* Companies without reserves */}
       {withoutReserve.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
             No Reserve Set ({withoutReserve.length})
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {withoutReserve.map(co => (
               <div
                 key={co.id}
-                className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center gap-3 group hover:border-violet-200 transition-colors"
+                className="bg-white rounded-lg border border-neutral-200 px-4 py-3 flex items-center gap-3 group hover:border-violet-200 transition-colors"
               >
                 <CompanyAvatar co={co} />
                 <div className="flex-1 min-w-0">
-                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-slate-900 hover:text-gold-500 transition-colors truncate block">
+                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-neutral-900 hover:text-primary-500 transition-colors truncate block">
                     {co.name}
                   </Link>
-                  <p className="text-xs text-slate-400">{co.sector}</p>
+                  <p className="text-xs text-neutral-500">{co.sector}</p>
                 </div>
                 <button
                   onClick={() => setAddTarget(co)}
-                  className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-gold-500 hover:text-gold-600 opacity-0 group-hover:opacity-100 transition-opacity bg-gold-50 px-2.5 py-1.5 rounded-lg"
+                  className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-primary-500 hover:text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity bg-gold-50 px-2.5 py-1.5 rounded-lg"
                 >
                   <TrendingUp size={12} /> Set reserve
                 </button>
@@ -293,8 +293,8 @@ export default function ReservesClient({ companies, reserves }: Props) {
       {/* Empty state */}
       {withReserve.length === 0 && withoutReserve.length === 0 && (
         <div className="card px-5 py-20 text-center">
-          <p className="text-sm text-slate-400 mb-4">No portfolio companies yet.</p>
-          <Link href="/companies" className="text-sm font-semibold text-gold-500 hover:underline">
+          <p className="text-sm text-neutral-500 mb-4">No portfolio companies yet.</p>
+          <Link href="/companies" className="text-sm font-semibold text-primary-500 hover:underline">
             Add companies →
           </Link>
         </div>

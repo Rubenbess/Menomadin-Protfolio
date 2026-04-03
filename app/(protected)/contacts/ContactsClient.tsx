@@ -32,7 +32,7 @@ interface Props {
 
 function avatarColor(name: string) {
   const colors = [
-    'bg-gold-100 text-gold-600',
+    'bg-gold-100 text-primary-600',
     'bg-blue-100 text-blue-700',
     'bg-emerald-100 text-emerald-700',
     'bg-amber-100 text-amber-700',
@@ -81,11 +81,11 @@ function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: 
     onDone()
   }
 
-  const inp = 'px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
+  const inp = 'px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-3">
-      <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Log Interaction</p>
+    <form onSubmit={handleSubmit} className="bg-neutral-50 rounded-lg p-4 ring-1 ring-slate-200 space-y-3">
+      <p className="text-xs font-semibold text-neutral-700 uppercase tracking-wider">Log Interaction</p>
       <div className="grid grid-cols-2 gap-2">
         <select value={type} onChange={e => setType(e.target.value as InteractionType)} className={inp}>
           {INTERACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -100,10 +100,10 @@ function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: 
         placeholder="What was discussed…"
       />
       <div className="flex gap-2">
-        <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-gold-500 text-white rounded-xl text-xs font-semibold hover:bg-gold-600 disabled:opacity-50 transition-colors">
+        <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors">
           {saving ? 'Saving…' : 'Log interaction'}
         </button>
-        <button type="button" onClick={onDone} className="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs">Cancel</button>
+        <button type="button" onClick={onDone} className="px-3 py-2 text-neutral-600 hover:text-neutral-800 text-xs">Cancel</button>
       </div>
     </form>
   )
@@ -141,22 +141,22 @@ function ContactPanel({
       <div className="fixed right-0 top-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold flex-shrink-0 ${avatarColor(contact.name)}`}>
+            <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0 ${avatarColor(contact.name)}`}>
               {initials(contact.name)}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">{contact.name}</h2>
-              {contact.position && <p className="text-sm text-slate-500 mt-0.5">{contact.position}</p>}
+              <h2 className="text-lg font-bold text-neutral-900">{contact.name}</h2>
+              {contact.position && <p className="text-sm text-neutral-600 mt-0.5">{contact.position}</p>}
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {contact.companies && (
-                  <p className="text-xs text-gold-500 font-medium flex items-center gap-1">
+                  <p className="text-xs text-primary-500 font-medium flex items-center gap-1">
                     <Building2 size={11} /> {contact.companies.name}
                   </p>
                 )}
                 {contact.contact_type && (
-                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
                     {contact.contact_type}
                   </span>
                 )}
@@ -165,20 +165,20 @@ function ContactPanel({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex-shrink-0"
+            className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors flex-shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-100 bg-slate-50/60 px-6">
+        <div className="flex border-b border-neutral-200 bg-neutral-50/60 px-6">
           <button
             onClick={() => setTab('interactions')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'interactions'
-                ? 'text-gold-500 border-b-2 border-gold-500 -mb-px bg-white'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
+                : 'text-neutral-500 hover:text-neutral-700'
             }`}
           >
             Interactions
@@ -187,8 +187,8 @@ function ContactPanel({
             onClick={() => setTab('tasks')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'tasks'
-                ? 'text-gold-500 border-b-2 border-gold-500 -mb-px bg-white'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
+                : 'text-neutral-500 hover:text-neutral-700'
             }`}
           >
             Tasks
@@ -204,27 +204,27 @@ function ContactPanel({
           {/* Contact info */}
           <div className="space-y-2.5">
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-gold-50 hover:text-gold-600 transition-colors group">
-                <Mail size={15} className="text-slate-400 group-hover:text-gold-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 group-hover:text-gold-600 truncate">{contact.email}</span>
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-lg hover:bg-gold-50 hover:text-primary-600 transition-colors group">
+                <Mail size={15} className="text-neutral-500 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 group-hover:text-primary-600 truncate">{contact.email}</span>
               </a>
             )}
             {contact.phone && (
-              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-gold-50 hover:text-gold-600 transition-colors group">
-                <Phone size={15} className="text-slate-400 group-hover:text-gold-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 group-hover:text-gold-600">{contact.phone}</span>
+              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-lg hover:bg-gold-50 hover:text-primary-600 transition-colors group">
+                <Phone size={15} className="text-neutral-500 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 group-hover:text-primary-600">{contact.phone}</span>
               </a>
             )}
             {contact.address && (
-              <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl">
-                <MapPin size={15} className="text-slate-400 flex-shrink-0" />
-                <span className="text-sm text-slate-700">{contact.address}</span>
+              <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-xl">
+                <MapPin size={15} className="text-neutral-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800">{contact.address}</span>
               </div>
             )}
             {contact.linkedin_url && (
-              <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors group">
-                <Linkedin size={15} className="text-slate-400 group-hover:text-blue-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 group-hover:text-blue-700 flex-1 truncate">LinkedIn Profile</span>
+              <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+                <Linkedin size={15} className="text-neutral-500 group-hover:text-blue-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 group-hover:text-blue-700 flex-1 truncate">LinkedIn Profile</span>
                 <ExternalLink size={12} className="text-slate-300 group-hover:text-blue-400 flex-shrink-0" />
               </a>
             )}
@@ -235,14 +235,14 @@ function ContactPanel({
             <div className="grid grid-cols-2 gap-3">
               {contact.relationship_owner && (
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Relationship Owner</p>
-                  <p className="text-sm text-slate-700 flex items-center gap-1.5"><Users size={12} className="text-slate-400" /> {contact.relationship_owner}</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Relationship Owner</p>
+                  <p className="text-sm text-neutral-800 flex items-center gap-1.5"><Users size={12} className="text-neutral-500" /> {contact.relationship_owner}</p>
                 </div>
               )}
               {contact.last_interaction_date && (
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Last Interaction</p>
-                  <p className="text-sm text-slate-700 flex items-center gap-1.5"><CalendarDays size={12} className="text-slate-400" /> {fmtDate(contact.last_interaction_date)}</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Last Interaction</p>
+                  <p className="text-sm text-neutral-800 flex items-center gap-1.5"><CalendarDays size={12} className="text-neutral-500" /> {fmtDate(contact.last_interaction_date)}</p>
                 </div>
               )}
             </div>
@@ -250,18 +250,18 @@ function ContactPanel({
 
           {contact.notes && (
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Notes</p>
-              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
+              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Notes</p>
+              <p className="text-sm text-neutral-800 whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
             </div>
           )}
 
           {/* Interaction timeline */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Interaction Log</p>
+              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Interaction Log</p>
               <button
                 onClick={() => setShowAddInteraction(v => !v)}
-                className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium"
+                className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
               >
                 <Plus size={12} /> Log
               </button>
@@ -274,7 +274,7 @@ function ContactPanel({
             )}
 
             {sorted.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">No interactions logged yet.</p>
+              <p className="text-xs text-neutral-500 text-center py-4">No interactions logged yet.</p>
             ) : (
               <div className="space-y-2">
                 {sorted.map(item => (
@@ -282,11 +282,11 @@ function ContactPanel({
                     <span className="text-base mt-0.5">{typeIcon(item.interaction_type)}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-700 capitalize">{item.interaction_type}</span>
-                        <span className="text-xs text-slate-400">{fmtDate(item.date)}</span>
+                        <span className="text-xs font-semibold text-neutral-800 capitalize">{item.interaction_type}</span>
+                        <span className="text-xs text-neutral-500">{fmtDate(item.date)}</span>
                       </div>
                       {item.notes && (
-                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.notes}</p>
+                        <p className="text-xs text-neutral-600 mt-0.5 leading-relaxed">{item.notes}</p>
                       )}
                     </div>
                     <button
@@ -302,8 +302,8 @@ function ContactPanel({
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Added</p>
-            <p className="text-sm text-slate-500">{fmtDate(contact.created_at)}</p>
+            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Added</p>
+            <p className="text-sm text-neutral-600">{fmtDate(contact.created_at)}</p>
           </div>
 
             </>
@@ -315,16 +315,16 @@ function ContactPanel({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
+        <div className="px-6 py-4 border-t border-neutral-200 flex gap-3">
           <button
             onClick={() => { onClose(); onEdit(contact) }}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gold-500 text-white rounded-xl text-sm font-semibold hover:bg-gold-600 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
           >
             <Pencil size={14} /> Edit contact
           </button>
           <button
             onClick={() => { onClose(); onDelete(contact.id, contact.name) }}
-            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 size={16} />
           </button>
@@ -383,10 +383,10 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
 
       {/* Top bar */}
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex-1">
           <h1 className="page-title">Contacts</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
+          <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
         </div>
         <Button onClick={() => { setEditContact(null); setShowForm(true) }}>
           <Plus size={15} className="mr-1.5" /> Add contact
@@ -394,10 +394,10 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
       </div>
 
       {/* Search and filters */}
-      <div className="px-6 py-4 flex items-center gap-2 flex-wrap border-b border-slate-200 dark:border-slate-800">
+      <div className="px-6 py-4 flex items-center gap-2 flex-wrap border-b border-neutral-200 dark:border-neutral-700">
         {/* Search */}
         <div className="relative min-w-[200px] max-w-sm flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-600" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -405,21 +405,21 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
             className="field-input w-full"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700">
               <X size={13} />
             </button>
           )}
         </div>
 
         {/* Contact type filter */}
-        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 cursor-pointer">
           <option value="">All types</option>
           {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
 
         {/* Company filter */}
         {uniqueCompanies.length > 0 && (
-          <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+          <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 cursor-pointer">
             <option value="">All companies</option>
             {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -427,7 +427,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
 
         {/* Owner filter */}
         {uniqueOwners.length > 0 && (
-          <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 cursor-pointer">
+          <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 cursor-pointer">
             <option value="">All owners</option>
             {uniqueOwners.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
@@ -436,7 +436,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
         {hasFilters && (
           <button
             onClick={() => { setSearch(''); setFilterCompany(''); setFilterType(''); setFilterOwner('') }}
-            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             <X size={12} /> Clear
           </button>
@@ -464,13 +464,13 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
           <div className="card overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3">Name</th>
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Type</th>
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Company</th>
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden lg:table-cell">Email</th>
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Owner</th>
-                  <th className="text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Last Touch</th>
+                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3">Name</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Type</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Company</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden lg:table-cell">Email</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Owner</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Last Touch</th>
                   <th className="px-5 py-3 w-20" />
                 </tr>
               </thead>
@@ -479,7 +479,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                   <tr
                     key={contact.id}
                     onClick={() => setPanelContact(contact)}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors duration-200"
+                    className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors duration-200"
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
@@ -487,26 +487,26 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                           {initials(contact.name)}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{contact.name}</p>
-                          {contact.position && <p className="text-xs text-slate-400">{contact.position}</p>}
+                          <p className="text-sm font-semibold text-neutral-900">{contact.name}</p>
+                          {contact.position && <p className="text-xs text-neutral-500">{contact.position}</p>}
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
                       {contact.contact_type ? (
-                        <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">{contact.contact_type}</span>
+                        <span className="text-xs font-medium text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-full">{contact.contact_type}</span>
                       ) : <span className="text-slate-300 text-sm">—</span>}
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
                       {contact.companies ? (
-                        <span className="text-sm text-slate-600">{contact.companies.name}</span>
+                        <span className="text-sm text-neutral-700">{contact.companies.name}</span>
                       ) : (
                         <span className="text-sm text-slate-300">—</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">
                       {contact.email ? (
-                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-slate-600 hover:text-gold-500 transition-colors flex items-center gap-1.5">
+                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-neutral-700 hover:text-primary-500 transition-colors flex items-center gap-1.5">
                           <Mail size={12} className="text-slate-300 flex-shrink-0" />
                           {contact.email}
                         </a>
@@ -515,11 +515,11 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                       )}
                     </td>
                     <td className="px-5 py-3.5 hidden xl:table-cell">
-                      <span className="text-sm text-slate-500">{contact.relationship_owner ?? <span className="text-slate-300">—</span>}</span>
+                      <span className="text-sm text-neutral-600">{contact.relationship_owner ?? <span className="text-slate-300">—</span>}</span>
                     </td>
                     <td className="px-5 py-3.5 hidden xl:table-cell">
                       {contact.last_interaction_date ? (
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
+                        <span className="text-xs text-neutral-600 flex items-center gap-1">
                           <CalendarDays size={11} className="text-slate-300" />
                           {fmtDate(contact.last_interaction_date)}
                         </span>
@@ -531,13 +531,13 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => { setEditContact(contact); setShowForm(true) }}
-                          className="p-1.5 text-slate-400 hover:text-gold-500 hover:bg-gold-50 rounded-lg transition-colors"
+                          className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-colors"
                         >
                           <Pencil size={13} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget({ id: contact.id, name: contact.name })}
-                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -562,7 +562,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
 
       {/* Delete confirm */}
       <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete contact">
-        <p className="text-sm text-slate-600 mb-6">
+        <p className="text-sm text-neutral-700 mb-6">
           Are you sure you want to delete <span className="font-semibold">{deleteTarget?.name}</span>? This cannot be undone.
         </p>
         <div className="flex gap-3">

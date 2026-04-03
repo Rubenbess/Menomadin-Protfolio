@@ -63,7 +63,7 @@ export default function TaskTemplates({ templates }: Props) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Task Templates</h3>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Task Templates</h3>
           <Button onClick={() => setShowCreateTemplate(true)} size="sm">
             <Plus size={14} /> Create Template
           </Button>
@@ -79,7 +79,7 @@ export default function TaskTemplates({ templates }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Task Templates</h3>
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Task Templates</h3>
         <Button onClick={() => {
           setShowCreateTemplate(true)
           setEditingTemplate(null)
@@ -97,23 +97,23 @@ export default function TaskTemplates({ templates }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {templates.map(template => (
-          <div key={template.id} className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-gold-200 dark:hover:border-gold-500 transition-colors">
+          <div key={template.id} className="p-4 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-gold-200 dark:hover:border-primary-500 transition-colors">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <h4 className="font-medium text-slate-900 dark:text-white">{template.name}</h4>
-                <p className="text-xs text-slate-500 mt-1">{CATEGORY_LABELS[template.category] || template.category}</p>
+                <h4 className="font-medium text-neutral-900 dark:text-white">{template.name}</h4>
+                <p className="text-xs text-neutral-600 mt-1">{CATEGORY_LABELS[template.category] || template.category}</p>
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <button
                   onClick={() => handleEditTemplate(template)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                  className="p-1.5 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 hover:bg-neutral-100 dark:hover:bg-slate-700 rounded transition-colors"
                   title="Edit template"
                 >
                   <Edit2 size={14} />
                 </button>
                 <button
                   onClick={() => handleDeleteTemplate(template.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                  className="p-1.5 text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                   title="Delete template"
                 >
                   <Trash2 size={14} />
@@ -121,9 +121,9 @@ export default function TaskTemplates({ templates }: Props) {
               </div>
             </div>
             {template.description && (
-              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{template.description}</p>
+              <p className="text-sm text-neutral-700 dark:text-neutral-500 line-clamp-2">{template.description}</p>
             )}
-            <div className="mt-3 text-xs text-slate-500 space-y-1">
+            <div className="mt-3 text-xs text-neutral-600 space-y-1">
               <p>• Title: {template.template_content?.title || '—'}</p>
               <p>• Priority: {template.template_content?.priority || '—'}</p>
             </div>
@@ -142,7 +142,7 @@ export default function TaskTemplates({ templates }: Props) {
       >
         <form className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+            <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
               Template Name *
             </label>
             <input
@@ -150,12 +150,12 @@ export default function TaskTemplates({ templates }: Props) {
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
               placeholder="e.g., Due Diligence Checklist"
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+            <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
               Description
             </label>
             <textarea
@@ -163,18 +163,18 @@ export default function TaskTemplates({ templates }: Props) {
               onChange={(e) => setTemplateDescription(e.target.value)}
               placeholder="Optional description of what this template is for"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+            <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
               Category *
             </label>
             <select
               value={templateCategory}
               onChange={(e) => setTemplateCategory(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
             >
               {CATEGORIES.map(cat => (
                 <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
@@ -182,11 +182,11 @@ export default function TaskTemplates({ templates }: Props) {
             </select>
           </div>
 
-          <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-            <h4 className="font-medium text-slate-900 dark:text-white mb-3">Default Task Fields</h4>
+          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+            <h4 className="font-medium text-neutral-900 dark:text-white mb-3">Default Task Fields</h4>
 
             <div>
-              <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+              <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
                 Task Title
               </label>
               <input
@@ -194,18 +194,18 @@ export default function TaskTemplates({ templates }: Props) {
                 value={templateTitle}
                 onChange={(e) => setTemplateTitle(e.target.value)}
                 placeholder="e.g., Conduct technical due diligence"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               />
             </div>
 
             <div className="mt-3">
-              <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+              <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
                 Priority
               </label>
               <select
                 value={templatePriority}
                 onChange={(e) => setTemplatePriority(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -214,7 +214,7 @@ export default function TaskTemplates({ templates }: Props) {
             </div>
 
             <div className="mt-3">
-              <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
+              <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">
                 Due in (days)
               </label>
               <input
@@ -222,12 +222,12 @@ export default function TaskTemplates({ templates }: Props) {
                 value={isDueDays}
                 onChange={(e) => setIsDueDays(e.target.value)}
                 placeholder="e.g., 7"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
               />
             </div>
           </div>
 
-          <div className="flex gap-2 justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex gap-2 justify-end pt-4 border-t border-neutral-200 dark:border-neutral-700">
             <Button
               variant="secondary"
               onClick={() => {

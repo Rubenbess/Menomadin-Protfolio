@@ -26,9 +26,9 @@ import type { PipelineEntry } from '@/lib/types'
 // ── Color maps ────────────────────────────────────────────────────────────
 
 const COLOR_HEADER: Record<string, string> = {
-  slate:  'bg-slate-100 text-slate-700 border-slate-200',
+  slate:  'bg-neutral-100 text-neutral-800 border-neutral-200',
   blue:   'bg-blue-100 text-blue-700 border-blue-200',
-  indigo: 'bg-gold-100 text-gold-600 border-violet-200',
+  indigo: 'bg-gold-100 text-primary-600 border-violet-200',
   purple: 'bg-purple-100 text-purple-700 border-purple-200',
   amber:  'bg-amber-100 text-amber-700 border-amber-200',
   orange: 'bg-orange-100 text-orange-700 border-orange-200',
@@ -39,7 +39,7 @@ const COLOR_HEADER: Record<string, string> = {
 const COLOR_DOT: Record<string, string> = {
   slate:  'bg-slate-400',
   blue:   'bg-blue-500',
-  indigo: 'bg-gold-500',
+  indigo: 'bg-primary-500',
   purple: 'bg-purple-500',
   amber:  'bg-amber-400',
   orange: 'bg-orange-400',
@@ -124,9 +124,9 @@ function AnalyticsBar({ entries, stages }: { entries: PipelineEntry[]; stages: S
   return (
     <div className="grid grid-cols-5 gap-3 mb-5">
       {stats.map(s => (
-        <div key={s.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3 shadow-sm">
-          <p className="text-xs text-slate-400 font-medium mb-1">{s.label}</p>
-          <p className="text-xl font-bold text-slate-900">{s.value}</p>
+        <div key={s.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 shadow-sm">
+          <p className="text-xs text-neutral-500 font-medium mb-1">{s.label}</p>
+          <p className="text-xl font-bold text-neutral-900">{s.value}</p>
         </div>
       ))}
     </div>
@@ -199,35 +199,35 @@ function DealPanel({
       <div className="fixed right-0 top-0 h-full w-[400px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200">
           <div className="flex-1 min-w-0 pr-3">
-            <h2 className="text-lg font-bold text-slate-900">{entry.name}</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{entry.name}</h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {entry.sector && <span className="text-xs text-slate-500">{entry.sector}</span>}
+              {entry.sector && <span className="text-xs text-neutral-600">{entry.sector}</span>}
               {entry.hq && (
                 <>
                   <span className="text-slate-300 text-xs">·</span>
-                  <span className="text-xs text-slate-500">{entry.hq}</span>
+                  <span className="text-xs text-neutral-600">{entry.hq}</span>
                 </>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex-shrink-0"
+            className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors flex-shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-100 bg-slate-50/60 px-6">
+        <div className="flex border-b border-neutral-200 bg-neutral-50/60 px-6">
           <button
             onClick={() => setTab('details')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'details'
-                ? 'text-gold-500 border-b-2 border-gold-500 -mb-px bg-white'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
+                : 'text-neutral-500 hover:text-neutral-700'
             }`}
           >
             Details
@@ -236,8 +236,8 @@ function DealPanel({
             onClick={() => setTab('tasks')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'tasks'
-                ? 'text-gold-500 border-b-2 border-gold-500 -mb-px bg-white'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
+                : 'text-neutral-500 hover:text-neutral-700'
             }`}
           >
             Tasks
@@ -252,18 +252,18 @@ function DealPanel({
 
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-slate-400 font-medium mb-0.5">Fundraising Ask</p>
-              <p className="text-lg font-bold text-slate-900">
+            <div className="bg-neutral-50 rounded-lg p-3">
+              <p className="text-xs text-neutral-500 font-medium mb-0.5">Fundraising Ask</p>
+              <p className="text-lg font-bold text-neutral-900">
                 {entry.fundraising_ask ? fmtMoney(entry.fundraising_ask) : '—'}
               </p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-slate-400 font-medium mb-1">Internal Score</p>
+            <div className="bg-neutral-50 rounded-lg p-3">
+              <p className="text-xs text-neutral-500 font-medium mb-1">Internal Score</p>
               {entry.internal_score ? (
                 <StarRow score={entry.internal_score} size={16} />
               ) : (
-                <p className="text-sm text-slate-400">Not rated</p>
+                <p className="text-sm text-neutral-500">Not rated</p>
               )}
             </div>
           </div>
@@ -271,34 +271,34 @@ function DealPanel({
           {/* Detail rows */}
           {detailRows.map(({ label, value }) => value ? (
             <div key={label}>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">{label}</p>
               <p className="text-sm text-slate-800">{value}</p>
             </div>
           ) : null)}
 
           {entry.next_steps && (
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Next Steps</p>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Next Steps</p>
               <p className="text-sm text-slate-800 whitespace-pre-wrap">{entry.next_steps}</p>
             </div>
           )}
 
           {entry.notes && (
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Notes</p>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Notes</p>
               <p className="text-sm text-slate-800 whitespace-pre-wrap">{entry.notes}</p>
             </div>
           )}
 
           {entry.deck_url && (
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Pitch Deck</p>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Pitch Deck</p>
               <div className="flex items-center gap-2">
                 <a
                   href={entry.deck_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-gold-500 hover:text-gold-600 hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary-500 hover:text-primary-600 hover:underline"
                 >
                   <Paperclip size={13} /> View deck
                 </a>
@@ -314,15 +314,15 @@ function DealPanel({
               {aiSummary && (
                 <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
                   <p className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI Analysis</p>
-                  <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
+                  <p className="text-xs text-neutral-800 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
                 </div>
               )}
             </div>
           )}
 
           <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Added</p>
-            <p className="text-sm text-slate-500">{createdDate}</p>
+            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Added</p>
+            <p className="text-sm text-neutral-600">{createdDate}</p>
           </div>
 
             </>
@@ -334,16 +334,16 @@ function DealPanel({
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
+        <div className="px-6 py-4 border-t border-neutral-200 flex gap-3">
           <button
             onClick={() => { onClose(); onEdit(entry) }}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gold-500 text-white rounded-xl text-sm font-semibold hover:bg-gold-600 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
           >
             <Pencil size={14} /> Edit deal
           </button>
           <button
             onClick={() => { onClose(); onDelete(entry.id, entry.name) }}
-            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 size={16} />
           </button>
@@ -381,8 +381,8 @@ function DealCard({
       ref={setNodeRef}
       style={style}
       onClick={() => onView(entry)}
-      className={`bg-white rounded-xl border border-slate-200 p-3 shadow-card group cursor-pointer transition-shadow ${
-        isDragging ? 'opacity-40' : 'hover:shadow-card-hover hover:border-violet-200'
+      className={`bg-white rounded-lg border border-neutral-200 p-3 shadow-sm dark:shadow-md group cursor-pointer transition-shadow ${
+        isDragging ? 'opacity-40' : 'hover:shadow-sm dark:shadow-md-hover hover:border-violet-200'
       }`}
     >
       <div className="flex items-start gap-2">
@@ -390,28 +390,28 @@ function DealCard({
           {...listeners}
           {...attributes}
           onClick={e => e.stopPropagation()}
-          className="mt-0.5 text-slate-300 hover:text-slate-500 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+          className="mt-0.5 text-slate-300 hover:text-neutral-600 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
         >
           <GripVertical size={14} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-900 truncate">{entry.name}</p>
+          <p className="text-sm font-semibold text-neutral-900 truncate">{entry.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {entry.sector && <p className="text-xs text-slate-400">{entry.sector}</p>}
+            {entry.sector && <p className="text-xs text-neutral-500">{entry.sector}</p>}
             {entry.hq && (
               <>
                 <span className="text-slate-200 text-xs">·</span>
-                <p className="text-xs text-slate-400">{entry.hq}</p>
+                <p className="text-xs text-neutral-500">{entry.hq}</p>
               </>
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             {entry.stage && (
-              <span className="text-xs bg-slate-100 text-slate-600 rounded-lg px-2 py-0.5">{entry.stage}</span>
+              <span className="text-xs bg-neutral-100 text-neutral-700 rounded-lg px-2 py-0.5">{entry.stage}</span>
             )}
             {askLabel && (
-              <span className="text-xs bg-gold-50 text-gold-500 rounded-lg px-2 py-0.5">{askLabel}</span>
+              <span className="text-xs bg-gold-50 text-primary-500 rounded-lg px-2 py-0.5">{askLabel}</span>
             )}
           </div>
           {entry.internal_score != null && entry.internal_score > 0 && (
@@ -427,13 +427,13 @@ function DealCard({
         >
           <button
             onClick={() => onEdit(entry)}
-            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onDelete(entry.id, entry.name)}
-            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 size={12} />
           </button>
@@ -473,7 +473,7 @@ function Column({
 
   return (
     <div className="flex-shrink-0 w-64 flex flex-col">
-      <div className={`rounded-xl border px-3 py-2.5 mb-2 flex items-center justify-between ${headerClass}`}>
+      <div className={`rounded-lg border px-3 py-2.5 mb-2 flex items-center justify-between ${headerClass}`}>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotClass}`} />
           <span className="text-sm font-semibold truncate">{stage.name}</span>
@@ -495,12 +495,12 @@ function Column({
           </button>
           {showMenu && (
             <div
-              className="absolute right-0 top-8 z-20 bg-white rounded-xl shadow-xl ring-1 ring-black/[0.06] py-1 w-36"
+              className="absolute right-0 top-8 z-20 bg-white rounded-lg shadow-xl ring-1 ring-black/[0.06] py-1 w-36"
               onMouseLeave={() => setShowMenu(false)}
             >
               <button
                 onClick={() => { onEditStage(stage); setShowMenu(false) }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-neutral-800 hover:bg-neutral-50"
               >
                 <Pencil size={12} /> Edit stage
               </button>
@@ -517,7 +517,7 @@ function Column({
 
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-col gap-2 min-h-24 rounded-xl p-1.5 transition-colors ${
+        className={`flex-1 flex flex-col gap-2 min-h-24 rounded-lg p-1.5 transition-colors ${
           isOver ? 'bg-gold-50 ring-2 ring-violet-200 ring-dashed' : ''
         }`}
       >
@@ -535,7 +535,7 @@ function Column({
         {entries.length === 0 && !isOver && (
           <button
             onClick={() => onAddCard(stage.name)}
-            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
+            className="flex items-center justify-center gap-1.5 p-3 rounded-lg border-2 border-dashed border-neutral-200 text-xs text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
           >
             <Plus size={12} /> Add deal
           </button>
@@ -603,16 +603,16 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
     <div className="animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Deal Pipeline</h1>
-        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+        <div className="flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg p-1 shadow-sm">
           <button
             onClick={() => setView('board')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-gold-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-800'}`}
           >
             <Plus size={12} /> Board
           </button>
           <button
             onClick={() => setView('analytics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-gold-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-800'}`}
           >
             <BarChart2 size={12} /> Analytics
           </button>
@@ -653,7 +653,7 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
           <div className="flex-shrink-0 w-64">
             <button
               onClick={() => setShowAddStage(true)}
-              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 text-sm text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
             >
               <Plus size={15} /> Add stage
             </button>
@@ -662,10 +662,10 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
 
         <DragOverlay>
           {activeEntry && (
-            <div className="bg-white rounded-xl border border-gold-200 shadow-xl p-3 w-64 rotate-2 opacity-95">
-              <p className="text-sm font-semibold text-slate-900">{activeEntry.name}</p>
+            <div className="bg-white rounded-lg border border-gold-200 shadow-xl p-3 w-64 rotate-2 opacity-95">
+              <p className="text-sm font-semibold text-neutral-900">{activeEntry.name}</p>
               {activeEntry.sector && (
-                <p className="text-xs text-slate-400 mt-0.5">{activeEntry.sector}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{activeEntry.sector}</p>
               )}
             </div>
           )}

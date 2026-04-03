@@ -65,22 +65,22 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
       <div className="space-y-5">
 
         {/* SAFE summary */}
-        <div className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 grid grid-cols-2 gap-3">
+        <div className="bg-neutral-50 rounded-lg p-4 ring-1 ring-slate-200 grid grid-cols-2 gap-3">
           <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Investment</p>
-            <p className="text-sm font-bold text-slate-900">{fmt$$(safe.investment_amount)}</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Investment</p>
+            <p className="text-sm font-bold text-neutral-900">{fmt$$(safe.investment_amount)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Valuation Cap</p>
-            <p className="text-sm font-bold text-slate-900">{safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—'}</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Valuation Cap</p>
+            <p className="text-sm font-bold text-neutral-900">{safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—'}</p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Discount Rate</p>
-            <p className="text-sm font-bold text-slate-900">{safe.discount_rate ? `${safe.discount_rate}%` : '—'}</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Discount Rate</p>
+            <p className="text-sm font-bold text-neutral-900">{safe.discount_rate ? `${safe.discount_rate}%` : '—'}</p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">MFN / Pro-rata</p>
-            <p className="text-sm font-bold text-slate-900">
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">MFN / Pro-rata</p>
+            <p className="text-sm font-bold text-neutral-900">
               {[safe.has_mfn && 'MFN', safe.has_pro_rata && 'Pro-rata'].filter(Boolean).join(' · ') || '—'}
             </p>
           </div>
@@ -88,8 +88,8 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
 
         {/* Scenario inputs */}
         <div>
-          <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <Calculator size={15} className="text-gold-500" />
+          <p className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+            <Calculator size={15} className="text-primary-500" />
             Model next round
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -108,27 +108,27 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
 
         {/* Result */}
         {result && (
-          <div className="bg-gold-50 rounded-xl p-4 ring-1 ring-violet-200 space-y-3">
-            <p className="text-xs font-semibold text-gold-500 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-gold-50 rounded-lg p-4 ring-1 ring-violet-200 space-y-3">
+            <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider flex items-center gap-1.5">
               <Zap size={12} /> Conversion result
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Effective Conversion Val.</p>
-                <p className="text-sm font-bold text-slate-900">{fmt$$(result.effectiveVal)}</p>
-                <p className="text-[11px] text-gold-500 mt-0.5">{MECH_LABELS[result.mechanism]}</p>
+                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Effective Conversion Val.</p>
+                <p className="text-sm font-bold text-neutral-900">{fmt$$(result.effectiveVal)}</p>
+                <p className="text-[11px] text-primary-500 mt-0.5">{MECH_LABELS[result.mechanism]}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Our Ownership</p>
-                <p className="text-lg font-bold text-gold-600">{fmtPct(result.ownershipPct)}</p>
+                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Our Ownership</p>
+                <p className="text-lg font-bold text-primary-600">{fmtPct(result.ownershipPct)}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Stake Value (post-round)</p>
+                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Stake Value (post-round)</p>
                 <p className="text-sm font-bold text-emerald-600">{fmt$$(result.sharesValue)}</p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">MOIC at conversion</p>
-                <p className="text-sm font-bold text-slate-900">
+                <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">MOIC at conversion</p>
+                <p className="text-sm font-bold text-neutral-900">
                   {(result.sharesValue / safe.investment_amount).toFixed(2)}x
                 </p>
               </div>
@@ -138,12 +138,12 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
 
         {/* Convert section */}
         {safe.status === 'unconverted' && (
-          <div className="border-t border-slate-100 pt-4">
-            <p className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          <div className="border-t border-neutral-200 pt-4">
+            <p className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
               <TrendingUp size={15} className="text-emerald-500" />
               Convert this SAFE
             </p>
-            <p className="text-xs text-slate-500 mb-3">
+            <p className="text-xs text-neutral-600 mb-3">
               Select the round this SAFE converted at and confirm. A cap table entry will be created automatically.
             </p>
             <div className="mb-3">
@@ -174,7 +174,7 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
         )}
 
         {safe.status === 'converted' && (
-          <div className="flex items-center gap-2 bg-emerald-50 rounded-xl px-4 py-3 ring-1 ring-emerald-200">
+          <div className="flex items-center gap-2 bg-emerald-50 rounded-lg px-4 py-3 ring-1 ring-emerald-200">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <p className="text-sm font-medium text-emerald-800">This SAFE has already been converted.</p>
           </div>

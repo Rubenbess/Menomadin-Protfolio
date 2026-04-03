@@ -75,18 +75,18 @@ function PerformanceChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Invested vs Current Value</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Per company · sorted by capital deployed</p>
+          <h3 className="text-sm font-semibold text-neutral-900">Invested vs Current Value</h3>
+          <p className="text-xs text-neutral-500 mt-0.5">Per company · sorted by capital deployed</p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-600">
             <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block" />
             Invested
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-600">
             <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />
             Current Value
           </span>
@@ -138,9 +138,9 @@ function SectorChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Sector Allocation</h3>
-      <p className="text-xs text-slate-400 mb-4">By capital invested</p>
+    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Sector Allocation</h3>
+      <p className="text-xs text-neutral-500 mb-4">By capital invested</p>
 
       <div className="flex items-center gap-4">
         {/* Donut */}
@@ -177,14 +177,14 @@ function SectorChart({ companies }: Props) {
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ background: SECTOR_COLORS[i % SECTOR_COLORS.length] }}
               />
-              <span className="text-xs text-slate-600 truncate flex-1">{entry.name}</span>
-              <span className="text-xs font-semibold text-slate-700 flex-shrink-0">
+              <span className="text-xs text-neutral-700 truncate flex-1">{entry.name}</span>
+              <span className="text-xs font-semibold text-neutral-800 flex-shrink-0">
                 {total > 0 ? fmtPct((entry.value / total) * 100) : '—'}
               </span>
             </div>
           ))}
           {data.length > 6 && (
-            <p className="text-xs text-slate-400">+{data.length - 6} more</p>
+            <p className="text-xs text-neutral-500">+{data.length - 6} more</p>
           )}
         </div>
       </div>
@@ -207,9 +207,9 @@ function MoicChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">MOIC by Company</h3>
-      <p className="text-xs text-slate-400 mb-5">Top performers ranked by return multiple</p>
+    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">MOIC by Company</h3>
+      <p className="text-xs text-neutral-500 mb-5">Top performers ranked by return multiple</p>
       <ResponsiveContainer width="100%" height={data.length * 32 + 20}>
         <BarChart data={data} layout="vertical" barCategoryGap="30%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
           <CartesianGrid horizontal={false} stroke="#f1f5f9" />
@@ -251,7 +251,7 @@ function MoicChart({ companies }: Props) {
           { label: '1–2x', color: '#6366f1' },
           { label: '< 1x', color: '#f59e0b' },
         ].map(l => (
-          <span key={l.label} className="flex items-center gap-1.5 text-xs text-slate-400">
+          <span key={l.label} className="flex items-center gap-1.5 text-xs text-neutral-500">
             <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
             {l.label}
           </span>
@@ -273,16 +273,16 @@ function StatusBreakdown({ companies }: Props) {
   if (total === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Portfolio Status</h3>
-      <p className="text-xs text-slate-400 mb-5">Company health breakdown · {total} total</p>
+    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Portfolio Status</h3>
+      <p className="text-xs text-neutral-500 mb-5">Company health breakdown · {total} total</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
           const count = counts[key] ?? 0
           const pct = total > 0 ? (count / total) * 100 : 0
           return (
-            <div key={key} className={`rounded-xl px-4 py-3 ${cfg.bg}`}>
+            <div key={key} className={`rounded-lg px-4 py-3 ${cfg.bg}`}>
               <p className={`text-2xl font-bold ${cfg.text}`}>{count}</p>
               <p className={`text-xs font-medium mt-0.5 ${cfg.text} opacity-80`}>{cfg.label}</p>
               <p className={`text-xs mt-1 ${cfg.text} opacity-60`}>{fmtPct(pct)} of portfolio</p>

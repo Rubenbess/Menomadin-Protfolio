@@ -17,10 +17,10 @@ export function DashboardQuickActions() {
           </div>
           <ArrowRight size={18} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
+        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">
           View Analytics
         </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-neutral-700 dark:text-neutral-500">
           Portfolio metrics, charts, and performance analysis
         </p>
       </Link>
@@ -36,10 +36,10 @@ export function DashboardQuickActions() {
           </div>
           <ArrowRight size={18} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
+        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">
           Bulk Import
         </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-neutral-700 dark:text-neutral-500">
           Import companies and contacts from CSV files
         </p>
       </Link>
@@ -55,10 +55,10 @@ export function DashboardQuickActions() {
           </div>
           <ArrowRight size={18} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
+        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">
           Advanced Filters
         </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-neutral-700 dark:text-neutral-500">
           Filter companies and contacts with advanced criteria
         </p>
       </Link>

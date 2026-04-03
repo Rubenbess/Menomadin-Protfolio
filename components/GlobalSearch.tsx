@@ -14,7 +14,7 @@ interface Result {
 }
 
 const TYPE_CONFIG = {
-  company: { label: 'Company',  icon: Building2, color: 'text-gold-500 bg-gold-50' },
+  company: { label: 'Company',  icon: Building2, color: 'text-primary-500 bg-gold-50' },
   contact: { label: 'Contact',  icon: Users,     color: 'text-blue-500 bg-blue-50' },
   deal:    { label: 'Deal',     icon: GitMerge,  color: 'text-emerald-500 bg-emerald-50' },
 }
@@ -86,7 +86,7 @@ export default function GlobalSearch() {
   if (!open) return (
     <button
       onClick={() => setOpen(true)}
-      className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-xl text-xs text-slate-400 transition-all"
+      className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg text-xs text-neutral-500 transition-all"
     >
       <Search size={12} />
       <span className="hidden sm:inline">Search…</span>
@@ -100,17 +100,17 @@ export default function GlobalSearch() {
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
       {/* Panel */}
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.08] overflow-hidden">
+      <div className="relative w-full max-w-xl bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.08] overflow-hidden">
         {/* Input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100">
-          <Search size={16} className="text-slate-400 flex-shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-200">
+          <Search size={16} className="text-neutral-500 flex-shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder="Search companies, contacts, deals…"
-            className="flex-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none"
           />
           {loading && (
             <svg className="animate-spin h-4 w-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@ export default function GlobalSearch() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           )}
-          <button onClick={() => setOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors flex-shrink-0">
+          <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 hover:text-neutral-700 rounded-lg transition-colors flex-shrink-0">
             <X size={14} />
           </button>
         </div>
@@ -135,19 +135,19 @@ export default function GlobalSearch() {
                   onClick={() => navigate(r.href)}
                   onMouseEnter={() => setCursor(i)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                    i === cursor ? 'bg-gold-50' : 'hover:bg-slate-50'
+                    i === cursor ? 'bg-gold-50' : 'hover:bg-neutral-50'
                   }`}
                 >
                   {r.logo ? (
-                    <img src={r.logo} alt="" className="w-7 h-7 rounded-lg object-contain bg-slate-50 ring-1 ring-slate-100 flex-shrink-0" />
+                    <img src={r.logo} alt="" className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
                   ) : (
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
                       <Icon size={13} />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{r.title}</p>
-                    {r.subtitle && <p className="text-xs text-slate-400 truncate">{r.subtitle}</p>}
+                    <p className="text-sm font-semibold text-neutral-900 truncate">{r.title}</p>
+                    {r.subtitle && <p className="text-xs text-neutral-500 truncate">{r.subtitle}</p>}
                   </div>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.color}`}>
                     {cfg.label}
@@ -157,20 +157,20 @@ export default function GlobalSearch() {
             })}
           </div>
         ) : query.length >= 2 && !loading ? (
-          <div className="py-10 text-center text-sm text-slate-400">No results for "{query}"</div>
+          <div className="py-10 text-center text-sm text-neutral-500">No results for "{query}"</div>
         ) : query.length === 0 ? (
           <div className="py-6 px-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick navigation</p>
+            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Quick navigation</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Companies', href: '/companies', icon: Building2, color: 'bg-gold-50 text-gold-500' },
+                { label: 'Companies', href: '/companies', icon: Building2, color: 'bg-gold-50 text-primary-500' },
                 { label: 'Contacts',  href: '/contacts',  icon: Users,     color: 'bg-blue-50 text-blue-600' },
                 { label: 'Pipeline',  href: '/pipeline',  icon: GitMerge,  color: 'bg-emerald-50 text-emerald-600' },
               ].map(({ label, href, icon: Icon, color }) => (
                 <button
                   key={href}
                   onClick={() => navigate(href)}
-                  className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs font-semibold text-slate-600 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2.5 bg-neutral-50 hover:bg-neutral-100 rounded-lg text-xs font-semibold text-neutral-700 transition-colors"
                 >
                   <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
                     <Icon size={12} />
@@ -183,10 +183,10 @@ export default function GlobalSearch() {
         ) : null}
 
         {results.length > 0 && (
-          <div className="px-4 py-2.5 border-t border-slate-100 flex items-center gap-4 text-[11px] text-slate-400">
-            <span><kbd className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">↑↓</kbd> navigate</span>
-            <span><kbd className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">↵</kbd> open</span>
-            <span><kbd className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">Esc</kbd> close</span>
+          <div className="px-4 py-2.5 border-t border-neutral-200 flex items-center gap-4 text-[11px] text-neutral-500">
+            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">↑↓</kbd> navigate</span>
+            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">↵</kbd> open</span>
+            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">Esc</kbd> close</span>
           </div>
         )}
       </div>

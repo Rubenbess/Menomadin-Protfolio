@@ -21,8 +21,8 @@ const SCORE_DIMS = [
   { key: 'score_fit',      label: 'Strategic Fit',     description: '1 = low   · 5 = perfect fit' },
 ] as const
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 type ScoreKey = typeof SCORE_DIMS[number]['key']
 
@@ -48,8 +48,8 @@ function StarRating({
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold text-slate-700">{label}</span>
-        <span className="text-xs text-slate-400">{description}</span>
+        <span className="text-xs font-semibold text-neutral-800">{label}</span>
+        <span className="text-xs text-neutral-500">{description}</span>
       </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(i => (
@@ -66,7 +66,7 @@ function StarRating({
             </svg>
           </button>
         ))}
-        {value > 0 && <span className="text-xs text-slate-400 self-center ml-1">{value}/5</span>}
+        {value > 0 && <span className="text-xs text-neutral-500 self-center ml-1">{value}/5</span>}
       </div>
     </div>
   )
@@ -221,11 +221,11 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
                 placeholder="New sector name"
                 autoFocus
               />
-              <button type="button" onClick={addCustomSector} className="px-2.5 py-1.5 bg-gold-500 text-white rounded-lg text-xs font-medium hover:bg-gold-600 transition-colors flex-shrink-0">Add</button>
-              <button type="button" onClick={() => { setShowSectorInput(false); setNewSector('') }} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"><X size={14} /></button>
+              <button type="button" onClick={addCustomSector} className="px-2.5 py-1.5 bg-primary-500 text-white rounded-lg text-xs font-medium hover:bg-primary-600 transition-colors flex-shrink-0">Add</button>
+              <button type="button" onClick={() => { setShowSectorInput(false); setNewSector('') }} className="p-1.5 text-neutral-500 hover:text-neutral-700 transition-colors flex-shrink-0"><X size={14} /></button>
             </div>
           ) : (
-            <button type="button" onClick={() => setShowSectorInput(true)} className="mt-1.5 flex items-center gap-1 text-xs text-slate-400 hover:text-gold-500 transition-colors">
+            <button type="button" onClick={() => setShowSectorInput(true)} className="mt-1.5 flex items-center gap-1 text-xs text-neutral-500 hover:text-primary-500 transition-colors">
               <Plus size={12} /> Add custom sector
             </button>
           )}
@@ -278,9 +278,9 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
       </div>
 
       {/* Deal Scoring Rubric */}
-      <div className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-4">
+      <div className="bg-neutral-50 rounded-lg p-4 ring-1 ring-slate-200 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Deal Score</p>
+          <p className="text-sm font-semibold text-neutral-900">Deal Score</p>
           {compositeScore > 0 && (
             <span className={`text-sm font-bold tabular-nums ${
               compositeScore >= 4 ? 'text-emerald-600' :
@@ -318,26 +318,26 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
         <input ref={fileInputRef} type="file" accept=".pdf,.ppt,.pptx" onChange={handleDeckChange} className="hidden" />
         {deckFile ? (
           <div className="flex items-center gap-2 px-3 py-2.5 bg-gold-50 border border-violet-200 rounded-xl">
-            <Paperclip size={14} className="text-gold-500 flex-shrink-0" />
-            <span className="text-xs text-gold-600 flex-1 truncate">{deckFile.name}</span>
-            <button type="button" onClick={() => { setDeckFile(null); if (fileInputRef.current) fileInputRef.current.value = '' }} className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0">
+            <Paperclip size={14} className="text-primary-500 flex-shrink-0" />
+            <span className="text-xs text-primary-600 flex-1 truncate">{deckFile.name}</span>
+            <button type="button" onClick={() => { setDeckFile(null); if (fileInputRef.current) fileInputRef.current.value = '' }} className="text-neutral-500 hover:text-red-500 transition-colors flex-shrink-0">
               <X size={14} />
             </button>
           </div>
         ) : deckUrl && !removeDeck ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <Paperclip size={14} className="text-slate-400 flex-shrink-0" />
-            <a href={deckUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gold-500 hover:underline flex-1 truncate flex items-center gap-1">
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl">
+            <Paperclip size={14} className="text-neutral-500 flex-shrink-0" />
+            <a href={deckUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-500 hover:underline flex-1 truncate flex items-center gap-1">
               View current deck <ExternalLink size={11} />
             </a>
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs text-slate-500 hover:text-gold-500 transition-colors flex-shrink-0">Replace</button>
-            <button type="button" onClick={() => setRemoveDeck(true)} className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={13} /></button>
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs text-neutral-600 hover:text-primary-500 transition-colors flex-shrink-0">Replace</button>
+            <button type="button" onClick={() => setRemoveDeck(true)} className="text-neutral-500 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={13} /></button>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-neutral-200 rounded-lg text-sm text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
           >
             <Paperclip size={14} />
             Attach deck (PDF, PPT, PPTX)
@@ -355,7 +355,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
         <textarea name="notes" rows={3} defaultValue={entry?.notes ?? ''} className={`${inp} resize-none`} placeholder="Add any context…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={loading} className="flex-1">

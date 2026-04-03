@@ -68,13 +68,13 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
           <label className="field-label">Valuation Cap ($)</label>
           <input type="number" className="field-input" placeholder="e.g. 8000000"
             value={cap} onChange={e => setCap(e.target.value)} min="0" step="any" />
-          <p className="text-[11px] text-slate-400 mt-1">Leave blank if no cap</p>
+          <p className="text-[11px] text-neutral-500 mt-1">Leave blank if no cap</p>
         </div>
         <div>
           <label className="field-label">Discount Rate (%)</label>
           <input type="number" className="field-input" placeholder="e.g. 20"
             value={discount} onChange={e => setDiscount(e.target.value)} min="0" max="100" step="any" />
-          <p className="text-[11px] text-slate-400 mt-1">Leave blank if no discount</p>
+          <p className="text-[11px] text-neutral-500 mt-1">Leave blank if no discount</p>
         </div>
       </div>
 
@@ -82,12 +82,12 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasMfn} onChange={e => setHasMfn(e.target.checked)} />
-          <span className="text-sm text-slate-700 font-medium">MFN Clause</span>
+          <span className="text-sm text-neutral-800 font-medium">MFN Clause</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasProRata} onChange={e => setHasProRata(e.target.checked)} />
-          <span className="text-sm text-slate-700 font-medium">Pro-rata Rights</span>
+          <span className="text-sm text-neutral-800 font-medium">Pro-rata Rights</span>
         </label>
       </div>
 

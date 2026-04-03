@@ -106,8 +106,8 @@ export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
         />
       </div>
 
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/30 dark:to-slate-900/30 rounded-lg p-5 space-y-4 border border-slate-200 dark:border-slate-700">
-        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Task Details</p>
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/30 dark:to-slate-900/30 rounded-lg p-5 space-y-4 border border-neutral-200 dark:border-neutral-700">
+        <p className="text-xs font-bold text-neutral-800 dark:text-neutral-300 uppercase tracking-wider">Task Details</p>
 
         <div>
           <label className="field-label">Task Title *</label>
@@ -141,23 +141,23 @@ export default function TemplateForm({ template, onSuccess, onCancel }: Props) {
           onChange={e => setIsPublic(e.target.checked)}
           className="w-4 h-4 accent-gold-500"
         />
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">
           Make public (share with team)
         </span>
       </label>
 
-      <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+      <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
         <button
           type="submit"
           disabled={saving || !name.trim() || !taskTitle.trim()}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gold-500 text-white rounded-lg text-sm font-semibold hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <Save size={16} /> {saving ? 'Saving…' : template ? 'Update' : 'Create'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-neutral-800 dark:text-neutral-300 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors"
         >
           <X size={16} /> Cancel
         </button>

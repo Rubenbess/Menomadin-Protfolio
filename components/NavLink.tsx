@@ -34,7 +34,7 @@ export function NavLink({
       className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors relative group ${
         isActive
           ? 'bg-amber-700 text-white'
-          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          : 'text-neutral-800 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
       } ${className}`}
     >
       {icon && <span className="w-5 h-5 flex-shrink-0">{icon}</span>}
@@ -51,7 +51,7 @@ export function NavLink({
 
       {/* Tooltip for collapsed state */}
       {isCollapsed && (
-        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-neutral-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
           {label}
           {badge && ` (${badge})`}
         </div>

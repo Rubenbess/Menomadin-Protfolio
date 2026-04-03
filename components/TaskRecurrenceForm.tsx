@@ -56,13 +56,13 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
     <div className="space-y-4 sm:space-y-6">
       {/* Frequency Select */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+        <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
           Frequency
         </label>
         <select
           value={frequency}
           onChange={(e) => setFrequency(e.target.value as RecurrenceFrequency)}
-          className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+          className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
         >
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -76,7 +76,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
       {/* Interval */}
       {(frequency === 'daily' || frequency === 'weekly' || frequency === 'monthly') && (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-900 dark:text-white">
+          <label className="block text-sm font-medium text-neutral-900 dark:text-white">
             Every {frequency === 'weekly' ? 'N weeks' : frequency === 'monthly' ? 'N months' : 'N days'}
           </label>
           <input
@@ -85,7 +85,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
             max="52"
             value={interval}
             onChange={(e) => setInterval(Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
           />
         </div>
       )}
@@ -93,7 +93,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
       {/* Days of Week (for weekly recurrence) */}
       {frequency === 'weekly' && (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-900 dark:text-white">
+          <label className="block text-sm font-medium text-neutral-900 dark:text-white">
             Repeat on days
           </label>
           <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -104,7 +104,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
                 className={`p-2 sm:p-2 rounded-lg font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
                   daysOfWeek.includes(index)
                     ? 'bg-amber-700 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-slate-700'
                 }`}
               >
                 {day}
@@ -117,7 +117,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
       {/* Day of Month (for monthly recurrence) */}
       {frequency === 'monthly' && (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-900 dark:text-white">
+          <label className="block text-sm font-medium text-neutral-900 dark:text-white">
             Day of month
           </label>
           <input
@@ -126,7 +126,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
             max="31"
             value={dayOfMonth}
             onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
           />
         </div>
       )}
@@ -140,7 +140,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
           onChange={(e) => setIsActive(e.target.checked)}
           className="w-4 h-4 rounded"
         />
-        <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">
+        <label htmlFor="active" className="text-sm text-neutral-800 dark:text-neutral-300">
           Activate this recurring task
         </label>
       </div>
@@ -156,7 +156,7 @@ const TaskRecurrenceForm = memo(function TaskRecurrenceForm({
         </button>
         <button
           onClick={onCancel}
-          className="flex-1 px-4 py-2.5 sm:py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation"
+          className="flex-1 px-4 py-2.5 sm:py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-300 rounded-lg font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors touch-manipulation"
         >
           Cancel
         </button>

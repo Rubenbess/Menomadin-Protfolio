@@ -13,8 +13,8 @@ interface Props {
   teamMembers: { id: string; name: string }[]
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 dark:focus:border-gold-500 focus:bg-white dark:focus:bg-slate-700 transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 dark:focus:border-primary-500 focus:bg-white dark:focus:bg-slate-700 transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 dark:text-neutral-300 mb-1.5'
 
 const triggers: { value: AutomationTrigger; label: string }[] = [
   { value: 'deal_created', label: 'Deal created in pipeline' },
@@ -102,13 +102,13 @@ const TaskAutomationRuleForm = memo(function TaskAutomationRuleForm({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-0">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-xl w-full mx-auto max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-2xl max-w-xl w-full mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Create Automation Rule</h2>
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Create Automation Rule</h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-slate-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             <X size={20} />
           </button>
@@ -219,7 +219,7 @@ const TaskAutomationRuleForm = memo(function TaskAutomationRuleForm({
               onChange={(e) => setIsActive(e.target.checked)}
               className="w-4 h-4 rounded"
             />
-            <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">
+            <label htmlFor="active" className="text-sm text-neutral-800 dark:text-neutral-300">
               Activate this rule immediately
             </label>
           </div>
@@ -243,7 +243,7 @@ const TaskAutomationRuleForm = memo(function TaskAutomationRuleForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation"
+              className="flex-1 px-4 py-2.5 border border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-300 rounded-lg font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors touch-manipulation"
             >
               Cancel
             </button>

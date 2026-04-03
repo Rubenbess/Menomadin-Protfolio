@@ -19,14 +19,14 @@ const CATEGORIES: DocumentCategory[] = [
 ]
 
 const CAT_COLORS: Record<DocumentCategory, string> = {
-  'Term Sheet':           'bg-gold-100 text-gold-600',
+  'Term Sheet':           'bg-gold-100 text-primary-600',
   'SHA':                  'bg-blue-100 text-blue-700',
   'Investment Agreement': 'bg-emerald-100 text-emerald-700',
   'Board Minutes':        'bg-amber-100 text-amber-700',
   'Financials':           'bg-teal-100 text-teal-700',
   'Pitch Deck':           'bg-rose-100 text-rose-700',
   'Legal':                'bg-orange-100 text-orange-700',
-  'Other':                'bg-slate-100 text-slate-600',
+  'Other':                'bg-neutral-100 text-neutral-700',
 }
 
 function fileIcon(name: string) {
@@ -43,8 +43,8 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 // ── Upload Modal ─────────────────────────────────────────────────────────────
 
@@ -108,8 +108,8 @@ function UploadModal({
         {file ? (
           <div className="flex items-center gap-2 px-3 py-2.5 bg-gold-50 border border-violet-200 rounded-xl">
             <span>{fileIcon(file.name)}</span>
-            <span className="text-sm text-gold-600 flex-1 truncate">{file.name}</span>
-            <button type="button" onClick={() => setFile(null)} className="text-slate-400 hover:text-red-500">
+            <span className="text-sm text-primary-600 flex-1 truncate">{file.name}</span>
+            <button type="button" onClick={() => setFile(null)} className="text-neutral-500 hover:text-red-500">
               <X size={14} />
             </button>
           </div>
@@ -117,7 +117,7 @@ function UploadModal({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-full flex items-center justify-center gap-2 py-8 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-8 border-2 border-dashed border-neutral-200 rounded-lg text-sm text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
           >
             <Upload size={18} /> Click to select file
           </button>
@@ -150,7 +150,7 @@ function UploadModal({
         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={`${inp} resize-none`} placeholder="Brief description…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={uploading} className="flex-1">
@@ -167,17 +167,17 @@ function UploadModal({
 function PdfPreview({ url, name, onClose }: { url: string; name: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
           <div className="flex items-center gap-2">
             <span>{fileIcon(name)}</span>
             <span className="text-sm font-semibold text-slate-800 truncate max-w-xs">{name}</span>
           </div>
           <div className="flex items-center gap-2">
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-gold-500 hover:text-gold-600 font-medium">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium">
               Open <ExternalLink size={12} />
             </a>
-            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+            <button onClick={onClose} className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -242,10 +242,10 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Document Vault</h1>
-          <p className="text-sm text-slate-400 mt-0.5">{documents.length} documents</p>
+          <p className="text-sm text-neutral-500 mt-0.5">{documents.length} documents</p>
         </div>
         <Button onClick={() => setShowUpload(true)}>
           <Upload size={15} /> Upload Document
@@ -258,8 +258,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
       <div className="flex flex-wrap gap-2 mb-5">
         <button
           onClick={() => setCatFilter('')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-            !catFilter ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+            !catFilter ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300'
           }`}
         >
           All ({documents.length})
@@ -268,8 +268,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
           <button
             key={cat}
             onClick={() => setCatFilter(cat === catFilter ? '' : cat)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-              catFilter === cat ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+              catFilter === cat ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300'
             }`}
           >
             {cat} ({catCounts[cat]})
@@ -280,22 +280,22 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
       {/* Search + filter row */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search documents…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700">
               <X size={13} />
             </button>
           )}
         </div>
 
         {uniqueCompanies.length > 0 && (
-          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500/30 cursor-pointer">
+          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 cursor-pointer">
             <option value="">All companies</option>
             {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -304,13 +304,13 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         {hasFilters && (
           <button
             onClick={() => { setSearch(''); setCatFilter(''); setCompanyFilter('') }}
-            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-slate-100"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100"
           >
             <X size={12} /> Clear
           </button>
         )}
 
-        <span className="text-xs text-slate-400 ml-auto">{filtered.length} results</span>
+        <span className="text-xs text-neutral-500 ml-auto">{filtered.length} results</span>
       </div>
 
       {filtered.length === 0 ? (
@@ -332,25 +332,25 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Document</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden md:table-cell">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden lg:table-cell">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hidden xl:table-cell">Notes</th>
+              <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+                <th className="text-left px-5 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Document</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Category</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest hidden md:table-cell">Company</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest hidden lg:table-cell">Date</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest hidden xl:table-cell">Notes</th>
                 <th className="px-4 py-3 w-24" />
               </tr>
             </thead>
             <tbody>
               {filtered.map(doc => (
-                <tr key={doc.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
+                <tr key={doc.id} className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200">
                   <td className="px-5 py-3.5">
                     <button
                       onClick={() => doc.file_name.toLowerCase().endsWith('.pdf') ? setPreviewDoc(doc) : window.open(doc.file_url, '_blank')}
                       className="flex items-center gap-2.5 text-left group"
                     >
                       <span className="text-lg flex-shrink-0">{fileIcon(doc.file_name)}</span>
-                      <span className="font-medium text-slate-800 group-hover:text-gold-500 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
+                      <span className="font-medium text-slate-800 group-hover:text-primary-500 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
                     </button>
                   </td>
                   <td className="px-4 py-3.5">
@@ -360,7 +360,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                   </td>
                   <td className="px-4 py-3.5 hidden md:table-cell">
                     {doc.company_id && companyMap[doc.company_id] ? (
-                      <span className="text-sm text-slate-600 flex items-center gap-1">
+                      <span className="text-sm text-neutral-700 flex items-center gap-1">
                         <Building2 size={12} className="text-slate-300" />
                         {companyMap[doc.company_id]}
                       </span>
@@ -370,7 +370,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                   </td>
                   <td className="px-4 py-3.5 hidden lg:table-cell">
                     {doc.doc_date ? (
-                      <span className="text-xs text-slate-500 flex items-center gap-1">
+                      <span className="text-xs text-neutral-600 flex items-center gap-1">
                         <Calendar size={11} className="text-slate-300" />
                         {fmtDate(doc.doc_date)}
                       </span>
@@ -380,7 +380,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                   </td>
                   <td className="px-4 py-3.5 hidden xl:table-cell">
                     {doc.notes ? (
-                      <span className="text-xs text-slate-500 truncate max-w-[160px] block">{doc.notes}</span>
+                      <span className="text-xs text-neutral-600 truncate max-w-[160px] block">{doc.notes}</span>
                     ) : (
                       <span className="text-slate-300 text-sm">—</span>
                     )}
@@ -391,14 +391,14 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 text-slate-400 hover:text-gold-500 hover:bg-gold-50 rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-colors"
                         title="Open"
                       >
                         <ExternalLink size={13} />
                       </a>
                       <button
                         onClick={() => handleDelete(doc)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 size={13} />

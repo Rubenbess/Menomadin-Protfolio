@@ -116,13 +116,13 @@ export function FormField({
       )}
 
       {!displayError && helperText && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400" id={`${props.name}-hint`}>
+        <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-500" id={`${props.name}-hint`}>
           {helperText}
         </p>
       )}
 
       {hint && !displayError && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-500">
           {hint}
         </p>
       )}
@@ -186,14 +186,14 @@ export function FormTextarea({
           )}
 
           {!displayError && helperText && (
-            <p className="text-xs text-slate-500 dark:text-slate-400" id={`${props.name}-hint`}>
+            <p className="text-xs text-neutral-600 dark:text-neutral-500" id={`${props.name}-hint`}>
               {helperText}
             </p>
           )}
         </div>
 
         {maxCharacters && (
-          <p className={`text-xs ${isNearLimit ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+          <p className={`text-xs ${isNearLimit ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-neutral-500 dark:text-neutral-600'}`}>
             {charCount}/{maxCharacters}
           </p>
         )}

@@ -65,17 +65,17 @@ export function AdvancedFilterPanel({
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-start justify-end z-50">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 h-screen overflow-y-auto">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900">
+      <div className="w-full max-w-md bg-white dark:bg-neutral-800 h-screen overflow-y-auto">
+        <div className="p-6 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 bg-white dark:bg-neutral-800">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
               Advanced Filters
             </h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+              className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
             >
-              <X size={20} className="text-slate-600 dark:text-slate-400" />
+              <X size={20} className="text-neutral-700 dark:text-neutral-500" />
             </button>
           </div>
 
@@ -86,7 +86,7 @@ export function AdvancedFilterPanel({
               className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
                 filterGroup.logic === 'and'
                   ? 'bg-amber-700 text-white'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                  : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
               }`}
             >
               Match All
@@ -96,7 +96,7 @@ export function AdvancedFilterPanel({
               className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
                 filterGroup.logic === 'or'
                   ? 'bg-amber-700 text-white'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                  : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
               }`}
             >
               Match Any
@@ -111,7 +111,7 @@ export function AdvancedFilterPanel({
             return (
               <div
                 key={condition.id}
-                className="space-y-2 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                className="space-y-2 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg"
               >
                 {/* Field Select */}
                 <select
@@ -119,7 +119,7 @@ export function AdvancedFilterPanel({
                   onChange={(e) =>
                     handleConditionChange(condition.id, 'field', e.target.value)
                   }
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                 >
                   {fields.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -139,7 +139,7 @@ export function AdvancedFilterPanel({
                         e.target.value as FilterOperator
                       )
                     }
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                   >
                     {field.operators.map((op) => (
                       <option key={op} value={op}>
@@ -156,7 +156,7 @@ export function AdvancedFilterPanel({
                     onChange={(e) =>
                       handleConditionChange(condition.id, 'value', e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                   >
                     <option value="">Select value</option>
                     {field.options.map((opt) => (
@@ -174,7 +174,7 @@ export function AdvancedFilterPanel({
                         handleConditionChange(condition.id, 'value', e.target.value)
                       }
                       placeholder="Value"
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                     />
                     {condition.operator === 'between' && (
                       <input
@@ -184,7 +184,7 @@ export function AdvancedFilterPanel({
                           handleConditionChange(condition.id, 'valueTo', e.target.value)
                         }
                         placeholder="To"
-                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                       />
                     )}
                   </>
@@ -196,7 +196,7 @@ export function AdvancedFilterPanel({
                       handleConditionChange(condition.id, 'value', e.target.value)
                     }
                     placeholder="Value"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
                   />
                 )}
 
@@ -215,7 +215,7 @@ export function AdvancedFilterPanel({
           {/* Add Condition Button */}
           <button
             onClick={handleAddCondition}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400 font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-800 dark:text-neutral-300 hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400 font-medium transition-colors"
           >
             <Plus size={18} />
             Add Filter
@@ -223,7 +223,7 @@ export function AdvancedFilterPanel({
         </div>
 
         {/* Actions */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 sticky bottom-0 space-y-3">
+        <div className="p-6 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 sticky bottom-0 space-y-3">
           <button
             onClick={handleApply}
             className="w-full px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-medium"
@@ -232,7 +232,7 @@ export function AdvancedFilterPanel({
           </button>
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium"
+            className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-slate-700 rounded-lg font-medium"
           >
             Cancel
           </button>

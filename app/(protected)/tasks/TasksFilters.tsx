@@ -29,11 +29,11 @@ const PRIORITIES = [
 ]
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
-  'To do': 'text-slate-600 dark:text-slate-400',
+  'To do': 'text-neutral-700 dark:text-neutral-500',
   'In progress': 'text-blue-600 dark:text-blue-400',
   'Waiting': 'text-amber-600 dark:text-amber-400',
   'Done': 'text-emerald-600 dark:text-emerald-400',
-  'Cancelled': 'text-slate-400 dark:text-slate-500',
+  'Cancelled': 'text-neutral-500 dark:text-neutral-600',
 }
 
 export default function TasksFilters({
@@ -73,19 +73,19 @@ export default function TasksFilters({
   const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || companyFilter
 
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900/30 border-r border-slate-200 dark:border-slate-800 overflow-y-auto flex flex-col">
+    <aside className="w-64 bg-white dark:bg-neutral-800/30 border-r border-neutral-200 dark:border-neutral-700 overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="px-6 py-6 border-b border-slate-200 dark:border-slate-800">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6">Filters</h2>
+      <div className="px-6 py-6 border-b border-neutral-200 dark:border-neutral-700">
+        <h2 className="text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-widest mb-6">Filters</h2>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3 text-center">
           <div className="p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Active</p>
+            <p className="text-xs text-neutral-700 dark:text-neutral-500 font-medium mb-1">Active</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.active}</p>
           </div>
           <div className="p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Done</p>
+            <p className="text-xs text-neutral-700 dark:text-neutral-500 font-medium mb-1">Done</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function TasksFilters({
                   onChange={() => togglePriority(p.value)}
                   className="w-4 h-4 accent-gold-500"
                 />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.label}</span>
+                <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">{p.label}</span>
               </label>
             ))}
           </div>
@@ -156,13 +156,13 @@ export default function TasksFilters({
             onChange={(e) => onIncludeCompletedChange(e.target.checked)}
             className="w-4 h-4 accent-gold-500"
           />
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show completed</span>
+          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">Show completed</span>
         </label>
       </div>
 
       {/* Clear Button */}
       {hasActiveFilters && (
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700">
           <button
             onClick={clearAllFilters}
             className="w-full px-4 py-2 text-sm font-semibold text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20 rounded-lg transition-colors"

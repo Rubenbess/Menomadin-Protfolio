@@ -27,11 +27,11 @@ export default function ImportPage() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <Upload className="text-amber-700 dark:text-amber-600" size={24} />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
               Bulk Import
             </h1>
           </div>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-neutral-700 dark:text-neutral-500">
             Import companies and contacts from CSV files
           </p>
         </div>
@@ -43,10 +43,10 @@ export default function ImportPage() {
         {/* Companies Import */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
               Import Companies
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+            <p className="text-sm text-neutral-700 dark:text-neutral-500 mt-2">
               Upload a CSV file with company information. Required: name.
               Optional: sector, stage, HQ, status, strategy, invested amount,
               current value, MOIC, ownership %.
@@ -62,10 +62,10 @@ export default function ImportPage() {
         {/* Contacts Import */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
               Import Contacts
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+            <p className="text-sm text-neutral-700 dark:text-neutral-500 mt-2">
               Upload a CSV file with contact information. Required: name.
               Optional: position, email, phone, company, contact type,
               relationship owner.
@@ -80,13 +80,13 @@ export default function ImportPage() {
       </div>
 
       {/* Import Guidelines */}
-      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+      <div className="bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
           Import Guidelines
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-600 dark:text-slate-400">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-neutral-700 dark:text-neutral-500">
           <div>
-            <h4 className="font-medium text-slate-900 dark:text-white mb-2">
+            <h4 className="font-medium text-neutral-900 dark:text-white mb-2">
               General Rules
             </h4>
             <ul className="list-disc list-inside space-y-1">
@@ -98,7 +98,7 @@ export default function ImportPage() {
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-slate-900 dark:text-white mb-2">
+            <h4 className="font-medium text-neutral-900 dark:text-white mb-2">
               Best Practices
             </h4>
             <ul className="list-disc list-inside space-y-1">

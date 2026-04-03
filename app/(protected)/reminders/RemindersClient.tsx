@@ -17,13 +17,13 @@ type Item = { type: 'reminder'; data: Reminder } | { type: 'task'; data: Task }
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Follow-up':        'bg-gold-100 text-gold-600',
+  'Follow-up':        'bg-gold-100 text-primary-600',
   'Board Meeting':    'bg-blue-100 text-blue-700',
   'Report Due':       'bg-amber-100 text-amber-700',
   'KPI Review':       'bg-emerald-100 text-emerald-700',
   'Contract Renewal': 'bg-orange-100 text-orange-700',
   'Call':             'bg-cyan-100 text-cyan-700',
-  'Other':            'bg-slate-100 text-slate-700',
+  'Other':            'bg-neutral-100 text-neutral-800',
 }
 
 type Status = 'overdue' | 'today' | 'upcoming' | 'completed'
@@ -78,16 +78,16 @@ function ReminderRow({
 
   const dueBadge = status === 'overdue'   ? `bg-red-100 text-red-700`
                  : status === 'today'     ? `bg-amber-100 text-amber-700`
-                 : status === 'completed' ? `bg-slate-100 text-slate-400`
+                 : status === 'completed' ? `bg-neutral-100 text-neutral-500`
                  : `bg-blue-50 text-blue-600`
 
   const dotColor = status === 'overdue'   ? 'bg-red-400'
                  : status === 'today'     ? 'bg-amber-400'
-                 : status === 'completed' ? 'bg-slate-200'
+                 : status === 'completed' ? 'bg-neutral-200'
                  : 'bg-blue-400'
 
   return (
-    <div className={`flex items-start gap-4 px-5 py-4 group hover:bg-slate-50/60 transition-colors ${reminder.completed ? 'opacity-60' : ''}`}>
+    <div className={`flex items-start gap-4 px-5 py-4 group hover:bg-neutral-50/60 transition-colors ${reminder.completed ? 'opacity-60' : ''}`}>
       {/* Status dot */}
       <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dotColor}`} />
 
@@ -97,7 +97,7 @@ function ReminderRow({
         className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors mt-0.5 ${
           reminder.completed
             ? 'bg-emerald-500 border-emerald-500 text-white'
-            : 'border-slate-300 hover:border-gold-300'
+            : 'border-neutral-300 hover:border-gold-300'
         }`}
       >
         {reminder.completed && <Check size={10} />}
@@ -106,17 +106,17 @@ function ReminderRow({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2 flex-wrap">
-          <p className={`text-sm font-semibold ${reminder.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+          <p className={`text-sm font-semibold ${reminder.completed ? 'line-through text-neutral-500' : 'text-neutral-900'}`}>
             {reminder.title}
           </p>
-          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${CATEGORY_COLORS[reminder.category] ?? 'bg-slate-100 text-slate-600'}`}>
+          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${CATEGORY_COLORS[reminder.category] ?? 'bg-neutral-100 text-neutral-700'}`}>
             {reminder.category}
           </span>
         </div>
 
         <div className="flex items-center gap-3 mt-1 flex-wrap">
           {companyName && (
-            <span className="text-xs text-gold-500 font-medium">{companyName}</span>
+            <span className="text-xs text-primary-500 font-medium">{companyName}</span>
           )}
           <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${dueBadge}`}>
             {status === 'overdue'
@@ -126,7 +126,7 @@ function ReminderRow({
         </div>
 
         {reminder.notes && (
-          <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{reminder.notes}</p>
+          <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{reminder.notes}</p>
         )}
       </div>
 
@@ -134,13 +134,13 @@ function ReminderRow({
       <div className="flex-shrink-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onEdit}
-          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
         >
           <Pencil size={13} />
         </button>
         <button
           onClick={onDelete}
-          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
         >
           <Trash2 size={13} />
         </button>
@@ -169,16 +169,16 @@ function TaskRow({
 
   const dueBadge = status === 'overdue'   ? `bg-red-100 text-red-700`
                  : status === 'today'     ? `bg-amber-100 text-amber-700`
-                 : status === 'completed' ? `bg-slate-100 text-slate-400`
+                 : status === 'completed' ? `bg-neutral-100 text-neutral-500`
                  : `bg-blue-50 text-blue-600`
 
   const dotColor = status === 'overdue'   ? 'bg-red-400'
                  : status === 'today'     ? 'bg-amber-400'
-                 : status === 'completed' ? 'bg-slate-200'
+                 : status === 'completed' ? 'bg-neutral-200'
                  : 'bg-blue-400'
 
   return (
-    <div className={`flex items-start gap-4 px-5 py-4 group hover:bg-slate-50/60 transition-colors ${isCompleted ? 'opacity-60' : ''}`}>
+    <div className={`flex items-start gap-4 px-5 py-4 group hover:bg-neutral-50/60 transition-colors ${isCompleted ? 'opacity-60' : ''}`}>
       {/* Status dot */}
       <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dotColor}`} />
 
@@ -188,7 +188,7 @@ function TaskRow({
         className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors mt-0.5 ${
           isCompleted
             ? 'bg-emerald-500 border-emerald-500 text-white'
-            : 'border-slate-300 hover:border-gold-300'
+            : 'border-neutral-300 hover:border-gold-300'
         }`}
       >
         {isCompleted && <Check size={10} />}
@@ -197,17 +197,17 @@ function TaskRow({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2 flex-wrap">
-          <p className={`text-sm font-semibold ${isCompleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+          <p className={`text-sm font-semibold ${isCompleted ? 'line-through text-neutral-500' : 'text-neutral-900'}`}>
             {task.title}
           </p>
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-gold-100 text-gold-600">
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 bg-gold-100 text-primary-600">
             Task
           </span>
         </div>
 
         <div className="flex items-center gap-3 mt-1 flex-wrap">
           {companyName && (
-            <span className="text-xs text-gold-500 font-medium">{companyName}</span>
+            <span className="text-xs text-primary-500 font-medium">{companyName}</span>
           )}
           {task.priority && (
             <TaskPriorityBadge priority={task.priority} />
@@ -222,7 +222,7 @@ function TaskRow({
         </div>
 
         {task.description && (
-          <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{task.description}</p>
+          <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{task.description}</p>
         )}
       </div>
 
@@ -230,7 +230,7 @@ function TaskRow({
       <div className="flex-shrink-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onDelete}
-          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
         >
           <Trash2 size={13} />
         </button>
@@ -320,10 +320,10 @@ export default function RemindersClient({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Reminders & Tasks</h1>
-          <p className="text-sm text-slate-400 mt-0.5">Deadlines, follow-ups, and task items all in one place</p>
+          <p className="text-sm text-neutral-500 mt-0.5">Deadlines, follow-ups, and task items all in one place</p>
         </div>
         <Button onClick={() => setShowAdd(true)}>
           <Plus size={15} /> Add Reminder
@@ -338,17 +338,17 @@ export default function RemindersClient({
           { label: 'Overdue',   count: counts.overdue,   color: 'text-red-600',     bg: 'bg-red-50   border-red-200',   icon: <AlertCircle size={14} className="text-red-400" /> },
           { label: 'Today',     count: counts.today,     color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-200', icon: <Bell size={14} className="text-amber-400" /> },
           { label: 'Upcoming',  count: counts.upcoming,  color: 'text-blue-600',    bg: 'bg-blue-50  border-blue-200',  icon: <Clock size={14} className="text-blue-400" /> },
-          { label: 'Completed', count: counts.completed, color: 'text-emerald-600', bg: 'bg-white    border-slate-200', icon: <Check size={14} className="text-emerald-400" /> },
+          { label: 'Completed', count: counts.completed, color: 'text-emerald-600', bg: 'bg-white    border-neutral-200', icon: <Check size={14} className="text-emerald-400" /> },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl border px-4 py-3 ${s.bg}`}>
-            <div className="flex items-center gap-1.5 mb-1">{s.icon}<p className="text-xs text-slate-500 font-medium">{s.label}</p></div>
+          <div key={s.label} className={`rounded-lg border px-4 py-3 ${s.bg}`}>
+            <div className="flex items-center gap-1.5 mb-1">{s.icon}<p className="text-xs text-neutral-600 font-medium">{s.label}</p></div>
             <p className={`text-2xl font-bold ${s.color}`}>{s.count}</p>
           </div>
         ))}
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-card ring-1 ring-black/[0.04] w-fit">
+      <div className="flex gap-1 mb-4 bg-white rounded-lg p-1 shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 w-fit">
         {FILTERS.map(({ value, label }) => {
           const count = value === 'all'
             ? counts.overdue + counts.today + counts.upcoming
@@ -360,7 +360,7 @@ export default function RemindersClient({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 filter === value
                   ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-neutral-600 hover:text-neutral-800'
               }`}
             >
               {label}
@@ -370,7 +370,7 @@ export default function RemindersClient({
                     ? 'bg-white/20 text-white'
                     : value === 'overdue' ? 'bg-red-100 text-red-600'
                     : value === 'today'   ? 'bg-amber-100 text-amber-600'
-                    : 'bg-slate-100 text-slate-500'
+                    : 'bg-neutral-100 text-neutral-600'
                 }`}>
                   {count}
                 </span>
@@ -384,7 +384,7 @@ export default function RemindersClient({
       {filtered.length === 0 ? (
         <div className="card px-5 py-16 text-center">
           <CalendarDays size={24} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-sm text-slate-400 mb-4">
+          <p className="text-sm text-neutral-500 mb-4">
             {filter === 'all' ? 'No active reminders or tasks.' : `No ${filter} reminders or tasks.`}
           </p>
           <Button onClick={() => setShowAdd(true)} variant="secondary">

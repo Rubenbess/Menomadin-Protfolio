@@ -120,17 +120,17 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
     { id: 'tasks',       label: 'Tasks',         count: tasks.length },
   ]
 
-  const th = 'px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider text-left'
+  const th = 'px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-left'
   const td = 'px-5 py-3.5'
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Back + header */}
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex-1">
           <Link
             href="/companies"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mb-3"
+            className="inline-flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-slate-300 transition-colors mb-3"
           >
             <ArrowLeft size={14} /> Companies
           </Link>
@@ -142,7 +142,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <Badge value={company.status} />
                 <Badge value={company.strategy} type="strategy" />
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-sm text-neutral-600 dark:text-neutral-500 mt-2">
                 {company.sector}{company.hq ? ` · ${company.hq}` : ''}
               </p>
             </div>
@@ -186,13 +186,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             }`}
           >
             <p className="section-title">{label}</p>
-            <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-white">{value}</p>
+            <p className="mt-1.5 text-xl font-bold text-neutral-900 dark:text-white">{value}</p>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-200 mb-6">
+      <div className="border-b border-neutral-200 mb-6">
         <nav className="flex gap-0.5 -mb-px">
           {tabs.map((tab) => (
             <button
@@ -200,13 +200,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-gold-500 text-gold-500'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  ? 'border-primary-500 text-primary-500'
+                  : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
               }`}
             >
               {tab.label}
               {tab.count !== undefined && tab.count > 0 && (
-                <span className="ml-1.5 text-xs bg-slate-100 text-slate-500 rounded-full px-1.5 py-0.5">
+                <span className="ml-1.5 text-xs bg-neutral-100 text-neutral-600 rounded-full px-1.5 py-0.5">
                   {tab.count}
                 </span>
               )}
@@ -222,14 +222,14 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {activeTab === 'overview' && (
           <div className="p-6 space-y-6">
             {company.description && (
-              <div className="pb-5 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">About</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{company.description}</p>
+              <div className="pb-5 border-b border-neutral-200">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">About</p>
+                <p className="text-sm text-neutral-800 leading-relaxed">{company.description}</p>
               </div>
             )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900">Company Details</h3>
+              <h3 className="text-sm font-semibold text-neutral-900">Company Details</h3>
               {[
                 { label: 'Name',     value: company.name },
                 { label: 'Sector',   value: company.sector },
@@ -239,53 +239,53 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 { label: 'Entry Stage', value: company.entry_stage || '—' },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                  <p className="text-sm text-slate-900 capitalize">{value}</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                  <p className="text-sm text-neutral-900 capitalize">{value}</p>
                 </div>
               ))}
 
               {/* Menomadin ownership info */}
-              <div className="pt-4 border-t border-slate-100 space-y-4">
-                <h3 className="text-sm font-semibold text-slate-900">Menomadin</h3>
+              <div className="pt-4 border-t border-neutral-200 space-y-4">
+                <h3 className="text-sm font-semibold text-neutral-900">Menomadin</h3>
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Investment Owner</p>
-                  <p className="text-sm text-slate-900">{company.investment_owner || '—'}</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">Investment Owner</p>
+                  <p className="text-sm text-neutral-900">{company.investment_owner || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Board Representation</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Board Representation</p>
                   {company.board_seat ? (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                       company.board_seat === 'Board Seat'
-                        ? 'bg-gold-100 text-gold-600 ring-1 ring-violet-200'
+                        ? 'bg-gold-100 text-primary-600 ring-1 ring-violet-200'
                         : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
                     }`}>
                       {company.board_seat}
                     </span>
                   ) : (
-                    <span className="text-sm text-slate-400">No seat</span>
+                    <span className="text-sm text-neutral-500">No seat</span>
                   )}
                 </div>
               </div>
 
               {/* Co-investors */}
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <h3 className="text-sm font-semibold text-slate-900">Co-investors</h3>
+              <div className="pt-4 border-t border-neutral-200 space-y-3">
+                <h3 className="text-sm font-semibold text-neutral-900">Co-investors</h3>
                 {company.co_investors && company.co_investors.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {company.co_investors.map((inv, i) => (
-                      <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+                      <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800 ring-1 ring-slate-200">
                         {inv}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">—</p>
+                  <p className="text-sm text-neutral-500">—</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900">Investment Summary</h3>
+              <h3 className="text-sm font-semibold text-neutral-900">Investment Summary</h3>
               {[
                 { label: 'Total Invested', value: fmt$$(totalInvested) },
                 { label: 'Ownership %',    value: ownershipPct > 0 ? fmtPct(ownershipPct) : '—' },
@@ -299,15 +299,15 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 { label: 'MOIC',              value: moic > 0 ? fmtMultiple(moic) : '—' },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                  <p className="text-sm font-medium text-slate-900">{value}</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                  <p className="text-sm font-medium text-neutral-900">{value}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Health Score */}
-          <div className="pt-4 border-t border-slate-100">
+          <div className="pt-4 border-t border-neutral-200">
             <HealthScoreBreakdown score={healthScore} />
           </div>
           </div>
@@ -354,8 +354,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
           return (
             <div>
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 className="text-sm font-semibold text-slate-900">Investment History</h3>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                <h3 className="text-sm font-semibold text-neutral-900">Investment History</h3>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" onClick={() => setShowAddInvestment(true)}><Plus size={13} /> Add Investment</Button>
                   <Button size="sm" variant="secondary" onClick={() => { setEditingSafe(null); setShowAddSafe(true) }}><Plus size={13} /> Add SAFE</Button>
@@ -389,8 +389,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                               {/* SAFE label */}
                               <div className="sm:w-36 flex-shrink-0">
-                                <p className="text-sm font-bold text-slate-900">SAFE</p>
-                                <p className="text-xs text-slate-400 mt-0.5">{fmtDate(safe.date)}</p>
+                                <p className="text-sm font-bold text-neutral-900">SAFE</p>
+                                <p className="text-xs text-neutral-500 mt-0.5">{fmtDate(safe.date)}</p>
                                 <span className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                                   safe.status === 'converted'
                                     ? 'bg-emerald-100 text-emerald-700'
@@ -410,8 +410,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                   { label: 'Est. Ownership', value: estOwnership > 0 ? fmtPct(estOwnership) : '—', accent: estOwnership > 0 },
                                 ].map(({ label, value, highlight, accent }) => (
                                   <div key={label}>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                                    <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-gold-600' : 'text-slate-900'}`}>{value}</p>
+                                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                                    <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-primary-600' : 'text-neutral-900'}`}>{value}</p>
                                   </div>
                                 ))}
                               </div>
@@ -421,7 +421,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 <div className="flex items-center gap-1 justify-end">
                                   <button
                                     onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-gold-500 hover:bg-gold-50 rounded-lg transition-all"
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
                                   ><Pencil size={12} /></button>
                                   <button
                                     onClick={async e => {
@@ -430,7 +430,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                       await deleteSafe(safe.id)
                                       router.refresh()
                                     }}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                   ><Trash2 size={12} /></button>
                                 </div>
                                 {safe.status === 'unconverted' && (
@@ -460,10 +460,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                             {/* Round label */}
                             <div className="sm:w-36 flex-shrink-0">
-                              <p className="text-sm font-bold text-slate-900">{round.type}</p>
-                              <p className="text-xs text-slate-400 mt-0.5">{fmtDate(round.date)}</p>
+                              <p className="text-sm font-bold text-neutral-900">{round.type}</p>
+                              <p className="text-xs text-neutral-500 mt-0.5">{fmtDate(round.date)}</p>
                               {instrument && (
-                                <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gold-50 text-gold-600 ring-1 ring-violet-200">
+                                <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gold-50 text-primary-600 ring-1 ring-violet-200">
                                   {instrument}
                                 </span>
                               )}
@@ -480,16 +480,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 { label: 'FMV',            value: fmv != null ? fmt$$(fmv) : '—', accent: true },
                               ].map(({ label, value, highlight, accent }) => (
                                 <div key={label}>
-                                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                                  <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-gold-600' : 'text-slate-900'}`}>{value}</p>
+                                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                                  <p className={`text-sm font-medium ${accent ? 'text-emerald-600' : highlight ? 'text-primary-600' : 'text-neutral-900'}`}>{value}</p>
                                 </div>
                               ))}
                             </div>
 
                             {/* MOIC */}
                             <div className="sm:text-right flex-shrink-0">
-                              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">MOIC</p>
-                              <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-slate-400'}`}>
+                              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">MOIC</p>
+                              <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-neutral-500'}`}>
                                 {moic != null ? fmtMultiple(moic) : '—'}
                               </p>
                             </div>
@@ -497,14 +497,14 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
                           {/* Investment line items for this round */}
                           {roundInvs.length > 0 && (
-                            <div className="mt-3 ml-0 sm:ml-40 border-t border-slate-100 pt-3 space-y-1.5">
+                            <div className="mt-3 ml-0 sm:ml-40 border-t border-neutral-200 pt-3 space-y-1.5">
                               {roundInvs.map(inv => (
                                 <div key={inv.id} className="flex items-center justify-between group">
-                                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                                  <div className="flex items-center gap-3 text-xs text-neutral-600">
                                     <span>{fmtDate(inv.date)}</span>
-                                    <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
-                                    <span className="px-2 py-0.5 rounded-full bg-gold-50 text-gold-600 ring-1 ring-violet-200">{inv.instrument}</span>
-                                    {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
+                                    <span className="font-semibold text-neutral-800">{fmt$$(inv.amount)}</span>
+                                    <span className="px-2 py-0.5 rounded-full bg-gold-50 text-primary-600 ring-1 ring-violet-200">{inv.instrument}</span>
+                                    {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                                   </div>
                                   <button
                                     onClick={() => handleDeleteInvestment(inv.id)}
@@ -521,16 +521,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
                   {/* Investments not linked to any round */}
                   {unlinkedInvs.length > 0 && (
-                    <div className="border-t border-slate-200 px-5 py-4">
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Other Investments (no round)</p>
+                    <div className="border-t border-neutral-200 px-5 py-4">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Other Investments (no round)</p>
                       <div className="space-y-2">
                         {unlinkedInvs.map(inv => (
                           <div key={inv.id} className="flex items-center justify-between group">
-                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                            <div className="flex items-center gap-3 text-xs text-neutral-600">
                               <span>{fmtDate(inv.date)}</span>
-                              <span className="font-semibold text-slate-700">{fmt$$(inv.amount)}</span>
-                              <span className="px-2 py-0.5 rounded-full bg-gold-50 text-gold-600 ring-1 ring-violet-200">{inv.instrument}</span>
-                              {inv.valuation_cap && <span className="text-slate-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
+                              <span className="font-semibold text-neutral-800">{fmt$$(inv.amount)}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-gold-50 text-primary-600 ring-1 ring-violet-200">{inv.instrument}</span>
+                              {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
                             <button
                               onClick={() => handleDeleteInvestment(inv.id)}
@@ -550,10 +550,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {/* CAP TABLE */}
         {activeTab === 'captable' && (
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Cap Table</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <h3 className="text-sm font-semibold text-neutral-900">Cap Table</h3>
+                <p className="text-xs text-neutral-500 mt-0.5">
                   Add the fund&apos;s entry last — it will be used for ownership calculations.
                 </p>
               </div>
@@ -567,7 +567,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70">
+                    <tr className="border-b border-neutral-200 bg-neutral-50/70">
                       {['Shareholder', 'Ownership %', ''].map((h) => (
                         <th key={h} className={th}>{h}</th>
                       ))}
@@ -575,13 +575,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {capTable.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-slate-50/60 group transition-colors">
-                        <td className={td + ' font-medium text-slate-900'}>{entry.shareholder_name}</td>
-                        <td className={td + ' text-slate-600'}>{fmtPct(entry.ownership_percentage)}</td>
+                      <tr key={entry.id} className="hover:bg-neutral-50/60 group transition-colors">
+                        <td className={td + ' font-medium text-neutral-900'}>{entry.shareholder_name}</td>
+                        <td className={td + ' text-neutral-700'}>{fmtPct(entry.ownership_percentage)}</td>
                         <td className={td + ' text-right'}>
                           <button
                             onClick={() => handleDeleteCapTable(entry.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                           >
                             <Trash2 size={13} />
                           </button>
@@ -609,8 +609,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           ]
           return (
             <div>
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 className="text-sm font-semibold text-slate-900">KPI Snapshots</h3>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+                <h3 className="text-sm font-semibold text-neutral-900">KPI Snapshots</h3>
                 <Button size="sm" onClick={() => setShowAddKPI(true)}><Plus size={13} /> Add Snapshot</Button>
               </div>
 
@@ -624,29 +624,29 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
               {/* Latest values */}
               {latest && (
                 <div className="px-5 pt-4 pb-2">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
                     Latest — {fmtDate(latest.date)}
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {KPI_META.map(({ key, label, fmt }) => {
                       const val = latest[key as keyof CompanyKPI] as number | null
                       return val != null ? (
-                        <div key={key} className="bg-slate-50 rounded-xl px-4 py-3 ring-1 ring-slate-200">
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                          <p className="text-sm font-bold text-slate-900">{fmt(val)}</p>
+                        <div key={key} className="bg-neutral-50 rounded-lg px-4 py-3 ring-1 ring-slate-200">
+                          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                          <p className="text-sm font-bold text-neutral-900">{fmt(val)}</p>
                         </div>
                       ) : null
                     })}
                     {/* Custom KPIs from latest snapshot */}
                     {latest.custom_kpis && Object.entries(latest.custom_kpis).map(([k, v]) => (
-                      <div key={k} className="bg-gold-50 rounded-xl px-4 py-3 ring-1 ring-gold-100">
+                      <div key={k} className="bg-gold-50 rounded-lg px-4 py-3 ring-1 ring-gold-100">
                         <p className="text-xs font-semibold text-gold-300 uppercase tracking-wider mb-0.5">{k}</p>
-                        <p className="text-sm font-bold text-slate-900">{v}</p>
+                        <p className="text-sm font-bold text-neutral-900">{v}</p>
                       </div>
                     ))}
                   </div>
                   {latest.notes && (
-                    <p className="mt-3 text-sm text-slate-500 italic">{latest.notes}</p>
+                    <p className="mt-3 text-sm text-neutral-600 italic">{latest.notes}</p>
                   )}
                 </div>
               )}
@@ -658,7 +658,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <div className="overflow-x-auto mt-4">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/70">
+                      <tr className="border-b border-neutral-200 bg-neutral-50/70">
                         {['Date', 'Revenue', 'ARR', 'Run Rate', 'Burn/mo', 'Runway', 'HC', 'GM%', ''].map(h => (
                           <th key={h} className={th}>{h}</th>
                         ))}
@@ -666,19 +666,19 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {kpis.map(k => (
-                        <tr key={k.id} className="hover:bg-slate-50/60 group transition-colors">
-                          <td className={td + ' text-slate-500 font-medium'}>{fmtDate(k.date)}</td>
-                          <td className={td + ' text-slate-700'}>{k.revenue != null ? fmt$$(k.revenue) : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.arr != null ? fmt$$(k.arr) : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.run_rate != null ? fmt$$(k.run_rate) : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.burn_rate != null ? fmt$$(k.burn_rate) : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.cash_runway != null ? `${k.cash_runway} mo` : '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.headcount ?? '—'}</td>
-                          <td className={td + ' text-slate-700'}>{k.gross_margin != null ? fmtPct(k.gross_margin) : '—'}</td>
+                        <tr key={k.id} className="hover:bg-neutral-50/60 group transition-colors">
+                          <td className={td + ' text-neutral-600 font-medium'}>{fmtDate(k.date)}</td>
+                          <td className={td + ' text-neutral-800'}>{k.revenue != null ? fmt$$(k.revenue) : '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.arr != null ? fmt$$(k.arr) : '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.run_rate != null ? fmt$$(k.run_rate) : '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.burn_rate != null ? fmt$$(k.burn_rate) : '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.cash_runway != null ? `${k.cash_runway} mo` : '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.headcount ?? '—'}</td>
+                          <td className={td + ' text-neutral-800'}>{k.gross_margin != null ? fmtPct(k.gross_margin) : '—'}</td>
                           <td className={td + ' text-right'}>
                             <button
                               onClick={async () => { if (confirm('Delete this snapshot?')) { await deleteKPI(k.id); router.refresh() } }}
-                              className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                             ><Trash2 size={13} /></button>
                           </td>
                         </tr>
@@ -694,8 +694,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {/* UPDATES */}
         {activeTab === 'updates' && (
           <div>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900">Updates & Milestones</h3>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+              <h3 className="text-sm font-semibold text-neutral-900">Updates & Milestones</h3>
               <Button size="sm" onClick={() => setShowAddUpdate(true)}><Plus size={13} /> Add Update</Button>
             </div>
             {updates.length === 0 ? (
@@ -706,25 +706,25 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   <div key={u.id} className="flex gap-4 group">
                     {/* Timeline line */}
                     <div className="flex flex-col items-center flex-shrink-0">
-                      <div className="w-2.5 h-2.5 rounded-full bg-gold-500 mt-1.5 flex-shrink-0 ring-2 ring-white" />
-                      {i < updates.length - 1 && <div className="w-px flex-1 bg-slate-200 my-1" />}
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary-500 mt-1.5 flex-shrink-0 ring-2 ring-white" />
+                      {i < updates.length - 1 && <div className="w-px flex-1 bg-neutral-200 my-1" />}
                     </div>
                     {/* Content */}
                     <div className="pb-5 flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[u.category] ?? 'bg-slate-100 text-slate-700'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[u.category] ?? 'bg-neutral-100 text-neutral-800'}`}>
                             {u.category}
                           </span>
-                          <span className="text-xs text-slate-400">{fmtDate(u.date)}</span>
+                          <span className="text-xs text-neutral-500">{fmtDate(u.date)}</span>
                         </div>
                         <button
                           onClick={async () => { if (confirm('Delete this update?')) { await deleteUpdate(u.id); router.refresh() } }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-all flex-shrink-0"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-red-500 rounded transition-all flex-shrink-0"
                         ><Trash2 size={12} /></button>
                       </div>
-                      <p className="text-sm font-semibold text-slate-900 mb-0.5">{u.title}</p>
-                      {u.notes && <p className="text-sm text-slate-500 leading-relaxed">{u.notes}</p>}
+                      <p className="text-sm font-semibold text-neutral-900 mb-0.5">{u.title}</p>
+                      {u.notes && <p className="text-sm text-neutral-600 leading-relaxed">{u.notes}</p>}
                     </div>
                   </div>
                 ))}
@@ -748,15 +748,15 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             ) : (
               <div className="space-y-3">
                 {tasks.map(task => (
-                  <div key={task.id} className="flex items-start justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:border-violet-200 transition-colors">
+                  <div key={task.id} className="flex items-start justify-between p-3 rounded-lg bg-neutral-50 border border-neutral-200 hover:border-violet-200 transition-colors">
                     <div className="flex-1">
-                      <p className="font-medium text-sm text-slate-900">{task.title}</p>
+                      <p className="font-medium text-sm text-neutral-900">{task.title}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-xs px-2 py-0.5 rounded ${
-                          task.status === 'To do' ? 'bg-slate-100 text-slate-600' :
+                          task.status === 'To do' ? 'bg-neutral-100 text-neutral-700' :
                           task.status === 'In progress' ? 'bg-blue-100 text-blue-600' :
                           task.status === 'Done' ? 'bg-emerald-100 text-emerald-600' :
-                          'bg-slate-100 text-slate-600'
+                          'bg-neutral-100 text-neutral-700'
                         }`}>
                           {task.status}
                         </span>
@@ -768,11 +768,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                           {task.priority}
                         </span>
                         {task.due_date && (
-                          <span className="text-xs text-slate-500">{new Date(task.due_date).toLocaleDateString()}</span>
+                          <span className="text-xs text-neutral-600">{new Date(task.due_date).toLocaleDateString()}</span>
                         )}
                       </div>
                     </div>
-                    <Link href="/tasks" className="text-xs text-gold-500 hover:text-gold-600 font-medium">
+                    <Link href="/tasks" className="text-xs text-primary-500 hover:text-primary-600 font-medium">
                       View
                     </Link>
                   </div>

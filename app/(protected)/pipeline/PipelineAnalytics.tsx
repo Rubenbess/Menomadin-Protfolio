@@ -86,15 +86,15 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
     count: visible.filter(e => e.internal_score === i).length,
   }))
 
-  const card = 'bg-white rounded-2xl p-6 border border-slate-100'
+  const card = 'bg-white rounded-lg p-6 border border-neutral-200'
 
   return (
     <div className="space-y-4">
 
       {/* Stage funnel */}
       <div className={card}>
-        <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Pipeline Funnel</h3>
-        <p className="text-xs text-slate-400 mb-4">Deals per stage</p>
+        <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Pipeline Funnel</h3>
+        <p className="text-xs text-neutral-500 mb-4">Deals per stage</p>
         <div className="flex items-end gap-1.5">
           {stages.map((s, i) => {
             const count = entries.filter(e => e.status === s.name).length
@@ -102,12 +102,12 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
             const pct = (count / max) * 100
             return (
               <div key={s.id} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-xs font-bold text-slate-700">{count}</span>
+                <span className="text-xs font-bold text-neutral-800">{count}</span>
                 <div
                   className="w-full rounded-t-lg transition-all"
                   style={{ height: Math.max(pct * 1.6, 4), background: COLORS[i % COLORS.length] }}
                 />
-                <span className="text-[10px] text-slate-400 text-center leading-tight" style={{ width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span className="text-[10px] text-neutral-500 text-center leading-tight" style={{ width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {s.name}
                 </span>
               </div>
@@ -121,8 +121,8 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
         {/* Source breakdown */}
         {sourceData.length > 0 && (
           <div className={card}>
-            <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Deal Sources</h3>
-            <p className="text-xs text-slate-400 mb-4">Where deals come from</p>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Deal Sources</h3>
+            <p className="text-xs text-neutral-500 mb-4">Where deals come from</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={sourceData} layout="vertical" barCategoryGap="25%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
                 <CartesianGrid horizontal={false} stroke="#f1f5f9" />
@@ -140,8 +140,8 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
         {/* Sector breakdown */}
         {sectorData.length > 0 && (
           <div className={card}>
-            <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Sectors in Pipeline</h3>
-            <p className="text-xs text-slate-400 mb-4">Deal count by sector</p>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Sectors in Pipeline</h3>
+            <p className="text-xs text-neutral-500 mb-4">Deal count by sector</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={sectorData} layout="vertical" barCategoryGap="25%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
                 <CartesianGrid horizontal={false} stroke="#f1f5f9" />
@@ -159,8 +159,8 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
         {/* Avg days per stage */}
         {avgDaysByStage.length > 0 && (
           <div className={card}>
-            <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Avg. Days Active</h3>
-            <p className="text-xs text-slate-400 mb-4">Average time deals spend per stage</p>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Avg. Days Active</h3>
+            <p className="text-xs text-neutral-500 mb-4">Average time deals spend per stage</p>
             <ResponsiveContainer width="100%" height={Math.max(avgDaysByStage.length * 32 + 20, 120)}>
               <BarChart data={avgDaysByStage} layout="vertical" barCategoryGap="25%" margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
                 <CartesianGrid horizontal={false} stroke="#f1f5f9" />
@@ -177,8 +177,8 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
         {/* Score distribution */}
         {visible.some(e => e.internal_score) && (
           <div className={card}>
-            <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Internal Score Distribution</h3>
-            <p className="text-xs text-slate-400 mb-4">How deals are rated by the team</p>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Internal Score Distribution</h3>
+            <p className="text-xs text-neutral-500 mb-4">How deals are rated by the team</p>
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={scoreDist} barCategoryGap="35%" margin={{ top: 0, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#f1f5f9" />
@@ -199,8 +199,8 @@ export default function PipelineAnalytics({ entries, stages }: Props) {
       {/* Avg ask by stage */}
       {askByStage.length > 0 && (
         <div className={card}>
-          <h3 className="text-sm font-semibold text-slate-900 mb-0.5">Avg. Fundraising Ask by Stage</h3>
-          <p className="text-xs text-slate-400 mb-4">For deals with a declared fundraising amount</p>
+          <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Avg. Fundraising Ask by Stage</h3>
+          <p className="text-xs text-neutral-500 mb-4">For deals with a declared fundraising amount</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={askByStage} barCategoryGap="35%" margin={{ top: 0, right: 4, left: 8, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="#f1f5f9" />

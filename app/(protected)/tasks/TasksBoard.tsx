@@ -20,7 +20,7 @@ import type { Task, TaskStatus, TaskWithRelations } from '@/lib/types'
 import { isTaskOverdue, formatDueDate } from '@/lib/task-utils'
 
 const STATUS_COLORS: Record<TaskStatus, { header: string; dot: string }> = {
-  'To do': { header: 'bg-slate-100 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
+  'To do': { header: 'bg-neutral-100 text-neutral-800 border-neutral-200', dot: 'bg-slate-400' },
   'In progress': { header: 'bg-blue-100 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
   'Waiting': { header: 'bg-amber-100 text-amber-700 border-amber-200', dot: 'bg-amber-400' },
   'Done': { header: 'bg-emerald-100 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
@@ -50,8 +50,8 @@ function TaskCard({ task, isDragging, onView, onEdit, onDelete }: TaskCardProps)
       ref={setNodeRef}
       style={style}
       onClick={() => onView(task)}
-      className={`bg-white rounded-xl border border-slate-200 p-3 shadow-card group cursor-pointer transition-shadow ${
-        isDragging ? 'opacity-40' : 'hover:shadow-card-hover hover:border-violet-200'
+      className={`bg-white rounded-lg border border-neutral-200 p-3 shadow-sm dark:shadow-md group cursor-pointer transition-shadow ${
+        isDragging ? 'opacity-40' : 'hover:shadow-sm dark:shadow-md-hover hover:border-violet-200'
       }`}
     >
       <div className="flex items-start gap-2">
@@ -59,13 +59,13 @@ function TaskCard({ task, isDragging, onView, onEdit, onDelete }: TaskCardProps)
           {...listeners}
           {...attributes}
           onClick={e => e.stopPropagation()}
-          className="mt-0.5 text-slate-300 hover:text-slate-500 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+          className="mt-0.5 text-slate-300 hover:text-neutral-600 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
         >
           <GripVertical size={14} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-900 truncate">{task.title}</p>
+          <p className="text-sm font-semibold text-neutral-900 truncate">{task.title}</p>
 
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             <TaskPriorityBadge priority={task.priority} size="sm" />
@@ -73,7 +73,7 @@ function TaskCard({ task, isDragging, onView, onEdit, onDelete }: TaskCardProps)
               <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${
                 overdue
                   ? 'bg-red-100 text-red-700'
-                  : 'bg-slate-100 text-slate-600'
+                  : 'bg-neutral-100 text-neutral-700'
               }`}>
                 {formatDueDate(task)}
               </span>
@@ -81,7 +81,7 @@ function TaskCard({ task, isDragging, onView, onEdit, onDelete }: TaskCardProps)
           </div>
 
           {task.assignees && task.assignees.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-slate-100">
+            <div className="mt-2 pt-2 border-t border-neutral-200">
               <TaskAssigneesStack assignees={task.assignees} />
             </div>
           )}
@@ -93,13 +93,13 @@ function TaskCard({ task, isDragging, onView, onEdit, onDelete }: TaskCardProps)
         >
           <button
             onClick={() => onEdit(task)}
-            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onDelete(task.id, task.title)}
-            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 size={12} />
           </button>
@@ -133,7 +133,7 @@ function Column({
 
   return (
     <div className="flex-shrink-0 w-72 flex flex-col">
-      <div className={`rounded-xl border px-3 py-2.5 mb-2 flex items-center justify-between ${colors.header}`}>
+      <div className={`rounded-lg border px-3 py-2.5 mb-2 flex items-center justify-between ${colors.header}`}>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${colors.dot}`} />
           <span className="text-sm font-semibold truncate">{status}</span>
@@ -150,7 +150,7 @@ function Column({
 
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-col gap-2 min-h-24 rounded-xl p-1.5 transition-colors ${
+        className={`flex-1 flex flex-col gap-2 min-h-24 rounded-lg p-1.5 transition-colors ${
           isOver ? 'bg-gold-50 ring-2 ring-violet-200 ring-dashed' : ''
         }`}
       >
@@ -168,7 +168,7 @@ function Column({
         {tasks.length === 0 && !isOver && (
           <button
             onClick={() => onAddTask(status)}
-            className="flex items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 text-xs text-slate-400 hover:border-gold-200 hover:text-gold-500 transition-colors"
+            className="flex items-center justify-center gap-1.5 p-3 rounded-lg border-2 border-dashed border-neutral-200 text-xs text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
           >
             <Plus size={12} /> Add task
           </button>
@@ -267,10 +267,10 @@ export default function TasksBoard({ groupedTasks, onTaskClick, onTaskCreate, on
 
       <DragOverlay>
         {activeTask && (
-          <div className="bg-white rounded-xl border border-gold-200 shadow-xl p-3 w-72 rotate-2 opacity-95">
-            <p className="text-sm font-semibold text-slate-900">{activeTask.title}</p>
+          <div className="bg-white rounded-lg border border-gold-200 shadow-xl p-3 w-72 rotate-2 opacity-95">
+            <p className="text-sm font-semibold text-neutral-900">{activeTask.title}</p>
             {activeTask.priority && (
-              <p className="text-xs text-slate-400 mt-0.5">Priority: {activeTask.priority}</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Priority: {activeTask.priority}</p>
             )}
           </div>
         )}

@@ -40,13 +40,13 @@ export default async function TaskAutomationsPage() {
       <div className="page-header mb-8">
         <Link
           href="/tasks"
-          className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-4 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-slate-300 mb-4 transition-colors"
         >
           <ChevronLeft size={16} />
           Back to Tasks
         </Link>
         <h1 className="page-title">Task Automations</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
+        <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">
           Set up rules to automatically create tasks, notify teams, and manage your workflow
         </p>
       </div>

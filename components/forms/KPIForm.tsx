@@ -12,8 +12,8 @@ interface Props {
   onClose: () => void
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 // Standard fields always shown
 const STANDARD_FIELDS = [
@@ -106,7 +106,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
 
       {/* Standard fields */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Standard Metrics</p>
+        <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Standard Metrics</p>
         <div className="grid grid-cols-2 gap-3">
           {STANDARD_FIELDS.map(f => (
             <div key={f.name}>
@@ -120,7 +120,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
       {/* Sector-specific suggestions */}
       {suggestions.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
             {sector ? `Suggested for ${sector}` : 'Suggested Metrics'}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -134,8 +134,8 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
                   disabled={added}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                     added
-                      ? 'bg-gold-50 border-violet-200 text-gold-500 cursor-default'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-gold-300 hover:text-gold-500'
+                      ? 'bg-gold-50 border-violet-200 text-primary-500 cursor-default'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-gold-300 hover:text-primary-500'
                   }`}
                 >
                   {added ? '✓ ' : '+ '}{s}
@@ -149,7 +149,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
       {/* Custom fields */}
       {customFields.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Custom Fields</p>
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Custom Fields</p>
           {customFields.map((f, i) => (
             <div key={i} className="flex gap-2 items-center">
               <input
@@ -165,7 +165,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
                 placeholder="Value"
               />
               <button type="button" onClick={() => removeField(i)}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0">
+                className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0">
                 <Trash2 size={14} />
               </button>
             </div>
@@ -176,7 +176,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
       <button
         type="button"
         onClick={addCustom}
-        className="flex items-center gap-1.5 text-xs text-gold-500 hover:text-gold-600 font-medium"
+        className="flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 font-medium"
       >
         <Plus size={12} /> Add custom metric
       </button>
@@ -186,7 +186,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
         <textarea name="notes" className={`${inp} resize-none`} rows={2} placeholder="Additional context…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-1">
         <Button type="submit" loading={loading} className="flex-1">Save Snapshot</Button>

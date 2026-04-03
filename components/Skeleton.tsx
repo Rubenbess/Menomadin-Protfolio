@@ -25,7 +25,7 @@ export function Skeleton({ className = '', count = 1 }: SkeletonProps) {
 
 export function CompanyCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 space-y-4">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-5 space-y-4">
       <div className="flex items-start justify-between">
         <div className="space-y-2 flex-1">
           <Skeleton className="h-5 w-2/3" />
@@ -47,7 +47,7 @@ export function CompanyCardSkeleton() {
 
 export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
   return (
-    <tr className="border-b border-slate-100 dark:border-slate-700">
+    <tr className="border-b border-neutral-200 dark:border-neutral-700">
       {Array.from({ length: columns }).map((_, i) => (
         <td key={i} className="py-3 px-4">
           <Skeleton className="h-4 w-full" />
@@ -59,7 +59,7 @@ export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
 
 export function TableSkeleton({ rows = 5, columns = 5 }: { rows?: number; columns?: number }) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
       <div className="divide-y divide-slate-100 dark:divide-slate-700">
         {Array.from({ length: rows }).map((_, i) => (
           <TableRowSkeleton key={i} columns={columns} />

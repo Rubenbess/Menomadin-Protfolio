@@ -100,22 +100,26 @@ export default async function DashboardPage({ searchParams }: Props) {
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-0.5">{strategyLabel}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{strategyLabel}</p>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-10 md:mb-12">
-        <MetricCard label="Total Invested"    value={fmt$$(totalInvested)}      accent="violet" />
-        <MetricCard label="Portfolio Value"   value={fmt$$(totalCurrentValue)}  accent="emerald" />
-        <MetricCard label="TVPI"              value={fmtMultiple(tvpi)}         accent="blue" />
-        <MetricCard label="MOIC"              value={fmtMultiple(moic)}         accent="amber" />
-        <MetricCard label="IRR"               value={irr != null ? `${(irr * 100).toFixed(1)}%` : 'N/A'} accent="violet" />
-        <MetricCard label="DPI"               value={fmtMultiple(dpi)} />
+      <div className="px-8 py-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4 mb-12">
+          <MetricCard label="Total Invested"    value={fmt$$(totalInvested)}      accent="violet" />
+          <MetricCard label="Portfolio Value"   value={fmt$$(totalCurrentValue)}  accent="emerald" />
+          <MetricCard label="TVPI"              value={fmtMultiple(tvpi)}         accent="blue" />
+          <MetricCard label="MOIC"              value={fmtMultiple(moic)}         accent="amber" />
+          <MetricCard label="IRR"               value={irr != null ? `${(irr * 100).toFixed(1)}%` : 'N/A'} accent="violet" />
+          <MetricCard label="DPI"               value={fmtMultiple(dpi)} />
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <DashboardQuickActions />
+      <div className="px-8">
+        <DashboardQuickActions />
+      </div>
 
       {/* Strategy breakdown */}
       {!strategy && (() => {
@@ -127,29 +131,31 @@ export default async function DashboardPage({ searchParams }: Props) {
         const ventureValue    = ventureCos.reduce((s, c) => s + c.currentValue,  0)
 
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 md:mb-8">
-            <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 border-l-4 border-emerald-500">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                <span className="text-sm font-semibold text-slate-900">Menomadin Impact</span>
-                <span className="ml-auto text-xs text-slate-400">{impactCos.length} companies</span>
+          <div className="px-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-neutral-0 dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-emerald-500">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Impact</span>
+                  <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{impactCos.length} companies</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Invested</p><p className="text-lg font-bold text-neutral-900 dark:text-neutral-50 mt-2">{fmt$$(impactInvested)}</p></div>
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Value</p><p className="text-lg font-bold text-neutral-900 dark:text-neutral-50 mt-2">{fmt$$(impactValue)}</p></div>
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">MOIC</p><p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-2">{fmtMultiple(calcMOIC(impactValue, impactInvested))}</p></div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Invested</p><p className="text-base font-bold text-slate-900 mt-1">{fmt$$(impactInvested)}</p></div>
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Value</p><p className="text-base font-bold text-slate-900 mt-1">{fmt$$(impactValue)}</p></div>
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">MOIC</p><p className="text-base font-bold text-emerald-600 mt-1">{fmtMultiple(calcMOIC(impactValue, impactInvested))}</p></div>
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] p-5 border-l-4 border-blue-500">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                <span className="text-sm font-semibold text-slate-900">Menomadin Ventures</span>
-                <span className="ml-auto text-xs text-slate-400">{ventureCos.length} companies</span>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Invested</p><p className="text-base font-bold text-slate-900 mt-1">{fmt$$(ventureInvested)}</p></div>
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Value</p><p className="text-base font-bold text-slate-900 mt-1">{fmt$$(ventureValue)}</p></div>
-                <div><p className="text-xs font-medium text-slate-400 uppercase tracking-wider">MOIC</p><p className="text-base font-bold text-blue-600 mt-1">{fmtMultiple(calcMOIC(ventureValue, ventureInvested))}</p></div>
+              <div className="bg-neutral-0 dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-blue-500">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Ventures</span>
+                  <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{ventureCos.length} companies</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Invested</p><p className="text-lg font-bold text-neutral-900 dark:text-neutral-50 mt-2">{fmt$$(ventureInvested)}</p></div>
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Value</p><p className="text-lg font-bold text-neutral-900 dark:text-neutral-50 mt-2">{fmt$$(ventureValue)}</p></div>
+                  <div><p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">MOIC</p><p className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-2">{fmtMultiple(calcMOIC(ventureValue, ventureInvested))}</p></div>
+                </div>
               </div>
             </div>
           </div>
@@ -157,37 +163,39 @@ export default async function DashboardPage({ searchParams }: Props) {
       })()}
 
       {/* Portfolio table */}
-      <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-sm font-semibold text-slate-900">Portfolio Companies</h2>
-            <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded-full px-2.5 py-0.5">
-              {companiesWithMetrics.length}
-            </span>
+      <div className="px-8">
+        <div className="bg-neutral-0 dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+          <div className="px-6 py-5 border-b border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Portfolio Companies</h2>
+              <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700 rounded-full px-3 py-1">
+                {companiesWithMetrics.length}
+              </span>
+            </div>
+            <Suspense fallback={null}>
+              <StrategyTableFilter />
+            </Suspense>
           </div>
-          <Suspense fallback={null}>
-            <StrategyTableFilter />
-          </Suspense>
-        </div>
 
-        {companiesWithMetrics.length === 0 ? (
-          <div className="px-5 py-16 text-center">
-            <p className="text-sm text-slate-400 mb-4">No companies found.</p>
-            <Link href="/companies" className="inline-flex items-center text-sm font-semibold text-gold-500 hover:text-gold-600">
-              Add a company →
-            </Link>
-          </div>
-        ) : (
-          <PortfolioTable
-            companies={companiesWithMetrics}
-            investments={investmentsList}
-            safes={safesList}
-          />
-        )}
+          {companiesWithMetrics.length === 0 ? (
+            <div className="px-6 py-16 text-center">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">No companies found.</p>
+              <Link href="/companies" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+                Add a company →
+              </Link>
+            </div>
+          ) : (
+            <PortfolioTable
+              companies={companiesWithMetrics}
+              investments={investmentsList}
+              safes={safesList}
+            />
+          )}
+        </div>
       </div>
 
       {/* Charts */}
-      <div className="mt-6">
+      <div className="px-8 mt-8 pb-8">
         <DashboardCharts companies={companiesWithMetrics} />
       </div>
     </div>

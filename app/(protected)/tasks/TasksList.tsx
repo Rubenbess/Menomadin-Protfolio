@@ -17,25 +17,25 @@ interface Props {
 export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
   if (tasks.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-500">
+      <div className="flex items-center justify-center h-full text-neutral-600">
         <p>No tasks</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-card ring-1 ring-black/[0.04] overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-slate-200 bg-white sticky top-0">
+          <thead className="border-b border-neutral-200 bg-white sticky top-0">
             <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 w-1/3">Task</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600">Priority</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600">Due Date</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600">Assignees</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600">Company</th>
-              <th className="px-5 py-3 text-center text-xs font-semibold text-slate-600 w-12">Actions</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700 w-1/3">Task</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700">Status</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700">Priority</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700">Due Date</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700">Assignees</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-neutral-700">Company</th>
+              <th className="px-5 py-3 text-center text-xs font-semibold text-neutral-700 w-12">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -45,10 +45,10 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                 <tr
                   key={task.id}
                   onClick={() => onTaskClick(task)}
-                  className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                  className="hover:bg-neutral-50 transition-colors group cursor-pointer"
                 >
                   <td className="px-5 py-4">
-                    <p className="text-sm font-medium text-slate-900 group-hover:text-gold-500 group-hover:underline transition-colors">{task.title}</p>
+                    <p className="text-sm font-medium text-neutral-900 group-hover:text-primary-500 group-hover:underline transition-colors">{task.title}</p>
                   </td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
@@ -71,19 +71,19 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onTaskClick(task)}
-                      className="hover:text-gold-500 transition-colors"
+                      className="hover:text-primary-500 transition-colors"
                       title="Click to edit due date"
                     >
                       {task.due_date ? (
                         <span className={`text-sm font-medium ${
                           overdue
                             ? 'text-red-600'
-                            : 'text-slate-600'
+                            : 'text-neutral-700'
                         }`}>
                           {format(new Date(task.due_date), 'MMM dd')}
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400">—</span>
+                        <span className="text-sm text-neutral-500">—</span>
                       )}
                     </button>
                   </td>
@@ -96,20 +96,20 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                       {task.assignees && task.assignees.length > 0 ? (
                         <TaskAssigneesStack assignees={task.assignees} />
                       ) : (
-                        <span className="text-sm text-slate-400">—</span>
+                        <span className="text-sm text-neutral-500">—</span>
                       )}
                     </button>
                   </td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onTaskClick(task)}
-                      className="text-sm text-slate-600 hover:text-gold-500 transition-colors"
+                      className="text-sm text-neutral-700 hover:text-primary-500 transition-colors"
                       title="Click to edit company"
                     >
                       {task.company ? (
                         <span>{task.company.name}</span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-neutral-500">—</span>
                       )}
                     </button>
                   </td>
@@ -117,7 +117,7 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                     <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onTaskClick(task)}
-                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
                         title="Edit task"
                       >
                         <Pencil size={14} />
@@ -128,7 +128,7 @@ export default function TasksList({ tasks, onTaskClick, onTaskUpdate }: Props) {
                             // Delete logic will be handled by parent
                           }
                         }}
-                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete task"
                       >
                         <Trash2 size={14} />

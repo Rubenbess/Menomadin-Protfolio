@@ -21,23 +21,23 @@ export default async function FounderUpdatePage({ params }: { params: Promise<{ 
   if (!company) return notFound()
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-start justify-center py-16 px-4">
+    <div className="min-h-screen bg-neutral-50 flex items-start justify-center py-16 px-4">
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-gold-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
             <img src="/menomadin-icon.svg" alt="" className="h-4 w-4 invert" />
             Menomadin Group
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">{company.name}</h1>
-          <p className="text-slate-500 mt-1">Monthly / Quarterly Update</p>
+          <h1 className="text-2xl font-bold text-neutral-900">{company.name}</h1>
+          <p className="text-neutral-600 mt-1">Monthly / Quarterly Update</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-black/[0.06] p-6">
+        <div className="bg-white rounded-lg shadow-sm ring-1 ring-black/[0.06] p-6">
           <FounderUpdateForm companyId={company.id} companyName={company.name} />
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center text-xs text-neutral-500 mt-6">
           This form is confidential and shared only with the Menomadin investment team.
         </p>
       </div>

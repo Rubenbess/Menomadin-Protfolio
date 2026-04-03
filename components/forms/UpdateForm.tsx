@@ -10,18 +10,18 @@ interface Props {
   onClose: () => void
 }
 
-const inp = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-slate-700 mb-1.5'
+const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 const CATEGORIES = ['Fundraising', 'Product', 'Team', 'Regulatory', 'Commercial', 'Other']
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Fundraising: 'bg-gold-100 text-gold-600',
+  Fundraising: 'bg-gold-100 text-primary-600',
   Product:     'bg-blue-100 text-blue-700',
   Team:        'bg-emerald-100 text-emerald-700',
   Regulatory:  'bg-amber-100 text-amber-700',
   Commercial:  'bg-cyan-100 text-cyan-700',
-  Other:       'bg-slate-100 text-slate-700',
+  Other:       'bg-neutral-100 text-neutral-800',
 }
 
 export { CATEGORY_COLORS }
@@ -75,7 +75,7 @@ export default function UpdateForm({ companyId, onClose }: Props) {
         <textarea name="notes" className={`${inp} resize-none`} rows={4} placeholder="More detail about this update…" />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
+      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>}
 
       <div className="flex gap-3 pt-1">
         <Button type="submit" loading={loading} className="flex-1">Save Update</Button>

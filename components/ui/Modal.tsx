@@ -29,12 +29,12 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
         onClick={onClose}
       />
       {/* Panel */}
-      <div className="relative bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.08] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+      <div className="relative bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.08] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+          <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
           >
             <X size={17} />
           </button>

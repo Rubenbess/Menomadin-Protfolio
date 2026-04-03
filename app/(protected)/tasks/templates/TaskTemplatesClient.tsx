@@ -66,10 +66,10 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
   if (templates.length === 0 && !showForm && !editTemplate) {
     return (
       <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-        <div className="page-header border-b border-slate-200 dark:border-slate-800">
+        <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
           <div>
             <h1 className="page-title">Task Templates</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Reusable templates for quick task creation</p>
+            <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">Reusable templates for quick task creation</p>
           </div>
           <Button onClick={() => setShowForm(true)}>
             <Plus size={16} /> New template
@@ -99,10 +99,10 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Task Templates</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{templates.length} {templates.length === 1 ? 'template' : 'templates'}</p>
+          <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">{templates.length} {templates.length === 1 ? 'template' : 'templates'}</p>
         </div>
         {!showForm && !editTemplate && (
           <Button onClick={() => setShowForm(true)}>
@@ -137,8 +137,8 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="font-bold text-slate-900 dark:text-white text-lg line-clamp-2">{template.name}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-semibold uppercase tracking-wider">
+                    <h3 className="font-bold text-neutral-900 dark:text-white text-lg line-clamp-2">{template.name}</h3>
+                    <p className="text-xs text-neutral-600 dark:text-neutral-500 mt-2 font-semibold uppercase tracking-wider">
                       {getCategoryLabel(template.category)}
                     </p>
                   </div>
@@ -148,15 +148,15 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
                 </div>
 
                 {template.description && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-2">
+                  <p className="text-sm text-neutral-700 dark:text-neutral-500 mb-6 flex-1 line-clamp-2">
                     {template.description}
                   </p>
                 )}
 
-                <div className="flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex gap-2 pt-4 border-t border-neutral-200 dark:border-neutral-700">
                   <button
                     onClick={() => setEditTemplate(template)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-slate-700 transition-colors"
                   >
                     <Edit2 size={14} /> Edit
                   </button>
@@ -177,13 +177,13 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
       {deleteTarget && (
         <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Template?">
           <div className="px-6 py-5">
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-slate-900 dark:text-slate-100">"{deleteTarget.name}"</span>? This cannot be undone.
+            <p className="text-sm text-neutral-700 dark:text-neutral-500 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-neutral-900 dark:text-neutral-100">"{deleteTarget.name}"</span>? This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 px-4 py-2.5 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 text-neutral-800 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-slate-700 rounded-lg transition-colors font-medium"
               >
                 Cancel
               </button>

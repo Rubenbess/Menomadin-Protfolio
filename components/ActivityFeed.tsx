@@ -44,8 +44,8 @@ export function ActivityFeed({
   if (activities.length === 0) {
     return (
       <div className="text-center py-8">
-        <Activity size={32} className="mx-auto mb-3 text-slate-300 dark:text-slate-700" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <Activity size={32} className="mx-auto mb-3 text-slate-300 dark:text-neutral-800" />
+        <p className="text-sm text-neutral-600 dark:text-neutral-500">
           No activity yet
         </p>
       </div>
@@ -73,7 +73,7 @@ export function ActivityFeed({
                 activity.action === 'updated' ? 'bg-blue-500' :
                 'bg-red-500'
               }`} />
-              <div className="w-0.5 h-8 bg-slate-200 dark:bg-slate-800 flex-1" />
+              <div className="w-0.5 h-8 bg-neutral-200 dark:bg-neutral-800 flex-1" />
             </div>
 
             {/* Content */}
@@ -82,12 +82,12 @@ export function ActivityFeed({
                 <span className={`text-xs font-semibold px-2 py-1 rounded-full ${ACTION_COLORS[activity.action]}`}>
                   {activity.action}
                 </span>
-                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
                   {entityLabel}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2 mt-1 text-xs text-neutral-700 dark:text-neutral-500">
                 <span>{actorName}</span>
                 <span>•</span>
                 <span>{timeAgo}</span>
@@ -95,20 +95,20 @@ export function ActivityFeed({
 
               {activity.field_changed && (
                 <div className="mt-2 text-xs space-y-1">
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-neutral-700 dark:text-neutral-500">
                     <span className="font-medium">{activity.field_changed}</span>:
                   </p>
                   <div className="flex gap-2 items-center pl-2">
                     {activity.old_value && (
                       <>
-                        <span className="line-through text-slate-400">
+                        <span className="line-through text-neutral-500">
                           {activity.old_value}
                         </span>
-                        <span className="text-slate-400">→</span>
+                        <span className="text-neutral-500">→</span>
                       </>
                     )}
                     {activity.new_value && (
-                      <span className="text-slate-700 dark:text-slate-300 font-medium">
+                      <span className="text-neutral-800 dark:text-neutral-300 font-medium">
                         {activity.new_value}
                       </span>
                     )}

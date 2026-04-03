@@ -41,7 +41,7 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="page-header border-b border-slate-200 dark:border-slate-800">
+      <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <h1 className="page-title">Deal Pipeline</h1>
         <Button onClick={() => setShowAdd(true)}>
           <Plus size={16} />
@@ -96,11 +96,11 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
                   {['Company', 'Sector', 'Stage', 'Status', 'Notes', ''].map((h) => (
                     <th
                       key={h}
-                      className="px-5 py-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest text-left"
+                      className="px-5 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest text-left"
                     >
                       {h}
                     </th>
@@ -109,27 +109,27 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200 group">
-                    <td className="px-5 py-3.5 font-medium text-slate-900 dark:text-slate-100">{entry.name}</td>
-                    <td className="px-5 py-3.5 text-slate-600 dark:text-slate-400">{entry.sector || '—'}</td>
-                    <td className="px-5 py-3.5 text-slate-600 dark:text-slate-400">{entry.stage || '—'}</td>
+                  <tr key={entry.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200 group">
+                    <td className="px-5 py-3.5 font-medium text-neutral-900 dark:text-neutral-100">{entry.name}</td>
+                    <td className="px-5 py-3.5 text-neutral-700 dark:text-neutral-500">{entry.sector || '—'}</td>
+                    <td className="px-5 py-3.5 text-neutral-700 dark:text-neutral-500">{entry.stage || '—'}</td>
                     <td className="px-5 py-3.5">
                       <Badge value={entry.status} />
                     </td>
-                    <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 max-w-xs truncate">
+                    <td className="px-5 py-3.5 text-neutral-600 dark:text-neutral-500 max-w-xs truncate">
                       {entry.notes || '—'}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => setEditEntry(entry)}
-                          className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
+                          className="p-1.5 text-neutral-500 dark:text-neutral-600 hover:text-neutral-700 dark:hover:text-slate-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(entry.id, entry.name)}
-                          className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                          className="p-1.5 text-neutral-500 dark:text-neutral-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>

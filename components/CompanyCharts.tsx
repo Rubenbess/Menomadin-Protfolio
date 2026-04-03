@@ -50,8 +50,8 @@ export function KPITrendChart({ kpis }: { kpis: CompanyKPI[] }) {
   }))
 
   return (
-    <div className="bg-slate-50 rounded-xl p-4 mb-4 ring-1 ring-slate-200">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">KPI Trends</p>
+    <div className="bg-neutral-50 rounded-lg p-4 mb-4 ring-1 ring-slate-200">
+      <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider mb-3">KPI Trends</p>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -96,8 +96,8 @@ export function ValuationChart({ rounds }: { rounds: Round[] }) {
   if (data.length < 2) return null
 
   return (
-    <div className="bg-slate-50 rounded-xl p-4 mb-4 ring-1 ring-slate-200">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Valuation History</p>
+    <div className="bg-neutral-50 rounded-lg p-4 mb-4 ring-1 ring-slate-200">
+      <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider mb-3">Valuation History</p>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />

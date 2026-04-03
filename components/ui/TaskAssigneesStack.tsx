@@ -15,7 +15,7 @@ export default function TaskAssigneesStack({ assignees, maxDisplay = 3 }: Props)
         {displayed.map(assignee => (
           <div
             key={assignee.id}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-slate-800"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-neutral-700"
             style={{ backgroundColor: assignee.team_member?.color || '#94a3b8' }}
             title={assignee.team_member?.name}
           >
@@ -24,7 +24,7 @@ export default function TaskAssigneesStack({ assignees, maxDisplay = 3 }: Props)
         ))}
       </div>
       {remaining > 0 && (
-        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+        <span className="text-xs text-neutral-700 dark:text-neutral-500 font-medium">
           +{remaining}
         </span>
       )}

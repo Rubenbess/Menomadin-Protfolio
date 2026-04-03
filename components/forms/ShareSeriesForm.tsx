@@ -12,7 +12,7 @@ interface Props {
   onClose: () => void
 }
 
-const fi = 'w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500 focus:bg-white transition-all'
+const fi = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
 
 export default function ShareSeriesForm({ companyId, rounds, series, onClose }: Props) {
   const [holderName, setHolderName]       = useState(series?.holder_name ?? '')
@@ -111,25 +111,25 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
       <label className="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
           checked={isPreferred} onChange={e => setIsPreferred(e.target.checked)} />
-        <span className="text-sm text-slate-700 font-medium">Preferred Shares (has liquidation preference)</span>
+        <span className="text-sm text-neutral-800 font-medium">Preferred Shares (has liquidation preference)</span>
       </label>
 
       {isPreferred && (
-        <div className="bg-slate-50 rounded-xl p-4 ring-1 ring-slate-200 space-y-3">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Preferred Terms</p>
+        <div className="bg-neutral-50 rounded-lg p-4 ring-1 ring-slate-200 space-y-3">
+          <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider">Preferred Terms</p>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="field-label">Liquidation Preference (×)</label>
               <input type="number" className={fi} value={liqMult} onChange={e => setLiqMult(e.target.value)}
                 placeholder="1.0" min="0" step="0.1" />
-              <p className="text-[11px] text-slate-400 mt-1">1× = standard, 2× = double dip</p>
+              <p className="text-[11px] text-neutral-500 mt-1">1× = standard, 2× = double dip</p>
             </div>
             <div>
               <label className="field-label">Seniority Rank</label>
               <input type="number" className={fi} value={seniority} onChange={e => setSeniority(e.target.value)}
                 placeholder="1" min="0" step="1" />
-              <p className="text-[11px] text-slate-400 mt-1">Higher = paid first. 0 = pari passu common</p>
+              <p className="text-[11px] text-neutral-500 mt-1">Higher = paid first. 0 = pari passu common</p>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
               <label className="field-label">Conversion Ratio</label>
               <input type="number" className={fi} value={conversionRatio} onChange={e => setConversionRatio(e.target.value)}
                 placeholder="1.0" min="0" step="0.01" />
-              <p className="text-[11px] text-slate-400 mt-1">1.0 = 1:1 conversion to common</p>
+              <p className="text-[11px] text-neutral-500 mt-1">1.0 = 1:1 conversion to common</p>
             </div>
             <div>
               <label className="field-label">Anti-dilution</label>
@@ -153,7 +153,7 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
               checked={isParticipating} onChange={e => setIsParticipating(e.target.checked)} />
-            <span className="text-sm text-slate-700 font-medium">Participating preferred (double-dip)</span>
+            <span className="text-sm text-neutral-800 font-medium">Participating preferred (double-dip)</span>
           </label>
 
           {isParticipating && (
@@ -161,7 +161,7 @@ export default function ShareSeriesForm({ companyId, rounds, series, onClose }: 
               <label className="field-label">Participation Cap (× invested amount)</label>
               <input type="number" className={fi} value={partCapMult} onChange={e => setPartCapMult(e.target.value)}
                 placeholder="Leave blank for uncapped" min="0" step="0.1" />
-              <p className="text-[11px] text-slate-400 mt-1">e.g. 3× = stops participating after 3× return. Blank = uncapped</p>
+              <p className="text-[11px] text-neutral-500 mt-1">e.g. 3× = stops participating after 3× return. Blank = uncapped</p>
             </div>
           )}
         </div>

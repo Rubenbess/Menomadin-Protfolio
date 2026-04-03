@@ -30,11 +30,11 @@ export default async function AnalyticsPage() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <BarChart3 className="text-amber-700 dark:text-amber-600" size={24} />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
               Analytics
             </h1>
           </div>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-neutral-700 dark:text-neutral-500">
             Portfolio performance and investment metrics
           </p>
         </div>

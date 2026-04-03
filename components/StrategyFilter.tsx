@@ -30,7 +30,7 @@ export default function StrategyFilter() {
 
   return (
     <div className="px-3 pb-3">
-      <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest mb-2 px-1">
+      <p className="text-[10px] font-semibold text-neutral-700 uppercase tracking-widest mb-2 px-1">
         Strategy
       </p>
       <div className="space-y-0.5">
@@ -38,10 +38,10 @@ export default function StrategyFilter() {
           <button
             key={value}
             onClick={() => setStrategy(value)}
-            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+            className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${
               current === value
-                ? 'bg-gold-500/15 text-gold-200'
-                : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'
+                ? 'bg-primary-500/15 text-gold-200'
+                : 'text-neutral-600 hover:text-slate-200 hover:bg-white/5'
             }`}
           >
             {value === '' ? (

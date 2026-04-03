@@ -35,12 +35,12 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex fixed left-0 top-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col transition-all duration-200 ${
+        className={`hidden md:flex fixed left-0 top-0 h-screen bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 flex-col transition-all duration-200 ${
           isCollapsed ? 'w-20' : 'w-64'
         } z-40`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200 dark:border-neutral-700">
           {!isCollapsed && (
             <div className="text-xl font-bold text-amber-700 dark:text-amber-600">
               Portfolio
@@ -48,13 +48,13 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg ml-auto"
+            className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg ml-auto"
             title={isCollapsed ? 'Expand' : 'Collapse'}
           >
             {isCollapsed ? (
-              <ChevronRight size={18} className="text-slate-600 dark:text-slate-400" />
+              <ChevronRight size={18} className="text-neutral-700 dark:text-neutral-500" />
             ) : (
-              <ChevronLeft size={18} className="text-slate-600 dark:text-slate-400" />
+              <ChevronLeft size={18} className="text-neutral-700 dark:text-neutral-500" />
             )}
           </button>
         </div>
@@ -64,7 +64,7 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
           {Array.from(sections.entries()).map(([section, sectionItems]) => (
             <div key={section}>
               {!isCollapsed && section !== 'main' && (
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase px-2 mb-2">
+                <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-500 uppercase px-2 mb-2">
                   {section}
                 </p>
               )}
@@ -79,7 +79,7 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors relative group ${
                         isActive
                           ? 'bg-amber-700 text-white'
-                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          : 'text-neutral-800 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
                       }`}
                     >
                       <span className="w-5 h-5 flex-shrink-0">{item.icon}</span>
@@ -96,7 +96,7 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
 
                       {/* Tooltip for collapsed state */}
                       {isCollapsed && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-neutral-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                           {item.label}
                           {item.badge && ` (${item.badge})`}
                         </div>
@@ -110,8 +110,8 @@ export function ResponsiveSidebar({ items }: ResponsiveSidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-slate-200 dark:border-slate-800 p-4">
-          <div className={`text-xs text-slate-500 dark:text-slate-400 ${isCollapsed ? 'text-center' : ''}`}>
+        <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
+          <div className={`text-xs text-neutral-600 dark:text-neutral-500 ${isCollapsed ? 'text-center' : ''}`}>
             {!isCollapsed && (
               <p>© 2024 Menomadin Portfolio</p>
             )}
