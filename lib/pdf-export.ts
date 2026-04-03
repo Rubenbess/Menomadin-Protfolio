@@ -35,7 +35,7 @@ export function exportToPDF(
   // Add title
   if (title) {
     doc.setFontSize(16)
-    doc.setFont(undefined, 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(title, 14, yPosition)
     yPosition += 7
   }
@@ -43,7 +43,7 @@ export function exportToPDF(
   // Add subtitle
   if (subtitle) {
     doc.setFontSize(10)
-    doc.setFont(undefined, 'normal')
+    doc.setFont('helvetica', 'normal')
     doc.setTextColor(100, 100, 100)
     doc.text(subtitle, 14, yPosition)
     yPosition += 6
@@ -144,11 +144,11 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
 
   // Metrics section
   doc.setFontSize(20)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Portfolio Summary', 14, 15)
 
   doc.setFontSize(10)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   const metrics = [
     ['Total Invested', `$${(data.totalInvested / 1_000_000).toFixed(2)}M`],
     ['Current Value', `$${(data.currentValue / 1_000_000).toFixed(2)}M`],
@@ -160,9 +160,9 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
 
   let yPos = 30
   metrics.forEach(([label, value]) => {
-    doc.setFont(undefined, 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(label, 14, yPos)
-    doc.setFont(undefined, 'normal')
+    doc.setFont('helvetica', 'normal')
     doc.text(value, 100, yPos, { align: 'right' })
     yPos += 8
   })
@@ -170,7 +170,7 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
   // Companies table
   yPos += 5
   doc.setFontSize(12)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Companies', 14, yPos)
 
   autoTable(doc, {
