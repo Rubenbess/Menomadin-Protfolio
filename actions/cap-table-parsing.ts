@@ -89,15 +89,22 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   const extraction = extractTableData(worksheet, headerDetection.headers, headerDetection.headerRowIndex)
 
   if (extraction.data.length === 0) {
-    // More helpful error: report what we scanned
+    // Detailed diagnostic information
     const scannedRows = Math.max(0, extraction.filteredRowCount)
+    const totalRowsInSheet = Object.keys(worksheet)
+      .filter(key => /^\d+$/.test(key.substring(1)) && key !== '!ref' && key !== '!merges')
+      .length
+
     const message =
       scannedRows === 0 || extraction.filteredRowCount < 0
-        ? `No data rows found. Headers detected at row ${headerDetection.headerRowIndex + 1} (${headerDetection.headers.join(', ')}), ` +
-          `but no additional rows found after that. The file may only contain headers, or the structure is unexpected.`
-        : `No valid data rows found. Scanned ${scannedRows} rows after headers but all were empty or filtered as summaries. ` +
+        ? `No data rows found. Headers detected at row ${headerDetection.headerRowIndex + 1}: [${headerDetection.headers.join(', ')}]. ` +
+          `Header confidence: ${headerDetection.confidence}%. ` +
+          `Worksheet appears to have data only in header row. ` +
+          `Checked rows after row ${headerDetection.headerRowIndex + 1} but found no valid data entries.`
+        : `No valid data rows found. Scanned ${scannedRows} rows after headers. ` +
           `Headers: ${headerDetection.headers.join(', ')}. ` +
-          `Try checking the file structure.`
+          `Rows checked: ${extraction.dataRowIndices.join(', ') || '(none)'}. ` +
+          `All potential rows were empty or filtered.`
 
     throw new Error(message)
   }
