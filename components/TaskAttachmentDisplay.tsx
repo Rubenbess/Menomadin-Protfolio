@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Download, Trash2, FileText, Image, File } from 'lucide-react'
+import ImagePreviewModal from '@/components/ImagePreviewModal'
 import { deleteTaskAttachment } from '@/actions/task-attachments'
 import { useToast } from '@/hooks/useToast'
 import type { TaskAttachment } from '@/lib/types'
@@ -15,6 +16,7 @@ interface Props {
 
 export function TaskAttachmentDisplay({ attachment, currentUserId, uploadedByName, onDeleted }: Props) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showImagePreview, setShowImagePreview] = useState(false)
   const { success, error: showError } = useToast()
 
   const handleDelete = async () => {
@@ -34,26 +36,27 @@ export function TaskAttachmentDisplay({ attachment, currentUserId, uploadedByNam
 
   const getFileIcon = () => {
     const type = attachment.file_name.split('.').pop()?.toLowerCase() || ''
-    const mimeType = attachment.file_url?.split('.').pop()?.toLowerCase() || ''
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(type)) {
-      return <Image size={16} />
+      return { icon: <Image size={16} />, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' }
     } else if (['pdf'].includes(type)) {
-      return <FileText size={16} />
+      return { icon: <FileText size={16} />, color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' }
+    } else if (['doc', 'docx', 'txt'].includes(type)) {
+      return { icon: <FileText size={16} />, color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' }
     }
-    return <File size={16} />
+    return { icon: <File size={16} />, color: 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400' }
   }
 
   const getFilePreview = () => {
     const type = attachment.file_name.split('.').pop()?.toLowerCase() || ''
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(type)) {
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(type)) {
       return (
         <div className="mt-2 relative group">
           <img
             src={attachment.file_url}
             alt={attachment.file_name}
             className="max-w-xs max-h-48 rounded-lg border border-neutral-200 dark:border-neutral-700 cursor-pointer"
-            onClick={() => window.open(attachment.file_url, '_blank')}
+            onClick={() => setShowImagePreview(true)}
           />
           <div className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <p className="text-white text-sm font-medium">Click to enlarge</p>
@@ -71,13 +74,16 @@ export function TaskAttachmentDisplay({ attachment, currentUserId, uploadedByNam
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
+  const fileIcon = getFileIcon()
+
   return (
-    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 flex-1">
-          <div className="p-2 rounded-lg bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400">
-            {getFileIcon()}
-          </div>
+    <>
+      <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 flex-1">
+            <div className={`p-2 rounded-lg ${fileIcon.color}`}>
+              {fileIcon.icon}
+            </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-neutral-900 dark:text-white truncate" title={attachment.file_name}>
               {attachment.file_name}
@@ -115,7 +121,18 @@ export function TaskAttachmentDisplay({ attachment, currentUserId, uploadedByNam
         </div>
       </div>
 
-      {getFilePreview()}
-    </div>
+        {getFilePreview()}
+      </div>
+
+      {/* Image Preview Modal */}
+      {getFilePreview() && (
+        <ImagePreviewModal
+          isOpen={showImagePreview}
+          imageUrl={attachment.file_url}
+          fileName={attachment.file_name}
+          onClose={() => setShowImagePreview(false)}
+        />
+      )}
+    </>
   )
 }

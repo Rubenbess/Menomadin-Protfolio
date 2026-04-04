@@ -73,7 +73,9 @@
       "Bash(rm \"c:/Users/rubenb/.claude/projects/c--Users-rubenb-Portfolio/memory/cap_table_upload_complete.md\")",
       "Bash(mv /tmp/memory.tmp \"c:/Users/rubenb/.claude/projects/c--Users-rubenb-Portfolio/memory/MEMORY.md\")",
       "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/)",
-      "Bash(grep -l \"CompanyTasks\\\\|company.*task\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/*.tsx)"
+      "Bash(grep -l \"CompanyTasks\\\\|company.*task\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/*.tsx)",
+      "Bash(grep -r \"fixed.*inset\\\\|w-full max-w\" /c/Users/rubenb/Portfolio/components/*.tsx)",
+      "Bash(grep -l \"analytics\\\\|report\" /c/Users/rubenb/Portfolio/actions/*.ts)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

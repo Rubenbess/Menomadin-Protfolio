@@ -169,8 +169,8 @@ export default function TaskDetailModal({
   const overdue = isTaskOverdue(currentTask)
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto md:rounded-lg rounded-t-3xl md:mx-0 mx-0 fixed bottom-0 md:static md:rounded-lg">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
           <h2 className="text-xl font-bold text-neutral-900 dark:text-white truncate pr-4">

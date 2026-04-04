@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate, Calendar } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate, Calendar, Menu, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import TasksBoard from './TasksBoard'
@@ -40,6 +40,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   const [showCompleted, setShowCompleted] = useState(true)
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set())
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -249,8 +250,19 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
         </div>
       </div>
 
+      {/* Mobile Filter Toggle */}
+      <div className="md:hidden px-6 mb-4">
+        <button
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white text-sm font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+        >
+          {showMobileFilters ? <X size={16} /> : <Menu size={16} />}
+          {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+        </button>
+      </div>
+
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-8 px-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 px-6">
         {[
           { label: 'Total', count: stats.total, icon: '📊' },
           { label: 'Active', count: stats.active, icon: '⚡' },
@@ -292,20 +304,55 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
       </div>
 
       {/* Main Content - Sidebar + Tasks View */}
-      <div className="flex flex-1 gap-0 overflow-hidden">
-        {/* Sidebar Filters */}
-        <TasksFilters
-          statusFilter={statusFilter}
-          priorityFilter={priorityFilter}
-          companyFilter={companyFilter || ''}
-          includeCompleted={showCompleted}
-          companies={companies}
-          onStatusChange={setStatusFilter}
-          onPriorityChange={setPriorityFilter}
-          onCompanyChange={(id) => setCompanyFilter(id || null)}
-          onIncludeCompletedChange={setShowCompleted}
-          stats={stats}
-        />
+      <div className="flex flex-1 gap-0 overflow-hidden relative">
+        {/* Sidebar Filters - Desktop */}
+        <div className="hidden md:block">
+          <TasksFilters
+            statusFilter={statusFilter}
+            priorityFilter={priorityFilter}
+            companyFilter={companyFilter || ''}
+            includeCompleted={showCompleted}
+            companies={companies}
+            onStatusChange={setStatusFilter}
+            onPriorityChange={setPriorityFilter}
+            onCompanyChange={(id) => setCompanyFilter(id || null)}
+            onIncludeCompletedChange={setShowCompleted}
+            stats={stats}
+          />
+        </div>
+
+        {/* Sidebar Filters - Mobile Drawer */}
+        {showMobileFilters && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 md:hidden z-40"
+              onClick={() => setShowMobileFilters(false)}
+            />
+            <div className="fixed left-0 top-0 bottom-0 w-72 bg-white dark:bg-neutral-800 z-40 overflow-y-auto">
+              <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+                <h3 className="font-semibold text-neutral-900 dark:text-white">Filters</h3>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <TasksFilters
+                statusFilter={statusFilter}
+                priorityFilter={priorityFilter}
+                companyFilter={companyFilter || ''}
+                includeCompleted={showCompleted}
+                companies={companies}
+                onStatusChange={setStatusFilter}
+                onPriorityChange={setPriorityFilter}
+                onCompanyChange={(id) => setCompanyFilter(id || null)}
+                onIncludeCompletedChange={setShowCompleted}
+                stats={stats}
+              />
+            </div>
+          </>
+        )}
 
         {/* Tasks Content */}
         <div className="flex-1 flex flex-col overflow-hidden px-6 py-6">
