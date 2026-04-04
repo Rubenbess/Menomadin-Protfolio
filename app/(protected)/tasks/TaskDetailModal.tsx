@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Calendar, Flag, User, Building2, MessageSquare, FileUp, Tag, Edit2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TaskStatusBadge from '@/components/ui/TaskStatusBadge'
 import TaskPriorityBadge from '@/components/ui/TaskPriorityBadge'
 import TaskAssigneesStack from '@/components/ui/TaskAssigneesStack'
 import TaskCommentForm from '@/components/forms/TaskCommentForm'
+import { TaskCommentInput } from '@/components/TaskCommentInput'
+import { TaskCommentDisplay } from '@/components/TaskCommentDisplay'
+import { TaskAttachmentDisplay } from '@/components/TaskAttachmentDisplay'
+import { TaskAttachmentUpload } from '@/components/TaskAttachmentUpload'
+import { TaskActivityFeed } from '@/components/TaskActivityFeed'
+import { TaskDependencyViewer } from '@/components/TaskDependencyViewer'
+import { getTaskComments } from '@/actions/task-comments'
+import { getTaskAttachments } from '@/actions/task-attachments'
 import TaskEditModal from './TaskEditModal'
 import { formatDueDate, isTaskOverdue } from '@/lib/task-utils'
 import { completeTask, cancelTask, deleteTask, assignTask, removeAssignee } from '@/actions/tasks'
@@ -20,6 +28,7 @@ interface Props {
   companies: { id: string; name: string }[]
   teamMembers: { id: string; name: string; color: string }[]
   allLabels: { id: string; name: string; color: string | null }[]
+  currentUserId: string
 }
 
 export default function TaskDetailModal({
@@ -29,12 +38,39 @@ export default function TaskDetailModal({
   onTaskUpdated,
   teamMembers,
   companies,
+  currentUserId,
 }: Props) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [currentTask, setCurrentTask] = useState(task)
+  const [comments, setComments] = useState(task.comments || [])
+  const [attachments, setAttachments] = useState(task.attachments || [])
+  const [loadingComments, setLoadingComments] = useState(false)
+  const [loadingAttachments, setLoadingAttachments] = useState(false)
+
+  // Load comments and attachments on mount
+  useEffect(() => {
+    const loadData = async () => {
+      setLoadingComments(true)
+      setLoadingAttachments(true)
+
+      const commentsResult = await getTaskComments(task.id)
+      if (!commentsResult.error && commentsResult.comments) {
+        setComments(commentsResult.comments)
+      }
+
+      const attachmentsResult = await getTaskAttachments(task.id)
+      if (!attachmentsResult.error && attachmentsResult.attachments) {
+        setAttachments(attachmentsResult.attachments)
+      }
+
+      setLoadingComments(false)
+      setLoadingAttachments(false)
+    }
+    loadData()
+  }, [task.id])
 
   const handleComplete = async () => {
     setIsCompleting(true)
@@ -86,6 +122,36 @@ export default function TaskDetailModal({
     setCurrentTask(updatedTask)
     onTaskUpdated(updatedTask)
     setShowEditModal(false)
+  }
+
+  const handleCommentAdded = async () => {
+    // Reload comments when a new one is added
+    const result = await getTaskComments(task.id)
+    if (!result.error && result.comments) {
+      setComments(result.comments)
+    }
+  }
+
+  const handleCommentDeleted = (commentId: string) => {
+    setComments(prev => prev.filter(c => c.id !== commentId))
+  }
+
+  const handleCommentUpdated = (updatedComment: any) => {
+    setComments(prev =>
+      prev.map(c => (c.id === updatedComment.id ? updatedComment : c))
+    )
+  }
+
+  const handleAttachmentAdded = async () => {
+    // Reload attachments when a new one is added
+    const result = await getTaskAttachments(task.id)
+    if (!result.error && result.attachments) {
+      setAttachments(result.attachments)
+    }
+  }
+
+  const handleAttachmentDeleted = (attachmentId: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== attachmentId))
   }
 
   const overdue = isTaskOverdue(currentTask)
@@ -326,36 +392,79 @@ export default function TaskDetailModal({
             </div>
           )}
 
+          {/* Dependencies */}
+          <div className="space-y-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+            <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-500 uppercase">Dependencies</p>
+            <TaskDependencyViewer taskId={task.id} onTaskClick={(id) => {}} />
+          </div>
+
+          {/* Attachments Section */}
+          <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
+              <FileUp size={16} />
+              Attachments ({attachments.length})
+            </label>
+
+            {/* Upload Area */}
+            <TaskAttachmentUpload taskId={task.id} onAttachmentAdded={handleAttachmentAdded} />
+
+            {/* Attachments List */}
+            {loadingAttachments ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-neutral-500 dark:text-neutral-600">Loading attachments...</p>
+              </div>
+            ) : attachments.length > 0 ? (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {attachments.map(attachment => (
+                  <TaskAttachmentDisplay
+                    key={attachment.id}
+                    attachment={attachment}
+                    currentUserId={currentUserId}
+                    onDeleted={handleAttachmentDeleted}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500 dark:text-neutral-600 italic">No attachments yet</p>
+            )}
+          </div>
+
           {/* Comments Section */}
           <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
             <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
               <MessageSquare size={16} />
-              Comments
+              Comments ({comments.filter(c => !c.is_activity).length})
             </label>
 
-            <TaskCommentForm taskId={task.id} />
+            {/* Comment Input */}
+            <TaskCommentInput
+              taskId={task.id}
+              teamMembers={teamMembers}
+              onCommentAdded={handleCommentAdded}
+            />
 
             {/* Comments List */}
-            {task.comments && task.comments.length > 0 && (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {task.comments
+            {loadingComments ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-neutral-500 dark:text-neutral-600">Loading comments...</p>
+              </div>
+            ) : comments.length > 0 ? (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {comments
                   .filter(c => !c.is_activity)
                   .map(comment => (
-                    <div key={comment.id} className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                          {comment.author?.name}
-                        </p>
-                        <p className="text-xs text-neutral-600 dark:text-neutral-500">
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <p className="text-sm text-neutral-700 dark:text-neutral-500">
-                        {comment.content}
-                      </p>
-                    </div>
+                    <TaskCommentDisplay
+                      key={comment.id}
+                      comment={comment}
+                      currentUserId={currentUserId}
+                      teamMembers={teamMembers}
+                      onCommentDeleted={handleCommentDeleted}
+                      onCommentUpdated={handleCommentUpdated}
+                    />
                   ))}
               </div>
+            ) : (
+              <p className="text-sm text-neutral-500 dark:text-neutral-600 italic">No comments yet</p>
             )}
           </div>
 
@@ -363,14 +472,11 @@ export default function TaskDetailModal({
           {currentTask.activities && currentTask.activities.length > 0 && (
             <div className="space-y-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
               <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">Activity</h4>
-              <div className="space-y-2 text-sm">
-                {currentTask.activities.slice(0, 5).map(activity => (
-                  <div key={activity.id} className="text-xs text-neutral-600 dark:text-neutral-500">
-                    <strong>{activity.action_type.replace(/_/g, ' ')}</strong> •{' '}
-                    {new Date(activity.created_at).toLocaleDateString()}
-                  </div>
-                ))}
-              </div>
+              <TaskActivityFeed
+                activities={currentTask.activities}
+                teamMembers={teamMembers}
+                maxItems={8}
+              />
             </div>
           )}
         </div>

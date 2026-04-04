@@ -7,6 +7,10 @@ export const dynamic = 'force-dynamic'
 export default async function TasksPage() {
   const supabase = await createServerSupabaseClient()
 
+  // Get current user ID
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id || ''
+
   // Fetch tasks with relations (assignees, company, pipeline deal, and contact)
   const { data: tasks, error } = await supabase
     .from('tasks')
@@ -60,6 +64,7 @@ export default async function TasksPage() {
         allLabels={allLabels || []}
         teamMembers={teamMembers || []}
         companies={companies || []}
+        currentUserId={userId}
       />
     </div>
   )

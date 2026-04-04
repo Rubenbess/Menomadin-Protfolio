@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
+import { TaskSavedFilters } from '@/components/TaskSavedFilters'
 import type { TaskStatus } from '@/lib/types'
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
     completed: number
     overdue: number
   }
+  onApplySavedFilter?: (filters: any) => void
 }
 
 const STATUSES: TaskStatus[] = ['To do', 'In progress', 'Waiting', 'Done', 'Cancelled']
@@ -47,6 +49,7 @@ export default function TasksFilters({
   onIncludeCompletedChange,
   companies,
   stats,
+  onApplySavedFilter,
 }: Props) {
   const toggleStatus = (status: TaskStatus) => {
     if (statusFilter.includes(status)) {
@@ -158,6 +161,27 @@ export default function TasksFilters({
           />
           <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">Show completed</span>
         </label>
+      </div>
+
+      {/* Saved Filters */}
+      <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700">
+        <TaskSavedFilters
+          currentFilters={{
+            status: statusFilter,
+            priority: priorityFilter,
+            company_id: companyFilter,
+            include_completed: includeCompleted,
+          }}
+          onFilterApply={(filters) => {
+            if (filters.status) onStatusChange(filters.status)
+            if (filters.priority) onPriorityChange(filters.priority)
+            if (filters.company_id) onCompanyChange(filters.company_id)
+            if (typeof filters.include_completed === 'boolean') {
+              onIncludeCompletedChange(filters.include_completed)
+            }
+            onApplySavedFilter?.(filters)
+          }}
+        />
       </div>
 
       {/* Clear Button */}

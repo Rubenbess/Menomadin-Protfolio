@@ -362,6 +362,7 @@ export interface Task {
   is_recurring: boolean
   recurrence_rule_id: string | null
   template_id: string | null
+  parent_task_id: string | null
 }
 
 // Multi-assignee support

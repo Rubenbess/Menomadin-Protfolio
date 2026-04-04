@@ -64,7 +64,9 @@
       "Bash(cat c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/import/page.tsx)",
       "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/companies/\")",
       "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/\")",
-      "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/tasks/\")"
+      "Bash(ls -la \"c:/Users/rubenb/Portfolio/app/\\(protected\\)/tasks/\")",
+      "Bash(ls -la actions/task-att*)",
+      "Bash(wc -l app/\\\\\\(protected\\\\\\)/tasks/TasksFilters.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

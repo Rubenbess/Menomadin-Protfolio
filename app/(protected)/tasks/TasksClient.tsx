@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate, Calendar } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import TasksBoard from './TasksBoard'
 import TasksList from './TasksList'
+import TaskCalendar from '@/components/TaskCalendar'
 import TaskDetailModal from './TaskDetailModal'
 import TaskForm from '@/components/forms/TaskForm'
 import TasksFilters from './TasksFilters'
@@ -19,12 +20,13 @@ interface Props {
   allLabels: { id: string; name: string; color: string | null }[]
   teamMembers: { id: string; name: string; color: string }[]
   companies: { id: string; name: string }[]
+  currentUserId: string
 }
 
-type ViewType = 'list' | 'board'
+type ViewType = 'list' | 'board' | 'calendar'
 type QuickFilter = 'all' | 'mine' | 'overdue' | 'today' | 'this-week'
 
-export default function TasksClient({ initialTasks, allLabels, teamMembers, companies }: Props) {
+export default function TasksClient({ initialTasks, allLabels, teamMembers, companies, currentUserId }: Props) {
   const router = useRouter()
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
   const [view, setView] = useState<ViewType>('list')
@@ -53,10 +55,14 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
         e.preventDefault()
         setShowCreateForm(true)
       }
-      // B - Toggle board/list
+      // B - Cycle through views
       else if (e.key === 'b' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault()
-        setView(v => v === 'list' ? 'board' : 'list')
+        setView(v => {
+          if (v === 'list') return 'board'
+          if (v === 'board') return 'calendar'
+          return 'list'
+        })
       }
       // / - Focus search
       else if (e.key === '/') {
@@ -197,14 +203,23 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
             <button
               onClick={() => setView('list')}
               className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'list' ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-700 dark:text-neutral-500'}`}
+              title="List view (B to cycle)"
             >
               <LayoutList size={16} />
             </button>
             <button
               onClick={() => setView('board')}
               className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'board' ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-700 dark:text-neutral-500'}`}
+              title="Board view (B to cycle)"
             >
               <Kanban size={16} />
+            </button>
+            <button
+              onClick={() => setView('calendar')}
+              className={`px-3 py-2 rounded-md text-sm font-semibold transition-all ${view === 'calendar' ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-700 dark:text-neutral-500'}`}
+              title="Calendar view (B to cycle)"
+            >
+              <Calendar size={16} />
             </button>
           </div>
           <Link
@@ -339,13 +354,17 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
               onTaskClick={setSelectedTask}
               onTaskUpdate={handleTaskUpdated}
             />
-          ) : (
+          ) : view === 'board' ? (
             <TasksBoard
               groupedTasks={groupedByStatus}
               onTaskClick={setSelectedTask}
               onTaskCreate={() => setShowCreateForm(true)}
               onTaskEdit={setSelectedTask}
             />
+          ) : (
+            <div className="flex-1 overflow-auto">
+              <TaskCalendar tasks={filteredTasks} onTaskClick={setSelectedTask} />
+            </div>
           )}
         </div>
       </div>
@@ -370,6 +389,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
           companies={companies}
           teamMembers={teamMembers}
           allLabels={allLabels}
+          currentUserId={currentUserId}
         />
       )}
 
