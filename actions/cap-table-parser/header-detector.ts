@@ -72,15 +72,16 @@ export function detectHeaderRow(worksheet: XLSX.WorkSheet): HeaderDetectionResul
     }
   }
 
-  // If we found a good header row, return it
-  if (bestResult && bestScore > 20) {
-    return bestResult
-  }
-
-  // Fallback: use first non-empty row as headers
+  // If we found any candidate, return it (even with low score)
   if (bestResult) {
-    bestResult.confidence = Math.max(10, bestResult.confidence)
-    bestResult.reasoning = 'Fallback: First non-empty row used as headers (low confidence)'
+    // Boost confidence for fallback cases
+    if (bestScore < 20) {
+      bestResult.confidence = Math.max(15, bestResult.confidence)
+      bestResult.reasoning = 'Fallback: First non-empty row used as headers (low confidence - please verify)'
+    } else if (bestScore < 40) {
+      bestResult.confidence = Math.max(30, bestResult.confidence)
+      bestResult.reasoning = 'Detected likely headers (low-medium confidence)'
+    }
     return bestResult
   }
 
@@ -141,9 +142,19 @@ function normalizeHeaders(rawHeaders: string[]): string[] {
 function scoreHeaderRow(headers: string[]): number {
   let score = 0
 
+  // Base score: any non-empty row that could be headers
+  const nonEmptyCount = headers.filter(h => h.length > 0).length
+  if (nonEmptyCount > 0) {
+    score = 5 // Base score for having any content
+  }
+
   // Bonus for having multiple columns
   if (headers.length > 2) {
-    score += 10
+    score += 8
+  }
+
+  if (headers.length > 5) {
+    score += 5 // More columns = more likely to be real headers
   }
 
   // Check for header keywords
@@ -153,15 +164,19 @@ function scoreHeaderRow(headers: string[]): number {
   HEADER_KEYWORDS.forEach(keyword => {
     if (headerText.includes(keyword)) {
       keywordMatches++
-      score += 10
+      score += 8
     }
   })
 
   // Bonus if multiple keywords matched
+  if (keywordMatches >= 1) {
+    score += 10
+  }
   if (keywordMatches >= 2) {
     score += 15
-  } else if (keywordMatches >= 4) {
-    score += 30
+  }
+  if (keywordMatches >= 4) {
+    score += 25
   }
 
   // Check for data-like content (numbers, special patterns)
@@ -171,26 +186,31 @@ function scoreHeaderRow(headers: string[]): number {
   headers.forEach(header => {
     if (header) {
       totalNonEmpty++
-      // Check if looks like a number or percentage
+      // Check if looks like a pure number or percentage
       if (/^\d+\.?\d*%?$/.test(header)) {
         numberCount++
       }
     }
   })
 
-  // Penalize if mostly numbers (likely data row)
-  if (numberCount > totalNonEmpty * 0.5) {
-    score -= 20
+  // Penalize if MOSTLY numbers (likely data row), but not too harshly
+  if (numberCount > totalNonEmpty * 0.7) {
+    score -= 15
+  } else if (numberCount > totalNonEmpty * 0.5) {
+    score -= 5
   }
 
-  // Bonus for high cell density
-  if (totalNonEmpty / headers.length > 0.7) {
+  // Bonus for high cell density (most cells filled)
+  const filledRatio = totalNonEmpty / headers.length
+  if (filledRatio > 0.8) {
+    score += 10
+  } else if (filledRatio > 0.6) {
     score += 5
   }
 
   // Check for suspicious patterns that indicate data rows
   if (looksLikeDataRow(headers)) {
-    score -= 30
+    score -= 25
   }
 
   return Math.max(0, score)

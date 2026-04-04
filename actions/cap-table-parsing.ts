@@ -78,9 +78,12 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   // Detect header row intelligently
   const headerDetection = detectHeaderRow(worksheet)
 
-  if (headerDetection.headers.length === 0 || headerDetection.confidence === 0) {
-    throw new Error('Could not detect valid headers in sheet')
+  if (headerDetection.headers.length === 0) {
+    throw new Error('Could not detect any headers in sheet (all rows appear empty)')
   }
+
+  // Allow detection even with low confidence - better to try than fail
+  // Low confidence just means user may need to verify column mappings
 
   // Extract table data
   const extraction = extractTableData(worksheet, headerDetection.headers, headerDetection.headerRowIndex)
