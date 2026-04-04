@@ -70,7 +70,10 @@ export async function uploadAndParseCapTableFile(
         allSheets = parsed.allSheets
         selectedSheet = allSheets[0] || ''
       } catch (err) {
-        return { error: `Excel parsing failed: ${err instanceof Error ? err.message : 'Unknown error'}` }
+        const errMsg = err instanceof Error ? err.message : 'Unknown error'
+        console.error('Excel parsing error:', errMsg)
+        console.error('File size:', fileBuffer.length)
+        return { error: `Excel parsing failed: ${errMsg}` }
       }
     } else {
       const parsed = await parseCSVFile(fileBuffer)
