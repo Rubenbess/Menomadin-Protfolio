@@ -71,15 +71,23 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
     throw new Error(`Sheet "${targetSheet}" not found`)
   }
 
-  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
 
   if (data.length === 0) {
     throw new Error('Excel file is empty')
   }
 
-  const headers = (data[0] || []).map(h => String(h).trim())
-  const rows = data.slice(1).map(row =>
-    Object.fromEntries(headers.map((h, i) => [h, row[i] ?? null]))
+  // Filter out completely empty rows (all cells are empty/null)
+  const nonEmptyData = data.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''))
+
+  if (nonEmptyData.length === 0) {
+    throw new Error('Excel file contains no data')
+  }
+
+  // First non-empty row is headers
+  const headers = (nonEmptyData[0] || []).map(h => (h ? String(h).trim() : ''))
+  const rows = nonEmptyData.slice(1).map(row =>
+    Object.fromEntries(headers.map((h, i) => [h || `Column${i}`, row[i] ?? null]))
   )
 
   return {
