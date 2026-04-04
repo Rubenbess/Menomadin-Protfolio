@@ -95,6 +95,32 @@ export async function createTask(data: {
   return { error: null, data: fullTask || task }
 }
 
+export async function getTask(id: string) {
+  const supabase = await createServerSupabaseClient()
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .select(`
+      *,
+      assignees:task_assignees(
+        id,
+        task_id,
+        assigned_to,
+        assigned_at,
+        assigned_by,
+        team_member:team_members(id, name, color)
+      ),
+      company:companies(id, name),
+      recurrence_rule:task_recurrence_rules(*)
+    `)
+    .eq('id', id)
+    .single()
+
+  if (error) return { error: error.message, data: null }
+
+  return { error: null, data: task }
+}
+
 export async function updateTask(id: string, data: Partial<Task>) {
   const supabase = await createServerSupabaseClient()
 

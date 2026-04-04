@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import TaskRecurrenceForm from '@/components/forms/TaskRecurrenceForm'
 import { createTask } from '@/actions/tasks'
-import type { TaskWithRelations } from '@/lib/types'
+import { createRecurrenceRule } from '@/actions/task-recurrence'
+import type { TaskWithRelations, RecurrenceFrequency } from '@/lib/types'
 
 interface Props {
   onClose: () => void
@@ -25,6 +27,28 @@ export default function TaskForm({
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurrenceData, setRecurrenceData] = useState<{
+    frequency: RecurrenceFrequency
+    interval: number
+    day_of_week: number | null
+    day_of_month: number | null
+    next_occurrence: string
+    is_active: boolean
+  } | null>(null)
+
+  async function handleRecurrenceSubmit(data: {
+    frequency: RecurrenceFrequency
+    interval: number
+    day_of_week: number | null
+    day_of_month: number | null
+    next_occurrence: string
+    is_active: boolean
+  }) {
+    // Store the recurrence data to be used when creating the task
+    setRecurrenceData(data)
+    // Recurrence form will be collapsed after submission
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -59,6 +83,22 @@ export default function TaskForm({
         setError(result.error)
         setLoading(false)
         return
+      }
+
+      // Create recurrence rule if needed
+      let taskId = ''
+      if (result.data) {
+        taskId = (result.data as TaskWithRelations).id
+      }
+
+      if (isRecurring && recurrenceData && taskId) {
+        const ruleResult = await createRecurrenceRule(recurrenceData)
+
+        if (ruleResult.error) {
+          setError('Task created but recurrence failed: ' + ruleResult.error)
+          setLoading(false)
+          return
+        }
       }
 
       if (result.data) {
@@ -139,6 +179,48 @@ export default function TaskForm({
               ))}
             </select>
           </div>
+
+          {/* Make Recurring */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={e => setIsRecurring(e.target.checked)}
+              className="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-gold-500 dark:bg-neutral-800 dark:border-neutral-600"
+            />
+            <span className="text-sm text-neutral-800 dark:text-neutral-300">Make this task recurring</span>
+          </label>
+
+          {/* Recurrence Form */}
+          {isRecurring && !recurrenceData && (
+            <div className="p-4 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20">
+              <TaskRecurrenceForm
+                onSubmit={handleRecurrenceSubmit}
+                onCancel={() => setIsRecurring(false)}
+                isLoading={false}
+                submitLabel="Configure Recurrence"
+              />
+            </div>
+          )}
+
+          {/* Recurrence Summary */}
+          {recurrenceData && (
+            <div className="p-4 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-neutral-800 dark:text-neutral-300">
+                  <p className="font-medium">Recurrence configured</p>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-500">Next occurrence: {new Date(recurrenceData.next_occurrence).toLocaleDateString()}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRecurrenceData(null)}
+                  className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Assignees */}
           <div>

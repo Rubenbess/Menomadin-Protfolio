@@ -14,11 +14,13 @@ import { TaskAttachmentUpload } from '@/components/TaskAttachmentUpload'
 import { TaskActivityFeed } from '@/components/TaskActivityFeed'
 import { TaskDependencyViewer } from '@/components/TaskDependencyViewer'
 import { TaskHealthBadge } from '@/components/TaskHealthBadge'
+import TaskRecurrenceDisplay from '@/components/TaskRecurrenceDisplay'
+import RecurrenceFormModal from '@/components/RecurrenceFormModal'
 import { getTaskComments } from '@/actions/task-comments'
 import { getTaskAttachments } from '@/actions/task-attachments'
 import TaskEditModal from './TaskEditModal'
 import { formatDueDate, isTaskOverdue } from '@/lib/task-utils'
-import { completeTask, cancelTask, deleteTask, assignTask, removeAssignee } from '@/actions/tasks'
+import { completeTask, cancelTask, deleteTask, assignTask, removeAssignee, getTask } from '@/actions/tasks'
 import type { TaskWithRelations, TaskStatus } from '@/lib/types'
 
 interface Props {
@@ -45,6 +47,7 @@ export default function TaskDetailModal({
   const [isCompleting, setIsCompleting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showRecurrenceModal, setShowRecurrenceModal] = useState(false)
   const [currentTask, setCurrentTask] = useState(task)
   const [comments, setComments] = useState(task.comments || [])
   const [attachments, setAttachments] = useState(task.attachments || [])
@@ -123,6 +126,14 @@ export default function TaskDetailModal({
     setCurrentTask(updatedTask)
     onTaskUpdated(updatedTask)
     setShowEditModal(false)
+  }
+
+  const handleRecurrenceUpdated = async () => {
+    // Refresh the task to get updated recurrence info
+    const result = await getTask(task.id)
+    if (!result.error && result.data) {
+      setCurrentTask(result.data as TaskWithRelations)
+    }
   }
 
   const handleCommentAdded = async () => {
@@ -252,6 +263,25 @@ export default function TaskDetailModal({
               )}
             </div>
           </div>
+
+          {/* Recurrence */}
+          {currentTask.is_recurring && currentTask.recurrence_rule ? (
+            <TaskRecurrenceDisplay
+              rule={currentTask.recurrence_rule}
+              taskId={currentTask.id}
+              onRuleUpdated={handleRecurrenceUpdated}
+              onEdit={() => setShowRecurrenceModal(true)}
+            />
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setShowRecurrenceModal(true)}
+              className="w-full"
+            >
+              Make Task Recurring
+            </Button>
+          )}
 
           {/* Assignees */}
           <div className="space-y-3">
@@ -512,6 +542,18 @@ export default function TaskDetailModal({
           teamMembers={teamMembers}
         />
       )}
+
+      {/* Recurrence Modal */}
+      <RecurrenceFormModal
+        open={showRecurrenceModal}
+        rule={currentTask.recurrence_rule}
+        taskId={currentTask.id}
+        onClose={() => setShowRecurrenceModal(false)}
+        onSubmit={() => {
+          handleRecurrenceUpdated()
+          setShowRecurrenceModal(false)
+        }}
+      />
     </div>
   )
 }

@@ -69,7 +69,11 @@
       "Bash(wc -l app/\\\\\\(protected\\\\\\)/tasks/TasksFilters.tsx)",
       "Bash(grep -n \"activeTab === ''tasks''\" app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
       "Bash(wc -l app/\\\\\\(protected\\\\\\)/dashboard/page.tsx)",
-      "Bash(grep -n \"CapTableUploadModal\\\\|showCapTableUpload\" app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)"
+      "Bash(grep -n \"CapTableUploadModal\\\\|showCapTableUpload\" app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
+      "Bash(rm \"c:/Users/rubenb/.claude/projects/c--Users-rubenb-Portfolio/memory/cap_table_upload_complete.md\")",
+      "Bash(mv /tmp/memory.tmp \"c:/Users/rubenb/.claude/projects/c--Users-rubenb-Portfolio/memory/MEMORY.md\")",
+      "Bash(ls -la c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/tasks/)",
+      "Bash(grep -l \"CompanyTasks\\\\|company.*task\" c:/Users/rubenb/Portfolio/app/\\\\\\(protected\\\\\\)/companies/[id]/*.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
