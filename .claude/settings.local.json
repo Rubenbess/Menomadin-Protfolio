@@ -68,7 +68,8 @@
       "Bash(ls -la actions/task-att*)",
       "Bash(wc -l app/\\\\\\(protected\\\\\\)/tasks/TasksFilters.tsx)",
       "Bash(grep -n \"activeTab === ''tasks''\" app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)",
-      "Bash(wc -l app/\\\\\\(protected\\\\\\)/dashboard/page.tsx)"
+      "Bash(wc -l app/\\\\\\(protected\\\\\\)/dashboard/page.tsx)",
+      "Bash(grep -n \"CapTableUploadModal\\\\|showCapTableUpload\" app/\\\\\\(protected\\\\\\)/companies/[id]/CompanyDetailClient.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"

@@ -29,7 +29,6 @@ import SafeScenarioModal from '@/components/SafeScenarioModal'
 import OwnershipTable from '@/components/OwnershipTable'
 import WaterfallScenarioPanel from '@/components/WaterfallScenarioPanel'
 import { HealthScoreBreakdown } from '@/components/HealthScoreBadge'
-import CapTableUploadModal from '@/components/cap-table/CapTableUploadModal'
 import {
   calcCurrentValue,
   calcMOIC,
@@ -71,7 +70,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [showAddRound, setShowAddRound] = useState(false)
   const [showAddInvestment, setShowAddInvestment] = useState(false)
   const [showAddCapTable, setShowAddCapTable] = useState(false)
-  const [showCapTableUpload, setShowCapTableUpload] = useState(false)
   const [showAddKPI, setShowAddKPI] = useState(false)
   const [showAddUpdate, setShowAddUpdate] = useState(false)
   const [showAddSafe, setShowAddSafe] = useState(false)
@@ -561,9 +559,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="secondary" onClick={() => setShowCapTableUpload(true)}>
-                  📤 Import from File
-                </Button>
                 <Button size="sm" onClick={() => setShowAddCapTable(true)}>
                   <Plus size={13} /> Add Entry
                 </Button>
@@ -799,11 +794,6 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           onClose={() => setScenarioSafe(null)}
         />
       )}
-      <CapTableUploadModal
-        companyId={company.id}
-        isOpen={showCapTableUpload}
-        onClose={() => setShowCapTableUpload(false)}
-      />
     </div>
   )
 }
