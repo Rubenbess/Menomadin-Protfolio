@@ -90,13 +90,14 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
 
   if (extraction.data.length === 0) {
     // More helpful error: report what we scanned
-    const scannedRows = extraction.filteredRowCount
+    const scannedRows = Math.max(0, extraction.filteredRowCount)
     const message =
-      scannedRows === 0
-        ? `No data rows found in sheet. Headers detected at row ${headerDetection.headerRowIndex + 1} (${headerDetection.headers.join(', ')}), but sheet appears to have no rows after that.`
+      scannedRows === 0 || extraction.filteredRowCount < 0
+        ? `No data rows found. Headers detected at row ${headerDetection.headerRowIndex + 1} (${headerDetection.headers.join(', ')}), ` +
+          `but no additional rows found after that. The file may only contain headers, or the structure is unexpected.`
         : `No valid data rows found. Scanned ${scannedRows} rows after headers but all were empty or filtered as summaries. ` +
           `Headers: ${headerDetection.headers.join(', ')}. ` +
-          `Try checking the file structure or the rows may need manual inspection.`
+          `Try checking the file structure.`
 
     throw new Error(message)
   }

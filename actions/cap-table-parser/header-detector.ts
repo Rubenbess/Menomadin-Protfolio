@@ -44,10 +44,12 @@ const HEADER_KEYWORDS = [
  */
 export function detectHeaderRow(worksheet: XLSX.WorkSheet): HeaderDetectionResult {
   const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
-  const maxRowsToCheck = Math.min(50, range.e.r - range.s.r + 1)
+  const totalRows = range.e.r - range.s.r + 1
+  const maxRowsToCheck = Math.min(50, totalRows)
 
   let bestResult: HeaderDetectionResult | null = null
   let bestScore = 0
+  let candidates: Array<{ row: number; score: number; headers: string[] }> = []
 
   // Check first N rows as potential headers
   for (let row = range.s.r; row < range.s.r + maxRowsToCheck; row++) {
@@ -61,6 +63,8 @@ export function detectHeaderRow(worksheet: XLSX.WorkSheet): HeaderDetectionResul
     const headers = normalizeHeaders(rowData)
     const score = scoreHeaderRow(headers)
 
+    candidates.push({ row, score, headers })
+
     if (score > bestScore) {
       bestScore = score
       bestResult = {
@@ -68,6 +72,24 @@ export function detectHeaderRow(worksheet: XLSX.WorkSheet): HeaderDetectionResul
         headers,
         confidence: Math.min(100, score),
         reasoning: generateReasoning(headers, score),
+      }
+    }
+  }
+
+  // Safety check: if detected header is at/near the end of file with no room for data,
+  // try the second-best candidate instead
+  if (bestResult && candidates.length > 1) {
+    const rowsAfterHeader = range.e.r - bestResult.headerRowIndex
+    if (rowsAfterHeader <= 0) {
+      // Header is at the very end - try second candidate
+      const secondBest = candidates.sort((a, b) => b.score - a.score)[1]
+      if (secondBest) {
+        bestResult = {
+          headerRowIndex: secondBest.row,
+          headers: secondBest.headers,
+          confidence: Math.min(100, secondBest.score),
+          reasoning: generateReasoning(secondBest.headers, secondBest.score) + ' (adjusted due to position)',
+        }
       }
     }
   }
