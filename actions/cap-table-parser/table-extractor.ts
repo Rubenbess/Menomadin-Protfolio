@@ -39,7 +39,7 @@ export function extractTableData(
   for (let row = headerRowIndex + 1; row <= range.e.r; row++) {
     const rowData = extractRowData(worksheet, row, range)
 
-    // Skip completely empty rows
+    // Skip completely empty rows (all cells empty)
     if (rowData.every(cell => !cell)) {
       continue
     }
@@ -47,6 +47,17 @@ export function extractTableData(
     // Skip summary/total rows
     if (isSummaryRow(rowData, headers)) {
       continue
+    }
+
+    // Check if row has at least SOME content in a meaningful column
+    // (typically first column should have a name/identifier)
+    if (!rowData[0]) {
+      // If first column is empty, row might be continuation or formatting
+      // Only skip if truly nothing in the row
+      const hasAnyData = rowData.some(cell => cell && cell.toString().trim().length > 0)
+      if (!hasAnyData) {
+        continue
+      }
     }
 
     // Convert to object using headers
