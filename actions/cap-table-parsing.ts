@@ -63,7 +63,12 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   rows: Record<string, any>[]
   allSheets: string[]
 } {
-  const workbook = XLSX.read(buffer, { type: 'buffer' })
+  // Read with explicit settings to handle all file types
+  const workbook = XLSX.read(buffer, {
+    type: 'buffer',
+    cellFormula: false,
+    cellStyles: false
+  })
 
   if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
     throw new Error('Excel file has no sheets')
@@ -76,46 +81,53 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
     throw new Error(`Sheet "${targetSheet}" not found in workbook`)
   }
 
-  // Use XLSX's built-in JSON conversion - it handles most cases well
-  const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[]
+  // Read as array of arrays first - most reliable
+  const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
 
-  if (!jsonData || jsonData.length === 0) {
-    // Fallback: try header: 1 mode and convert manually
-    const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
-
-    if (!arrayData || arrayData.length < 2) {
-      throw new Error('Excel file contains no data rows')
-    }
-
-    const headers = (arrayData[0] || []).map(h => String(h || '').trim())
-    const fallbackRows = arrayData
-      .slice(1)
-      .filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''))
-      .map(row => {
-        const obj: Record<string, any> = {}
-        headers.forEach((h, i) => {
-          obj[h || `Column${i}`] = row[i] ?? null
-        })
-        return obj
-      })
-
-    if (fallbackRows.length === 0) {
-      throw new Error('Excel file has headers but no valid data rows')
-    }
-
-    return {
-      headers,
-      rows: fallbackRows,
-      allSheets: workbook.SheetNames,
-    }
+  if (!arrayData || arrayData.length === 0) {
+    throw new Error('Excel sheet is completely empty')
   }
 
-  // Extract headers from first row keys
-  const headers = Object.keys(jsonData[0])
+  // First row is headers
+  const headerRow = arrayData[0] || []
+  if (headerRow.length === 0) {
+    throw new Error('Excel file has no columns')
+  }
+
+  // Get headers
+  const headers = headerRow.map(h => {
+    const str = h ? String(h).trim() : ''
+    return str.length > 0 ? str : 'Unknown'
+  })
+
+  // Data rows are everything after the first row
+  const dataRows = arrayData.slice(1)
+
+  // Filter to only rows that have at least one non-empty cell
+  const rows = dataRows
+    .filter(row => {
+      if (!row || row.length === 0) return false
+      return row.some(cell => cell !== null && cell !== undefined && cell !== '')
+    })
+    .map(row => {
+      const obj: Record<string, any> = {}
+      headers.forEach((header, idx) => {
+        // Get value from this row at this column index
+        obj[header] = (row && row[idx]) ?? null
+      })
+      return obj
+    })
+
+  if (rows.length === 0) {
+    throw new Error(
+      `Excel file has headers (${headers.join(', ')}) but no data rows. ` +
+      `Found ${dataRows.length} rows after header, but all were empty.`
+    )
+  }
 
   return {
     headers,
-    rows: jsonData,
+    rows,
     allSheets: workbook.SheetNames,
   }
 }
