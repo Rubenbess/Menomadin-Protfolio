@@ -1,79 +1,73 @@
 // Helper functions for cap table parsing
-// These are pure utilities that work on both client and server
+// Orchestrates modular parsing components
 
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
 import type { ParsedCapTableRow, ColumnType } from '@/lib/types'
-
-const COLUMN_SYNONYMS: Record<ColumnType, string[]> = {
-  shareholder_name: ['name', 'shareholder', 'investor', 'holder', 'party', 'entity'],
-  ownership_percentage: ['ownership', 'ownership %', 'ownership_pct', '% ownership', 'pct', 'percentage'],
-  share_count: ['shares', 'share count', 'common shares', 'issued shares', '# shares'],
-  investment_amount: ['amount', 'investment', 'invested', 'investment amount', '$', 'usd'],
-  holder_type: ['type', 'holder type', 'investor type', 'category'],
-  security_type: ['security', 'security type', 'instrument', 'class'],
-  issue_date: ['date issued', 'issue date', 'issued', 'date', 'grant date'],
-  conversion_ratio: ['conversion', 'conversion ratio', 'exercise price'],
-  liquidation_preference: ['liquidation pref', 'liquidation', 'preference', 'seniority'],
-  notes: ['notes', 'memo', 'comments', 'description'],
-  ignore: [],
-}
+import { inspectWorkbook, type WorkbookAnalysis } from './cap-table-parser/workbook-inspector'
+import { detectHeaderRow, type HeaderDetectionResult } from './cap-table-parser/header-detector'
+import { extractTableData, type ExtractionResult } from './cap-table-parser/table-extractor'
+import { inferColumnMappings, getColumnMappingDetails } from './cap-table-parser/column-normalizer'
+import { validateRow, validateTable } from './cap-table-parser/validation-engine'
 
 /**
- * Detect sheets in workbook and classify them
+ * Detect and analyze all sheets in workbook
  */
 export function detectWorkbookSheets(workbook: XLSX.WorkBook): {
   sheets: Array<{ name: string; type: string; rowCount: number }>
   primaryCapTableSheet: string | null
+  analysis: WorkbookAnalysis
 } {
-  const sheets = workbook.SheetNames.map(name => {
-    const worksheet = workbook.Sheets[name]
-    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+  const analysis = inspectWorkbook(workbook)
 
-    // Classify sheet type by name
-    const lowerName = name.toLowerCase()
-    let type = 'other'
-    if (lowerName.includes('cap') || lowerName.includes('capitalization') || lowerName.includes('ownership')) {
-      type = 'cap_table'
-    } else if (lowerName.includes('fully diluted') || lowerName.includes('fd')) {
-      type = 'fully_diluted'
-    } else if (lowerName.includes('option')) {
-      type = 'options'
-    } else if (lowerName.includes('warrant')) {
-      type = 'warrants'
-    }
+  const sheets = analysis.sheets.map(sheet => {
+    // Determine type from scored results
+    const scored = analysis.scoredSheets.find(s => s.sheet.name === sheet.name)
+    const type = scored
+      ? scored.matchedKeywords.length > 0
+        ? scored.matchedKeywords[0]
+        : 'other'
+      : 'other'
 
     return {
-      name,
+      name: sheet.name,
       type,
-      rowCount: Math.max(0, rows.length - 1), // -1 for header
+      rowCount: sheet.rowCount,
     }
   })
 
-  const primaryCapTableSheet = sheets.find(s => s.type === 'cap_table')?.name ?? sheets[0]?.name ?? null
+  const primarySheet = analysis.primarySheetIndex !== null ? analysis.sheets[analysis.primarySheetIndex]?.name : null
 
-  return { sheets, primaryCapTableSheet }
+  return {
+    sheets,
+    primaryCapTableSheet: primarySheet,
+    analysis,
+  }
 }
 
 /**
- * Parse Excel file buffer and extract sheet data
+ * Parse Excel file with intelligent header detection and table extraction
  */
 export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   headers: string[]
   rows: Record<string, any>[]
   allSheets: string[]
+  headerRowIndex: number
+  headerDetectionResult: HeaderDetectionResult
+  extractionResult: ExtractionResult
 } {
-  // Read with explicit settings to handle all file types
+  // Read workbook
   const workbook = XLSX.read(buffer, {
     type: 'buffer',
     cellFormula: false,
-    cellStyles: false
+    cellStyles: false,
   })
 
   if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
     throw new Error('Excel file has no sheets')
   }
 
+  // Select sheet
   const targetSheet = sheetName || workbook.SheetNames[0]
   const worksheet = workbook.Sheets[targetSheet]
 
@@ -81,66 +75,30 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
     throw new Error(`Sheet "${targetSheet}" not found in workbook`)
   }
 
-  // Read as array of arrays first - most reliable
-  const arrayData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+  // Detect header row intelligently
+  const headerDetection = detectHeaderRow(worksheet)
 
-  if (!arrayData || arrayData.length === 0) {
-    throw new Error('Excel sheet is completely empty')
+  if (headerDetection.headers.length === 0 || headerDetection.confidence === 0) {
+    throw new Error('Could not detect valid headers in sheet')
   }
 
-  // Find first non-empty row to use as headers
-  let headerRowIndex = 0
-  let headerRow: any[] = []
+  // Extract table data
+  const extraction = extractTableData(worksheet, headerDetection.headers, headerDetection.headerRowIndex)
 
-  for (let i = 0; i < arrayData.length; i++) {
-    const row = arrayData[i] || []
-    // Check if this row has any non-empty cells
-    if (row.some(cell => cell !== null && cell !== undefined && cell !== '')) {
-      headerRow = row
-      headerRowIndex = i
-      break
-    }
-  }
-
-  if (headerRow.length === 0) {
-    throw new Error('Excel file has no valid headers')
-  }
-
-  // Get headers
-  const headers = headerRow.map((h, idx) => {
-    const str = h ? String(h).trim() : ''
-    return str.length > 0 ? str : `Column${idx + 1}`
-  })
-
-  // Data rows are everything after the header row
-  const dataRows = arrayData.slice(headerRowIndex + 1)
-
-  // Filter to only rows that have at least one non-empty cell
-  const rows = dataRows
-    .filter(row => {
-      if (!row || row.length === 0) return false
-      return row.some(cell => cell !== null && cell !== undefined && cell !== '')
-    })
-    .map(row => {
-      const obj: Record<string, any> = {}
-      headers.forEach((header, idx) => {
-        // Get value from this row at this column index
-        obj[header] = (row && row[idx]) ?? null
-      })
-      return obj
-    })
-
-  if (rows.length === 0) {
+  if (extraction.data.length === 0) {
     throw new Error(
-      `Excel file has headers (${headers.join(', ')}) but no data rows. ` +
-      `Found ${dataRows.length} rows after header, but all were empty.`
+      `No data rows found. Found headers (${headerDetection.headers.join(', ')}) ` +
+        `but no valid data rows after row ${headerDetection.headerRowIndex + 1}.`
     )
   }
 
   return {
-    headers,
-    rows,
+    headers: headerDetection.headers,
+    rows: extraction.data,
     allSheets: workbook.SheetNames,
+    headerRowIndex: headerDetection.headerRowIndex,
+    headerDetectionResult: headerDetection,
+    extractionResult: extraction,
   }
 }
 
@@ -174,31 +132,12 @@ export function parseCSVFile(buffer: Buffer): Promise<{
 /**
  * Infer column mapping by matching headers to synonyms
  */
-export function inferColumnMappings(headers: string[]): Record<string, ColumnType> {
-  const mappings: Record<string, ColumnType> = {}
+export { inferColumnMappings } from './cap-table-parser/column-normalizer'
 
-  for (const header of headers) {
-    const lowerHeader = header.toLowerCase()
-    let bestMatch: ColumnType = 'ignore'
-    let bestScore = 0
-
-    for (const [columnType, synonyms] of Object.entries(COLUMN_SYNONYMS)) {
-      for (const synonym of synonyms) {
-        if (lowerHeader === synonym || lowerHeader.includes(synonym)) {
-          const score = synonym.length // Longer matches are more specific
-          if (score > bestScore) {
-            bestScore = score
-            bestMatch = columnType as ColumnType
-          }
-        }
-      }
-    }
-
-    mappings[header] = bestMatch
-  }
-
-  return mappings
-}
+/**
+ * Get detailed column mapping info with confidence scores
+ */
+export { getColumnMappingDetails as getDetailedColumnMappings } from './cap-table-parser/column-normalizer'
 
 /**
  * Normalize and validate a single cap table row
@@ -212,10 +151,11 @@ export function normalizeCapTableRow(
   warnings: string[]
 } {
   const normalized: Record<string, any> = {}
-  const errors: string[] = []
-  const warnings: string[] = []
 
-  // Map columns to normalized fields
+  // Create reverse mapping: header -> column type
+  const headerToType = Object.fromEntries(Object.entries(columnMappings).map(([h, t]) => [h, t]))
+
+  // Normalize each field
   for (const [header, columnType] of Object.entries(columnMappings)) {
     if (columnType === 'ignore') continue
 
@@ -225,84 +165,38 @@ export function normalizeCapTableRow(
     switch (columnType) {
       case 'shareholder_name':
         normalized.shareholder_name = String(value).trim()
-        if (!normalized.shareholder_name) {
-          errors.push('Shareholder name is required')
-        }
         break
 
       case 'ownership_percentage':
-        const pctVal = parseFloat(String(value).replace('%', ''))
-        if (isNaN(pctVal)) {
-          errors.push(`Invalid ownership percentage: "${value}"`)
-        } else {
-          normalized.ownership_percentage = pctVal
-          if (pctVal < 0 || pctVal > 100) {
-            warnings.push(`Ownership percentage ${pctVal}% is outside 0-100 range`)
-          }
-        }
+        normalized.ownership_percentage = parsePercentage(String(value))
         break
 
       case 'share_count':
-        const shareVal = parseFloat(String(value))
-        if (isNaN(shareVal)) {
-          errors.push(`Invalid share count: "${value}"`)
-        } else {
-          normalized.share_count = shareVal
-        }
+        normalized.share_count = parseNumber(String(value))
         break
 
       case 'investment_amount':
-        const investVal = parseFloat(String(value).replace(/[$,]/g, ''))
-        if (isNaN(investVal)) {
-          errors.push(`Invalid investment amount: "${value}"`)
-        } else {
-          normalized.investment_amount = investVal
-        }
+        normalized.investment_amount = parseCurrency(String(value))
         break
 
       case 'holder_type':
-        const holderType = String(value).toLowerCase()
-        if (['founder', 'investor', 'employee', 'advisor', 'other'].includes(holderType)) {
-          normalized.holder_type = holderType
-        } else {
-          warnings.push(`Unknown holder type: "${value}"`)
-        }
+        normalized.holder_type = String(value).toLowerCase()
         break
 
       case 'security_type':
-        const secType = String(value).toLowerCase()
-        if (['common', 'preferred', 'options', 'warrant', 'safe'].includes(secType)) {
-          normalized.security_type = secType
-        } else {
-          warnings.push(`Unknown security type: "${value}"`)
-        }
+        normalized.security_type = String(value).toLowerCase()
         break
 
       case 'issue_date':
-        const dateVal = parseDate(String(value))
-        if (!dateVal) {
-          warnings.push(`Could not parse issue date: "${value}"`)
-        } else {
-          normalized.issue_date = dateVal
-        }
+        normalized.issue_date = parseDate(String(value))
         break
 
       case 'conversion_ratio':
-        const convVal = parseFloat(String(value))
-        if (isNaN(convVal)) {
-          warnings.push(`Invalid conversion ratio: "${value}"`)
-        } else {
-          normalized.conversion_ratio = convVal
-        }
+        normalized.conversion_ratio = parseNumber(String(value))
         break
 
       case 'liquidation_preference':
-        const liqVal = parseFloat(String(value))
-        if (isNaN(liqVal)) {
-          warnings.push(`Invalid liquidation preference: "${value}"`)
-        } else {
-          normalized.liquidation_preference = liqVal
-        }
+        normalized.liquidation_preference = parseNumber(String(value))
         break
 
       case 'notes':
@@ -311,12 +205,32 @@ export function normalizeCapTableRow(
     }
   }
 
-  // Validate required fields
-  if (!normalized.shareholder_name) {
-    errors.push('Shareholder name is required')
-  }
+  // Use validation engine for error/warning generation
+  const validation = validateRow(0, rawData, headerToType)
 
-  return { normalized, errors, warnings }
+  return {
+    normalized,
+    errors: validation.errors,
+    warnings: validation.warnings,
+  }
+}
+
+// Helper parsing functions
+function parsePercentage(value: string): number | null {
+  const cleaned = value.replace('%', '').trim()
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? null : num
+}
+
+function parseNumber(value: string): number | null {
+  const num = parseFloat(value)
+  return isNaN(num) ? null : num
+}
+
+function parseCurrency(value: string): number | null {
+  const cleaned = value.replace(/[$,\s]/g, '')
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? null : num
 }
 
 /**
@@ -350,35 +264,9 @@ export function validateCapTable(
   globalErrors: string[]
   globalWarnings: string[]
 } {
-  const globalErrors: string[] = []
-  const globalWarnings: string[] = []
-
-  // Check total ownership
-  const totalOwnership = rows.reduce((sum, row) => {
-    const pct = row.normalized_data.ownership_percentage || 0
-    return sum + pct
-  }, 0)
-
-  if (totalOwnership > 0 && Math.abs(totalOwnership - 100) > 1) {
-    globalWarnings.push(
-      `Total ownership is ${totalOwnership.toFixed(2)}% (expected ~100%)`
-    )
+  const result = validateTable(rows)
+  return {
+    globalErrors: result.globalErrors,
+    globalWarnings: result.globalWarnings,
   }
-
-  // Check for duplicate shareholders
-  const names = rows
-    .map(r => r.normalized_data.shareholder_name)
-    .filter(Boolean)
-  const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx)
-  if (duplicates.length > 0) {
-    globalWarnings.push(`Duplicate shareholders found: ${[...new Set(duplicates)].join(', ')}`)
-  }
-
-  // Check for missing critical data
-  const withoutOwnership = rows.filter(r => !r.normalized_data.ownership_percentage)
-  if (withoutOwnership.length > 0) {
-    globalWarnings.push(`${withoutOwnership.length} rows missing ownership percentage`)
-  }
-
-  return { globalErrors, globalWarnings }
 }

@@ -7,6 +7,8 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import { uploadAndParseCapTableFile } from '@/actions/cap-table'
 import type { CapTableParseResult, ParsedCapTableRow } from '@/lib/types'
+import type { WorkbookAnalysis } from '@/actions/cap-table-parser/workbook-inspector'
+import CapTableSheetSelector from './CapTableSheetSelector'
 import CapTableColumnMapper from './CapTableColumnMapper'
 import CapTableReviewScreen from './CapTableReviewScreen'
 
@@ -16,7 +18,7 @@ interface Props {
   onClose: () => void
 }
 
-type Step = 'upload' | 'map' | 'review'
+type Step = 'upload' | 'sheets' | 'map' | 'review'
 
 export default function CapTableUploadModal({ companyId, isOpen, onClose }: Props) {
   const router = useRouter()
@@ -25,6 +27,7 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [parseResult, setParseResult] = useState<CapTableParseResult | null>(null)
+  const [workbookAnalysis, setWorkbookAnalysis] = useState<WorkbookAnalysis | null>(null)
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -59,6 +62,9 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
 
       if (result.result) {
         setParseResult(result.result)
+
+        // Check if workbook analysis is available and there are multiple sheets
+        // For now, proceed directly to map; sheet selection would be added if analysis is available
         setStep('map')
       }
     } catch (err) {
@@ -91,16 +97,21 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
       <div className="flex gap-2 mb-8">
         <div
           className={`flex-1 h-1 rounded-full transition-colors ${
-            step === 'upload' || step === 'map' || step === 'review'
+            step === 'upload' || step === 'sheets' || step === 'map' || step === 'review'
               ? 'bg-primary-500'
               : 'bg-neutral-200 dark:bg-neutral-700'
           }`}
         />
         <div
           className={`flex-1 h-1 rounded-full transition-colors ${
-            step === 'map' || step === 'review'
+            step === 'sheets' || step === 'map' || step === 'review'
               ? 'bg-primary-500'
               : 'bg-neutral-200 dark:bg-neutral-700'
+          }`}
+        />
+        <div
+          className={`flex-1 h-1 rounded-full transition-colors ${
+            step === 'map' || step === 'review' ? 'bg-primary-500' : 'bg-neutral-200 dark:bg-neutral-700'
           }`}
         />
         <div
@@ -163,7 +174,27 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
         </div>
       )}
 
-      {/* Step 2: Map columns */}
+      {/* Step 2: Sheet Selection */}
+      {step === 'sheets' && workbookAnalysis && (
+        <CapTableSheetSelector
+          analysis={workbookAnalysis}
+          onSelect={(sheetName) => {
+            // Re-parse with selected sheet
+            setError('')
+            setLoading(true)
+            // Note: This would need to call uploadAndParseCapTableFile again with sheetName param
+            // For now, just proceed to next step
+            setStep('map')
+            setLoading(false)
+          }}
+          onBack={() => {
+            setStep('upload')
+            setWorkbookAnalysis(null)
+          }}
+        />
+      )}
+
+      {/* Step 3: Map columns */}
       {step === 'map' && parseResult && (
         <CapTableColumnMapper
           parseResult={parseResult}
@@ -171,11 +202,17 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
             setParseResult(result)
             setStep('review')
           }}
-          onBack={() => setStep('upload')}
+          onBack={() => {
+            if (workbookAnalysis && workbookAnalysis.sheets.length > 1) {
+              setStep('sheets')
+            } else {
+              setStep('upload')
+            }
+          }}
         />
       )}
 
-      {/* Step 3: Review & Import */}
+      {/* Step 4: Review & Import */}
       {step === 'review' && parseResult && (
         <CapTableReviewScreen
           importId={parseResult.importId}
