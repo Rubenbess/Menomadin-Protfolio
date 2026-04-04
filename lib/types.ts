@@ -79,12 +79,79 @@ export interface Investment {
   valuation_cap: number | null
 }
 
+export type HolderType = 'founder' | 'investor' | 'employee' | 'advisor' | 'other'
+export type SecurityType = 'common' | 'preferred' | 'options' | 'warrant' | 'safe'
+export type ColumnType =
+  | 'shareholder_name'
+  | 'ownership_percentage'
+  | 'share_count'
+  | 'investment_amount'
+  | 'holder_type'
+  | 'security_type'
+  | 'issue_date'
+  | 'conversion_ratio'
+  | 'liquidation_preference'
+  | 'notes'
+  | 'ignore'
+
 export interface CapTableEntry {
   id: string
   company_id: string
   round_id: string | null
   shareholder_name: string
   ownership_percentage: number
+  holder_type?: HolderType
+  security_type?: SecurityType
+  share_count?: number
+  investment_amount?: number
+  issue_date?: string
+  conversion_ratio?: number
+  liquidation_preference?: number
+  notes?: string
+  is_fully_diluted?: boolean
+  import_snapshot_id?: string
+  created_at?: string
+}
+
+export interface CapTableImport {
+  id: string
+  company_id: string
+  file_name: string
+  file_size: number | null
+  file_url: string | null
+  uploaded_by: string | null
+  uploaded_at: string
+  detected_sheet_names: string[]
+  parsed_row_count: number
+  imported_row_count: number
+  import_status: 'uploaded' | 'parsed' | 'reviewed' | 'imported' | 'failed'
+  validation_summary: {
+    errors: string[]
+    warnings: string[]
+  }
+  created_at: string
+  imported_at: string | null
+}
+
+export interface ParsedCapTableRow {
+  row_index: number
+  raw_data: Record<string, any>
+  normalized_data: Record<string, any>
+  validation_errors: string[]
+  validation_warnings: string[]
+  is_imported: boolean
+}
+
+export interface CapTableParseResult {
+  success: boolean
+  importId: string
+  detectedSheets: string[]
+  selectedSheet: string
+  columnMappings: Record<string, string>
+  parsedRows: ParsedCapTableRow[]
+  totalRows: number
+  errors: string[]
+  warnings: string[]
 }
 
 export interface Reserve {
