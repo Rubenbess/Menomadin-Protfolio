@@ -88,20 +88,32 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
     throw new Error('Excel sheet is completely empty')
   }
 
-  // First row is headers
-  const headerRow = arrayData[0] || []
+  // Find first non-empty row to use as headers
+  let headerRowIndex = 0
+  let headerRow: any[] = []
+
+  for (let i = 0; i < arrayData.length; i++) {
+    const row = arrayData[i] || []
+    // Check if this row has any non-empty cells
+    if (row.some(cell => cell !== null && cell !== undefined && cell !== '')) {
+      headerRow = row
+      headerRowIndex = i
+      break
+    }
+  }
+
   if (headerRow.length === 0) {
-    throw new Error('Excel file has no columns')
+    throw new Error('Excel file has no valid headers')
   }
 
   // Get headers
-  const headers = headerRow.map(h => {
+  const headers = headerRow.map((h, idx) => {
     const str = h ? String(h).trim() : ''
-    return str.length > 0 ? str : 'Unknown'
+    return str.length > 0 ? str : `Column${idx + 1}`
   })
 
-  // Data rows are everything after the first row
-  const dataRows = arrayData.slice(1)
+  // Data rows are everything after the header row
+  const dataRows = arrayData.slice(headerRowIndex + 1)
 
   // Filter to only rows that have at least one non-empty cell
   const rows = dataRows
