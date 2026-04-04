@@ -63,7 +63,7 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   rows: Record<string, any>[]
   allSheets: string[]
 } {
-  const workbook = XLSX.read(buffer, { type: 'buffer', cellText: false })
+  const workbook = XLSX.read(buffer, { type: 'buffer' })
   const targetSheet = sheetName || workbook.SheetNames[0]
   const worksheet = workbook.Sheets[targetSheet]
 
@@ -71,53 +71,49 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
     throw new Error(`Sheet "${targetSheet}" not found`)
   }
 
-  // Get the range of data
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
-
-  // Read raw data with headers in first row
-  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true }) as any[][]
-
-  if (!data || data.length === 0) {
+  // Get the actual data range
+  const ref = worksheet['!ref']
+  if (!ref) {
     throw new Error('Excel file is empty')
   }
 
-  // First row is headers, rest are data
-  const headerRow = data[0] || []
-  const dataRows = data.slice(1)
+  const range = XLSX.utils.decode_range(ref)
+  const headers: string[] = []
+  const rows: Record<string, any>[] = []
 
-  if (dataRows.length === 0) {
-    throw new Error('Excel file contains headers but no data rows')
+  // Read first row as headers
+  for (let col = range.s.c; col <= range.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col })
+    const cell = worksheet[cellAddress]
+    const value = cell ? String(cell.v ?? '').trim() : ''
+    headers.push(value || `Column${col}`)
   }
 
-  // Create headers, filter out completely empty columns
-  const headers = headerRow
-    .map((h, i) => ({
-      index: i,
-      name: h ? String(h).trim() : `Column${i}`,
-    }))
-    .filter(({ index }) => {
-      // Keep column if it has any non-empty value in data rows
-      return dataRows.some(row => {
-        const val = row[index]
-        return val !== null && val !== undefined && val !== ''
-      })
-    })
-    .map(h => h.name)
+  // Read remaining rows as data
+  for (let row = range.s.r + 1; row <= range.e.r; row++) {
+    const rowData: Record<string, any> = {}
+    let hasData = false
 
-  // Parse rows, skipping completely empty rows
-  const rows = dataRows
-    .filter(row => row.some((cell: any) => cell !== null && cell !== undefined && cell !== ''))
-    .map(row => {
-      const obj: Record<string, any> = {}
-      headers.forEach((header, headerIdx) => {
-        const originalColIdx = headerRow.findIndex(h => (h ? String(h).trim() : '') === header)
-        obj[header] = row[originalColIdx] ?? null
-      })
-      return obj
-    })
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col })
+      const cell = worksheet[cellAddress]
+      const value = cell ? cell.v : null
+
+      if (value !== null && value !== undefined && value !== '') {
+        hasData = true
+      }
+
+      rowData[headers[col - range.s.c]] = value
+    }
+
+    // Only add rows that have at least some data
+    if (hasData) {
+      rows.push(rowData)
+    }
+  }
 
   if (rows.length === 0) {
-    throw new Error('No valid data rows found in Excel file')
+    throw new Error('Excel file contains headers but no data rows')
   }
 
   return {
