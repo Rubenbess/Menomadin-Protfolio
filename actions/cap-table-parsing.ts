@@ -89,10 +89,16 @@ export function parseExcelFile(buffer: Buffer, sheetName?: string): {
   const extraction = extractTableData(worksheet, headerDetection.headers, headerDetection.headerRowIndex)
 
   if (extraction.data.length === 0) {
-    throw new Error(
-      `No data rows found. Found headers (${headerDetection.headers.join(', ')}) ` +
-        `but no valid data rows after row ${headerDetection.headerRowIndex + 1}.`
-    )
+    // More helpful error: report what we scanned
+    const scannedRows = extraction.filteredRowCount
+    const message =
+      scannedRows === 0
+        ? `No data rows found in sheet. Headers detected at row ${headerDetection.headerRowIndex + 1} (${headerDetection.headers.join(', ')}), but sheet appears to have no rows after that.`
+        : `No valid data rows found. Scanned ${scannedRows} rows after headers but all were empty or filtered as summaries. ` +
+          `Headers: ${headerDetection.headers.join(', ')}. ` +
+          `Try checking the file structure or the rows may need manual inspection.`
+
+    throw new Error(message)
   }
 
   return {

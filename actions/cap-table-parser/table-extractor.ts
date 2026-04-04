@@ -90,44 +90,34 @@ function extractRowData(worksheet: XLSX.WorkSheet, rowIndex: number, range: XLSX
 
 /**
  * Determine if a row is a summary/total row
+ * Only mark as summary if there's strong evidence, to avoid filtering legitimate data
  */
 function isSummaryRow(rowData: string[], headers: string[]): boolean {
   const firstCell = rowData[0] || ''
   const allCells = rowData.join(' ').toLowerCase()
 
-  // Check first cell against patterns
-  if (SUMMARY_ROW_PATTERNS.some(pattern => pattern.test(firstCell))) {
+  // Only filter if first cell explicitly indicates summary
+  // Check first cell against strong patterns
+  if (/^total|^subtotal|^grand total|^sum/i.test(firstCell.trim())) {
     return true
   }
 
-  // Check if first cell is a known summary keyword
-  if (/^(total|subtotal|sum|average)$/i.test(firstCell.trim())) {
+  // Check for "notes:" or "comments:" labels (usually at bottom)
+  if (/^notes?:|^comments?:|^source:/i.test(firstCell.trim())) {
     return true
   }
 
-  // Check if all non-first cells are numbers (likely a total row)
-  if (rowData.length > 1) {
+  // Check if row is all dashes or equals (separator row)
+  if (/^[=\-_]{3,}$/.test(firstCell.trim()) || rowData.every(cell => /^[=\-_\s]*$/.test(cell))) {
+    return true
+  }
+
+  // STRICT: Only filter as all-numbers if first cell explicitly says "total"
+  // Don't filter just because cells have numbers - that's normal data!
+  if (/total|subtotal|sum|all/i.test(firstCell) && rowData.length > 1) {
     const numberCells = rowData.slice(1).filter(cell => /^\d+\.?\d*%?$/.test(cell))
-    if (numberCells.length > rowData.slice(1).length * 0.7) {
-      // Check if first cell looks like a summary label
-      if (/total|sum|subtotal|all/i.test(firstCell)) {
-        return true
-      }
-    }
-  }
-
-  // Check for multiple consecutive empty cells followed by a number (often indicates summary)
-  let emptyCount = 0
-  for (let i = 0; i < rowData.length - 1; i++) {
-    if (!rowData[i]) {
-      emptyCount++
-    } else if (/^\d+\.?\d*%?$/.test(rowData[i])) {
-      if (emptyCount > 2) {
-        return true
-      }
-      emptyCount = 0
-    } else {
-      emptyCount = 0
+    if (numberCells.length > rowData.slice(1).length * 0.8) {
+      return true
     }
   }
 
