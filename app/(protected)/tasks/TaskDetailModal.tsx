@@ -13,6 +13,7 @@ import { TaskAttachmentDisplay } from '@/components/TaskAttachmentDisplay'
 import { TaskAttachmentUpload } from '@/components/TaskAttachmentUpload'
 import { TaskActivityFeed } from '@/components/TaskActivityFeed'
 import { TaskDependencyViewer } from '@/components/TaskDependencyViewer'
+import { TaskHealthBadge } from '@/components/TaskHealthBadge'
 import { getTaskComments } from '@/actions/task-comments'
 import { getTaskAttachments } from '@/actions/task-attachments'
 import TaskEditModal from './TaskEditModal'
@@ -183,6 +184,11 @@ export default function TaskDetailModal({
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {/* Health Score */}
+          <div className="p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <TaskHealthBadge task={currentTask} showDetails={true} />
+          </div>
+
           {/* Status Section */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Status</h3>
