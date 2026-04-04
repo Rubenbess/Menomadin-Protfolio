@@ -18,6 +18,7 @@ import { CATEGORY_COLORS } from '@/components/forms/UpdateForm'
 import DocumentUpload from '@/components/documents/DocumentUpload'
 import UpdateLinkButton from '@/components/UpdateLinkButton'
 import { KPITrendChart, ValuationChart } from '@/components/CompanyCharts'
+import CompanyTasks from '@/components/CompanyTasks'
 import { deleteInvestment } from '@/actions/investments'
 import { deleteCapTableEntry } from '@/actions/cap-table'
 import { deleteKPI } from '@/actions/kpis'
@@ -743,42 +744,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {/* TASKS */}
         {activeTab === 'tasks' && (
           <div className="p-5">
-            {tasks.length === 0 ? (
-              <EmptyState message="No tasks have been created for this company yet." />
-            ) : (
-              <div className="space-y-3">
-                {tasks.map(task => (
-                  <div key={task.id} className="flex items-start justify-between p-3 rounded-lg bg-neutral-50 border border-neutral-200 hover:border-violet-200 transition-colors">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm text-neutral-900">{task.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          task.status === 'To do' ? 'bg-neutral-100 text-neutral-700' :
-                          task.status === 'In progress' ? 'bg-blue-100 text-blue-600' :
-                          task.status === 'Done' ? 'bg-emerald-100 text-emerald-600' :
-                          'bg-neutral-100 text-neutral-700'
-                        }`}>
-                          {task.status}
-                        </span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          task.priority === 'high' ? 'bg-red-100 text-red-600' :
-                          task.priority === 'medium' ? 'bg-amber-100 text-amber-600' :
-                          'bg-emerald-100 text-emerald-600'
-                        }`}>
-                          {task.priority}
-                        </span>
-                        {task.due_date && (
-                          <span className="text-xs text-neutral-600">{new Date(task.due_date).toLocaleDateString()}</span>
-                        )}
-                      </div>
-                    </div>
-                    <Link href="/tasks" className="text-xs text-primary-500 hover:text-primary-600 font-medium">
-                      View
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
+            <CompanyTasks
+              tasks={tasks}
+              companyId={company.id}
+              companyName={company.name}
+            />
           </div>
         )}
       </div>

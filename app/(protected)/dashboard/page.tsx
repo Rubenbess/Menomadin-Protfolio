@@ -3,6 +3,7 @@ import { MetricCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import DashboardCharts from '@/components/DashboardCharts'
 import { DashboardQuickActions } from '@/components/DashboardQuickActions'
+import { TeamTasksDashboard } from '@/components/TeamTasksDashboard'
 import {
   calcCurrentValue,
   calcMOIC,
@@ -17,7 +18,7 @@ import {
   fmtPct,
   type CashFlow,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe, TaskWithRelations, TeamMember } from '@/lib/types'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import StrategyTableFilter from '@/components/StrategyTableFilter'
@@ -36,7 +37,7 @@ export default async function DashboardPage({ searchParams }: Props) {
   let companiesQuery = supabase.from('companies').select('*').order('name')
   if (strategy) companiesQuery = companiesQuery.eq('strategy', strategy)
 
-  const [{ data: companies }, { data: rounds }, { data: investments }, { data: capTable }, { data: reserves }, { data: safes }] =
+  const [{ data: companies }, { data: rounds }, { data: investments }, { data: capTable }, { data: reserves }, { data: safes }, { data: tasks }, { data: teamMembers }] =
     await Promise.all([
       companiesQuery,
       supabase.from('rounds').select('*'),
@@ -44,6 +45,18 @@ export default async function DashboardPage({ searchParams }: Props) {
       supabase.from('cap_table').select('*'),
       supabase.from('reserves').select('*'),
       supabase.from('safes').select('*').order('date'),
+      supabase.from('tasks').select(`
+        *,
+        assignees:task_assignees(
+          id,
+          task_id,
+          assigned_to,
+          assigned_at,
+          assigned_by,
+          team_member:team_members(id, name, color)
+        )
+      `).order('created_at', { ascending: false }),
+      supabase.from('team_members').select('*').order('name', { ascending: true }),
     ])
 
   const companiesList   = (companies   ?? []) as Company[]
@@ -52,6 +65,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   const capTableList    = (capTable    ?? []) as CapTableEntry[]
   const reservesList    = (reserves    ?? []) as Reserve[]
   const safesList       = (safes       ?? []) as Safe[]
+  const tasksList       = (tasks       ?? []) as TaskWithRelations[]
+  const teamMembersList = (teamMembers ?? []) as TeamMember[]
 
   const companiesWithMetrics: CompanyWithMetrics[] = companiesList.map((co) => {
     const coInvestments = investmentsList.filter((i) => i.company_id === co.id)
@@ -191,6 +206,14 @@ export default async function DashboardPage({ searchParams }: Props) {
               safes={safesList}
             />
           )}
+        </div>
+      </div>
+
+      {/* Team Tasks Dashboard */}
+      <div className="px-8 mt-8">
+        <div className="bg-neutral-0 dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-6">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-6">Team Tasks</h2>
+          <TeamTasksDashboard tasks={tasksList} teamMembers={teamMembersList} />
         </div>
       </div>
 
