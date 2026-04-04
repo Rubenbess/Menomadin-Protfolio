@@ -47,12 +47,13 @@ export async function uploadAndParseCapTableFile(
   try {
     const supabase = await createServerSupabaseClient()
 
-    // Determine file format
-    const isExcel = ['xlsx', 'xls'].includes(fileType.split('/').pop()?.toLowerCase() || '')
-    const isCSV = fileType.includes('csv') || fileName.toLowerCase().endsWith('.csv')
+    // Determine file format by extension (more reliable than MIME type)
+    const lowerFileName = fileName.toLowerCase()
+    const isExcel = lowerFileName.endsWith('.xlsx') || lowerFileName.endsWith('.xls')
+    const isCSV = lowerFileName.endsWith('.csv')
 
     if (!isExcel && !isCSV) {
-      return { error: 'File must be Excel (.xlsx) or CSV (.csv)' }
+      return { error: 'File must be Excel (.xlsx, .xls) or CSV (.csv)' }
     }
 
     // Parse file

@@ -30,6 +30,16 @@ export default function CapTableUploadModal({ companyId, isOpen, onClose }: Prop
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validate file type by extension
+    const fileName = file.name.toLowerCase()
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls')
+    const isCSV = fileName.endsWith('.csv')
+
+    if (!isExcel && !isCSV) {
+      setError('File must be Excel (.xlsx, .xls) or CSV (.csv)')
+      return
+    }
+
     setLoading(true)
     setError('')
 
