@@ -43,7 +43,32 @@ const HEADER_KEYWORDS = [
  * Detect header row by scanning first 50 rows
  */
 export function detectHeaderRow(worksheet: XLSX.WorkSheet): HeaderDetectionResult {
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
+  // Get sheet range - but validate it covers all used cells
+  let rangeStr = worksheet['!ref'] || 'A1'
+  let range = XLSX.utils.decode_range(rangeStr)
+
+  // CRITICAL FIX: Some Excel files don't have correct !ref
+  // Manually scan for actual used cells
+  let maxRow = range.e.r
+  let maxCol = range.e.c
+
+  // Scan worksheet for actual cell data
+  for (const key in worksheet) {
+    if (key.startsWith('!')) continue // Skip metadata keys
+    try {
+      const cellAddr = XLSX.utils.decode_cell(key)
+      if (cellAddr.r > maxRow) maxRow = cellAddr.r
+      if (cellAddr.c > maxCol) maxCol = cellAddr.c
+    } catch (e) {
+      // Invalid cell reference, skip
+    }
+  }
+
+  // Update range if we found more cells
+  if (maxRow > range.e.r || maxCol > range.e.c) {
+    range = { s: { r: 0, c: 0 }, e: { r: maxRow, c: maxCol } }
+  }
+
   const totalRows = range.e.r - range.s.r + 1
   const maxRowsToCheck = Math.min(50, totalRows)
 

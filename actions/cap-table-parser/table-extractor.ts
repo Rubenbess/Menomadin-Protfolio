@@ -31,7 +31,28 @@ export function extractTableData(
   headers: string[],
   headerRowIndex: number
 ): ExtractionResult {
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
+  // Get sheet range, accounting for files where !ref might be incomplete
+  let range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
+
+  // Manually scan for actual used cells in case !ref is wrong
+  let maxRow = range.e.r
+  let maxCol = range.e.c
+
+  for (const key in worksheet) {
+    if (key.startsWith('!')) continue
+    try {
+      const cellAddr = XLSX.utils.decode_cell(key)
+      if (cellAddr.r > maxRow) maxRow = cellAddr.r
+      if (cellAddr.c > maxCol) maxCol = cellAddr.c
+    } catch (e) {
+      // Invalid cell reference, skip
+    }
+  }
+
+  if (maxRow > range.e.r || maxCol > range.e.c) {
+    range = { s: { r: 0, c: 0 }, e: { r: maxRow, c: maxCol } }
+  }
+
   const dataRowIndices: number[] = []
   const data: Record<string, any>[] = []
 

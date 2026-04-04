@@ -78,8 +78,16 @@ export function inspectWorkbook(workbook: XLSX.WorkBook): WorkbookAnalysis {
  * Extract metadata from a single sheet
  */
 function extractSheetMetadata(name: string, index: number, worksheet: XLSX.WorkSheet): SheetMetadata {
-  // Get sheet dimensions
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
+  // Get sheet dimensions - CRITICAL: worksheet['!ref'] might be missing or incorrect
+  const rangeStr = worksheet['!ref'] || 'A1'
+  let range
+  try {
+    range = XLSX.utils.decode_range(rangeStr)
+  } catch (e) {
+    // If decode fails, use A1 as default
+    range = XLSX.utils.decode_range('A1')
+  }
+
   const rowCount = range.e.r - range.s.r + 1
   const columnCount = range.e.c - range.s.c + 1
 
