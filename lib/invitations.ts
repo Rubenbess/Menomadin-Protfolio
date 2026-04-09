@@ -79,7 +79,7 @@ export async function sendInvitation(
  */
 export async function getInvitationByCode(code: string): Promise<Invitation | null> {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
 
     const { data, error } = await supabase
       .from('invitations')
