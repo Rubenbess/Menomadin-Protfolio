@@ -184,13 +184,23 @@ async function sendInvitationEmail(
   role: UserRole
 ): Promise<void> {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    // Check if API key is configured
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.warn('[Email] RESEND_API_KEY not configured. Email not sent.')
+      console.log(`[Email Test] Would send to ${email}:`, invitationLink)
+      return
+    }
+
+    const resend = new Resend(apiKey)
 
     const roleDescriptions: Record<UserRole, string> = {
       admin: 'full access with permission management',
       associate: 'create and edit permissions',
       viewer: 'read-only access',
     }
+
+    console.log(`[Email] Attempting to send invitation to ${email}...`)
 
     const result = await resend.emails.send({
       from: 'onboarding@resend.dev',
@@ -200,12 +210,20 @@ async function sendInvitationEmail(
     })
 
     if (result.error) {
-      console.error('Failed to send invitation email:', result.error)
+      console.error('[Email] Failed to send:', {
+        error: result.error,
+        to: email,
+      })
+    } else if (result.data?.id) {
+      console.log(`[Email] ✓ Sent successfully to ${email} (ID: ${result.data.id})`)
     } else {
-      console.log(`[Email] Invitation sent to ${email}`)
+      console.log(`[Email] Email queued to ${email}`)
     }
   } catch (error) {
-    console.error('Error sending invitation email:', error)
+    console.error('[Email] Exception:', {
+      message: error instanceof Error ? error.message : String(error),
+      email,
+    })
   }
 }
 
