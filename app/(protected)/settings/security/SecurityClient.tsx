@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { ShieldCheck, ShieldOff, Trash2, CheckCircle2, AlertCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import PermissionsManager from '@/components/PermissionsManager'
 
 type Step = 'idle' | 'enrolling' | 'enrolled'
 
@@ -248,6 +249,12 @@ export default function SecurityClient({ required = false }: { required?: boolea
           <p className="text-xs text-neutral-500">Every login will now require your authenticator code.</p>
         </div>
       )}
+
+      {/* Separator */}
+      <div className="border-t border-neutral-200 dark:border-neutral-700 my-8" />
+
+      {/* Permissions Manager */}
+      <PermissionsManager />
       </div>
     </div>
   )

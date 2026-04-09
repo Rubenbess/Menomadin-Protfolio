@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate, Calendar, Menu, X } from 'lucide-react'
+import { CheckSquare, Plus, LayoutList, Kanban, RefreshCw, Trash2, CheckCheck, Zap, BookTemplate, Calendar, Menu, X, Lock } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import TasksBoard from './TasksBoard'
@@ -13,6 +13,7 @@ import TaskForm from '@/components/forms/TaskForm'
 import TasksFilters from './TasksFilters'
 import { groupTasksByStatus, searchTasks } from '@/lib/task-utils'
 import { deleteTask } from '@/actions/tasks'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { TaskWithRelations, TaskStatus } from '@/lib/types'
 
 interface Props {
@@ -28,6 +29,7 @@ type QuickFilter = 'all' | 'mine' | 'overdue' | 'today' | 'this-week'
 
 export default function TasksClient({ initialTasks, allLabels, teamMembers, companies, currentUserId }: Props) {
   const router = useRouter()
+  const { canCreate } = usePermissions('tasks')
   const [tasks, setTasks] = useState<TaskWithRelations[]>(initialTasks)
   const [view, setView] = useState<ViewType>('list')
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -244,9 +246,15 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
           >
             <RefreshCw size={16} />
           </button>
-          <Button onClick={() => setShowCreateForm(true)} size="sm">
-            <Plus size={16} /> New task
-          </Button>
+          {canCreate.allowed ? (
+            <Button onClick={() => setShowCreateForm(true)} size="sm">
+              <Plus size={16} /> New task
+            </Button>
+          ) : (
+            <Button disabled size="sm" className="opacity-50 cursor-not-allowed">
+              <Lock size={16} /> New task
+            </Button>
+          )}
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   Plus, Search, X, Pencil, Trash2, Mail, Phone, MapPin,
   Linkedin, Building2, ExternalLink, SlidersHorizontal,
-  MessageSquare, CalendarDays, Users, ChevronDown,
+  MessageSquare, CalendarDays, Users, ChevronDown, Lock,
 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -13,6 +13,7 @@ import ContactForm from '@/components/forms/ContactForm'
 import EmptyState from '@/components/EmptyState'
 import { deleteContact, createInteraction, deleteInteraction } from '@/actions/contacts'
 import ContactTasks from './ContactTasks'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { ContactWithCompany, ContactInteraction, InteractionType } from '@/lib/types'
 
 const INTERACTION_TYPES: { value: InteractionType; label: string }[] = [
@@ -117,12 +118,16 @@ function ContactPanel({
   onClose,
   onEdit,
   onDelete,
+  canUpdate,
+  canDelete: canDeletePerm,
 }: {
   contact: ContactWithCompany
   interactions: ContactInteraction[]
   onClose: () => void
   onEdit: (c: ContactWithCompany) => void
   onDelete: (id: string, name: string) => void
+  canUpdate: { allowed: boolean }
+  canDelete: { allowed: boolean }
 }) {
   const router = useRouter()
   const [tab, setTab] = useState<'interactions' | 'tasks'>('interactions')
@@ -316,18 +321,22 @@ function ContactPanel({
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-neutral-200 flex gap-3">
-          <button
-            onClick={() => { onClose(); onEdit(contact) }}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
-          >
-            <Pencil size={14} /> Edit contact
-          </button>
-          <button
-            onClick={() => { onClose(); onDelete(contact.id, contact.name) }}
-            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
+          {canUpdate.allowed && (
+            <button
+              onClick={() => { onClose(); onEdit(contact) }}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
+            >
+              <Pencil size={14} /> Edit contact
+            </button>
+          )}
+          {canDeletePerm.allowed && (
+            <button
+              onClick={() => { onClose(); onDelete(contact.id, contact.name) }}
+              className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
     </>
@@ -338,6 +347,7 @@ function ContactPanel({
 
 export default function ContactsClient({ contacts, companies, interactionsByContact }: Props) {
   const router = useRouter()
+  const { canCreate, canUpdate, canDelete } = usePermissions('contacts')
   const [search, setSearch] = useState('')
   const [filterCompany, setFilterCompany] = useState('')
   const [filterType, setFilterType] = useState('')
@@ -388,9 +398,15 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
           <h1 className="page-title">Contacts</h1>
           <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</p>
         </div>
-        <Button onClick={() => { setEditContact(null); setShowForm(true) }}>
-          <Plus size={15} className="mr-1.5" /> Add contact
-        </Button>
+        {canCreate.allowed ? (
+          <Button onClick={() => { setEditContact(null); setShowForm(true) }}>
+            <Plus size={15} className="mr-1.5" /> Add contact
+          </Button>
+        ) : (
+          <Button disabled className="opacity-50 cursor-not-allowed">
+            <Lock size={15} className="mr-1.5" /> Add contact
+          </Button>
+        )}
       </div>
 
       {/* Search and filters */}
@@ -529,18 +545,22 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                     </td>
                     <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => { setEditContact(contact); setShowForm(true) }}
-                          className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-colors"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget({ id: contact.id, name: contact.name })}
-                          className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        {canUpdate.allowed && (
+                          <button
+                            onClick={() => { setEditContact(contact); setShowForm(true) }}
+                            className="p-1.5 text-neutral-500 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-colors"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        )}
+                        {canDelete.allowed && (
+                          <button
+                            onClick={() => setDeleteTarget({ id: contact.id, name: contact.name })}
+                            className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -579,6 +599,8 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
           onClose={() => setPanelContact(null)}
           onEdit={c => { setPanelContact(null); setEditContact(c); setShowForm(true) }}
           onDelete={(id, name) => { setPanelContact(null); setDeleteTarget({ id, name }) }}
+          canUpdate={canUpdate}
+          canDelete={canDelete}
         />
       )}
     </div>

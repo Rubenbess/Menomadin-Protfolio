@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown, LayoutGrid, List } from 'lucide-react'
+import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown, LayoutGrid, List, Lock } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
@@ -13,6 +13,7 @@ import { deleteCompany } from '@/actions/companies'
 import { HealthScorePill } from '@/components/HealthScoreBadge'
 import { AdvancedFilterPanel } from '@/components/AdvancedFilterPanel'
 import { applyFilters, FilterGroup } from '@/lib/filter-utils'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { Company, Contact, HealthScore } from '@/lib/types'
 
 const STRATEGY_FILTERS = [
@@ -110,6 +111,9 @@ export default function CompaniesClient({
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false)
   const [advancedFilterGroup, setAdvancedFilterGroup] = useState<FilterGroup | null>(null)
 
+  // Check permissions for table actions
+  const { canRead, canCreate, canUpdate, canDelete, loading: permissionsLoading } = usePermissions('companies')
+
   const sectors = useMemo(() =>
     [...new Set(companies.map(c => c.sector).filter(Boolean))].sort(), [companies])
   const statuses = useMemo(() =>
@@ -167,9 +171,15 @@ export default function CompaniesClient({
           <h1 className="page-title">Companies</h1>
           <p className="text-neutral-600 dark:text-neutral-500 text-sm mt-2">Manage your portfolio companies</p>
         </div>
-        <Button onClick={() => setShowAdd(true)}>
-          <Plus size={15} /> Add Company
-        </Button>
+        {canCreate.allowed ? (
+          <Button onClick={() => setShowAdd(true)}>
+            <Plus size={15} /> Add Company
+          </Button>
+        ) : (
+          <Button disabled className="opacity-50 cursor-not-allowed">
+            <Lock size={15} /> Add Company
+          </Button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -359,18 +369,22 @@ export default function CompaniesClient({
                 )}
 
                 <div className="flex items-center gap-1.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => setEditCompany(co)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
-                  >
-                    <Pencil size={12} /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(co.id, co.name)}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={12} /> Delete
-                  </button>
+                  {canUpdate.allowed && (
+                    <button
+                      onClick={() => setEditCompany(co)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
+                    >
+                      <Pencil size={12} /> Edit
+                    </button>
+                  )}
+                  {canDelete.allowed && (
+                    <button
+                      onClick={() => handleDelete(co.id, co.name)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  )}
                 </div>
               </div>
             )
@@ -421,18 +435,22 @@ export default function CompaniesClient({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
-                        <button
-                          onClick={() => setEditCompany(co)}
-                          className="p-1.5 text-slate-300 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(co.id, co.name)}
-                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        {canUpdate.allowed && (
+                          <button
+                            onClick={() => setEditCompany(co)}
+                            className="p-1.5 text-slate-300 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        )}
+                        {canDelete.allowed && (
+                          <button
+                            onClick={() => handleDelete(co.id, co.name)}
+                            className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

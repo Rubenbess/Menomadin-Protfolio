@@ -2,10 +2,11 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, Trash2, Sparkles, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { Upload, FileText, Trash2, Sparkles, ChevronDown, ChevronUp, Loader2, Lock } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { deleteDocument } from '@/actions/documents'
 import Button from '@/components/ui/Button'
+import { usePermissions } from '@/hooks/usePermissions'
 import type { Document } from '@/lib/types'
 
 interface Props {
@@ -25,6 +26,7 @@ function fileIcon(name: string) {
 
 export default function DocumentUpload({ companyId, documents }: Props) {
   const router = useRouter()
+  const { canCreate, canDelete } = usePermissions('documents')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [extracting, setExtracting] = useState<string | null>(null)
@@ -93,10 +95,17 @@ export default function DocumentUpload({ companyId, documents }: Props) {
       <div className="flex items-center justify-between">
         <input ref={inputRef} type="file" onChange={handleUpload} className="hidden"
           accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.png,.jpg,.jpeg" />
-        <Button type="button" variant="secondary" size="sm" loading={uploading} onClick={() => inputRef.current?.click()}>
-          <Upload size={14} />
-          {uploading ? 'Uploading…' : 'Upload document'}
-        </Button>
+        {canCreate.allowed ? (
+          <Button type="button" variant="secondary" size="sm" loading={uploading} onClick={() => inputRef.current?.click()}>
+            <Upload size={14} />
+            {uploading ? 'Uploading…' : 'Upload document'}
+          </Button>
+        ) : (
+          <Button type="button" variant="secondary" size="sm" disabled className="opacity-50 cursor-not-allowed">
+            <Lock size={14} />
+            Upload document
+          </Button>
+        )}
         {error && <p className="text-xs text-red-600">{error}</p>}
       </div>
 
@@ -138,10 +147,12 @@ export default function DocumentUpload({ companyId, documents }: Props) {
                       : extracting === doc.id ? 'Extracting…' : 'Extract'
                     }
                   </button>
-                  <button onClick={() => handleDelete(doc.id, doc.file_url)}
-                    className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 size={13} />
-                  </button>
+                  {canDelete.allowed && (
+                    <button onClick={() => handleDelete(doc.id, doc.file_url)}
+                      className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                 </div>
               </div>
 
