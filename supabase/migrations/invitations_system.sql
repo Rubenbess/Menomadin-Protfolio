@@ -73,8 +73,8 @@ BEGIN
   WHERE id = v_invitation_id;
 
   -- Create team member if doesn't exist
-  INSERT INTO team_members (id, user_id, name, email, role, created_at)
-  VALUES (p_user_id, p_user_id, p_user_name, p_user_email, v_invited_role, NOW())
+  INSERT INTO team_members (id, name, email, role, created_at)
+  VALUES (p_user_id, p_user_name, p_user_email, v_invited_role, NOW())
   ON CONFLICT (id) DO UPDATE SET role = v_invited_role;
 
   RETURN TRUE;
@@ -86,9 +86,8 @@ CREATE OR REPLACE FUNCTION auto_create_team_member()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Create team member if doesn't exist
-  INSERT INTO team_members (id, user_id, name, email, role, created_at)
+  INSERT INTO team_members (id, name, email, role, created_at)
   VALUES (
-    NEW.id,
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', NEW.email),
     NEW.email,
