@@ -27,6 +27,15 @@ export async function sendInvitation(
   try {
     const supabase = createClient()
 
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'You must be logged in to send invitations' }
+    }
+
     // Generate unique code
     const code = nanoid(32)
 
@@ -38,6 +47,7 @@ export async function sendInvitation(
         invited_role: role,
         code,
         status: 'pending',
+        invited_by: user.id,
       })
       .select()
       .single()
