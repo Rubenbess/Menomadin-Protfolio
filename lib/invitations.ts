@@ -1,3 +1,5 @@
+'use server'
+
 import { createClient } from '@/lib/supabase'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import type { UserRole } from '@/lib/types'
@@ -54,8 +56,8 @@ export async function sendInvitation(
 
     if (error) {
       // Check if invitation already exists for this email
-      if (error.code === '23505') {
-        return { success: false, error: `An invitation is already pending for ${email}` }
+      if (error.code === '23505' || error.message?.includes('unique')) {
+        return { success: false, error: `An invitation is already pending for ${email}. Revoke it first or use a different email.` }
       }
       return { success: false, error: error.message }
     }
