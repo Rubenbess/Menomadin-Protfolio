@@ -27,7 +27,7 @@ export async function sendInvitation(
   siteUrl: string
 ): Promise<{ success: boolean; error?: string; code?: string }> {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
 
     // Get current user
     const {
