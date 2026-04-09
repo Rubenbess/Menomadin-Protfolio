@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAllPermissions, updateTablePermission } from '@/lib/permissions'
 import { TablePermission, UserRole, TableName, Action } from '@/lib/permissions'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import Button from '@/components/ui/Button'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 const ROLES: UserRole[] = ['admin', 'associate', 'viewer']
@@ -60,7 +59,6 @@ export default function PermissionsManager() {
       setSaving(true)
       setMessage(null)
 
-      // Group changes by role and table
       for (const key in localChanges) {
         const [role, table] = key.split('_') as [UserRole, TableName]
         const changes = localChanges[key]
@@ -115,18 +113,19 @@ export default function PermissionsManager() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Table Permissions</CardTitle>
-          <CardDescription>
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Table Permissions</h3>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
             Define what each role can do on specific tables. Changes affect all team members with that role.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          </p>
+        </div>
+
+        <div className="p-6 space-y-6">
           {message && (
             <div
-              className={`rounded-lg p-4 ${
-                message.type === 'success' ? 'bg-emerald-50 text-emerald-900' : 'bg-red-50 text-red-900'
+              className={`rounded-lg p-4 text-sm ${
+                message.type === 'success' ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-200'
               }`}
             >
               {message.text}
@@ -209,7 +208,7 @@ export default function PermissionsManager() {
           {/* Save Button */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={loadPermissions}
               disabled={!hasChanges() || saving}
             >
@@ -218,11 +217,10 @@ export default function PermissionsManager() {
             <Button
               onClick={saveChanges}
               disabled={!hasChanges() || saving}
-              className="gap-2"
             >
               {saving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Saving...
                 </>
               ) : (
@@ -230,8 +228,8 @@ export default function PermissionsManager() {
               )}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
