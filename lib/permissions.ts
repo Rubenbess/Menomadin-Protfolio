@@ -90,6 +90,13 @@ export async function getUserRole(userId?: string): Promise<UserRole | null> {
 export async function getRolePermissions(
   role: UserRole
 ): Promise<Record<TableName, Record<Action, boolean>>> {
+  const defaultPermissions: Record<TableName, Record<Action, boolean>> = {
+    companies: { read: false, create: false, update: false, delete: false },
+    contacts: { read: false, create: false, update: false, delete: false },
+    tasks: { read: false, create: false, update: false, delete: false },
+    documents: { read: false, create: false, update: false, delete: false },
+  }
+
   try {
     const supabase = createClient()
 
@@ -98,14 +105,9 @@ export async function getRolePermissions(
       .select('*')
       .eq('role_name', role)
 
-    if (error || !data) return {}
+    if (error || !data) return defaultPermissions
 
-    const permissions: Record<TableName, Record<Action, boolean>> = {
-      companies: { read: false, create: false, update: false, delete: false },
-      contacts: { read: false, create: false, update: false, delete: false },
-      tasks: { read: false, create: false, update: false, delete: false },
-      documents: { read: false, create: false, update: false, delete: false },
-    }
+    const permissions: Record<TableName, Record<Action, boolean>> = { ...defaultPermissions }
 
     data.forEach((perm: TablePermission) => {
       permissions[perm.table_name] = {
@@ -119,7 +121,7 @@ export async function getRolePermissions(
     return permissions
   } catch (error) {
     console.error('Error getting role permissions:', error)
-    return {}
+    return defaultPermissions
   }
 }
 

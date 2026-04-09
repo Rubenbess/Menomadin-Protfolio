@@ -96,7 +96,13 @@ export default function PermissionsManager() {
     }
 
     const perm = permissions.find((p) => p.role_name === role && p.table_name === table)
-    return perm?.[`can_${action}` as keyof TablePermission] ?? false
+    if (!perm) return false
+
+    if (action === 'read') return perm.can_read
+    if (action === 'create') return perm.can_create
+    if (action === 'update') return perm.can_update
+    if (action === 'delete') return perm.can_delete
+    return false
   }
 
   function hasChanges(): boolean {
