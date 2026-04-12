@@ -9,37 +9,14 @@ export async function addCommentToTask(taskId: string, content: string, mentione
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  // author_id stores the auth user UUID (task_comments_author_id_fkey was dropped)
   const { data: comment, error } = await supabase
     .from('task_comments')
-    .insert([
-      {
-        task_id: taskId,
-        author_id: user.id,
-        content,
-        mentioned_user_ids: mentionedUserIds,
-        is_activity: false,
-      },
-    ])
+    .insert([{ task_id: taskId, author_id: user.id, content, is_activity: false }])
     .select()
     .single()
 
   if (error) return { error: error.message }
-
-  // Create notifications for mentioned users
-  if (mentionedUserIds.length > 0) {
-    await supabase
-      .from('notifications')
-      .insert(
-        mentionedUserIds.map((userId) => ({
-          user_id: userId,
-          type: 'mentioned',
-          title: `You were mentioned in a task comment`,
-          message: content.substring(0, 100),
-          link: `/tasks?task=${taskId}`,
-          read: false,
-        }))
-      )
-  }
 
   revalidatePath(`/tasks`)
   return { data: comment }
