@@ -131,9 +131,10 @@ export async function getTaskComments(taskId: string) {
   const { data: authors } = await supabase
     .from('team_members')
     .select('id, user_id, name, email, role, color, created_at')
-    .in('id', authorIds)
+    .in('user_id', authorIds)
 
-  const authorMap = new Map(authors?.map(a => [a.id, a]) || [])
+  // author_id stores the auth user UUID; team_members.user_id links to auth
+  const authorMap = new Map(authors?.map(a => [a.user_id, a]) || [])
   const comments = rawComments.map(c => ({
     ...c,
     author: authorMap.get(c.author_id),
