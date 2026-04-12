@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 
 interface TeamMemberData {
-  user_id: string
+  id: string
   name: string
   email: string
   role: string | null

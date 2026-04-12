@@ -550,11 +550,15 @@ export type UserRole = 'admin' | 'associate' | 'viewer'
 
 export interface TeamMember {
   id: string
-  user_id: string
   name: string
   email: string
   role: UserRole
   color: string
+  job_title: string | null
+  phone: string | null
+  linkedin_url: string | null
+  initials: string | null
+  updated_at: string
   created_at: string
 }
 

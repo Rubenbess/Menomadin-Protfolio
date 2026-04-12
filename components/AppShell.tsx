@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './Sidebar'
 import GlobalSearch from './GlobalSearch'
@@ -9,12 +10,33 @@ import NotificationBell from './NotificationBell'
 import ThemeToggle from './ThemeToggle'
 import type { Notification } from '@/lib/types'
 
+interface UserProfile {
+  name: string
+  color: string
+  initials: string | null
+}
+
 interface Props {
   children: React.ReactNode
   initialNotifications: Notification[]
+  userProfile: UserProfile | null
 }
 
-export default function AppShell({ children, initialNotifications }: Props) {
+function AvatarButton({ profile }: { profile: UserProfile }) {
+  const letters = profile.initials || profile.name.slice(0, 2).toUpperCase()
+  return (
+    <Link
+      href="/profile"
+      title="My profile"
+      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ring-2 ring-white dark:ring-neutral-800 hover:ring-primary-300 transition-all flex-shrink-0"
+      style={{ backgroundColor: profile.color || '#5a7fa8' }}
+    >
+      {letters}
+    </Link>
+  )
+}
+
+export default function AppShell({ children, initialNotifications, userProfile }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -77,15 +99,17 @@ export default function AppShell({ children, initialNotifications }: Props) {
           <ThemeToggle />
           <NotificationBell initialNotifications={initialNotifications} />
           <GlobalSearch />
+          {userProfile && <AvatarButton profile={userProfile} />}
         </div>
 
-        {/* Desktop search bar */}
+        {/* Desktop top bar */}
         <div className="hidden md:flex items-center justify-between px-6 py-2 border-b border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/30 flex-shrink-0">
           <div />
           <div className="flex items-center gap-3">
             <GlobalSearch />
             <ThemeToggle />
             <NotificationBell initialNotifications={initialNotifications} />
+            {userProfile && <AvatarButton profile={userProfile} />}
           </div>
         </div>
 

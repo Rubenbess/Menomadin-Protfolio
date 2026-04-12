@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import AppShell from '@/components/AppShell'
 import type { Notification } from '@/lib/types'
 
@@ -14,22 +15,32 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     redirect('/login')
   }
 
-  // Auto-create team_member row if this user has never been registered
-  // Runs on every page load but the SELECT is fast and the INSERT is no-op after first time
-  const { data: existingMember } = await supabase
+  // Fetch team_member row — auto-create on first login
+  let { data: member } = await supabase
     .from('team_members')
-    .select('id')
-    .eq('user_id', user.id)
+    .select('id, name, color, initials, job_title')
+    .eq('id', user.id)
     .maybeSingle()
 
-  if (!existingMember && user.email) {
-    await supabase.from('team_members').insert({
-      user_id: user.id,
-      name: user.email.split('@')[0],
-      email: user.email,
-      role: 'admin',
-      color: '#6366f1',
-    })
+  const isNewUser = !member
+
+  if (!member && user.email) {
+    const name = user.email.split('@')[0]
+    const initials = name.slice(0, 2).toUpperCase()
+    const { data: created } = await supabase
+      .from('team_members')
+      .insert({ id: user.id, name, email: user.email, role: 'admin', color: '#5a7fa8', initials })
+      .select('id, name, color, initials, job_title')
+      .single()
+    member = created
+  }
+
+  // Redirect new users (or those who haven't completed their profile) to /profile
+  const headersList = await headers()
+  const currentPath = headersList.get('x-pathname') || ''
+  const profileIncomplete = isNewUser || !member?.job_title
+  if (profileIncomplete && !currentPath.startsWith('/profile')) {
+    redirect('/profile?welcome=1')
   }
 
   const { data: notifications } = await supabase
@@ -38,5 +49,12 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     .order('created_at', { ascending: false })
     .limit(30)
 
-  return <AppShell initialNotifications={(notifications ?? []) as Notification[]}>{children}</AppShell>
+  return (
+    <AppShell
+      initialNotifications={(notifications ?? []) as Notification[]}
+      userProfile={member ? { name: member.name, color: member.color, initials: member.initials } : null}
+    >
+      {children}
+    </AppShell>
+  )
 }

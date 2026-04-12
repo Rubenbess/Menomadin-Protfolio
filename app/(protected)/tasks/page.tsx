@@ -11,7 +11,7 @@ export default async function TasksPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const userId = user?.id || ''
 
-  // Fetch tasks with relations (assignees, company, pipeline deal, and contact)
+  // Fetch tasks with relations — assignees fetched separately to avoid FK cache issues
   const { data: tasks, error } = await supabase
     .from('tasks')
     .select(`
@@ -21,8 +21,7 @@ export default async function TasksPage() {
         task_id,
         assigned_to,
         assigned_at,
-        assigned_by,
-        team_member:team_members(id, name, color)
+        assigned_by
       ),
       company:companies(id, name),
       pipeline_deal:pipeline(id, name),
@@ -30,13 +29,22 @@ export default async function TasksPage() {
     `)
     .order('created_at', { ascending: false })
 
+  if (error) {
+    console.error('Error fetching tasks:', JSON.stringify(error), error)
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-600 font-mono text-sm">{error.message || JSON.stringify(error)}</p>
+      </div>
+    )
+  }
+
   // Fetch all labels for the label selector
   const { data: allLabels } = await supabase
     .from('task_labels')
     .select('*')
     .order('name', { ascending: true })
 
-  // Fetch team members for assignee selector
+  // Fetch team members for assignee selector and to hydrate assignee details
   const { data: teamMembers } = await supabase
     .from('team_members')
     .select('id, name, color')
@@ -48,19 +56,20 @@ export default async function TasksPage() {
     .select('id, name')
     .order('name', { ascending: true })
 
-  if (error) {
-    console.error('Error fetching tasks:', error)
-    return (
-      <div className="p-8 text-center">
-        <p className="text-red-600">Failed to load tasks. Please try again.</p>
-      </div>
-    )
-  }
+  // Hydrate assignee team_member info from the already-fetched teamMembers list
+  const memberMap = new Map((teamMembers || []).map(m => [m.id, m]))
+  const hydratedTasks = (tasks || []).map(task => ({
+    ...task,
+    assignees: (task.assignees || []).map((a: any) => ({
+      ...a,
+      team_member: memberMap.get(a.assigned_to) ?? null,
+    })),
+  }))
 
   return (
     <div className="max-w-full px-6 py-6">
       <TasksClient
-        initialTasks={(tasks || []) as TaskWithRelations[]}
+        initialTasks={hydratedTasks as TaskWithRelations[]}
         allLabels={allLabels || []}
         teamMembers={teamMembers || []}
         companies={companies || []}

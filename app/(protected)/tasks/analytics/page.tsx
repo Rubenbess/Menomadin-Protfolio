@@ -17,7 +17,7 @@ export default async function TaskAnalyticsPage() {
     redirect('/login')
   }
 
-  // Fetch all tasks with relations
+  // Fetch all tasks with relations — assignees hydrated separately to avoid FK cache issues
   const { data: tasks, error } = await supabase
     .from('tasks')
     .select(`
@@ -27,8 +27,7 @@ export default async function TaskAnalyticsPage() {
         task_id,
         assigned_to,
         assigned_at,
-        assigned_by,
-        team_member:team_members(id, name, color)
+        assigned_by
       ),
       company:companies(id, name)
     `)
@@ -38,7 +37,18 @@ export default async function TaskAnalyticsPage() {
     console.error('Error fetching tasks:', error)
   }
 
-  const tasksList = (tasks || []) as TaskWithRelations[]
+  const { data: teamMembers } = await supabase
+    .from('team_members')
+    .select('id, name, color')
+
+  const memberMap = new Map((teamMembers || []).map(m => [m.id, m]))
+  const tasksList = ((tasks || []).map(task => ({
+    ...task,
+    assignees: (task.assignees || []).map((a: any) => ({
+      ...a,
+      team_member: memberMap.get(a.assigned_to) ?? null,
+    })),
+  }))) as TaskWithRelations[]
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-900">
