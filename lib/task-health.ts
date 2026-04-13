@@ -27,7 +27,7 @@ export function calculateTaskHealth(task: TaskWithRelations): TaskHealthMetrics 
   // Calculate weighted score
   const totalWeight = Object.values(factors).reduce((sum, f) => sum + f.weight, 0)
   const weightedSum = Object.values(factors).reduce((sum, f) => sum + f.score * f.weight, 0)
-  const score = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 100) : 50
+  const score = totalWeight > 0 ? Math.min(100, Math.round(weightedSum / totalWeight)) : 50
 
   const level = getHealthLevel(score)
   const recommendations = getRecommendations(task, factors)
