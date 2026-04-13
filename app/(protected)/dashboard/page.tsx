@@ -52,8 +52,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           task_id,
           assigned_to,
           assigned_at,
-          assigned_by,
-          team_member:team_members(id, name, color)
+          assigned_by
         )
       `).order('created_at', { ascending: false }),
       supabase.from('team_members').select('*').order('name', { ascending: true }),
@@ -65,8 +64,17 @@ export default async function DashboardPage({ searchParams }: Props) {
   const capTableList    = (capTable    ?? []) as CapTableEntry[]
   const reservesList    = (reserves    ?? []) as Reserve[]
   const safesList       = (safes       ?? []) as Safe[]
-  const tasksList       = (tasks       ?? []) as TaskWithRelations[]
   const teamMembersList = (teamMembers ?? []) as TeamMember[]
+
+  // Hydrate assignee team_member info without relying on PostgREST FK join
+  const memberMap = new Map(teamMembersList.map(m => [m.id, m]))
+  const tasksList = ((tasks ?? []).map(t => ({
+    ...t,
+    assignees: (t.assignees || []).map((a: any) => ({
+      ...a,
+      team_member: memberMap.get(a.assigned_to) ?? null,
+    })),
+  }))) as TaskWithRelations[]
 
   const companiesWithMetrics: CompanyWithMetrics[] = companiesList.map((co) => {
     const coInvestments = investmentsList.filter((i) => i.company_id === co.id)
@@ -212,7 +220,12 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Team Tasks Dashboard */}
       <div className="px-8 mt-8">
         <div className="bg-neutral-0 dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-6">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-6">Team Tasks</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Team Tasks</h2>
+            <Link href="/tasks" className="text-xs font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+              View all tasks →
+            </Link>
+          </div>
           <TeamTasksDashboard tasks={tasksList} teamMembers={teamMembersList} />
         </div>
       </div>
