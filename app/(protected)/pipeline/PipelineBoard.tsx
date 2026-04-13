@@ -12,7 +12,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
-import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip, BarChart2, Sparkles } from 'lucide-react'
+import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip, BarChart2, Sparkles, Search } from 'lucide-react'
 import PipelineAnalytics from './PipelineAnalytics'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -558,6 +558,16 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
   const [editCard, setEditCard] = useState<PipelineEntry | null>(null)
   const [showAddStage, setShowAddStage] = useState(false)
   const [editStage, setEditStage] = useState<Stage | null>(null)
+  const [search, setSearch] = useState('')
+
+  const q = search.trim().toLowerCase()
+  const visibleEntries = !q ? localEntries : localEntries.filter(e =>
+    e.name.toLowerCase().includes(q) ||
+    (e.sector ?? '').toLowerCase().includes(q) ||
+    (e.stage ?? '').toLowerCase().includes(q) ||
+    (e.notes ?? '').toLowerCase().includes(q) ||
+    (e.lead_partner ?? '').toLowerCase().includes(q)
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -633,13 +643,33 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
       <>
       <AnalyticsBar entries={localEntries} stages={stages} />
 
+      {/* Search bar */}
+      <div className="relative mb-4">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search deals by name, sector, stage, notes…"
+          className="w-full pl-9 pr-9 py-2 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all shadow-sm"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-6 pt-1 px-1 -mx-1">
           {stages.map(stage => (
             <Column
               key={stage.id}
               stage={stage}
-              entries={localEntries.filter(e => e.status === stage.name)}
+              entries={visibleEntries.filter(e => e.status === stage.name)}
               activeId={activeId}
               onAddCard={(stageName) => setAddCardStage(stageName)}
               onViewCard={setPanelEntry}
