@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
@@ -24,6 +24,7 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
   const [showAdd, setShowAdd] = useState(false)
   const [editEntry, setEditEntry] = useState<PipelineEntry | null>(null)
   const [filter, setFilter] = useState<string>('all')
+  const [search, setSearch] = useState('')
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Remove "${name}" from pipeline?`)) return
@@ -31,7 +32,17 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
     router.refresh()
   }
 
-  const filtered = filter === 'all' ? entries : entries.filter((e) => e.status === filter)
+  const q = search.trim().toLowerCase()
+  const filtered = entries
+    .filter((e) => filter === 'all' || e.status === filter)
+    .filter((e) =>
+      !q ||
+      e.name.toLowerCase().includes(q) ||
+      (e.sector ?? '').toLowerCase().includes(q) ||
+      (e.stage ?? '').toLowerCase().includes(q) ||
+      (e.notes ?? '').toLowerCase().includes(q) ||
+      (e.lead_partner ?? '').toLowerCase().includes(q)
+    )
 
   // Count by status
   const counts = entries.reduce<Record<string, number>>((acc, e) => {
@@ -50,6 +61,26 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
+      {/* Search bar */}
+      <div className="relative mb-4">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search deals by name, sector, stage, notes…"
+          className="w-full pl-9 pr-9 py-2 text-sm bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
       {/* Status filters */}
       <div className="flex flex-wrap gap-2 mb-6">
         <button
@@ -83,9 +114,13 @@ export default function PipelineClient({ entries }: { entries: PipelineEntry[] }
         {filtered.length === 0 ? (
           <div className="px-5 py-16 text-center">
             <p className="text-sm text-gray-400 mb-4">
-              {filter === 'all' ? 'No deals in pipeline yet.' : `No deals with status "${filter.replace(/-/g, ' ')}".`}
+              {q
+                ? `No deals match "${search}".`
+                : filter === 'all'
+                ? 'No deals in pipeline yet.'
+                : `No deals with status "${filter.replace(/-/g, ' ')}".`}
             </p>
-            {filter === 'all' && (
+            {!q && filter === 'all' && (
               <Button onClick={() => setShowAdd(true)}>
                 <Plus size={16} />
                 Add your first deal
