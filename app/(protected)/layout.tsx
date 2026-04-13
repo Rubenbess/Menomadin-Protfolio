@@ -35,11 +35,17 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     member = created
   }
 
-  // Redirect new users (or those who haven't completed their profile) to /profile
+  // Redirect new users (or those who haven't completed their profile) to /profile.
+  // Skip if already on /profile, /mfa, or /settings to prevent redirect loops.
   const headersList = await headers()
   const currentPath = headersList.get('x-pathname') || ''
   const profileIncomplete = isNewUser || !member?.job_title
-  if (profileIncomplete && !currentPath.startsWith('/profile')) {
+  const isSafeToRedirect =
+    currentPath !== '' &&
+    !currentPath.startsWith('/profile') &&
+    !currentPath.startsWith('/mfa') &&
+    !currentPath.startsWith('/settings')
+  if (profileIncomplete && isSafeToRedirect) {
     redirect('/profile?welcome=1')
   }
 

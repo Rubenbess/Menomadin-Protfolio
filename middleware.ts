@@ -53,8 +53,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // MFA enforcement — skip checks on the MFA and security setup pages themselves
-  const isMfaRoute = pathname.startsWith('/mfa') || pathname.startsWith('/settings/security')
+  // MFA enforcement — skip checks on MFA, security setup, and profile pages
+  // /profile must be exempt so new users can complete their profile without hitting a redirect loop
+  const isMfaRoute =
+    pathname.startsWith('/mfa') ||
+    pathname.startsWith('/settings/security') ||
+    pathname.startsWith('/profile')
 
   if (user && !isMfaRoute && !isPublic) {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
