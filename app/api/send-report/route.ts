@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 export async function POST(req: NextRequest) {
+  const resendKey = process.env.RESEND_API_KEY
+
   const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${resendKey}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const resendKey = process.env.RESEND_API_KEY
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'
 
   if (!resendKey) {

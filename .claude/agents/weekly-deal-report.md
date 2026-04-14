@@ -162,7 +162,7 @@ const options = {
   path: '/api/send-report',
   method: 'POST',
   headers: {
-    'Authorization': 'Bearer ' + process.env.CRON_SECRET,
+    'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
     'Content-Type': 'application/json',
     'Content-Length': Buffer.byteLength(body)
   }
