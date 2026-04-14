@@ -1,0 +1,55 @@
+name: Send Weekly Deal Report
+
+on:
+  push:
+    paths:
+      - 'reports/**.md'
+    branches:
+      - main
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get changed report file
+        id: report
+        run: |
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'reports/*.md' | head -1)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "Found report: $FILE"
+
+      - name: Send via Resend
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+        run: |
+          FILE="${{ steps.report.outputs.file }}"
+          if [ -z "$FILE" ]; then
+            echo "No report file found, skipping."
+            exit 0
+          fi
+
+          REPORT=$(cat "$FILE")
+          DATE=$(basename "$FILE" .md)
+          FROM="${RESEND_FROM_EMAIL:-noreply@menomadin.com}"
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg from "Menomadin Research <$FROM>" \
+              --arg subject "Menomadin Weekly Deal Report | $DATE" \
+              --arg body "$REPORT" \
+              '{from: $from, to: ["rubenb@menomadin.com"], subject: $subject, text: $body}')")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+          echo "Resend response: $HTTP_CODE $BODY"
+
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
+            echo "Failed to send email"
+            exit 1
+          fi
+          echo "Email sent successfully"

@@ -138,45 +138,24 @@ STYLE
 
 ---
 
-Once you have completed the full report, send it by POSTing to the Menomadin app's relay endpoint. This avoids direct outbound calls to api.resend.com (blocked in sandbox environments).
+Once you have completed the full report, deliver it by committing it to the repository. The sandbox blocks all outbound HTTP — email is sent automatically by a GitHub Actions workflow that triggers on push.
 
-Before running the send command, write the full report content to `/tmp/deal-report.md` using Bash.
-
-Then send using this exact bash sequence:
+Use this exact bash sequence:
 
 ```bash
-node -e "
-const https = require('https');
-const fs = require('fs');
-const today = new Date().toISOString().split('T')[0];
-const report = fs.readFileSync('/tmp/deal-report.md', 'utf8');
+TODAY=$(node -e "console.log(new Date().toISOString().split('T')[0])")
+mkdir -p reports
+cat > "reports/${TODAY}.md" << 'REPORT_EOF'
+PASTE_REPORT_HERE
+REPORT_EOF
 
-const body = JSON.stringify({
-  report,
-  subject: 'Menomadin Weekly Deal Report | ' + today,
-  to: 'rubenb@menomadin.com'
-});
-
-const options = {
-  hostname: 'menomadin-portfolio.vercel.app',
-  path: '/api/send-report',
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
-    'Content-Type': 'application/json',
-    'Content-Length': Buffer.byteLength(body)
-  }
-};
-
-const req = https.request(options, res => {
-  let data = '';
-  res.on('data', chunk => data += chunk);
-  res.on('end', () => console.log('Send response:', res.statusCode, data));
-});
-req.on('error', e => console.error('Error:', e));
-req.write(body);
-req.end();
-"
+git config user.email "agent@menomadin.com"
+git config user.name "Menomadin Agent"
+git add "reports/${TODAY}.md"
+git commit -m "Weekly deal report ${TODAY}"
+git push
 ```
 
-Confirm the email was sent successfully (HTTP 200 response with `{\"sent\":true}`) and report back.
+Important: write the full report content into the file before committing. Replace the heredoc body with the actual report text.
+
+After pushing, confirm the commit was accepted and note that the email will be delivered within 1-2 minutes via GitHub Actions.
