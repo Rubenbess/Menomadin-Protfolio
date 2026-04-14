@@ -138,30 +138,31 @@ STYLE
 
 ---
 
-Once you have completed the full report, send it via Resend using this exact bash sequence:
+Once you have completed the full report, send it by POSTing to the Menomadin app's relay endpoint. This avoids direct outbound calls to api.resend.com (blocked in sandbox environments).
+
+Before running the send command, write the full report content to `/tmp/deal-report.md` using Bash.
+
+Then send using this exact bash sequence:
 
 ```bash
 node -e "
 const https = require('https');
-const today = new Date().toISOString().split('T')[0];
-
-// Write report to temp file first, then read it back
 const fs = require('fs');
+const today = new Date().toISOString().split('T')[0];
 const report = fs.readFileSync('/tmp/deal-report.md', 'utf8');
 
 const body = JSON.stringify({
-  from: 'Menomadin Research <' + (process.env.RESEND_FROM_EMAIL || 'noreply@menomadin.com') + '>',
-  to: ['rubenb@menomadin.com'],
+  report,
   subject: 'Menomadin Weekly Deal Report | ' + today,
-  text: report
+  to: 'rubenb@menomadin.com'
 });
 
 const options = {
-  hostname: 'api.resend.com',
-  path: '/emails',
+  hostname: 'menomadin-portfolio.vercel.app',
+  path: '/api/send-report',
   method: 'POST',
   headers: {
-    'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+    'Authorization': 'Bearer ' + process.env.CRON_SECRET,
     'Content-Type': 'application/json',
     'Content-Length': Buffer.byteLength(body)
   }
@@ -170,7 +171,7 @@ const options = {
 const req = https.request(options, res => {
   let data = '';
   res.on('data', chunk => data += chunk);
-  res.on('end', () => console.log('Resend response:', res.statusCode, data));
+  res.on('end', () => console.log('Send response:', res.statusCode, data));
 });
 req.on('error', e => console.error('Error:', e));
 req.write(body);
@@ -178,6 +179,4 @@ req.end();
 "
 ```
 
-Before running the send command, write the full report content to `/tmp/deal-report.md` using Bash so the Node script can read it.
-
-Confirm the email was sent successfully (HTTP 200 from Resend) and report back.
+Confirm the email was sent successfully (HTTP 200 response with `{\"sent\":true}`) and report back.
