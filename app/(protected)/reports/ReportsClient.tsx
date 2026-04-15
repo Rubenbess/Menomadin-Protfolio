@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { FileSpreadsheet, FileText, Download, CheckCircle2, Users } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Calendar } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
+import type { DealReport } from './page'
 
 interface CompanyWithMetrics {
   id: string
@@ -24,6 +26,7 @@ interface Props {
   rounds:      Round[]
   investments: Investment[]
   capTable:    CapTableEntry[]
+  dealReports: DealReport[]
 }
 
 const fmt$ = (n: number) => {
@@ -165,9 +168,77 @@ function ReportCard({ title, description, onExcel, onPDF }: ReportCardProps) {
   )
 }
 
+// ── Deal Reports tab ──────────────────────────────────────────────────────────
+
+function DealReportsTab({ reports }: { reports: DealReport[] }) {
+  const [selected, setSelected] = useState<DealReport | null>(null)
+
+  if (selected) {
+    return (
+      <div className="flex flex-col h-full">
+        <button
+          onClick={() => setSelected(null)}
+          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 mb-4 transition-colors"
+        >
+          <ChevronLeft size={16} /> Back to reports
+        </button>
+        <div className="card p-6 flex-1 overflow-y-auto">
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100 dark:border-neutral-700">
+            <Calendar size={15} className="text-neutral-400" />
+            <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+              Week of {new Date(selected.report_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
+          </div>
+          <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none">
+            <ReactMarkdown>{selected.content}</ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (reports.length === 0) {
+    return (
+      <div className="card p-12 text-center">
+        <TrendingUp size={32} className="text-neutral-300 mx-auto mb-3" />
+        <p className="text-sm font-medium text-neutral-500">No deal reports yet</p>
+        <p className="text-xs text-neutral-400 mt-1">Reports are published every Monday morning automatically</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {reports.map(report => (
+        <button
+          key={report.id}
+          onClick={() => setSelected(report)}
+          className="card p-5 text-left hover:shadow-md transition-shadow group flex items-center justify-between"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <TrendingUp size={16} className="text-primary-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                Israeli Tech Deal Report
+              </p>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Week of {new Date(report.report_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold text-primary-500 group-hover:text-primary-600 flex-shrink-0 ml-4">Read →</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export default function ReportsClient({ companies, rounds, investments, capTable }: Props) {
+export default function ReportsClient({ companies, rounds, investments, capTable, dealReports }: Props) {
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'deals'>('portfolio')
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   // ── Portfolio Overview ──────────────────────────────────────────────────────
@@ -425,11 +496,36 @@ export default function ReportsClient({ companies, rounds, investments, capTable
       <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Reports</h1>
-          <p className="text-sm text-neutral-500 mt-1">Download portfolio reports as Excel or PDF</p>
+          <p className="text-sm text-neutral-500 mt-1">
+            {activeTab === 'portfolio' ? 'Download portfolio reports as Excel or PDF' : 'Weekly Israeli tech ecosystem deal briefs'}
+          </p>
         </div>
       </div>
 
+      {/* Tab bar */}
+      <div className="flex gap-1 px-6 pt-4 border-b border-neutral-200 dark:border-neutral-700">
+        {([
+          { key: 'portfolio', label: 'Portfolio Reports' },
+          { key: 'deals',     label: `Deal Reports${dealReports.length > 0 ? ` (${dealReports.length})` : ''}` },
+        ] as const).map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              activeTab === tab.key
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 overflow-y-auto px-6 py-6">
+      {activeTab === 'deals' ? (
+        <DealReportsTab reports={dealReports} />
+      ) : (<>
 
       {/* Summary bar */}
       <div className="card p-5 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -509,6 +605,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
           onPDF={capTablePDF}
         />
       </div>
+      </>)}
       </div>
     </div>
   )

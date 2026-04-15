@@ -1,6 +1,6 @@
 ---
 name: weekly-deal-report
-description: Researches confirmed Israeli tech ecosystem deals from the past 7 days and emails a structured VC deal report to rubenb@menomadin.com via Resend. Run this every Monday morning to get the weekly Menomadin deal brief.
+description: Researches confirmed Israeli tech ecosystem deals from the past 7 days and publishes a structured VC deal report to the Menomadin Portfolio Platform. Run this every Monday morning to get the weekly deal brief.
 model: claude-opus-4-6
 tools:
   - WebSearch

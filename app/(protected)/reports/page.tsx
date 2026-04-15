@@ -8,6 +8,13 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+export interface DealReport {
+  id: string
+  report_date: string
+  content: string
+  created_at: string
+}
+
 export default async function ReportsPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -16,17 +23,20 @@ export default async function ReportsPage() {
     { data: rounds },
     { data: investments },
     { data: capTable },
+    { data: dealReports },
   ] = await Promise.all([
     supabase.from('companies').select('*').order('name'),
     supabase.from('rounds').select('*').order('date', { ascending: false }),
     supabase.from('investments').select('*').order('date', { ascending: false }),
     supabase.from('cap_table').select('*'),
+    supabase.from('deal_reports').select('id, report_date, content, created_at').order('report_date', { ascending: false }),
   ])
 
   const companiesList   = (companies   ?? []) as Company[]
   const roundsList      = (rounds      ?? []) as Round[]
   const investmentsList = (investments ?? []) as Investment[]
   const capTableList    = (capTable    ?? []) as CapTableEntry[]
+  const dealReportsList = (dealReports ?? []) as DealReport[]
 
   // Build companies with metrics for reports
   const companiesWithMetrics = companiesList.map(co => {
@@ -47,6 +57,7 @@ export default async function ReportsPage() {
       rounds={roundsList}
       investments={investmentsList}
       capTable={capTableList}
+      dealReports={dealReportsList}
     />
   )
 }
