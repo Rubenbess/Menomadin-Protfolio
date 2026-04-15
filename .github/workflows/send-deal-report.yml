@@ -55,3 +55,42 @@ jobs:
             exit 1
           fi
           echo "Report saved to platform successfully"
+
+      - name: Send email via Resend
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DEAL_REPORT_RECIPIENTS: ${{ vars.DEAL_REPORT_RECIPIENTS || 'rubenb@menomadin.com' }}
+        run: |
+          FILE="${{ steps.report.outputs.file }}"
+          if [ -z "$FILE" ]; then
+            echo "No report file, skipping email."
+            exit 0
+          fi
+
+          CONTENT=$(cat "$FILE")
+          REPORT_DATE=$(basename "$FILE" .md)
+          SUBJECT="Menomadin Weekly Deal Report | ${REPORT_DATE}"
+          FROM="Menomadin Deals <invites@portfolio-menomadin.com>"
+
+          # Build recipients array — DEAL_REPORT_RECIPIENTS can be comma-separated
+          RECIPIENTS_ARRAY=$(echo "$DEAL_REPORT_RECIPIENTS" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | jq -R . | jq -s .)
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.resend.com/emails" \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg from "$FROM" \
+              --argjson to "$RECIPIENTS_ARRAY" \
+              --arg subject "$SUBJECT" \
+              --arg text "$CONTENT" \
+              '{from: $from, to: $to, subject: $subject, text: $text}')")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+          echo "Resend response: $HTTP_CODE $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Warning: Email delivery failed (HTTP $HTTP_CODE) — report is saved to the platform."
+          else
+            echo "Email sent to ${DEAL_REPORT_RECIPIENTS}"
+          fi
