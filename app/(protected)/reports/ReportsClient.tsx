@@ -5,9 +5,10 @@ import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Calendar } from 'lucide-react'
+import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Calendar, Upload, X } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
 import type { DealReport } from './page'
+import { uploadDealReport } from './actions'
 
 interface CompanyWithMetrics {
   id: string
@@ -268,50 +269,189 @@ function DealReportViewer({ report, onBack }: { report: DealReport; onBack: () =
   )
 }
 
-// ── Deal Reports tab ──────────────────────────────────────────────────────────
+// ── Upload modal ──────────────────────────────────────────────────────────────
 
-function DealReportsTab({ reports }: { reports: DealReport[] }) {
-  const [selected, setSelected] = useState<DealReport | null>(null)
+function UploadModal({ onClose, onSaved }: { onClose: () => void; onSaved: (r: DealReport) => void }) {
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [content, setContent] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
-  if (selected) {
-    return <DealReportViewer report={selected} onBack={() => setSelected(null)} />
+  function handleFile(file: File) {
+    const reader = new FileReader()
+    reader.onload = e => setContent(e.target?.result as string ?? '')
+    reader.readAsText(file)
   }
 
-  if (reports.length === 0) {
-    return (
-      <div className="card p-12 text-center">
-        <TrendingUp size={32} className="text-neutral-300 mx-auto mb-3" />
-        <p className="text-sm font-medium text-neutral-500">No deal reports yet</p>
-        <p className="text-xs text-neutral-400 mt-1">Reports are published every Monday morning automatically</p>
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file) handleFile(file)
+  }
+
+  async function handleSave() {
+    if (!date || !content.trim()) { setError('Date and report content are required.'); return }
+    setSaving(true)
+    setError('')
+    try {
+      await uploadDealReport(date, content.trim())
+      onSaved({ id: crypto.randomUUID(), report_date: date, content: content.trim(), created_at: new Date().toISOString() })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save report.')
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800">
+          <div>
+            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">Upload Deal Report</p>
+            <p className="text-xs text-neutral-500 mt-0.5">Paste markdown or drop a .md file</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+            <X size={16} className="text-neutral-500" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-col gap-4 px-6 py-5 overflow-y-auto flex-1">
+          {/* Date */}
+          <div>
+            <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">Report Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-300"
+            />
+          </div>
+
+          {/* Drop zone + textarea */}
+          <div>
+            <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">Report Content (Markdown)</label>
+            <div
+              onDrop={handleDrop}
+              onDragOver={e => e.preventDefault()}
+              className="relative"
+            >
+              {!content && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-neutral-300 gap-1">
+                  <Upload size={20} />
+                  <span className="text-xs">Drop a .md file here or paste below</span>
+                </div>
+              )}
+              <textarea
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                rows={14}
+                placeholder=""
+                className="w-full px-3 py-2.5 text-xs font-mono rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-300 resize-none leading-relaxed"
+              />
+            </div>
+            {/* File input fallback */}
+            <label className="mt-2 flex items-center gap-2 text-xs text-primary-500 hover:text-primary-600 cursor-pointer w-fit">
+              <Upload size={13} />
+              Choose .md file
+              <input
+                type="file"
+                accept=".md,text/markdown,text/plain"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
+              />
+            </label>
+          </div>
+
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-100 dark:border-neutral-800">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">Cancel</button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !content.trim()}
+            className="px-5 py-2 text-sm font-semibold rounded-lg bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 transition-colors"
+          >
+            {saving ? 'Saving…' : 'Save Report'}
+          </button>
+        </div>
       </div>
+    </div>
+  )
+}
+
+// ── Deal Reports tab ──────────────────────────────────────────────────────────
+
+function DealReportsTab({ reports: initialReports }: { reports: DealReport[] }) {
+  const [reports, setReports] = useState(initialReports)
+  const [selected, setSelected] = useState<DealReport | null>(null)
+  const [showUpload, setShowUpload] = useState(false)
+
+  function handleSaved(report: DealReport) {
+    setReports(prev => [report, ...prev].sort((a, b) => b.report_date.localeCompare(a.report_date)))
+    setShowUpload(false)
+    setSelected(report)
+  }
+
+  if (selected) {
+    return (
+      <>
+        <DealReportViewer report={selected} onBack={() => setSelected(null)} />
+        {showUpload && <UploadModal onClose={() => setShowUpload(false)} onSaved={handleSaved} />}
+      </>
     )
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {reports.map(report => (
+    <>
+      {showUpload && <UploadModal onClose={() => setShowUpload(false)} onSaved={handleSaved} />}
+
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs text-neutral-500">{reports.length} report{reports.length !== 1 ? 's' : ''}</p>
         <button
-          key={report.id}
-          onClick={() => setSelected(report)}
-          className="card p-5 text-left hover:shadow-md transition-shadow group flex items-center justify-between"
+          onClick={() => setShowUpload(true)}
+          className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
         >
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <TrendingUp size={16} className="text-primary-500" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                Israeli Tech Deal Report
-              </p>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                Week of {new Date(report.report_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-            </div>
-          </div>
-          <span className="text-xs font-semibold text-primary-500 group-hover:text-primary-600 flex-shrink-0 ml-4">Read →</span>
+          <Upload size={13} /> Upload Report
         </button>
-      ))}
-    </div>
+      </div>
+
+      {reports.length === 0 ? (
+        <div className="card p-12 text-center">
+          <TrendingUp size={32} className="text-neutral-300 mx-auto mb-3" />
+          <p className="text-sm font-medium text-neutral-500">No deal reports yet</p>
+          <p className="text-xs text-neutral-400 mt-1">Upload a report or wait for the Monday automatic brief</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {reports.map(report => (
+            <button
+              key={report.id}
+              onClick={() => setSelected(report)}
+              className="card p-5 text-left hover:shadow-md transition-shadow group flex items-center justify-between"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <TrendingUp size={16} className="text-primary-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                    Israeli Tech Deal Report
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Week of {new Date(report.report_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-semibold text-primary-500 group-hover:text-primary-600 flex-shrink-0 ml-4">Read →</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
 
