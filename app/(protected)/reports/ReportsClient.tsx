@@ -297,9 +297,9 @@ function DealReportViewer({ report, onBack }: { report: DealReport; onBack: () =
     let i = 0
     while (i < rawLines.length) {
       const line = rawLines[i]
-      if (line.startsWith('| ')) {
+      if (line.startsWith('|')) {
         const tableRows: string[] = []
-        while (i < rawLines.length && rawLines[i].startsWith('| ')) {
+        while (i < rawLines.length && rawLines[i].startsWith('|')) {
           tableRows.push(rawLines[i])
           i++
         }
