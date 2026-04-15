@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Calendar } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
 import type { DealReport } from './page'
@@ -260,7 +261,7 @@ function DealReportViewer({ report, onBack }: { report: DealReport; onBack: () =
 
         {/* Report body */}
         <div className="px-6 py-6 max-w-none">
-          <ReactMarkdown components={mdComponents}>{report.content}</ReactMarkdown>
+          <ReactMarkdown components={mdComponents} remarkPlugins={[remarkGfm]}>{report.content}</ReactMarkdown>
         </div>
       </div>
     </div>
