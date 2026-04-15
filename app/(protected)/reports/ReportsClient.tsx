@@ -240,14 +240,161 @@ function DealReportViewer({ report, onBack }: { report: DealReport; onBack: () =
     year: 'numeric', month: 'long', day: 'numeric',
   })
 
+  async function handleDownload() {
+    const { default: jsPDF } = await import('jspdf')
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageW = doc.internal.pageSize.getWidth()
+    const pageH = doc.internal.pageSize.getHeight()
+    const margin = 18
+    const contentW = pageW - margin * 2
+    let y = 0
+
+    // Header bar
+    doc.setFillColor(79, 70, 229)
+    doc.rect(0, 0, pageW, 28, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Menomadin — Israeli Tech Deal Report', margin, 12)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(199, 210, 254)
+    doc.text(`Week of ${weekOf}`, margin, 20)
+    doc.text(`Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageW - margin, 20, { align: 'right' })
+
+    y = 36
+
+    const lines = report.content.split('\n')
+
+    function checkPage(needed = 8) {
+      if (y + needed > pageH - 15) {
+        doc.addPage()
+        y = 15
+      }
+    }
+
+    for (const line of lines) {
+      if (line.startsWith('# ')) {
+        checkPage(12)
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(30, 30, 60)
+        doc.text(line.replace(/^# /, ''), margin, y)
+        y += 8
+      } else if (line.startsWith('## ')) {
+        checkPage(12)
+        y += 4
+        const text = line.replace(/^## /, '').toUpperCase()
+        doc.setFillColor(238, 242, 255)
+        doc.rect(margin, y - 5, contentW, 8, 'F')
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(99, 102, 241)
+        doc.text(text, margin + 2, y)
+        y += 7
+      } else if (line.startsWith('### ')) {
+        checkPage(10)
+        y += 2
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(30, 30, 60)
+        doc.text(line.replace(/^### /, ''), margin, y)
+        y += 6
+      } else if (line.startsWith('---')) {
+        checkPage(6)
+        doc.setDrawColor(220, 220, 230)
+        doc.line(margin, y, pageW - margin, y)
+        y += 5
+      } else if (line.startsWith('| ')) {
+        // skip — tables handled below via jspdf-autotable
+      } else if (line.startsWith('- ') || line.startsWith('* ')) {
+        checkPage(7)
+        const text = line.replace(/^[-*] /, '').replace(/\*\*(.+?)\*\*/g, '$1')
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(60, 60, 80)
+        doc.text('•', margin + 2, y)
+        const wrapped = doc.splitTextToSize(text, contentW - 8)
+        doc.text(wrapped, margin + 7, y)
+        y += wrapped.length * 5 + 1
+      } else if (line.trim() !== '') {
+        checkPage(7)
+        const text = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\[(.+?)\]\(.+?\)/g, '$1')
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(60, 60, 80)
+        const wrapped = doc.splitTextToSize(text, contentW)
+        doc.text(wrapped, margin, y)
+        y += wrapped.length * 5 + 1
+      } else {
+        y += 3
+      }
+      checkPage()
+    }
+
+    // Re-render tables using autoTable
+    const { default: autoTable } = await import('jspdf-autotable')
+    const tableBlocks: string[][] = []
+    let currentTable: string[] = []
+    for (const line of lines) {
+      if (line.startsWith('| ')) {
+        currentTable.push(line)
+      } else {
+        if (currentTable.length > 0) { tableBlocks.push([...currentTable]); currentTable = [] }
+      }
+    }
+    if (currentTable.length > 0) tableBlocks.push(currentTable)
+
+    // Find table position in PDF by rebuilding — simpler: add tables on new pages at end
+    for (const block of tableBlocks) {
+      if (block.length < 2) continue
+      const [headerRow, , ...bodyRows] = block
+      const head = headerRow.split('|').map(c => c.trim()).filter(Boolean)
+      const body = bodyRows
+        .filter(r => !r.match(/^\|[-| ]+\|$/))
+        .map(r => r.split('|').map(c => c.trim()).filter(Boolean))
+      if (body.length === 0) continue
+
+      doc.addPage()
+      doc.setFillColor(238, 242, 255)
+      doc.rect(0, 0, pageW, 14, 'F')
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(99, 102, 241)
+      doc.text('SECTION 2 — FULL DEAL TABLE', margin, 9)
+
+      autoTable(doc, {
+        startY: 18,
+        head: [head],
+        body,
+        styles: { fontSize: 7, cellPadding: 2.5, overflow: 'linebreak' },
+        headStyles: { fillColor: [79, 70, 229], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        margin: { left: margin, right: margin },
+        columnStyles: { 0: { fontStyle: 'bold' } },
+      })
+    }
+
+    doc.save(`menomadin-deal-report-${report.report_date}.pdf`)
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors self-start"
-      >
-        <ChevronLeft size={16} /> Back to reports
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors"
+        >
+          <ChevronLeft size={16} /> Back to reports
+        </button>
+        <button
+          onClick={handleDownload}
+          className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+        >
+          <Download size={13} /> Download PDF
+        </button>
+      </div>
 
       <div className="card overflow-hidden">
         {/* Report header */}
