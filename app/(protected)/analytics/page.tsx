@@ -2,6 +2,14 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BarChart3 } from 'lucide-react'
 import AnalyticsClient from './AnalyticsClient'
+import {
+  calcCurrentValue,
+  calcMOIC,
+  getFundOwnershipPct,
+  getLatestRound,
+  totalInvestedInCompany,
+} from '@/lib/calculations'
+import type { Company, Round, Investment, CapTableEntry, Reserve } from '@/lib/types'
 
 export const metadata = {
   title: 'Analytics | Portfolio',
@@ -11,13 +19,39 @@ export const metadata = {
 export default async function AnalyticsPage() {
   const supabase = await createServerSupabaseClient()
 
-  const [companiesResult, investmentsResult] = await Promise.all([
+  const [companiesResult, investmentsResult, roundsResult, capTableResult, reservesResult] = await Promise.all([
     supabase.from('companies').select('*'),
-    supabase.from('investments').select('*'),
+    supabase.from('investments').select('*').order('date'),
+    supabase.from('rounds').select('*'),
+    supabase.from('cap_table').select('*'),
+    supabase.from('reserves').select('*'),
   ])
 
-  const companies = companiesResult.data || []
-  const investments = investmentsResult.data || []
+  const companiesList   = (companiesResult.data  || []) as Company[]
+  const investmentsList = (investmentsResult.data || []) as Investment[]
+  const roundsList      = (roundsResult.data      || []) as Round[]
+  const capTableList    = (capTableResult.data    || []) as CapTableEntry[]
+  const reservesList    = (reservesResult.data    || []) as Reserve[]
+
+  // Enrich each company with computed metrics (same logic as dashboard)
+  const companies = companiesList.map((co) => {
+    const coInvestments = investmentsList.filter((i) => i.company_id === co.id)
+    const coRounds      = roundsList.filter((r) => r.company_id === co.id)
+    const coCapTable    = capTableList.filter((c) => c.company_id === co.id)
+    const coReserve     = reservesList.find((r) => r.company_id === co.id)
+
+    const totalInvested   = totalInvestedInCompany(coInvestments)
+    const latestRound     = getLatestRound(coRounds)
+    const ownershipPct    = getFundOwnershipPct(coCapTable)
+    const currentValue    = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
+    const moic            = calcMOIC(currentValue, totalInvested)
+    const plannedReserves  = coReserve?.reserved_amount ?? 0
+    const deployedReserves = coReserve?.deployed_amount ?? 0
+
+    return { ...co, totalInvested, currentValue, moic, ownershipPct, plannedReserves, deployedReserves }
+  })
+
+  const investments = investmentsList
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
