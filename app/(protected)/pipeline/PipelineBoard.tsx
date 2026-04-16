@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import type { Components } from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import {
   DndContext,
   DragOverlay,
@@ -12,7 +15,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
-import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip, BarChart2, Sparkles, Search } from 'lucide-react'
+import { Plus, Pencil, Trash2, GripVertical, MoreHorizontal, X, Paperclip, BarChart2, Sparkles, Search, Download, Loader2 } from 'lucide-react'
 import PipelineAnalytics from './PipelineAnalytics'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -133,6 +136,363 @@ function AnalyticsBar({ entries, stages }: { entries: PipelineEntry[]; stages: S
   )
 }
 
+// ── Markdown components for analysis report ───────────────────────────────
+
+const reportComponents: Components = {
+  h1: ({ children }) => (
+    <h1 className="text-xl font-bold text-neutral-900 mb-1">{children}</h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-xs font-bold uppercase tracking-widest text-primary-500 mt-8 mb-4 pb-2 border-b border-primary-100">
+      {String(children)}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-sm font-bold text-neutral-800 mt-6 mb-2">{children}</h3>
+  ),
+  h4: ({ children }) => (
+    <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider mt-4 mb-1.5">{children}</h4>
+  ),
+  p: ({ children }) => (
+    <p className="text-sm text-neutral-700 leading-relaxed mb-3">{children}</p>
+  ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-neutral-900">{children}</strong>
+  ),
+  ul: ({ children }) => <ul className="space-y-2 mb-4">{children}</ul>,
+  ol: ({ children }) => <ol className="space-y-2 mb-4 list-decimal pl-4">{children}</ol>,
+  li: ({ children }) => (
+    <li className="flex gap-2 text-sm text-neutral-700 leading-relaxed">
+      <span className="text-primary-400 mt-1 flex-shrink-0">•</span>
+      <span>{children}</span>
+    </li>
+  ),
+  hr: () => <hr className="border-neutral-100 my-6" />,
+  code: ({ children }) => (
+    <code className="font-mono text-xs bg-neutral-100 text-primary-600 px-1.5 py-0.5 rounded font-semibold">{children}</code>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-2 border-primary-300 pl-4 my-4 text-sm text-neutral-600 italic">
+      {children}
+    </blockquote>
+  ),
+  table: ({ children }) => (
+    <div className="overflow-x-auto mb-6 rounded-lg border border-neutral-200">
+      <table className="w-full text-xs">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="bg-neutral-50">{children}</thead>,
+  th: ({ children }) => (
+    <th className="px-3 py-2.5 text-left font-semibold text-neutral-600 uppercase tracking-wider text-[10px] whitespace-nowrap border-b border-neutral-200">
+      {children}
+    </th>
+  ),
+  tbody: ({ children }) => <tbody className="divide-y divide-neutral-100">{children}</tbody>,
+  tr: ({ children }) => <tr className="hover:bg-neutral-50 transition-colors">{children}</tr>,
+  td: ({ children }) => (
+    <td className="px-3 py-2.5 text-neutral-700 align-top">{children}</td>
+  ),
+}
+
+// ── Deck Analysis Modal (full-screen) ─────────────────────────────────────
+
+function DeckAnalysisModal({
+  entry,
+  onClose,
+}: {
+  entry: PipelineEntry
+  onClose: () => void
+}) {
+  const [content, setContent] = useState('')
+  const [initializing, setInitializing] = useState(true)
+  const [streaming, setStreaming] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    if (!entry.deck_url) return
+    const ac = new AbortController()
+
+    async function run() {
+      try {
+        const res = await fetch('/api/pipeline/analyze-deck', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            deck_url: entry.deck_url,
+            entry: {
+              name: entry.name,
+              sector: entry.sector,
+              hq: entry.hq,
+              stage: entry.stage,
+              fundraising_ask: entry.fundraising_ask,
+              status: entry.status,
+            },
+          }),
+          signal: ac.signal,
+        })
+
+        // Non-200 responses return JSON errors
+        if (!res.ok || res.headers.get('content-type')?.includes('application/json')) {
+          const json = await res.json()
+          setError(json.error ?? 'Analysis failed. Please try again.')
+          setInitializing(false)
+          return
+        }
+
+        if (!res.body) {
+          setError('No response body received.')
+          setInitializing(false)
+          return
+        }
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        setInitializing(false)
+        setStreaming(true)
+
+        while (true) {
+          const { done: streamDone, value } = await reader.read()
+          if (streamDone) break
+          setContent(prev => prev + decoder.decode(value, { stream: true }))
+        }
+
+        setStreaming(false)
+        setDone(true)
+      } catch (err) {
+        if ((err as Error)?.name === 'AbortError') return
+        setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.')
+        setInitializing(false)
+        setStreaming(false)
+      }
+    }
+
+    run()
+    return () => ac.abort()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry.deck_url])
+
+  async function handleDownload() {
+    if (!content) return
+
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ])
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageW = doc.internal.pageSize.getWidth()
+    const pageH = doc.internal.pageSize.getHeight()
+    const margin = 18
+    const contentW = pageW - margin * 2
+    let y = 36
+
+    // Header
+    doc.setFillColor(79, 70, 229)
+    doc.rect(0, 0, pageW, 28, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(13)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Menomadin — Deck Analysis: ${entry.name}`, margin, 12)
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(199, 210, 254)
+    doc.text(
+      `Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+      pageW - margin, 21, { align: 'right' }
+    )
+
+    function checkPage(needed = 8) {
+      if (y + needed > pageH - 15) { doc.addPage(); y = 15 }
+    }
+
+    function stripInline(text: string) {
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/`(.+?)`/g, '$1')
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    }
+
+    function parseTableBlock(rows: string[]): { head: string[]; body: string[][] } | null {
+      const dataRows = rows.filter(r => !r.match(/^\|[\s|:-]+\|$/))
+      if (dataRows.length < 2) return null
+      const head = dataRows[0].split('|').map(c => c.trim()).filter(Boolean)
+      const body = dataRows.slice(1).map(r => r.split('|').map(c => c.trim()).filter(Boolean))
+      return { head, body }
+    }
+
+    type Block =
+      | { type: 'h1' | 'h2' | 'h3' | 'hr' | 'bullet' | 'text'; text: string }
+      | { type: 'table'; rows: string[] }
+      | { type: 'blank' }
+
+    const blocks: Block[] = []
+    const rawLines = content.split('\n')
+    let i = 0
+    while (i < rawLines.length) {
+      const line = rawLines[i]
+      if (line.startsWith('|')) {
+        const tableRows: string[] = []
+        while (i < rawLines.length && rawLines[i].startsWith('|')) {
+          tableRows.push(rawLines[i])
+          i++
+        }
+        blocks.push({ type: 'table', rows: tableRows })
+      } else if (line.startsWith('# '))  { blocks.push({ type: 'h1', text: line.replace(/^# /, '') }); i++ }
+      else if (line.startsWith('## '))   { blocks.push({ type: 'h2', text: line.replace(/^## /, '') }); i++ }
+      else if (line.startsWith('### '))  { blocks.push({ type: 'h3', text: line.replace(/^### /, '') }); i++ }
+      else if (line.startsWith('#### ')) { blocks.push({ type: 'h3', text: line.replace(/^#### /, '') }); i++ }
+      else if (line.match(/^-{3,}$/))    { blocks.push({ type: 'hr', text: '' }); i++ }
+      else if (line.match(/^[-*] /))     { blocks.push({ type: 'bullet', text: line.replace(/^[-*] /, '') }); i++ }
+      else if (line.trim() !== '')       { blocks.push({ type: 'text', text: line }); i++ }
+      else                               { blocks.push({ type: 'blank' }); i++ }
+    }
+
+    for (const block of blocks) {
+      if (block.type === 'blank') {
+        y += 2
+      } else if (block.type === 'hr') {
+        checkPage(6)
+        doc.setDrawColor(220, 220, 235)
+        doc.line(margin, y, pageW - margin, y)
+        y += 5
+      } else if (block.type === 'h1') {
+        checkPage(12); y += 2
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 50)
+        doc.text(stripInline(block.text), margin, y); y += 8
+      } else if (block.type === 'h2') {
+        checkPage(14); y += 4
+        doc.setFillColor(238, 242, 255)
+        doc.rect(margin - 2, y - 5, contentW + 4, 9, 'F')
+        doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(79, 70, 229)
+        doc.text(stripInline(block.text).toUpperCase(), margin, y); y += 8
+      } else if (block.type === 'h3') {
+        checkPage(10); y += 3
+        doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 50)
+        const wrapped = doc.splitTextToSize(stripInline(block.text), contentW)
+        doc.text(wrapped, margin, y); y += wrapped.length * 5.5 + 1
+      } else if (block.type === 'bullet') {
+        const text = stripInline(block.text)
+        const wrapped = doc.splitTextToSize(text, contentW - 8)
+        checkPage(wrapped.length * 5 + 3)
+        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 70)
+        doc.setFillColor(79, 70, 229)
+        doc.circle(margin + 1.5, y - 1.5, 1, 'F')
+        doc.text(wrapped, margin + 6, y); y += wrapped.length * 5 + 2
+      } else if (block.type === 'text') {
+        const text = stripInline(block.text)
+        const wrapped = doc.splitTextToSize(text, contentW)
+        checkPage(wrapped.length * 5 + 2)
+        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 70)
+        doc.text(wrapped, margin, y); y += wrapped.length * 5 + 2
+      } else if (block.type === 'table') {
+        const parsed = parseTableBlock(block.rows)
+        if (!parsed) continue
+        checkPage(30)
+        autoTable(doc, {
+          startY: y,
+          head: [parsed.head],
+          body: parsed.body,
+          styles: { fontSize: 7.5, cellPadding: 3, overflow: 'linebreak', valign: 'top' },
+          headStyles: { fillColor: [79, 70, 229], textColor: 255, fontStyle: 'bold', fontSize: 7 },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          margin: { left: margin, right: margin },
+          columnStyles: { 0: { fontStyle: 'bold', cellWidth: 30 } },
+          didDrawPage: () => { y = 15 },
+        })
+        y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6
+      }
+    }
+
+    doc.save(`menomadin-analysis-${entry.name.toLowerCase().replace(/\s+/g, '-')}.pdf`)
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 flex-shrink-0 bg-white shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Sparkles size={14} className="text-amber-600" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-neutral-900 truncate">
+              Deck Analysis — {entry.name}
+            </p>
+            <p className="text-xs text-neutral-500">Menomadin Investment Analysis</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+          {done && content && (
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
+            >
+              <Download size={12} /> Download PDF
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-8 py-8">
+
+          {/* Initial loading state */}
+          {initializing && (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <Loader2 size={28} className="text-primary-500 animate-spin" />
+              <div className="text-center">
+                <p className="text-sm font-semibold text-neutral-800">Analyzing deck…</p>
+                <p className="text-xs text-neutral-500 mt-1">Downloading and reading the pitch deck</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 mt-4">
+              <p className="text-sm font-semibold text-red-700 mb-1">Analysis failed</p>
+              <p className="text-xs text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Streaming / completed report */}
+          {content && (
+            <ReactMarkdown components={reportComponents} remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          )}
+
+          {/* Streaming cursor */}
+          {streaming && content && (
+            <span className="inline-block w-2 h-4 bg-primary-500 rounded-sm animate-pulse ml-0.5" />
+          )}
+
+          {/* Done state — show download prompt */}
+          {done && content && (
+            <div className="mt-10 pt-6 border-t border-neutral-100 flex items-center justify-between">
+              <p className="text-xs text-neutral-400">Analysis complete · Powered by Menomadin Deck Analyst</p>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+              >
+                <Download size={12} /> Save as PDF
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Deal Panel (slide-over) ───────────────────────────────────────────────
 
 function DealPanel({
@@ -147,39 +507,7 @@ function DealPanel({
   onDelete: (id: string, name: string) => void
 }) {
   const [tab, setTab] = useState<'details' | 'tasks'>('details')
-  const [analyzing, setAnalyzing] = useState(false)
-  const [aiSummary, setAiSummary] = useState<string | null>(null)
-  const [aiError, setAiError] = useState<string | null>(null)
-
-  async function analyzeDeck() {
-    if (!entry.deck_url) return
-    setAnalyzing(true)
-    setAiError(null)
-    try {
-      const res = await fetch('/api/pipeline/analyze-deck', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deck_url: entry.deck_url }),
-      })
-      const json = await res.json()
-      if (json.error) { setAiError(json.error); return }
-      const e = json.extracted
-      const lines = [
-        e.tagline && `"${e.tagline}"`,
-        e.problem && `Problem: ${e.problem}`,
-        e.solution && `Solution: ${e.solution}`,
-        e.traction && `Traction: ${e.traction}`,
-        e.market_size && `Market: ${e.market_size}`,
-        e.team && `Team: ${e.team}`,
-        e.business_model && `Model: ${e.business_model}`,
-      ].filter(Boolean)
-      setAiSummary(lines.join('\n\n') || e.summary || 'No summary available')
-    } catch {
-      setAiError('Analysis failed — try again')
-    } finally {
-      setAnalyzing(false)
-    }
-  }
+  const [showAnalysis, setShowAnalysis] = useState(false)
 
   const createdDate = new Date(entry.created_at).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -293,7 +621,7 @@ function DealPanel({
           {entry.deck_url && (
             <div>
               <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Pitch Deck</p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <a
                   href={entry.deck_url}
                   target="_blank"
@@ -303,21 +631,17 @@ function DealPanel({
                   <Paperclip size={13} /> View deck
                 </a>
                 <button
-                  onClick={analyzeDeck}
-                  disabled={analyzing}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors disabled:opacity-50"
+                  onClick={() => setShowAnalysis(true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors"
                 >
-                  <Sparkles size={11} /> {analyzing ? 'Analyzing…' : 'AI Summary'}
+                  <Sparkles size={11} /> Full Analysis
                 </button>
               </div>
-              {aiError && <p className="mt-2 text-xs text-red-500">{aiError}</p>}
-              {aiSummary && (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                  <p className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI Analysis</p>
-                  <p className="text-xs text-neutral-800 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
-                </div>
-              )}
             </div>
+          )}
+
+          {showAnalysis && entry.deck_url && (
+            <DeckAnalysisModal entry={entry} onClose={() => setShowAnalysis(false)} />
           )}
 
           <div>
