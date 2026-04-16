@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { logActivity } from './activities'
 import {
   parseCSV,
+  parseExcel,
   validateCompanyRow,
   validateContactRow,
   rowToCompanyData,
@@ -14,6 +15,10 @@ import {
   CompanyImportData,
   ContactImportData,
 } from '@/lib/bulk-import-utils'
+
+function isExcel(file: File) {
+  return file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+}
 
 export async function importCompanies(
   formData: FormData
@@ -47,15 +52,15 @@ export async function importCompanies(
       }
     }
 
-    // Parse CSV
-    const rows = await parseCSV(file)
+    // Parse CSV or Excel
+    const rows = isExcel(file) ? await parseExcel(file) : await parseCSV(file)
     if (rows.length === 0) {
       return {
         success: false,
         total: 0,
         imported: 0,
         failed: 0,
-        errors: [{ row: 0, field: 'file', message: 'CSV file is empty' }],
+        errors: [{ row: 0, field: 'file', message: 'File is empty' }],
         warnings: [],
       }
     }
@@ -194,15 +199,15 @@ export async function importContacts(
       }
     }
 
-    // Parse CSV
-    const rows = await parseCSV(file)
+    // Parse CSV or Excel
+    const rows = isExcel(file) ? await parseExcel(file) : await parseCSV(file)
     if (rows.length === 0) {
       return {
         success: false,
         total: 0,
         imported: 0,
         failed: 0,
-        errors: [{ row: 0, field: 'file', message: 'CSV file is empty' }],
+        errors: [{ row: 0, field: 'file', message: 'File is empty' }],
         warnings: [],
       }
     }

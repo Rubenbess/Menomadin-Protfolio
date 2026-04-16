@@ -47,8 +47,10 @@ export function BulkImportForm({
   }
 
   const handleFile = async (file: File) => {
-    if (!file.name.endsWith('.csv')) {
-      toast.error('Please upload a CSV file')
+    const validExtensions = ['.csv', '.xlsx', '.xls']
+    const hasValidExt = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+    if (!hasValidExt) {
+      toast.error('Please upload a CSV or Excel file (.csv, .xlsx, .xls)')
       return
     }
 
@@ -115,16 +117,16 @@ export function BulkImportForm({
           />
           <div className="text-center">
             <p className="font-medium text-neutral-900 dark:text-white">
-              Drag and drop your CSV file
+              Drag and drop your CSV or Excel file
             </p>
             <p className="text-sm text-neutral-700 dark:text-neutral-500 mt-1">
-              or click to browse
+              .csv, .xlsx, .xls — or click to browse
             </p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".csv,.xlsx,.xls"
             onChange={handleFileInput}
             disabled={isLoading}
             className="hidden"

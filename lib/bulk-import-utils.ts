@@ -1,6 +1,7 @@
 /**
- * Bulk import utilities for CSV parsing and validation
+ * Bulk import utilities for CSV and Excel parsing and validation
  */
+import * as XLSX from 'xlsx'
 
 export interface ImportResult {
   success: boolean
@@ -64,6 +65,30 @@ export async function parseCSV(file: File): Promise<string[][]> {
     }
     reader.onerror = () => reject(new Error('Failed to read file'))
     reader.readAsText(file)
+  })
+}
+
+/**
+ * Parse Excel file (.xlsx / .xls) into the same string[][] format as parseCSV
+ */
+export async function parseExcel(file: File): Promise<string[][]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const sheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[sheetName]
+        // header:1 returns raw array-of-arrays; defval fills empty cells with ''
+        const rows: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+        resolve(rows.map(row => (row as unknown[]).map(cell => String(cell ?? ''))))
+      } catch (error) {
+        reject(error)
+      }
+    }
+    reader.onerror = () => reject(new Error('Failed to read Excel file'))
+    reader.readAsArrayBuffer(file)
   })
 }
 

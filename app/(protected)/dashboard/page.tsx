@@ -2,7 +2,6 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { MetricCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import DashboardCharts from '@/components/DashboardCharts'
-import { DashboardQuickActions } from '@/components/DashboardQuickActions'
 import { TeamTasksDashboard } from '@/components/TeamTasksDashboard'
 import {
   calcCurrentValue,
@@ -137,11 +136,6 @@ export default async function DashboardPage({ searchParams }: Props) {
           <MetricCard label="IRR"               value={irr != null ? `${(irr * 100).toFixed(1)}%` : 'N/A'} accent="violet" />
           <MetricCard label="DPI"               value={fmtMultiple(dpi)} />
         </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="px-8">
-        <DashboardQuickActions />
       </div>
 
       {/* Strategy breakdown */}
