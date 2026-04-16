@@ -11,6 +11,8 @@ import {
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Reserve } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Analytics | Portfolio',
   description: 'Portfolio analytics and performance metrics',
