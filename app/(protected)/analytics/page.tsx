@@ -5,9 +5,11 @@ import AnalyticsClient from './AnalyticsClient'
 import {
   calcCurrentValue,
   calcMOIC,
+  calcXIRR,
   getFundOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
+  type CashFlow,
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Reserve } from '@/lib/types'
 
@@ -50,7 +52,16 @@ export default async function AnalyticsPage() {
     const plannedReserves  = coReserve?.reserved_amount ?? 0
     const deployedReserves = coReserve?.deployed_amount ?? 0
 
-    return { ...co, totalInvested, currentValue, moic, ownershipPct, plannedReserves, deployedReserves }
+    // IRR per company: investments are negative cash flows, current value is today's positive
+    const xirrFlows: CashFlow[] = [
+      ...coInvestments
+        .filter(i => i.amount > 0 && i.date)
+        .map(i => ({ amount: -i.amount, date: new Date(i.date) })),
+      ...(currentValue > 0 ? [{ amount: currentValue, date: new Date() }] : []),
+    ]
+    const irr = calcXIRR(xirrFlows) ?? 0
+
+    return { ...co, totalInvested, currentValue, moic, irr, ownershipPct, plannedReserves, deployedReserves }
   })
 
   const investments = investmentsList
