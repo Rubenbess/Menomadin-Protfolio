@@ -1,0 +1,127 @@
+name: Daily Platform Health Check
+
+# 19:00 Israel Daylight Time (IDT) = 16:00 UTC
+# Runs Sun–Thu (Israeli work week); skips Fri (5) and Sat (6)
+on:
+  schedule:
+    - cron: '0 16 * * 0-4'
+  workflow_dispatch: {}   # allow manual trigger
+
+jobs:
+  health-check:
+    name: Platform Health Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── STEP 1 – BUILD & DEPLOYMENT ────────────────────────────────────────
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Build (Next.js production)
+        id: build
+        env:
+          # Provide stub env vars so Next.js can compile without real secrets
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+        run: npm run build 2>&1 | tee build.log
+
+      # ── STEP 2 – TYPESCRIPT TYPE CHECK ─────────────────────────────────────
+      - name: TypeScript type check
+        id: typecheck
+        run: npx tsc --noEmit 2>&1 | tee typecheck.log || true
+
+      # ── STEP 3 – LINT ──────────────────────────────────────────────────────
+      - name: ESLint
+        id: lint
+        run: npx next lint 2>&1 | tee lint.log || true
+
+      # ── STEP 4 – STATIC ANALYSIS: missing API routes ────────────────────────
+      - name: Audit fetch() calls vs. existing API routes
+        id: api_audit
+        run: |
+          echo "=== Fetch calls in app/components/actions ===" | tee api-audit.log
+          grep -rn "fetch('/api/" app/ components/ actions/ --include="*.ts" --include="*.tsx" \
+            | grep -v "node_modules" \
+            | sed "s|.*fetch('||;s|'.*||" \
+            | sort -u > fetched_routes.txt
+
+          echo "=== Existing API routes ===" | tee -a api-audit.log
+          find app/api -name "route.ts" \
+            | sed "s|app||;s|/route\.ts||" \
+            | sort > existing_routes.txt
+
+          echo "Missing routes (fetched but not implemented):" | tee -a api-audit.log
+          MISSING=$(comm -23 fetched_routes.txt existing_routes.txt)
+          if [ -n "$MISSING" ]; then
+            echo "$MISSING" | tee -a api-audit.log
+            echo "MISSING_ROUTES=true" >> $GITHUB_ENV
+          else
+            echo "None — all fetched routes have implementations." | tee -a api-audit.log
+            echo "MISSING_ROUTES=false" >> $GITHUB_ENV
+          fi
+
+      # ── STEP 5 – PRINT SUMMARY ─────────────────────────────────────────────
+      - name: Print health check summary
+        if: always()
+        run: |
+          DATE=$(TZ='Asia/Jerusalem' date '+%Y-%m-%d %H:%M IDT')
+          BUILD_STATUS="${{ steps.build.outcome }}"
+          TC_STATUS="${{ steps.typecheck.outcome }}"
+          LINT_STATUS="${{ steps.lint.outcome }}"
+
+          [ "$BUILD_STATUS" = "success" ] && BUILD_LABEL="OK" || BUILD_LABEL="NEEDS ATTENTION"
+          [ "$TC_STATUS"    = "success" ] && TC_LABEL="OK"    || TC_LABEL="NEEDS ATTENTION"
+          [ "$LINT_STATUS"  = "success" ] && LINT_LABEL="OK"  || LINT_LABEL="NEEDS ATTENTION"
+          [ "$MISSING_ROUTES" = "false" ] && API_LABEL="OK"   || API_LABEL="NEEDS ATTENTION"
+
+          echo ""
+          echo "=========================================="
+          echo "  MENOMADIN DAILY HEALTH CHECK — $DATE"
+          echo "=========================================="
+          echo ""
+          echo "BUILD & DEPLOYMENT      [$BUILD_LABEL]"
+          echo "TYPESCRIPT TYPE CHECK   [$TC_LABEL]"
+          echo "ESLINT                  [$LINT_LABEL]"
+          echo "API ROUTE COVERAGE      [$API_LABEL]"
+          echo ""
+          echo "------------------------------------------"
+          echo "BRANCH: ${{ github.ref_name }}"
+          echo "COMMIT: ${{ github.sha }}"
+          echo "------------------------------------------"
+          echo ""
+          echo "BUILD LOG (last 30 lines):"
+          tail -30 build.log || true
+          echo ""
+          echo "TYPE CHECK LOG:"
+          cat typecheck.log || true
+          echo ""
+          echo "LINT LOG:"
+          cat lint.log || true
+          echo ""
+          echo "API AUDIT:"
+          cat api-audit.log || true
+          echo ""
+          echo "=========================================="
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-check-logs-${{ github.run_number }}
+          path: |
+            build.log
+            typecheck.log
+            lint.log
+            api-audit.log
+          retention-days: 14
