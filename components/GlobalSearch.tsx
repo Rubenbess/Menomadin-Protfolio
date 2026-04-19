@@ -57,6 +57,7 @@ export default function GlobalSearch() {
     setLoading(true)
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      if (!res.ok) { setResults([]); return }
       const json = await res.json()
       setResults(json.results ?? [])
       setCursor(0)
