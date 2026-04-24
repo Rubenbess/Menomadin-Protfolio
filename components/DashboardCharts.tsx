@@ -75,11 +75,11 @@ function PerformanceChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+    <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900">Invested vs Current Value</h3>
-          <p className="text-xs text-neutral-500 mt-0.5">Per company · sorted by capital deployed</p>
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Invested vs Current Value</h3>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Per company · sorted by capital deployed</p>
         </div>
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 text-xs text-neutral-600">
@@ -138,9 +138,9 @@ function SectorChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Sector Allocation</h3>
-      <p className="text-xs text-neutral-500 mb-4">By capital invested</p>
+    <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-0.5">Sector Allocation</h3>
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">By capital invested</p>
 
       <div className="flex items-center gap-4">
         {/* Donut */}
@@ -207,9 +207,9 @@ function MoicChart({ companies }: Props) {
   if (data.length === 0) return null
 
   return (
-    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">MOIC by Company</h3>
-      <p className="text-xs text-neutral-500 mb-5">Top performers ranked by return multiple</p>
+    <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-0.5">MOIC by Company</h3>
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-5">Top performers ranked by return multiple</p>
       <ResponsiveContainer width="100%" height={data.length * 32 + 20}>
         <BarChart data={data} layout="vertical" barCategoryGap="30%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
           <CartesianGrid horizontal={false} stroke="#f1f5f9" />
@@ -273,9 +273,9 @@ function StatusBreakdown({ companies }: Props) {
   if (total === 0) return null
 
   return (
-    <div className="bg-white rounded-lg p-6" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-      <h3 className="text-sm font-semibold text-neutral-900 mb-0.5">Portfolio Status</h3>
-      <p className="text-xs text-neutral-500 mb-5">Company health breakdown · {total} total</p>
+    <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
+      <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-0.5">Portfolio Status</h3>
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-5">Company health breakdown · {total} total</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
