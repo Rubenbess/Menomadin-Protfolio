@@ -5,7 +5,7 @@ const strategyColors: Record<string, string> = {
 
 const strategyLabels: Record<string, string> = {
   impact:  'Menomadin Impact',
-  venture: 'Menomadin Ventures',
+  venture: 'Menomadin Catalyst',
 }
 
 const statusColors: Record<string, string> = {

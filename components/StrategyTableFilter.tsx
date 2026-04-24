@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 const OPTIONS = [
   { value: '', label: 'All' },
   { value: 'impact', label: 'Impact' },
-  { value: 'venture', label: 'Ventures' },
+  { value: 'venture', label: 'Catalyst' },
 ]
 
 export default function StrategyTableFilter() {

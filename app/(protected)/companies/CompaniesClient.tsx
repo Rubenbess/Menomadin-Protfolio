@@ -19,7 +19,7 @@ import type { Company, Contact, HealthScore } from '@/lib/types'
 const STRATEGY_FILTERS = [
   { value: 'all',     label: 'All' },
   { value: 'impact',  label: 'Menomadin Impact' },
-  { value: 'venture', label: 'Menomadin Ventures' },
+  { value: 'venture', label: 'Menomadin Catalyst' },
 ]
 
 const STATUS_LABELS: Record<string, string> = {

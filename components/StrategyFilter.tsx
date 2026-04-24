@@ -6,7 +6,7 @@ import { useCallback } from 'react'
 const FILTERS = [
   { value: '', label: 'All strategies' },
   { value: 'impact', label: 'Impact' },
-  { value: 'venture', label: 'Ventures' },
+  { value: 'venture', label: 'Catalyst' },
 ]
 
 export default function StrategyFilter() {

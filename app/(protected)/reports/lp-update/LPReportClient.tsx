@@ -372,7 +372,7 @@ export default function LPReportClient({
         <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5 border-l-4 border-blue-500">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-sm font-semibold text-neutral-900">Menomadin Ventures</span>
+            <span className="text-sm font-semibold text-neutral-900">Menomadin Catalyst</span>
             <span className="ml-auto text-xs text-neutral-500">{ventureCos.length} companies</span>
           </div>
           <div className="grid grid-cols-3 gap-4">

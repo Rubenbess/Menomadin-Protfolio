@@ -178,7 +178,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   const strategyLabel =
     strategy === 'impact'  ? 'Menomadin Impact'   :
-    strategy === 'venture' ? 'Menomadin Ventures' :
+    strategy === 'venture' ? 'Menomadin Catalyst' :
     'All Strategies'
 
   const today = new Date().toLocaleDateString('en-GB', {
@@ -301,7 +301,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-l-blue-500">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Ventures</span>
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Catalyst</span>
                   <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{ventureCos.length} companies</span>
                 </div>
                 <div className="grid grid-cols-3 gap-4">

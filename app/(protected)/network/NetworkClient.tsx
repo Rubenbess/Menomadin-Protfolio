@@ -112,7 +112,7 @@ function CoInvestorCard({
               <div
                 className="bg-blue-400 rounded-full transition-all"
                 style={{ width: `${(ventureCount / total) * 100}%` }}
-                title={`${ventureCount} Ventures`}
+                title={`${ventureCount} Catalyst`}
               />
             )}
           </div>
@@ -126,7 +126,7 @@ function CoInvestorCard({
             {ventureCount > 0 && (
               <span className="flex items-center gap-1 text-[10px] text-neutral-500">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                {ventureCount} Ventures
+                {ventureCount} Catalyst
               </span>
             )}
           </div>
