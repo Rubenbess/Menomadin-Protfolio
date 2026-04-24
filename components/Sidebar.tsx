@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut,
   Network, Bell, Users, Activity, ShieldCheck, Mail, FolderOpen,
-  CheckSquare, ChevronLeft, BarChart3, HelpCircle, BookOpen,
+  CheckSquare, ChevronLeft, BarChart3,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Suspense, useEffect, useState } from 'react'
@@ -46,10 +46,7 @@ const SETTINGS_NAV: NavItemDef[] = [
   { href: '/settings/email-scanner', label: 'Email Scanner', icon: Mail },
 ]
 
-const SUPPORT: NavItemDef[] = [
-  { href: '/help',          label: 'Help Center',  icon: HelpCircle },
-  { href: '/documentation', label: 'Documentation', icon: BookOpen },
-]
+const SUPPORT: NavItemDef[] = []
 
 const ALL_ITEMS = [...MAIN_MENU, ...TOOLS, ...SETTINGS_NAV, ...SUPPORT]
 
@@ -193,7 +190,6 @@ function NavLinks({ collapsed }: { collapsed: boolean }) {
     { label: 'MAIN MENU', items: MAIN_MENU },
     { label: 'TOOLS',     items: TOOLS },
     { label: 'SETTINGS',  items: SETTINGS_NAV },
-    { label: 'SUPPORT',   items: SUPPORT },
   ]
 
   return (
