@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Badge from '@/components/ui/Badge'
 import DashboardCharts from '@/components/DashboardCharts'
-import { DashboardQuickActions } from '@/components/DashboardQuickActions'
 import { TeamTasksDashboard } from '@/components/TeamTasksDashboard'
 import DashboardMetricCard from '@/components/ui/DashboardMetricCard'
 import ExportPortfolioCSV from '@/components/ExportPortfolioCSV'
@@ -258,11 +257,6 @@ export default async function DashboardPage({ searchParams }: Props) {
             icon={<ArrowUpRight size={15} color="#14b8a6" />}
           />
         </div>
-      </div>
-
-      {/* ── Quick Actions ────────────────────────────────────────────────── */}
-      <div className="px-8 pb-6">
-        <DashboardQuickActions />
       </div>
 
       {/* ── Strategy breakdown ───────────────────────────────────────────── */}
