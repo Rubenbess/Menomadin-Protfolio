@@ -1,7 +1,19 @@
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { BarChart3 } from 'lucide-react'
 import AnalyticsClient from './AnalyticsClient'
+import {
+  calcCurrentValue,
+  calcMOIC,
+  calcTVPI,
+  calcXIRR,
+  calcDPI,
+  getFundOwnershipPct,
+  getLatestRound,
+  totalInvestedInCompany,
+  type CashFlow,
+} from '@/lib/calculations'
+import type { Company, Round, Investment, CapTableEntry, Reserve } from '@/lib/types'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Analytics | Portfolio',
@@ -11,38 +23,68 @@ export const metadata = {
 export default async function AnalyticsPage() {
   const supabase = await createServerSupabaseClient()
 
-  const [companiesResult, investmentsResult] = await Promise.all([
-    supabase.from('companies').select('*'),
-    supabase.from('investments').select('*'),
+  const [
+    { data: companies },
+    { data: rounds },
+    { data: investments },
+    { data: capTable },
+    { data: reserves },
+  ] = await Promise.all([
+    supabase.from('companies').select('*').order('name'),
+    supabase.from('rounds').select('*'),
+    supabase.from('investments').select('*').order('date'),
+    supabase.from('cap_table').select('*'),
+    supabase.from('reserves').select('*'),
   ])
 
-  const companies = companiesResult.data || []
-  const investments = investmentsResult.data || []
+  const companiesList   = (companies   ?? []) as Company[]
+  const roundsList      = (rounds      ?? []) as Round[]
+  const investmentsList = (investments ?? []) as Investment[]
+  const capTableList    = (capTable    ?? []) as CapTableEntry[]
+  const reservesList    = (reserves    ?? []) as Reserve[]
 
-  const breadcrumbs = [
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Analytics', href: '/analytics' },
+  // Compute per-company metrics (same logic as dashboard)
+  const companiesWithMetrics = companiesList.map(co => {
+    const coInvestments = investmentsList.filter(i => i.company_id === co.id)
+    const coRounds      = roundsList.filter(r => r.company_id === co.id)
+    const coCapTable    = capTableList.filter(c => c.company_id === co.id)
+
+    const invested     = totalInvestedInCompany(coInvestments)
+    const latestRound  = getLatestRound(coRounds)
+    const ownershipPct = getFundOwnershipPct(coCapTable)
+    const currentValue = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
+    const moic         = calcMOIC(currentValue, invested)
+
+    return {
+      ...co,
+      totalInvested:  invested,
+      currentValue,
+      moic,
+      ownershipPct,
+    }
+  })
+
+  // Portfolio-level IRR
+  const xirrFlows: CashFlow[] = [
+    ...investmentsList
+      .filter(i => i.amount > 0 && i.date)
+      .map(i => ({ amount: -i.amount, date: new Date(i.date) })),
+    ...(() => {
+      const totalValue = companiesWithMetrics.reduce((s, c) => s + c.currentValue, 0)
+      return totalValue > 0 ? [{ amount: totalValue, date: new Date() }] : []
+    })(),
   ]
+  const irr = calcXIRR(xirrFlows) ?? 0
+  const dpi = calcDPI(0, companiesWithMetrics.reduce((s, c) => s + c.totalInvested, 0))
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <BarChart3 className="text-amber-700 dark:text-amber-600" size={24} />
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
-              Analytics
-            </h1>
-          </div>
-          <p className="text-neutral-700 dark:text-neutral-500">
-            Portfolio performance and investment metrics
-          </p>
-        </div>
-      </div>
-
-      <Breadcrumbs items={breadcrumbs} />
-
-      <AnalyticsClient companies={companies} investments={investments} />
+    <div className="px-8 py-8">
+      <AnalyticsClient
+        companies={companiesWithMetrics}
+        investments={investmentsList}
+        portfolioIrr={irr}
+        portfolioDpi={dpi}
+      />
     </div>
   )
 }
