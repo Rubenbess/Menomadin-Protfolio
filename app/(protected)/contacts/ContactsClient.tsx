@@ -240,7 +240,7 @@ function ContactPanel({
             <div className="grid grid-cols-2 gap-3">
               {contact.relationship_owner && (
                 <div>
-                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Relationship Owner</p>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Directors / Owner</p>
                   <p className="text-sm text-neutral-800 flex items-center gap-1.5"><Users size={12} className="text-neutral-500" /> {contact.relationship_owner}</p>
                 </div>
               )}
@@ -482,10 +482,10 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
               <thead>
                 <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
                   <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3">Name</th>
-                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Type</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Position / Title</th>
                   <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden md:table-cell">Company</th>
                   <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden lg:table-cell">Email</th>
-                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Owner</th>
+                  <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Directors / Owner</th>
                   <th className="text-left text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest px-5 py-3 hidden xl:table-cell">Last Touch</th>
                   <th className="px-5 py-3 w-20" />
                 </tr>
@@ -509,8 +509,8 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
-                      {contact.contact_type ? (
-                        <span className="text-xs font-medium text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-full">{contact.contact_type}</span>
+                      {contact.position ? (
+                        <span className="text-sm text-neutral-700 dark:text-neutral-300">{contact.position}</span>
                       ) : <span className="text-slate-300 text-sm">—</span>}
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
