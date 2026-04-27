@@ -307,6 +307,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             </div>
           </div>
 
+          {/* Valuation Timeline */}
+          {rounds.length >= 2 && (
+            <div className="pt-4 border-t border-neutral-200">
+              <ValuationChart rounds={rounds} ownershipPct={ownershipPct > 0 ? ownershipPct : undefined} />
+            </div>
+          )}
+
           {/* Health Score */}
           <div className="pt-4 border-t border-neutral-200">
             <HealthScoreBreakdown score={healthScore} />
@@ -370,7 +377,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <>
                   {rounds.length > 0 && (
                     <div className="px-5 pt-4">
-                      <ValuationChart rounds={rounds} />
+                      <ValuationChart rounds={rounds} ownershipPct={ownershipPct > 0 ? ownershipPct : undefined} />
                     </div>
                   )}
 
