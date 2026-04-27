@@ -5,10 +5,10 @@ import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Calendar, Upload, X } from 'lucide-react'
+import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Upload, X, Mail, Plus, Trash2, ChevronDown } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
-import type { DealReport } from './page'
-import { uploadDealReport } from './actions'
+import type { DealReport, DealReportRecipient } from './page'
+import { uploadDealReport, addDealReportRecipient, removeDealReportRecipient } from './actions'
 
 interface CompanyWithMetrics {
   id: string
@@ -30,6 +30,7 @@ interface Props {
   investments: Investment[]
   capTable:    CapTableEntry[]
   dealReports: DealReport[]
+  recipients:  DealReportRecipient[]
 }
 
 const fmt$ = (n: number) => {
@@ -543,9 +544,112 @@ function UploadModal({ onClose, onSaved }: { onClose: () => void; onSaved: (r: D
   )
 }
 
+// ── Recipients panel ──────────────────────────────────────────────────────────
+
+function RecipientsPanel({ initialRecipients }: { initialRecipients: DealReportRecipient[] }) {
+  const [open, setOpen] = useState(false)
+  const [recipients, setRecipients] = useState(initialRecipients)
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) return
+    setAdding(true)
+    setError('')
+    try {
+      await addDealReportRecipient(email, name)
+      setRecipients(prev => [...prev, { id: crypto.randomUUID(), email: email.trim().toLowerCase(), name: name.trim() || null }])
+      setEmail('')
+      setName('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add recipient.')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  async function handleRemove(id: string) {
+    await removeDealReportRecipient(id)
+    setRecipients(prev => prev.filter(r => r.id !== id))
+  }
+
+  return (
+    <div className="mb-4 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Mail size={14} className="text-primary-500" />
+          Email Recipients
+          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-bold">
+            {recipients.length}
+          </span>
+        </span>
+        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="border-t border-neutral-100 dark:border-neutral-800 px-4 pb-4 pt-3 flex flex-col gap-3">
+          {recipients.length === 0 ? (
+            <p className="text-xs text-neutral-400">No recipients yet. Add one below.</p>
+          ) : (
+            <ul className="flex flex-col gap-1.5">
+              {recipients.map(r => (
+                <li key={r.id} className="flex items-center justify-between gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                  <span>
+                    {r.name && <span className="font-medium mr-1.5">{r.name}</span>}
+                    <span className="text-neutral-500">{r.email}</span>
+                  </span>
+                  <button
+                    onClick={() => handleRemove(r.id)}
+                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-neutral-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <form onSubmit={handleAdd} className="flex gap-2 mt-1">
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Name (optional)"
+              className="w-28 px-2 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-300"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Email address"
+              required
+              className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-300"
+            />
+            <button
+              type="submit"
+              disabled={adding || !email.trim()}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 transition-colors"
+            >
+              <Plus size={12} />
+              {adding ? '…' : 'Add'}
+            </button>
+          </form>
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Deal Reports tab ──────────────────────────────────────────────────────────
 
-function DealReportsTab({ reports: initialReports }: { reports: DealReport[] }) {
+function DealReportsTab({ reports: initialReports, initialRecipients }: { reports: DealReport[]; initialRecipients: DealReportRecipient[] }) {
   const [reports, setReports] = useState(initialReports)
   const [selected, setSelected] = useState<DealReport | null>(null)
   const [showUpload, setShowUpload] = useState(false)
@@ -578,6 +682,8 @@ function DealReportsTab({ reports: initialReports }: { reports: DealReport[] }) 
           <Upload size={13} /> Upload Report
         </button>
       </div>
+
+      <RecipientsPanel initialRecipients={initialRecipients} />
 
       {reports.length === 0 ? (
         <div className="card p-12 text-center">
@@ -617,7 +723,7 @@ function DealReportsTab({ reports: initialReports }: { reports: DealReport[] }) 
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export default function ReportsClient({ companies, rounds, investments, capTable, dealReports }: Props) {
+export default function ReportsClient({ companies, rounds, investments, capTable, dealReports, recipients }: Props) {
   const [activeTab, setActiveTab] = useState<'portfolio' | 'deals'>('portfolio')
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
@@ -904,7 +1010,7 @@ export default function ReportsClient({ companies, rounds, investments, capTable
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
       {activeTab === 'deals' ? (
-        <DealReportsTab reports={dealReports} />
+        <DealReportsTab reports={dealReports} initialRecipients={recipients} />
       ) : (<>
 
       {/* Summary bar */}

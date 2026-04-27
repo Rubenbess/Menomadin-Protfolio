@@ -55,3 +55,33 @@ jobs:
             exit 1
           fi
           echo "Report saved to platform successfully"
+
+      - name: Send report email to recipients
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          FILE="${{ steps.report.outputs.file }}"
+          if [ -z "$FILE" ]; then
+            echo "No report file, skipping email."
+            exit 0
+          fi
+
+          CONTENT=$(cat "$FILE")
+          REPORT_DATE=$(basename "$FILE" .md)
+
+          SEND_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${APP_URL}/api/send-deal-report" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg date "$REPORT_DATE" \
+              --arg content "$CONTENT" \
+              '{report_date: $date, content: $content}')")
+
+          SEND_CODE=$(echo "$SEND_RESPONSE" | tail -1)
+          SEND_BODY=$(echo "$SEND_RESPONSE" | head -1)
+          echo "Send response: $SEND_CODE $SEND_BODY"
+
+          if [ "$SEND_CODE" != "200" ]; then
+            echo "Warning: email send returned $SEND_CODE"
+          fi

@@ -15,6 +15,12 @@ export interface DealReport {
   created_at: string
 }
 
+export interface DealReportRecipient {
+  id: string
+  email: string
+  name: string | null
+}
+
 export default async function ReportsPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -24,19 +30,22 @@ export default async function ReportsPage() {
     { data: investments },
     { data: capTable },
     { data: dealReports },
+    { data: recipients },
   ] = await Promise.all([
     supabase.from('companies').select('*').order('name'),
     supabase.from('rounds').select('*').order('date', { ascending: false }),
     supabase.from('investments').select('*').order('date', { ascending: false }),
     supabase.from('cap_table').select('*'),
     supabase.from('deal_reports').select('id, report_date, content, created_at').order('report_date', { ascending: false }),
+    supabase.from('deal_report_recipients').select('id, email, name').order('created_at', { ascending: true }),
   ])
 
-  const companiesList   = (companies   ?? []) as Company[]
-  const roundsList      = (rounds      ?? []) as Round[]
-  const investmentsList = (investments ?? []) as Investment[]
-  const capTableList    = (capTable    ?? []) as CapTableEntry[]
-  const dealReportsList = (dealReports ?? []) as DealReport[]
+  const companiesList    = (companies   ?? []) as Company[]
+  const roundsList       = (rounds      ?? []) as Round[]
+  const investmentsList  = (investments ?? []) as Investment[]
+  const capTableList     = (capTable    ?? []) as CapTableEntry[]
+  const dealReportsList  = (dealReports ?? []) as DealReport[]
+  const recipientsList   = (recipients  ?? []) as DealReportRecipient[]
 
   // Build companies with metrics for reports
   const companiesWithMetrics = companiesList.map(co => {
@@ -58,6 +67,7 @@ export default async function ReportsPage() {
       investments={investmentsList}
       capTable={capTableList}
       dealReports={dealReportsList}
+      recipients={recipientsList}
     />
   )
 }
