@@ -559,21 +559,20 @@ function RecipientsPanel({ initialRecipients }: { initialRecipients: DealReportR
     if (!email.trim()) return
     setAdding(true)
     setError('')
-    try {
-      await addDealReportRecipient(email, name)
+    const result = await addDealReportRecipient(email, name)
+    if (result.error) {
+      setError(result.error)
+    } else {
       setRecipients(prev => [...prev, { id: crypto.randomUUID(), email: email.trim().toLowerCase(), name: name.trim() || null }])
       setEmail('')
       setName('')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add recipient.')
-    } finally {
-      setAdding(false)
     }
+    setAdding(false)
   }
 
   async function handleRemove(id: string) {
-    await removeDealReportRecipient(id)
-    setRecipients(prev => prev.filter(r => r.id !== id))
+    const result = await removeDealReportRecipient(id)
+    if (!result.error) setRecipients(prev => prev.filter(r => r.id !== id))
   }
 
   return (

@@ -25,21 +25,23 @@ export async function getDealReportRecipients() {
   return data ?? []
 }
 
-export async function addDealReportRecipient(email: string, name: string) {
+export async function addDealReportRecipient(email: string, name: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase
     .from('deal_report_recipients')
     .insert({ email: email.trim().toLowerCase(), name: name.trim() || null })
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/reports')
+  return {}
 }
 
-export async function removeDealReportRecipient(id: string) {
+export async function removeDealReportRecipient(id: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase
     .from('deal_report_recipients')
     .delete()
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/reports')
+  return {}
 }

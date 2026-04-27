@@ -30,15 +30,19 @@ export default async function ReportsPage() {
     { data: investments },
     { data: capTable },
     { data: dealReports },
-    { data: recipients },
   ] = await Promise.all([
     supabase.from('companies').select('*').order('name'),
     supabase.from('rounds').select('*').order('date', { ascending: false }),
     supabase.from('investments').select('*').order('date', { ascending: false }),
     supabase.from('cap_table').select('*'),
     supabase.from('deal_reports').select('id, report_date, content, created_at').order('report_date', { ascending: false }),
-    supabase.from('deal_report_recipients').select('id, email, name').order('created_at', { ascending: true }),
   ])
+
+  // Fetched separately so a missing table never crashes the whole page
+  const { data: recipients } = await supabase
+    .from('deal_report_recipients')
+    .select('id, email, name')
+    .order('created_at', { ascending: true })
 
   const companiesList    = (companies   ?? []) as Company[]
   const roundsList       = (rounds      ?? []) as Round[]
