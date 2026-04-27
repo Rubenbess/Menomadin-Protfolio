@@ -547,7 +547,7 @@ function UploadModal({ onClose, onSaved }: { onClose: () => void; onSaved: (r: D
 // ── Recipients panel ──────────────────────────────────────────────────────────
 
 function RecipientsPanel({ initialRecipients }: { initialRecipients: DealReportRecipient[] }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [recipients, setRecipients] = useState(initialRecipients)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
