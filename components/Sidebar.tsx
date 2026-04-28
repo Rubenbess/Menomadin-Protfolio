@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   LayoutDashboard, Building2, GitMerge, Upload, FileDown, LogOut,
   Network, Bell, Users, Activity, ShieldCheck, Mail, FolderOpen,
-  CheckSquare, ChevronLeft, BarChart3,
+  CheckSquare, ChevronLeft, BarChart3, Landmark,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Suspense, useEffect, useState } from 'react'
@@ -42,8 +42,9 @@ const TOOLS: NavItemDef[] = [
 ]
 
 const SETTINGS_NAV: NavItemDef[] = [
-  { href: '/settings/security',      label: 'Security',      icon: ShieldCheck },
-  { href: '/settings/email-scanner', label: 'Email Scanner', icon: Mail },
+  { href: '/settings/security',        label: 'Security',        icon: ShieldCheck },
+  { href: '/settings/email-scanner',   label: 'Email Scanner',   icon: Mail },
+  { href: '/settings/legal-entities',  label: 'Legal Entities',  icon: Landmark },
 ]
 
 const SUPPORT: NavItemDef[] = []
