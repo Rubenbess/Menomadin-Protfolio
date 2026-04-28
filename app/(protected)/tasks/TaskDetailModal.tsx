@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Calendar, Flag, User, Building2, MessageSquare, FileUp, Tag, Edit2 } from 'lucide-react'
+import { X, Calendar, Flag, User, Building2, MessageSquare, FileUp, Tag, Edit2, Mail } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TaskStatusBadge from '@/components/ui/TaskStatusBadge'
 import TaskPriorityBadge from '@/components/ui/TaskPriorityBadge'
@@ -11,6 +11,7 @@ import { TaskCommentInput } from '@/components/TaskCommentInput'
 import { TaskCommentDisplay } from '@/components/TaskCommentDisplay'
 import { TaskAttachmentDisplay } from '@/components/TaskAttachmentDisplay'
 import { TaskAttachmentUpload } from '@/components/TaskAttachmentUpload'
+import TaskEmailsPanel from '@/components/TaskEmailsPanel'
 import { TaskActivityFeed } from '@/components/TaskActivityFeed'
 import { TaskDependencyViewer } from '@/components/TaskDependencyViewer'
 import { TaskHealthBadge } from '@/components/TaskHealthBadge'
@@ -463,6 +464,15 @@ export default function TaskDetailModal({
             ) : (
               <p className="text-sm text-neutral-500 dark:text-neutral-600 italic">No attachments yet</p>
             )}
+          </div>
+
+          {/* Emails Section */}
+          <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <label className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
+              <Mail size={16} />
+              Emails
+            </label>
+            <TaskEmailsPanel taskId={task.id} currentUserId={currentUserId} />
           </div>
 
           {/* Comments Section */}

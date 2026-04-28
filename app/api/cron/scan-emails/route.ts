@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
-
-interface EmailIntegration {
-  id: string
-  user_id: string
-  email: string
-  access_token: string
-  refresh_token: string | null
-  token_expires_at: string
-  last_scanned_at: string | null
-}
+import { createClient } from '@supabase/supabase-js'
+import {
+  getValidAccessToken,
+  type EmailIntegration,
+} from '@/lib/microsoft-graph'
 
 interface GraphEmail {
   id: string
@@ -109,47 +103,6 @@ function detectOpportunity(
   }
 }
 
-async function refreshAccessToken(
-  integration: EmailIntegration,
-  supabase: SupabaseClient
-): Promise<string | null> {
-  if (!integration.refresh_token) return null
-
-  const res = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: process.env.MICROSOFT_CLIENT_ID!,
-      client_secret: process.env.MICROSOFT_CLIENT_SECRET!,
-      grant_type: 'refresh_token',
-      refresh_token: integration.refresh_token,
-      scope: 'offline_access Mail.Read User.Read',
-    }),
-  })
-
-  const tokens = await res.json()
-  if (!tokens.access_token) return null
-
-  await supabase.from('email_integrations').update({
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token ?? integration.refresh_token,
-    token_expires_at: new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString(),
-  }).eq('id', integration.id)
-
-  return tokens.access_token
-}
-
-async function getAccessToken(
-  integration: EmailIntegration,
-  supabase: SupabaseClient
-): Promise<string | null> {
-  const expiresAt = new Date(integration.token_expires_at).getTime()
-  if (Date.now() > expiresAt - 5 * 60 * 1000) {
-    return refreshAccessToken(integration, supabase)
-  }
-  return integration.access_token
-}
-
 async function fetchEmails(accessToken: string, since: string): Promise<GraphEmail[]> {
   const filter = encodeURIComponent(`receivedDateTime ge ${since}`)
   const url = `https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=${filter}&$select=id,subject,bodyPreview,from,receivedDateTime,body&$top=50&$orderby=receivedDateTime asc`
@@ -186,7 +139,7 @@ export async function GET(req: NextRequest) {
   let totalOpportunities = 0
 
   for (const integration of integrations as EmailIntegration[]) {
-    const accessToken = await getAccessToken(integration, supabase)
+    const accessToken = await getValidAccessToken(integration, supabase)
     if (!accessToken) continue
 
     const since = integration.last_scanned_at

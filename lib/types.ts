@@ -470,6 +470,26 @@ export interface TaskAttachment {
   metadata: Record<string, any> | null
 }
 
+export interface TaskEmailAttachment {
+  id: string
+  task_id: string
+  attached_by: string
+  attached_at: string
+  is_private: boolean
+  source: 'outlook_picker' | 'file_upload'
+  outlook_message_id: string | null
+  outlook_web_link: string | null
+  subject: string | null
+  from_name: string | null
+  from_email: string | null
+  to_recipients: { name: string | null; email: string | null }[]
+  cc_recipients: { name: string | null; email: string | null }[]
+  received_at: string | null
+  body_html: string | null
+  body_text: string | null
+  body_preview: string | null
+}
+
 export interface TaskLabel {
   id: string
   name: string
