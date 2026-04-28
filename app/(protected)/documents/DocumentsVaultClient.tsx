@@ -166,7 +166,7 @@ function UploadModal({
 
 function PdfPreview({ url, name, onClose }: { url: string; name: string; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
           <div className="flex items-center gap-2">

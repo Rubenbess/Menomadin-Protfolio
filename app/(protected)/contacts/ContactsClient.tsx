@@ -142,7 +142,7 @@ function ContactPanel({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/25 z-40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="fixed inset-0 bg-neutral-900/30 z-40" onClick={onClose} />
       <div className="fixed right-0 top-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}

@@ -79,8 +79,8 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                         onClick={() => setExpandedId(isExpanded ? null : co.id)}
                         className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
                           isExpanded
-                            ? 'bg-gold-100 text-primary-500'
-                            : 'text-slate-300 hover:bg-neutral-100 hover:text-neutral-700'
+                            ? 'bg-primary-100 text-primary-500'
+                            : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700'
                         }`}
                         title={isExpanded ? 'Collapse' : 'View investments'}
                       >
@@ -97,9 +97,9 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {co.logo_url ? (
-                        <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                        <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-neutral-200 flex-shrink-0" />
                       ) : (
-                        <div className="w-7 h-7 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>
                         </div>
                       )}
@@ -112,17 +112,17 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                     </div>
                   </td>
                   <td className="px-4 py-3"><Badge value={co.status} /></td>
-                  <td className="hidden lg:table-cell px-4 py-3 text-neutral-600 text-xs">{co.entry_stage ?? <span className="text-slate-300">—</span>}</td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-800">{co.totalInvested > 0 ? fmt$$(co.totalInvested) : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-4 py-3 text-right text-neutral-700">{co.ownershipPct > 0 ? fmtPct(co.ownershipPct) : <span className="text-slate-300">—</span>}</td>
-                  <td className="hidden xl:table-cell px-4 py-3 text-right text-neutral-700">{co.plannedReserves > 0 ? fmt$$(co.plannedReserves) : <span className="text-slate-300">—</span>}</td>
-                  <td className="hidden xl:table-cell px-4 py-3 text-right text-neutral-700">{co.deployedReserves > 0 ? fmt$$(co.deployedReserves) : <span className="text-slate-300">—</span>}</td>
-                  <td className="hidden md:table-cell px-5 py-3 text-right text-neutral-700">{co.initialInvestment > 0 ? fmt$$(co.initialInvestment) : <span className="text-slate-300">—</span>}</td>
+                  <td className="hidden lg:table-cell px-4 py-3 text-neutral-600 text-xs">{co.entry_stage ?? <span className="text-neutral-300">—</span>}</td>
+                  <td className="px-4 py-3 text-right font-medium text-neutral-800">{co.totalInvested > 0 ? fmt$$(co.totalInvested) : <span className="text-neutral-300">—</span>}</td>
+                  <td className="px-4 py-3 text-right text-neutral-700">{co.ownershipPct > 0 ? fmtPct(co.ownershipPct) : <span className="text-neutral-300">—</span>}</td>
+                  <td className="hidden xl:table-cell px-4 py-3 text-right text-neutral-700">{co.plannedReserves > 0 ? fmt$$(co.plannedReserves) : <span className="text-neutral-300">—</span>}</td>
+                  <td className="hidden xl:table-cell px-4 py-3 text-right text-neutral-700">{co.deployedReserves > 0 ? fmt$$(co.deployedReserves) : <span className="text-neutral-300">—</span>}</td>
+                  <td className="hidden md:table-cell px-5 py-3 text-right text-neutral-700">{co.initialInvestment > 0 ? fmt$$(co.initialInvestment) : <span className="text-neutral-300">—</span>}</td>
                 </tr>
 
                 {/* Expanded investment rows */}
                 {isExpanded && timeline.length > 0 && (
-                  <tr key={`${co.id}-expanded`} className="border-t border-gold-100">
+                  <tr key={`${co.id}-expanded`} className="border-t border-neutral-100">
                     <td colSpan={9} className="px-0 py-0">
                       <div className="bg-neutral-50/60 border-b border-neutral-200">
                         <table className="w-full text-xs">
@@ -136,22 +136,22 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                               <th className="text-left px-4 py-2 font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody className="divide-y divide-neutral-100">
                             {timeline.map((item, i) => {
                               if (item.kind === 'investment') {
                                 const inv = item.data
                                 return (
                                   <tr key={`inv-${inv.id}`} className="hover:bg-white/60 transition-colors">
                                     <td className="w-8 pl-8">
-                                      <span className="w-1 h-1 rounded-full bg-gold-300 block mx-auto" />
+                                      <span className="w-1 h-1 rounded-full bg-primary-300 block mx-auto" />
                                     </td>
                                     <td className="px-4 py-2 text-neutral-600">{fmtDate(inv.date)}</td>
                                     <td className="px-4 py-2">
-                                      <span className="px-2 py-0.5 rounded-full bg-gold-50 text-primary-600 ring-1 ring-violet-200 font-medium">
+                                      <span className="px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 ring-1 ring-primary-200 font-medium">
                                         {inv.instrument}
                                       </span>
                                     </td>
-                                    <td className="px-4 py-2 text-right font-semibold text-slate-800">{fmt$$(inv.amount)}</td>
+                                    <td className="px-4 py-2 text-right font-semibold text-neutral-800">{fmt$$(inv.amount)}</td>
                                     <td className="px-4 py-2 text-neutral-600">
                                       {inv.valuation_cap ? `Cap: ${fmt$$(inv.valuation_cap)}` : '—'}
                                     </td>
@@ -174,7 +174,7 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                                       SAFE
                                     </span>
                                   </td>
-                                  <td className="px-4 py-2 text-right font-semibold text-slate-800">{fmt$$(safe.investment_amount)}</td>
+                                  <td className="px-4 py-2 text-right font-semibold text-neutral-800">{fmt$$(safe.investment_amount)}</td>
                                   <td className="px-4 py-2 text-neutral-600">
                                     {[
                                       safe.valuation_cap && `Cap: ${fmt$$(safe.valuation_cap)}`,
@@ -196,7 +196,7 @@ export default function PortfolioTable({ companies, investments, safes }: Props)
                               <td colSpan={3} className="px-4 py-2 font-semibold text-neutral-600 uppercase tracking-wider text-xs">
                                 Total
                               </td>
-                              <td className="px-4 py-2 text-right font-bold text-slate-800 text-xs">
+                              <td className="px-4 py-2 text-right font-bold text-neutral-800 text-xs">
                                 {fmt$$(
                                   coInvestments.reduce((s, i) => s + i.amount, 0) +
                                   coSafes.reduce((s, s2) => s + s2.investment_amount, 0)
