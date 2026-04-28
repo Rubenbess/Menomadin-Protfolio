@@ -476,9 +476,6 @@ export interface TaskEmailAttachment {
   attached_by: string
   attached_at: string
   is_private: boolean
-  source: 'outlook_picker' | 'file_upload'
-  outlook_message_id: string | null
-  outlook_web_link: string | null
   subject: string | null
   from_name: string | null
   from_email: string | null

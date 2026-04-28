@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Mail, Plus, Upload } from 'lucide-react'
-import Button from '@/components/ui/Button'
+import { Mail, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/useToast'
-import OutlookEmailPicker from '@/components/OutlookEmailPicker'
 import TaskEmailAttachmentDisplay from '@/components/TaskEmailAttachmentDisplay'
 import {
   attachEmailFileToTask,
@@ -20,7 +18,6 @@ interface Props {
 export default function TaskEmailsPanel({ taskId, currentUserId }: Props) {
   const [attachments, setAttachments] = useState<TaskEmailAttachment[]>([])
   const [loading, setLoading] = useState(true)
-  const [pickerOpen, setPickerOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadPrivate, setUploadPrivate] = useState(false)
@@ -83,35 +80,25 @@ export default function TaskEmailsPanel({ taskId, currentUserId }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setPickerOpen(true)}
-          type="button"
-        >
-          <Plus size={14} />
-          Attach from Outlook
-        </Button>
-        <span className="text-xs text-neutral-400">or drop a .eml / .msg file below</span>
-      </div>
-
       {/* Drop zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`p-3 rounded-lg border-2 border-dashed transition-colors cursor-pointer ${
+        className={`p-4 rounded-lg border-2 border-dashed transition-colors cursor-pointer ${
           isDragging
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
             : 'border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50 hover:border-primary-400 dark:hover:border-primary-500'
         }`}
       >
-        <div className="flex items-center justify-center gap-2 py-1">
-          <Upload size={14} className="text-neutral-500" />
-          <p className="text-xs text-neutral-600 dark:text-neutral-400">
-            {uploading ? 'Uploading…' : 'Drop .eml / .msg here, or click to browse'}
+        <div className="flex flex-col items-center justify-center gap-1.5 py-1">
+          <Upload size={18} className="text-neutral-500" />
+          <p className="text-sm text-neutral-700 dark:text-neutral-300">
+            {uploading ? 'Uploading…' : 'Drop .eml or .msg here, or click to browse'}
+          </p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-500">
+            In Outlook: right-click an email → <span className="font-medium">Save As</span>
           </p>
         </div>
         <input
@@ -155,13 +142,6 @@ export default function TaskEmailsPanel({ taskId, currentUserId }: Props) {
           ))}
         </div>
       )}
-
-      <OutlookEmailPicker
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        taskId={taskId}
-        onAttached={reload}
-      />
     </div>
   )
 }

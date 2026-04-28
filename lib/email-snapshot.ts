@@ -1,16 +1,13 @@
 /**
- * Normalize emails from three sources (Outlook Graph, .eml, .msg) into the
- * shape we store in task_email_attachments. Sanitizes HTML before storage.
+ * Parse .eml / .msg files into a uniform snapshot shape that maps to
+ * task_email_attachments columns. HTML is sanitized via DOMPurify.
  */
 
 import DOMPurify from 'isomorphic-dompurify'
 import { simpleParser, type AddressObject } from 'mailparser'
 import MsgReader from '@kenjiuno/msgreader'
-import type { GraphMessage } from './microsoft-graph'
 
 export interface EmailSnapshot {
-  outlook_message_id: string | null
-  outlook_web_link: string | null
   subject: string | null
   from_name: string | null
   from_email: string | null
@@ -52,40 +49,10 @@ function htmlToText(html: string): string {
 export function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true },
-    // Strip everything that could escape the snapshot or call out
     FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'link', 'meta'],
     FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur'],
     ALLOW_DATA_ATTR: false,
   })
-}
-
-// ─── From Microsoft Graph (picker flow) ─────────────────────────────────────
-
-export function snapshotFromGraphMessage(msg: GraphMessage): EmailSnapshot {
-  const isHtml = msg.body?.contentType === 'html'
-  const rawBody = msg.body?.content ?? ''
-  const safeHtml = isHtml && rawBody ? sanitizeHtml(rawBody) : null
-  const text = isHtml ? htmlToText(rawBody) : rawBody
-
-  return {
-    outlook_message_id: msg.id,
-    outlook_web_link: msg.webLink ?? null,
-    subject: msg.subject ?? null,
-    from_name: msg.from?.emailAddress?.name ?? null,
-    from_email: msg.from?.emailAddress?.address ?? null,
-    to_recipients: (msg.toRecipients ?? []).map((r) => ({
-      name: r.emailAddress?.name ?? null,
-      email: r.emailAddress?.address ?? null,
-    })),
-    cc_recipients: (msg.ccRecipients ?? []).map((r) => ({
-      name: r.emailAddress?.name ?? null,
-      email: r.emailAddress?.address ?? null,
-    })),
-    received_at: msg.receivedDateTime ?? null,
-    body_html: safeHtml,
-    body_text: text || null,
-    body_preview: makePreview(msg.bodyPreview ?? text),
-  }
 }
 
 // ─── From .eml file (mailparser) ────────────────────────────────────────────
@@ -118,8 +85,6 @@ export async function snapshotFromEml(buffer: Buffer): Promise<EmailSnapshot> {
   const ccList = flattenAddresses(parsed.cc)
 
   return {
-    outlook_message_id: null,
-    outlook_web_link: null,
     subject: parsed.subject ?? null,
     from_name: fromList[0]?.name ?? null,
     from_email: fromList[0]?.email ?? null,
@@ -188,8 +153,6 @@ export function snapshotFromMsg(buffer: Buffer): EmailSnapshot {
   }
 
   return {
-    outlook_message_id: null,
-    outlook_web_link: null,
     subject: data.subject ?? null,
     from_name: data.senderName ?? null,
     from_email: data.senderSmtpAddress ?? data.senderEmail ?? null,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, ExternalLink, Lock, Globe, Trash2, ChevronDown, ChevronRight, Calendar } from 'lucide-react'
+import { Mail, Lock, Globe, Trash2, ChevronDown, ChevronRight, Calendar } from 'lucide-react'
 import { useToast } from '@/hooks/useToast'
 import {
   detachEmailFromTask,
@@ -104,17 +104,6 @@ export default function TaskEmailAttachmentDisplay({
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
-          {attachment.outlook_web_link && (
-            <a
-              href={attachment.outlook_web_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 text-neutral-500 hover:text-primary-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded transition-colors"
-              title="Open in Outlook"
-            >
-              <ExternalLink size={13} />
-            </a>
-          )}
           {isOwner && (
             <>
               <button

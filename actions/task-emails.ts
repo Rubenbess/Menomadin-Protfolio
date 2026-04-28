@@ -2,18 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { getAccessTokenForUser, getMessage } from '@/lib/microsoft-graph'
-import {
-  snapshotFromGraphMessage,
-  snapshotFromEml,
-  snapshotFromMsg,
-  type EmailSnapshot,
-} from '@/lib/email-snapshot'
+import { snapshotFromEml, snapshotFromMsg } from '@/lib/email-snapshot'
 import type { TaskEmailAttachment } from '@/lib/types'
 
 type Result<T> = { error: string | null; data: T | null }
-
-// ─── Read ───────────────────────────────────────────────────────────────────
 
 export async function getTaskEmailAttachments(
   taskId: string
@@ -28,82 +20,6 @@ export async function getTaskEmailAttachments(
   if (error) return { error: error.message, attachments: [] }
   return { error: null, attachments: (data ?? []) as TaskEmailAttachment[] }
 }
-
-// ─── Insert helper ──────────────────────────────────────────────────────────
-
-async function insertSnapshot(args: {
-  taskId: string
-  source: 'outlook_picker' | 'file_upload'
-  isPrivate: boolean
-  snapshot: EmailSnapshot
-}): Promise<Result<{ id: string }>> {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated', data: null }
-
-  const row = {
-    task_id: args.taskId,
-    attached_by: user.id,
-    is_private: args.isPrivate,
-    source: args.source,
-    ...args.snapshot,
-  }
-
-  const { data, error } = await supabase
-    .from('task_email_attachments')
-    .insert(row)
-    .select('id')
-    .single()
-
-  if (error) {
-    // Handle the unique-index collision (same Outlook message attached twice)
-    if (error.code === '23505') {
-      return { error: 'This email is already attached to the task.', data: null }
-    }
-    return { error: error.message, data: null }
-  }
-
-  revalidatePath('/tasks')
-  return { error: null, data: { id: data.id } }
-}
-
-// ─── Outlook picker ─────────────────────────────────────────────────────────
-
-export async function attachOutlookEmailToTask(args: {
-  taskId: string
-  messageId: string
-  isPrivate?: boolean
-}): Promise<Result<{ id: string }>> {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated', data: null }
-
-  const auth = await getAccessTokenForUser(user.id)
-  if (!auth) {
-    return {
-      error: 'Outlook is not connected. Connect it in Settings → Email Scanner.',
-      data: null,
-    }
-  }
-
-  const message = await getMessage(auth.token, args.messageId)
-  if (!message) {
-    return { error: 'Could not load the email from Outlook.', data: null }
-  }
-
-  return insertSnapshot({
-    taskId: args.taskId,
-    source: 'outlook_picker',
-    isPrivate: args.isPrivate ?? false,
-    snapshot: snapshotFromGraphMessage(message),
-  })
-}
-
-// ─── File upload (.eml / .msg) ──────────────────────────────────────────────
 
 export async function attachEmailFileToTask(
   formData: FormData
@@ -133,7 +49,7 @@ export async function attachEmailFileToTask(
 
   const buf = Buffer.from(await file.arrayBuffer())
 
-  let snapshot: EmailSnapshot
+  let snapshot
   try {
     snapshot = isEml ? await snapshotFromEml(buf) : snapshotFromMsg(buf)
   } catch (e) {
@@ -141,18 +57,28 @@ export async function attachEmailFileToTask(
     return { error: msg, data: null }
   }
 
-  const result = await insertSnapshot({
-    taskId,
-    source: 'file_upload',
-    isPrivate,
-    snapshot,
-  })
-  if (result.error || !result.data) return { error: result.error, data: null }
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', data: null }
 
-  return { error: null, data: { id: result.data.id, subject: snapshot.subject } }
+  const { data, error } = await supabase
+    .from('task_email_attachments')
+    .insert({
+      task_id: taskId,
+      attached_by: user.id,
+      is_private: isPrivate,
+      ...snapshot,
+    })
+    .select('id')
+    .single()
+
+  if (error) return { error: error.message, data: null }
+
+  revalidatePath('/tasks')
+  return { error: null, data: { id: data.id, subject: snapshot.subject } }
 }
-
-// ─── Privacy + delete ───────────────────────────────────────────────────────
 
 export async function setEmailAttachmentPrivacy(
   id: string,

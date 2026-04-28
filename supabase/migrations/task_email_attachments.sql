@@ -1,32 +1,25 @@
--- Emails attached to tasks (Outlook picker or .eml/.msg drag-drop)
--- Stores a frozen snapshot at attach time + a live link back to Outlook (when available).
+-- Emails attached to tasks via .eml / .msg drag-drop.
+-- Stores a frozen snapshot of the email at attach time.
 
 create table if not exists task_email_attachments (
-  id                  uuid primary key default gen_random_uuid(),
-  task_id             uuid not null references tasks(id) on delete cascade,
-  attached_by         uuid not null references team_members(id) on delete cascade,
-  attached_at         timestamptz not null default now(),
+  id              uuid primary key default gen_random_uuid(),
+  task_id         uuid not null references tasks(id) on delete cascade,
+  attached_by     uuid not null references team_members(id) on delete cascade,
+  attached_at     timestamptz not null default now(),
 
   -- Privacy: when true, only attached_by + task assignees can see the row
-  is_private          boolean not null default false,
-
-  -- Where the email came from
-  source              text not null check (source in ('outlook_picker', 'file_upload')),
-
-  -- Identity (live link back to Outlook). Null for .eml/.msg uploads.
-  outlook_message_id  text,
-  outlook_web_link    text,
+  is_private      boolean not null default false,
 
   -- Snapshot (frozen at attach time)
-  subject             text,
-  from_name           text,
-  from_email          text,
-  to_recipients       jsonb not null default '[]'::jsonb,  -- [{name, email}, ...]
-  cc_recipients       jsonb not null default '[]'::jsonb,
-  received_at         timestamptz,
-  body_html           text,                                 -- sanitized HTML
-  body_text           text,                                 -- plaintext fallback
-  body_preview        text                                  -- short preview (~200 chars)
+  subject         text,
+  from_name       text,
+  from_email      text,
+  to_recipients   jsonb not null default '[]'::jsonb,  -- [{name, email}, ...]
+  cc_recipients   jsonb not null default '[]'::jsonb,
+  received_at     timestamptz,
+  body_html       text,                                 -- sanitized HTML
+  body_text       text,                                 -- plaintext fallback
+  body_preview    text                                  -- short preview (~200 chars)
 );
 
 create index if not exists task_email_attachments_task_id_idx
@@ -34,11 +27,6 @@ create index if not exists task_email_attachments_task_id_idx
 
 create index if not exists task_email_attachments_attached_by_idx
   on task_email_attachments(attached_by);
-
--- Avoid attaching the same Outlook message to the same task twice
-create unique index if not exists task_email_attachments_unique_outlook
-  on task_email_attachments(task_id, outlook_message_id)
-  where outlook_message_id is not null;
 
 alter table task_email_attachments enable row level security;
 
