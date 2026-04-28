@@ -4,20 +4,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createInvestment } from '@/actions/investments'
-import type { Round } from '@/lib/types'
+import type { Round, LegalEntity } from '@/lib/types'
 
 const INSTRUMENTS = ['SAFE', 'Equity', 'Note', 'Warrant']
 
 interface Props {
   companyId: string
   rounds: Round[]
+  legalEntities: LegalEntity[]
   onClose: () => void
 }
 
 const input = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
 const label = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
-export default function InvestmentForm({ companyId, rounds, onClose }: Props) {
+export default function InvestmentForm({ companyId, rounds, legalEntities, onClose }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -30,15 +31,17 @@ export default function InvestmentForm({ companyId, rounds, onClose }: Props) {
 
     const fd = new FormData(e.currentTarget)
     const roundId = fd.get('round_id') as string
+    const legalEntity = fd.get('legal_entity') as string
     const result = await createInvestment({
       company_id:    companyId,
       round_id:      roundId || null,
-      date:          fd.get('date')   as string,
+      date:          fd.get('date') as string,
       amount:        parseFloat(fd.get('amount') as string) || 0,
       instrument:    fd.get('instrument') as string,
       valuation_cap: fd.get('valuation_cap')
         ? parseFloat(fd.get('valuation_cap') as string)
         : null,
+      legal_entity:  legalEntity || null,
     })
 
     if (result.error) {
@@ -78,6 +81,18 @@ export default function InvestmentForm({ companyId, rounds, onClose }: Props) {
           </select>
         </div>
         <div>
+          <label className={label}>Legal Entity</label>
+          <select name="legal_entity" className={input}>
+            <option value="">— Unassigned —</option>
+            {legalEntities.map(e => (
+              <option key={e.id} value={e.name}>{e.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
           <label className={label}>Round (optional)</label>
           <select name="round_id" className={input}>
             <option value="">— None —</option>
@@ -86,14 +101,13 @@ export default function InvestmentForm({ companyId, rounds, onClose }: Props) {
             ))}
           </select>
         </div>
+        {(instrument === 'SAFE' || instrument === 'Note') && (
+          <div>
+            <label className={label}>Valuation Cap ($)</label>
+            <input name="valuation_cap" type="number" min="0" step="any" className={input} placeholder="10,000,000" />
+          </div>
+        )}
       </div>
-
-      {(instrument === 'SAFE' || instrument === 'Note') && (
-        <div>
-          <label className={label}>Valuation Cap ($)</label>
-          <input name="valuation_cap" type="number" min="0" step="any" className={input} placeholder="10,000,000" />
-        </div>
-      )}
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>

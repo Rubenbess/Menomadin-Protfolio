@@ -44,7 +44,7 @@ import {
   fmtPct,
   fmtDate,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity } from '@/lib/types'
 
 type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall' | 'tasks'
 
@@ -61,9 +61,10 @@ interface Props {
   optionPools: OptionPool[]
   waterfallScenarios: WaterfallScenario[]
   tasks: TaskWithRelations[]
+  legalEntities: LegalEntity[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks, legalEntities }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -287,23 +288,107 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-neutral-900">Investment Summary</h3>
-              {[
-                { label: 'Total Invested', value: fmt$$(totalInvested) },
-                { label: 'Ownership %',    value: ownershipPct > 0 ? fmtPct(ownershipPct) : '—' },
-                {
-                  label: 'Entry Valuation',
-                  value: rounds.length
-                    ? fmt$$([...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0].post_money)
-                    : '—',
-                },
-                { label: 'Current Valuation', value: latestRound ? fmt$$(latestRound.post_money) : '—' },
-                { label: 'MOIC',              value: moic > 0 ? fmtMultiple(moic) : '—' },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
-                  <p className="text-sm font-medium text-neutral-900">{value}</p>
-                </div>
-              ))}
+
+              {/* Per-entity breakdown */}
+              {(() => {
+                const entityRows = legalEntities.map(entity => {
+                  const alias = entity.cap_table_alias || entity.name
+                  const entInvs = investments.filter(i => i.legal_entity === entity.name)
+                  const entInvested = entInvs.reduce((s, i) => s + i.amount, 0)
+                  const entCapTable = capTable.filter(c =>
+                    c.shareholder_name.toLowerCase() === alias.toLowerCase()
+                  )
+                  const entOwnership = entCapTable.reduce((s, c) => s + c.ownership_percentage, 0)
+                  const entValue = latestRound ? (entOwnership / 100) * latestRound.post_money : 0
+                  const entMOIC = entInvested > 0 && entValue > 0 ? entValue / entInvested : null
+                  return { entity, entInvested, entOwnership, entValue, entMOIC, hasData: entInvested > 0 || entOwnership > 0 }
+                }).filter(r => r.hasData)
+
+                const hasUnassigned = investments.some(i => !i.legal_entity)
+                const unassignedInvested = investments.filter(i => !i.legal_entity).reduce((s, i) => s + i.amount, 0)
+
+                if (entityRows.length === 0 && !hasUnassigned) {
+                  return (
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Total Invested',    value: fmt$$(totalInvested) },
+                        { label: 'Ownership %',       value: ownershipPct > 0 ? fmtPct(ownershipPct) : '—' },
+                        { label: 'Entry Valuation',   value: rounds.length ? fmt$$([...rounds].sort((a,b) => new Date(a.date).getTime()-new Date(b.date).getTime())[0].post_money) : '—' },
+                        { label: 'Current Valuation', value: latestRound ? fmt$$(latestRound.post_money) : '—' },
+                        { label: 'MOIC',              value: moic > 0 ? fmtMultiple(moic) : '—' },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
+                          <p className="text-sm font-medium text-neutral-900">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                }
+
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-neutral-200">
+                          {['Entity', 'Invested', 'Ownership', 'Current Value', 'MOIC'].map(h => (
+                            <th key={h} className="pb-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-left pr-4">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {entityRows.map(({ entity, entInvested, entOwnership, entValue, entMOIC }) => (
+                          <tr key={entity.id}>
+                            <td className="py-2.5 pr-4 font-semibold text-neutral-800">{entity.name}</td>
+                            <td className="py-2.5 pr-4 text-primary-600 font-medium">{entInvested > 0 ? fmt$$(entInvested) : '—'}</td>
+                            <td className="py-2.5 pr-4 text-neutral-700">{entOwnership > 0 ? fmtPct(entOwnership) : '—'}</td>
+                            <td className="py-2.5 pr-4 text-emerald-600 font-medium">{entValue > 0 ? fmt$$(entValue) : '—'}</td>
+                            <td className={`py-2.5 font-bold ${entMOIC != null && entMOIC >= 1 ? 'text-emerald-600' : entMOIC != null ? 'text-red-500' : 'text-neutral-400'}`}>
+                              {entMOIC != null ? fmtMultiple(entMOIC) : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                        {hasUnassigned && (
+                          <tr>
+                            <td className="py-2.5 pr-4 text-neutral-400 italic text-xs">Unassigned</td>
+                            <td className="py-2.5 pr-4 text-neutral-500">{fmt$$(unassignedInvested)}</td>
+                            <td className="py-2.5 pr-4 text-neutral-400">—</td>
+                            <td className="py-2.5 pr-4 text-neutral-400">—</td>
+                            <td className="py-2.5 text-neutral-400">—</td>
+                          </tr>
+                        )}
+                        {/* Combined total row */}
+                        <tr className="border-t-2 border-neutral-300">
+                          <td className="py-2.5 pr-4 font-bold text-neutral-900">Total</td>
+                          <td className="py-2.5 pr-4 font-bold text-primary-600">{fmt$$(totalInvested)}</td>
+                          <td className="py-2.5 pr-4 font-bold text-neutral-700">{ownershipPct > 0 ? fmtPct(ownershipPct) : '—'}</td>
+                          <td className="py-2.5 pr-4 font-bold text-emerald-600">{currentValue > 0 ? fmt$$(currentValue) : '—'}</td>
+                          <td className={`py-2.5 font-bold ${moic >= 1 ? 'text-emerald-600' : moic > 0 ? 'text-red-500' : 'text-neutral-400'}`}>
+                            {moic > 0 ? fmtMultiple(moic) : '—'}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {/* Valuations below table */}
+                    <div className="mt-4 flex gap-6">
+                      {rounds.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">Entry Valuation</p>
+                          <p className="text-sm font-medium text-neutral-900">
+                            {fmt$$([...rounds].sort((a,b) => new Date(a.date).getTime()-new Date(b.date).getTime())[0].post_money)}
+                          </p>
+                        </div>
+                      )}
+                      {latestRound && (
+                        <div>
+                          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">Current Valuation</p>
+                          <p className="text-sm font-medium text-neutral-900">{fmt$$(latestRound.post_money)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </div>
 
@@ -512,6 +597,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                     <span>{fmtDate(inv.date)}</span>
                                     <span className="font-semibold text-neutral-800">{fmt$$(inv.amount)}</span>
                                     <span className="px-2 py-0.5 rounded-full bg-gold-50 text-primary-600 ring-1 ring-violet-200">{inv.instrument}</span>
+                                    {inv.legal_entity && (
+                                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200 font-semibold">{inv.legal_entity}</span>
+                                    )}
                                     {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                                   </div>
                                   <button
@@ -538,6 +626,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               <span>{fmtDate(inv.date)}</span>
                               <span className="font-semibold text-neutral-800">{fmt$$(inv.amount)}</span>
                               <span className="px-2 py-0.5 rounded-full bg-gold-50 text-primary-600 ring-1 ring-violet-200">{inv.instrument}</span>
+                              {inv.legal_entity && (
+                                <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200 font-semibold">{inv.legal_entity}</span>
+                              )}
                               {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
                             <button
@@ -771,7 +862,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         <RoundForm companyId={company.id} onClose={() => setShowAddRound(false)} />
       </Modal>
       <Modal open={showAddInvestment}   onClose={() => setShowAddInvestment(false)}  title="Add Investment">
-        <InvestmentForm companyId={company.id} rounds={rounds} onClose={() => setShowAddInvestment(false)} />
+        <InvestmentForm companyId={company.id} rounds={rounds} legalEntities={legalEntities} onClose={() => setShowAddInvestment(false)} />
       </Modal>
       <Modal open={showAddCapTable}     onClose={() => setShowAddCapTable(false)}    title="Add Cap Table Entry">
         <CapTableForm companyId={company.id} rounds={rounds} onClose={() => setShowAddCapTable(false)} />

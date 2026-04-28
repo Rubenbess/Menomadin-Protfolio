@@ -77,6 +77,14 @@ export interface Investment {
   amount: number
   instrument: Instrument
   valuation_cap: number | null
+  legal_entity: string | null
+}
+
+export interface LegalEntity {
+  id: string
+  name: string
+  cap_table_alias: string | null
+  created_at: string
 }
 
 export type HolderType = 'founder' | 'investor' | 'employee' | 'advisor' | 'other'

@@ -101,7 +101,11 @@
       "Bash(\"$f.tmp\")",
       "Bash(mv \"$f.tmp\" \"$f\")",
       "Bash(sed -i \"/const.*usePermissions/d\" \"$f\")",
-      "Bash(1)"
+      "Bash(1)",
+      "mcp__scheduled-tasks__create_scheduled_task",
+      "Bash(grep \".ts$\")",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(gh pr create --title 'Add valuation timeline chart to company overview' --body ' *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
