@@ -76,6 +76,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [showAddSafe, setShowAddSafe] = useState(false)
   const [editingSafe, setEditingSafe] = useState<Safe | null>(null)
   const [scenarioSafe, setScenarioSafe] = useState<Safe | null>(null)
+  const [editingRound, setEditingRound] = useState<Round | null>(null)
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null)
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -301,13 +303,19 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   const entOwnership = entCapTable.reduce((s, c) => s + c.ownership_percentage, 0)
                   const entValue = latestRound ? (entOwnership / 100) * latestRound.post_money : 0
                   const entMOIC = entInvested > 0 && entValue > 0 ? entValue / entInvested : null
-                  return { entity, entInvested, entOwnership, entValue, entMOIC, hasData: entInvested > 0 || entOwnership > 0 }
-                }).filter(r => r.hasData)
+                  return { entity, entInvested, entOwnership, entValue, entMOIC }
+                })
 
                 const hasUnassigned = investments.some(i => !i.legal_entity)
                 const unassignedInvested = investments.filter(i => !i.legal_entity).reduce((s, i) => s + i.amount, 0)
 
-                if (entityRows.length === 0 && !hasUnassigned) {
+                const totalEntityOwnership = entityRows.reduce((s, r) => s + r.entOwnership, 0)
+                const totalEntityValue = entityRows.reduce((s, r) => s + r.entValue, 0)
+                const combinedOwnership = totalEntityOwnership > 0 ? totalEntityOwnership : ownershipPct
+                const combinedValue = totalEntityValue > 0 ? totalEntityValue : currentValue
+                const combinedMOIC = totalInvested > 0 && combinedValue > 0 ? combinedValue / totalInvested : moic
+
+                if (legalEntities.length === 0 && !hasUnassigned) {
                   return (
                     <div className="space-y-3">
                       {[
@@ -361,10 +369,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                         <tr className="border-t-2 border-neutral-300">
                           <td className="py-2.5 pr-4 font-bold text-neutral-900">Total</td>
                           <td className="py-2.5 pr-4 font-bold text-primary-600">{fmt$$(totalInvested)}</td>
-                          <td className="py-2.5 pr-4 font-bold text-neutral-700">{ownershipPct > 0 ? fmtPct(ownershipPct) : '—'}</td>
-                          <td className="py-2.5 pr-4 font-bold text-emerald-600">{currentValue > 0 ? fmt$$(currentValue) : '—'}</td>
-                          <td className={`py-2.5 font-bold ${moic >= 1 ? 'text-emerald-600' : moic > 0 ? 'text-red-500' : 'text-neutral-400'}`}>
-                            {moic > 0 ? fmtMultiple(moic) : '—'}
+                          <td className="py-2.5 pr-4 font-bold text-neutral-700">{combinedOwnership > 0 ? fmtPct(combinedOwnership) : '—'}</td>
+                          <td className="py-2.5 pr-4 font-bold text-emerald-600">{combinedValue > 0 ? fmt$$(combinedValue) : '—'}</td>
+                          <td className={`py-2.5 font-bold ${combinedMOIC >= 1 ? 'text-emerald-600' : combinedMOIC > 0 ? 'text-red-500' : 'text-neutral-400'}`}>
+                            {combinedMOIC > 0 ? fmtMultiple(combinedMOIC) : '—'}
                           </td>
                         </tr>
                       </tbody>
@@ -579,12 +587,26 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               ))}
                             </div>
 
-                            {/* MOIC */}
+                            {/* MOIC + round edit/delete */}
                             <div className="sm:text-right flex-shrink-0">
                               <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">MOIC</p>
                               <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600' : moic != null ? 'text-red-500' : 'text-neutral-500'}`}>
                                 {moic != null ? fmtMultiple(moic) : '—'}
                               </p>
+                              <div className="flex items-center gap-1 justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => setEditingRound(round)}
+                                  className="p-1.5 text-neutral-400 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
+                                ><Pencil size={12} /></button>
+                                <button
+                                  onClick={async () => {
+                                    if (!confirm('Delete this round and all its investments?')) return
+                                    await import('@/actions/rounds').then(m => m.deleteRound(round.id))
+                                    router.refresh()
+                                  }}
+                                  className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                ><Trash2 size={12} /></button>
+                              </div>
                             </div>
                           </div>
 
@@ -602,10 +624,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                     )}
                                     {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                                   </div>
-                                  <button
-                                    onClick={() => handleDeleteInvestment(inv.id)}
-                                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                  ><Trash2 size={11} /></button>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                    <button
+                                      onClick={() => setEditingInvestment(inv)}
+                                      className="p-1 text-slate-300 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
+                                    ><Pencil size={11} /></button>
+                                    <button
+                                      onClick={() => handleDeleteInvestment(inv.id)}
+                                      className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    ><Trash2 size={11} /></button>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -631,10 +659,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               )}
                               {inv.valuation_cap && <span className="text-neutral-500">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
-                            <button
-                              onClick={() => handleDeleteInvestment(inv.id)}
-                              className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            ><Trash2 size={11} /></button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                              <button
+                                onClick={() => setEditingInvestment(inv)}
+                                className="p-1 text-slate-300 hover:text-primary-500 hover:bg-gold-50 rounded-lg transition-all"
+                              ><Pencil size={11} /></button>
+                              <button
+                                onClick={() => handleDeleteInvestment(inv.id)}
+                                className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              ><Trash2 size={11} /></button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -861,8 +895,18 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       <Modal open={showAddRound}        onClose={() => setShowAddRound(false)}       title="Add Round">
         <RoundForm companyId={company.id} onClose={() => setShowAddRound(false)} />
       </Modal>
+      <Modal open={!!editingRound} onClose={() => setEditingRound(null)} title="Edit Round">
+        {editingRound && (
+          <RoundForm companyId={company.id} round={editingRound} onClose={() => { setEditingRound(null); router.refresh() }} />
+        )}
+      </Modal>
       <Modal open={showAddInvestment}   onClose={() => setShowAddInvestment(false)}  title="Add Investment">
         <InvestmentForm companyId={company.id} rounds={rounds} legalEntities={legalEntities} onClose={() => setShowAddInvestment(false)} />
+      </Modal>
+      <Modal open={!!editingInvestment} onClose={() => setEditingInvestment(null)} title="Edit Investment">
+        {editingInvestment && (
+          <InvestmentForm companyId={company.id} rounds={rounds} legalEntities={legalEntities} investment={editingInvestment} onClose={() => { setEditingInvestment(null); router.refresh() }} />
+        )}
       </Modal>
       <Modal open={showAddCapTable}     onClose={() => setShowAddCapTable(false)}    title="Add Cap Table Entry">
         <CapTableForm companyId={company.id} rounds={rounds} onClose={() => setShowAddCapTable(false)} />
