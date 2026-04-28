@@ -1,6 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { snapshotFromEml, snapshotFromMsg } from '@/lib/email-snapshot'
 import type { TaskEmailAttachment } from '@/lib/types'
@@ -83,7 +82,9 @@ export async function attachEmailFileToTask(
       return { error: error.message, data: null }
     }
 
-    revalidatePath('/tasks')
+    // Skip revalidatePath — the client reloads via getTaskEmailAttachments.
+    // Triggering a /tasks re-render here surfaced opaque "Server Components
+    // render" errors when the page tree is mid-render.
     return { error: null, data: { id: data.id, subject: snapshot.subject } }
   } catch (e) {
     console.error('[task-emails] unexpected error', e)
@@ -103,7 +104,6 @@ export async function setEmailAttachmentPrivacy(
     .eq('id', id)
 
   if (error) return { error: error.message }
-  revalidatePath('/tasks')
   return { error: null }
 }
 
@@ -117,6 +117,5 @@ export async function detachEmailFromTask(
     .eq('id', id)
 
   if (error) return { error: error.message }
-  revalidatePath('/tasks')
   return { error: null }
 }
