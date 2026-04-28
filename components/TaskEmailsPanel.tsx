@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Mail, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/useToast'
 import TaskEmailAttachmentDisplay from '@/components/TaskEmailAttachmentDisplay'
-import {
-  attachEmailFileToTask,
-  getTaskEmailAttachments,
-} from '@/actions/task-emails'
+import { getTaskEmailAttachments } from '@/actions/task-emails'
 import type { TaskEmailAttachment } from '@/lib/types'
 
 interface Props {
@@ -55,15 +52,27 @@ export default function TaskEmailsPanel({ taskId, currentUserId }: Props) {
         fd.append('file', file)
         fd.append('isPrivate', uploadPrivate ? 'true' : 'false')
         try {
-          const r = await attachEmailFileToTask(fd)
-          if (r.error) {
-            showError(`${file.name}: ${r.error}`)
+          const res = await fetch('/api/tasks/emails', {
+            method: 'POST',
+            body: fd,
+          })
+          let payload: { id?: string; subject?: string | null; error?: string; details?: string; code?: string } = {}
+          try {
+            payload = await res.json()
+          } catch {
+            // server returned non-JSON (rare)
+          }
+          if (!res.ok) {
+            const msg = payload.error || `HTTP ${res.status}`
+            const detail = payload.details ? ` (${payload.details})` : ''
+            const code = payload.code ? ` [${payload.code}]` : ''
+            console.error('[TaskEmailsPanel] upload failed', res.status, payload)
+            showError(`${file.name}: ${msg}${code}${detail}`)
             continue
           }
-          success(`Attached "${r.data?.subject || file.name}"`)
+          success(`Attached "${payload.subject || file.name}"`)
         } catch (e) {
-          // Server action threw (e.g. bundle error). Surface it instead of
-          // leaving the UI stuck on "Uploading…".
+          // Network error or unexpected throw — surface it.
           const msg = e instanceof Error ? e.message : 'Upload failed'
           console.error('[TaskEmailsPanel] upload threw', e)
           showError(`${file.name}: ${msg}`)
