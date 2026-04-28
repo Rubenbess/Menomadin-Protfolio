@@ -6,12 +6,12 @@ import {
   calcTVPI,
   calcXIRR,
   calcDPI,
-  getFundOwnershipPct,
+  calcCombinedOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
   type CashFlow,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Reserve } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Reserve, LegalEntity } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,19 +29,22 @@ export default async function AnalyticsPage() {
     { data: investments },
     { data: capTable },
     { data: reserves },
+    { data: legalEntities },
   ] = await Promise.all([
     supabase.from('companies').select('*').order('name'),
     supabase.from('rounds').select('*'),
     supabase.from('investments').select('*').order('date'),
     supabase.from('cap_table').select('*'),
     supabase.from('reserves').select('*'),
+    supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
   ])
 
   const companiesList   = (companies   ?? []) as Company[]
   const roundsList      = (rounds      ?? []) as Round[]
   const investmentsList = (investments ?? []) as Investment[]
-  const capTableList    = (capTable    ?? []) as CapTableEntry[]
-  const reservesList    = (reserves    ?? []) as Reserve[]
+  const capTableList      = (capTable      ?? []) as CapTableEntry[]
+  const reservesList      = (reserves      ?? []) as Reserve[]
+  const legalEntitiesList = (legalEntities ?? []) as LegalEntity[]
 
   // Compute per-company metrics (same logic as dashboard)
   const companiesWithMetrics = companiesList.map(co => {
@@ -51,7 +54,7 @@ export default async function AnalyticsPage() {
 
     const invested     = totalInvestedInCompany(coInvestments)
     const latestRound  = getLatestRound(coRounds)
-    const ownershipPct = getFundOwnershipPct(coCapTable)
+    const ownershipPct = calcCombinedOwnershipPct(coCapTable, legalEntitiesList)
     const currentValue = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
     const moic         = calcMOIC(currentValue, invested)
 

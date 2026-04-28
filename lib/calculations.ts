@@ -1,4 +1,4 @@
-import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness, CompanyKPI, CompanyUpdate, HealthScore } from './types'
+import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness, CompanyKPI, CompanyUpdate, HealthScore, LegalEntity } from './types'
 
 // Canonical sector names — any alias maps to the canonical form
 const SECTOR_ALIASES: Record<string, string> = {
@@ -48,6 +48,26 @@ export function getFundOwnershipPct(capTable: CapTableEntry[]): number {
   if (!capTable.length) return 0
   // Use the last entry (most recent) — users should add the fund entry last
   return capTable[capTable.length - 1].ownership_percentage
+}
+
+/**
+ * Returns combined ownership % across all configured legal entities.
+ * Sums cap table entries whose shareholder_name matches each entity's
+ * cap_table_alias (or name if no alias set). Falls back to getFundOwnershipPct
+ * when no entities are configured or no entries match.
+ */
+export function calcCombinedOwnershipPct(
+  capTable: CapTableEntry[],
+  legalEntities: LegalEntity[],
+): number {
+  if (!legalEntities.length) return getFundOwnershipPct(capTable)
+  const total = legalEntities.reduce((sum, entity) => {
+    const alias = entity.cap_table_alias || entity.name
+    return sum + capTable
+      .filter(c => c.shareholder_name.toLowerCase() === alias.toLowerCase())
+      .reduce((s, c) => s + c.ownership_percentage, 0)
+  }, 0)
+  return total || getFundOwnershipPct(capTable)
 }
 
 export function totalInvestedInCompany(investments: Investment[]): number {

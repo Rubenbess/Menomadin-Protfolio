@@ -10,7 +10,7 @@ import {
   calcTVPI,
   calcXIRR,
   calcDPI,
-  getFundOwnershipPct,
+  calcCombinedOwnershipPct,
   getLatestRound,
   totalInvestedInCompany,
   fmt$$,
@@ -18,7 +18,7 @@ import {
   fmtPct,
   type CashFlow,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe, TaskWithRelations, TeamMember } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe, TaskWithRelations, TeamMember, LegalEntity } from '@/lib/types'
 import { DollarSign, TrendingUp, BarChart2, Activity, Percent, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -51,6 +51,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     { data: tasks },
     { data: teamMembers },
     { data: currentMember },
+    { data: legalEntities },
   ] = await Promise.all([
     companiesQuery,
     supabase.from('rounds').select('*'),
@@ -66,6 +67,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     `).order('created_at', { ascending: false }),
     supabase.from('team_members').select('*').order('name', { ascending: true }),
     supabase.from('team_members').select('name').eq('id', user?.id ?? '').maybeSingle(),
+    supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
   ])
 
   const firstName = (currentMember as any)?.name?.split(' ')[0] ?? 'there'
@@ -76,7 +78,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   const capTableList    = (capTable    ?? []) as CapTableEntry[]
   const reservesList    = (reserves    ?? []) as Reserve[]
   const safesList       = (safes       ?? []) as Safe[]
-  const teamMembersList = (teamMembers ?? []) as TeamMember[]
+  const teamMembersList   = (teamMembers   ?? []) as TeamMember[]
+  const legalEntitiesList = (legalEntities ?? []) as LegalEntity[]
 
   // Hydrate assignee team_member info
   const memberMap = new Map(teamMembersList.map(m => [m.id, m]))
@@ -96,7 +99,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
     const totalInvested    = totalInvestedInCompany(coInvestments)
     const latestRound      = getLatestRound(coRounds)
-    const ownershipPct     = getFundOwnershipPct(coCapTable)
+    const ownershipPct     = calcCombinedOwnershipPct(coCapTable, legalEntitiesList)
     const currentValue     = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
     const moic             = calcMOIC(currentValue, totalInvested)
     const plannedReserves  = coReserve?.reserved_amount  ?? 0
