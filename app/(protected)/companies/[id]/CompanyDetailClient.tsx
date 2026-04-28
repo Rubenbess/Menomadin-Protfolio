@@ -81,7 +81,17 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
-  const ownershipPct  = getFundOwnershipPct(capTable)
+
+  // Sum ownership across all configured legal entities; fall back to last cap table entry
+  const ownershipPct = legalEntities.length > 0
+    ? legalEntities.reduce((sum, entity) => {
+        const alias = entity.cap_table_alias || entity.name
+        return sum + capTable
+          .filter(c => c.shareholder_name.toLowerCase() === alias.toLowerCase())
+          .reduce((s, c) => s + c.ownership_percentage, 0)
+      }, 0) || getFundOwnershipPct(capTable)
+    : getFundOwnershipPct(capTable)
+
   const currentValue  = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
   const moic          = calcMOIC(currentValue, totalInvested)
 
@@ -439,7 +449,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
         {activeTab === 'history' && (() => {
           const sortedRounds  = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
           const latestRound   = sortedRounds[sortedRounds.length - 1]
-          const fundOwnership = getFundOwnershipPct(capTable)
+          const fundOwnership = ownershipPct
           const unlinkedInvs  = investments.filter(i => !i.round_id)
 
           // Build unified timeline: rounds + safes, sorted by date
