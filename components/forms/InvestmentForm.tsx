@@ -79,7 +79,7 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
             name="instrument"
             required
             value={instrument}
-            onChange={(e) => setInstrument(e.target.value)}
+            onChange={(e) => setInstrument(e.target.value as typeof instrument)}
             className={input}
           >
             {INSTRUMENTS.map((i) => <option key={i} value={i}>{i}</option>)}
