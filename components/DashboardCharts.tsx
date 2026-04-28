@@ -4,7 +4,9 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Cell, CartesianGrid, PieChart, Pie,
 } from 'recharts'
-import { normalizeSector } from '@/lib/calculations'
+import { useMemo } from 'react'
+import { normalizeSector, fmt$$ as fmt, fmtPct } from '@/lib/calculations'
+import { PERFORMANCE_CHART_MONTHS } from '@/lib/limits'
 
 interface CompanyData {
   name: string
@@ -39,17 +41,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   'written-off': { label: 'Written off',  color: '#ef4444', bg: 'bg-red-50',      text: 'text-red-600'     },
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmt(n: number) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000)     return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n}`
-}
-
-function fmtPct(n: number) {
-  return `${n.toFixed(1)}%`
-}
+// fmt / fmtPct imported from lib/calculations to keep formatting consistent across the app.
 
 const tooltipStyle = {
   borderRadius: 12,
@@ -62,15 +54,18 @@ const tooltipStyle = {
 // ── Invested vs Value ─────────────────────────────────────────────────────────
 
 function PerformanceChart({ companies }: Props) {
-  const data = companies
-    .filter(c => c.totalInvested > 0)
-    .sort((a, b) => b.totalInvested - a.totalInvested)
-    .slice(0, 12)
-    .map(c => ({
-      name: c.name.length > 14 ? c.name.slice(0, 13) + '…' : c.name,
-      Invested: c.totalInvested,
-      Value: c.currentValue,
-    }))
+  // Memoized so re-renders driven by parent state don't re-sort the full company list.
+  const data = useMemo(() => (
+    companies
+      .filter(c => c.totalInvested > 0)
+      .sort((a, b) => b.totalInvested - a.totalInvested)
+      .slice(0, PERFORMANCE_CHART_MONTHS)
+      .map(c => ({
+        name: c.name.length > 14 ? c.name.slice(0, 13) + '…' : c.name,
+        Invested: c.totalInvested,
+        Value: c.currentValue,
+      }))
+  ), [companies])
 
   if (data.length === 0) return null
 

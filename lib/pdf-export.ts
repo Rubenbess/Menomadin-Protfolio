@@ -1,5 +1,10 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { fmt$$, fmtMultiple, fmtPct } from './calculations'
+
+// Brand gold used in the platform's primary palette. Centralised here so
+// rebrands or tone tweaks happen in one place rather than as scattered RGB tuples.
+const BRAND_GOLD: [number, number, number] = [184, 149, 106]
 
 interface ExportOptions {
   title?: string
@@ -81,7 +86,7 @@ export function exportToPDF(
     body: tableRows,
     startY: yPosition,
     headStyles: {
-      fillColor: [184, 149, 106],
+      fillColor: BRAND_GOLD,
       textColor: 255,
       fontStyle: 'bold',
       fontSize: 10,
@@ -98,7 +103,7 @@ export function exportToPDF(
       fillColor: [250, 250, 250],
     },
     margin: { top: yPosition + 5 },
-    didDrawPage: (data) => {
+    didDrawPage: (data: { pageNumber: number }) => {
       // Footer
       const pageSize = doc.internal.pageSize
       const pageHeight = pageSize.getHeight()
@@ -108,7 +113,7 @@ export function exportToPDF(
       doc.setFontSize(8)
       doc.setTextColor(150, 150, 150)
       doc.text(
-        `Page ${(data as any).pageNumber} of ${pageCount}`,
+        `Page ${data.pageNumber} of ${pageCount}`,
         pageWidth / 2,
         pageHeight - 10,
         { align: 'center' }
@@ -150,12 +155,12 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
   const metrics = [
-    ['Total Invested', `$${(data.totalInvested / 1_000_000).toFixed(2)}M`],
-    ['Current Value', `$${(data.currentValue / 1_000_000).toFixed(2)}M`],
-    ['TVPI', `${data.tvpi.toFixed(2)}x`],
-    ['MOIC', `${data.moic.toFixed(2)}x`],
-    ['IRR', `${(data.irr * 100).toFixed(1)}%`],
-    ['DPI', `${data.dpi.toFixed(2)}x`],
+    ['Total Invested', fmt$$(data.totalInvested)],
+    ['Current Value',  fmt$$(data.currentValue)],
+    ['TVPI',           fmtMultiple(data.tvpi)],
+    ['MOIC',           fmtMultiple(data.moic)],
+    ['IRR',            fmtPct(data.irr * 100)],
+    ['DPI',            fmtMultiple(data.dpi)],
   ]
 
   let yPos = 30
@@ -179,13 +184,13 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
       c.name,
       c.sector,
       c.status,
-      `$${(c.invested / 1_000_000).toFixed(2)}M`,
-      `$${(c.value / 1_000_000).toFixed(2)}M`,
-      `${c.moic.toFixed(2)}x`,
+      fmt$$(c.invested),
+      fmt$$(c.value),
+      fmtMultiple(c.moic),
     ]),
     startY: yPos + 5,
     headStyles: {
-      fillColor: [184, 149, 106],
+      fillColor: BRAND_GOLD,
       textColor: 255,
       fontStyle: 'bold',
     },

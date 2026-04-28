@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
+
   const body = await req.json()
-  const supabase = await createServerSupabaseClient()
 
   const { error } = await supabase.from('documents').insert({
     company_id: body.company_id,

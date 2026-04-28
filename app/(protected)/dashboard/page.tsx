@@ -24,6 +24,19 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import StrategyTableFilter from '@/components/StrategyTableFilter'
 import PortfolioTable from '@/components/PortfolioTable'
+import { fundLabel } from '@/lib/funds'
+import { TOP_COMPANIES_FOR_SPARKLINE } from '@/lib/limits'
+
+function groupBy<T>(items: T[], key: (t: T) => string | null): Map<string, T[]> {
+  const m = new Map<string, T[]>()
+  for (const it of items) {
+    const k = key(it)
+    if (!k) continue
+    const arr = m.get(k)
+    if (arr) arr.push(it); else m.set(k, [it])
+  }
+  return m
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +83,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
   ])
 
-  const firstName = (currentMember as any)?.name?.split(' ')[0] ?? 'there'
+  const firstName = (currentMember as { name: string } | null)?.name?.split(' ')[0] ?? 'there'
 
   const companiesList   = (companies   ?? []) as Company[]
   const roundsList      = (rounds      ?? []) as Round[]
@@ -91,11 +104,18 @@ export default async function DashboardPage({ searchParams }: Props) {
     })),
   }))) as TaskWithRelations[]
 
+  // Pre-group sibling tables by company_id once (O(n)) so the per-company loop
+  // doesn't re-scan each list (was O(n²) — see daily health check report).
+  const investmentsByCompany = groupBy(investmentsList, i => i.company_id)
+  const roundsByCompany      = groupBy(roundsList,      r => r.company_id)
+  const capTableByCompany    = groupBy(capTableList,    c => c.company_id)
+  const reservesByCompany    = new Map(reservesList.map(r => [r.company_id, r]))
+
   const companiesWithMetrics: CompanyWithMetrics[] = companiesList.map((co) => {
-    const coInvestments = investmentsList.filter((i) => i.company_id === co.id)
-    const coRounds      = roundsList.filter((r) => r.company_id === co.id)
-    const coCapTable    = capTableList.filter((c) => c.company_id === co.id)
-    const coReserve     = reservesList.find((r) => r.company_id === co.id)
+    const coInvestments = investmentsByCompany.get(co.id) ?? []
+    const coRounds      = roundsByCompany.get(co.id)      ?? []
+    const coCapTable    = capTableByCompany.get(co.id)    ?? []
+    const coReserve     = reservesByCompany.get(co.id)
 
     const totalInvested    = totalInvestedInCompany(coInvestments)
     const latestRound      = getLatestRound(coRounds)
@@ -131,17 +151,17 @@ export default async function DashboardPage({ searchParams }: Props) {
   const byInvested = [...companiesWithMetrics]
     .filter(c => c.totalInvested > 0)
     .sort((a, b) => a.totalInvested - b.totalInvested)
-    .slice(-8)
+    .slice(-TOP_COMPANIES_FOR_SPARKLINE)
 
   const byValue = [...companiesWithMetrics]
     .filter(c => c.currentValue > 0)
     .sort((a, b) => a.currentValue - b.currentValue)
-    .slice(-8)
+    .slice(-TOP_COMPANIES_FOR_SPARKLINE)
 
   const byMoic = [...companiesWithMetrics]
     .filter(c => c.moic > 0)
     .sort((a, b) => a.moic - b.moic)
-    .slice(-8)
+    .slice(-TOP_COMPANIES_FOR_SPARKLINE)
 
   // Monthly deployment over last 8 months (for IRR sparkline)
   const now = new Date()
@@ -178,10 +198,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   // ── Misc ──────────────────────────────────────────────────────────────────────
 
-  const strategyLabel =
-    strategy === 'impact'  ? 'Menomadin Impact'   :
-    strategy === 'venture' ? 'Menomadin Catalyst' :
-    'All Strategies'
+  const strategyLabel = strategy ? fundLabel(strategy as 'impact' | 'venture') : 'All Strategies'
 
   const today = new Date().toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',
@@ -277,7 +294,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-l-emerald-500">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Impact</span>
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">{fundLabel('impact')}</span>
                   <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{impactCos.length} companies</span>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
@@ -298,7 +315,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-l-blue-500">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Catalyst</span>
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">{fundLabel('venture')}</span>
                   <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{ventureCos.length} companies</span>
                 </div>
                 <div className="grid grid-cols-3 gap-4">

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 function parseCSV(text: string): Record<string, string>[] {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim())
@@ -29,6 +29,10 @@ function parseCSV(text: string): Record<string, string>[] {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
+
   const type = req.nextUrl.searchParams.get('type') // 'contacts' | 'companies'
   const formData = await req.formData()
   const file = formData.get('file') as File | null
@@ -37,8 +41,6 @@ export async function POST(req: NextRequest) {
   const text = await file.text()
   const rows = parseCSV(text)
   if (!rows.length) return NextResponse.json({ error: 'No valid rows found in CSV' }, { status: 400 })
-
-  const supabase = await createServerSupabaseClient()
 
   if (type === 'contacts') {
     const records = rows.map(r => ({

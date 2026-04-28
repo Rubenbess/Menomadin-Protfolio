@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import * as XLSX from 'xlsx'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
+import { isAllowedFileUrl } from '@/lib/url-allowlist'
 
 function parseClaudeJSON(text: string) {
   // Strip markdown code fences if present
@@ -22,6 +23,10 @@ Look for: Revenue, ARR, MRR, Run Rate, Burn Rate, Cash Runway, Headcount, Gross 
 For metrics, always include the unit/currency. Use "—" if a value is mentioned but unclear.`
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
@@ -30,6 +35,9 @@ export async function POST(req: NextRequest) {
   const { document_id, file_url, file_name, file_type } = await req.json()
   if (!file_url || !document_id) {
     return NextResponse.json({ error: 'Missing document_id or file_url' }, { status: 400 })
+  }
+  if (!isAllowedFileUrl(file_url)) {
+    return NextResponse.json({ error: 'file_url is not on the allowed storage host' }, { status: 400 })
   }
 
   // Download the file
@@ -116,9 +124,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 500 })
   }
 
-  // Persist to database
-  const supabase = await createServerSupabaseClient()
-  await supabase.from('documents').update({ extracted_data: extracted }).eq('id', document_id)
+  // Persist to database (supabase from requireAuth above)
+  const { error: updateError } = await supabase
+    .from('documents')
+    .update({ extracted_data: extracted })
+    .eq('id', document_id)
+  if (updateError) {
+    return NextResponse.json({ error: `Failed to persist extraction: ${updateError.message}` }, { status: 500 })
+  }
 
   return NextResponse.json({ extracted })
 }

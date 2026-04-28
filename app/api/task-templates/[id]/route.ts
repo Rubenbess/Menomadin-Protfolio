@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -7,7 +7,9 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const supabase = await createServerSupabaseClient()
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { supabase } = auth
 
     const { data, error } = await supabase
       .from('task_templates')
@@ -35,12 +37,9 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { supabase } = auth
 
     const body = await request.json()
 
@@ -78,12 +77,9 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { supabase } = auth
 
     const { error } = await supabase
       .from('task_templates')

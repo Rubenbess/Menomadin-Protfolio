@@ -109,10 +109,11 @@ export async function getMyActivity() {
 export async function getAllTeamMembers() {
   const supabase = await createServerSupabaseClient()
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('team_members')
     .select('id, name, email, role, color, job_title, initials')
     .order('name', { ascending: true })
 
+  if (error) return { members: [], error: error.message }
   return { members: data || [] }
 }

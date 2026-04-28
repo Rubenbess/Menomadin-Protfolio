@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
+import { requireCronAuth } from '@/lib/api-auth'
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const cronError = requireCronAuth(req)
+  if (cronError) return cronError
 
   const resendKey  = process.env.RESEND_API_KEY
   const fromEmail  = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'

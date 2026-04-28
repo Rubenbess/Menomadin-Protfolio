@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
+
   const q = req.nextUrl.searchParams.get('q')?.trim()
   if (!q || q.length < 2) return NextResponse.json({ results: [] })
 
-  const supabase = await createServerSupabaseClient()
-  const pattern = `%${q}%`
+  // ilike pattern — escape % and _ so user input can't match-all the table.
+  const escaped = q.replace(/[\\%_]/g, m => `\\${m}`)
+  const pattern = `%${escaped}%`
 
   const [companies, contacts, pipeline] = await Promise.all([
     supabase

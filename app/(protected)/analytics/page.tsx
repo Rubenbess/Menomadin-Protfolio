@@ -12,6 +12,7 @@ import {
   type CashFlow,
 } from '@/lib/calculations'
 import type { Company, Round, Investment, CapTableEntry, Reserve, LegalEntity } from '@/lib/types'
+import { FULL_LIST_FETCH_LIMIT } from '@/lib/limits'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,11 +32,11 @@ export default async function AnalyticsPage() {
     { data: reserves },
     { data: legalEntities },
   ] = await Promise.all([
-    supabase.from('companies').select('*').order('name'),
-    supabase.from('rounds').select('*'),
-    supabase.from('investments').select('*').order('date'),
-    supabase.from('cap_table').select('*'),
-    supabase.from('reserves').select('*'),
+    supabase.from('companies').select('*').order('name').limit(FULL_LIST_FETCH_LIMIT),
+    supabase.from('rounds').select('*').limit(FULL_LIST_FETCH_LIMIT),
+    supabase.from('investments').select('*').order('date').limit(FULL_LIST_FETCH_LIMIT),
+    supabase.from('cap_table').select('*').limit(FULL_LIST_FETCH_LIMIT),
+    supabase.from('reserves').select('*').limit(FULL_LIST_FETCH_LIMIT),
     supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
   ])
 

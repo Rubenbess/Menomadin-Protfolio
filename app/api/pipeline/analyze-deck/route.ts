@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { requireAuth } from '@/lib/api-auth'
+import { isAllowedFileUrl } from '@/lib/url-allowlist'
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+
   const { deck_url } = await req.json()
   if (!deck_url) return NextResponse.json({ error: 'No deck_url provided' }, { status: 400 })
+  if (!isAllowedFileUrl(deck_url)) {
+    return NextResponse.json({ error: 'deck_url is not on the allowed storage host' }, { status: 400 })
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })

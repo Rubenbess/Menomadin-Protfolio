@@ -15,11 +15,11 @@ import { AdvancedFilterPanel } from '@/components/AdvancedFilterPanel'
 import { applyFilters, FilterGroup } from '@/lib/filter-utils'
 import { usePermissions } from '@/hooks/usePermissions'
 import type { Company, Contact, HealthScore } from '@/lib/types'
+import { FUNDS } from '@/lib/funds'
 
 const STRATEGY_FILTERS = [
-  { value: 'all',     label: 'All' },
-  { value: 'impact',  label: 'Menomadin Impact' },
-  { value: 'venture', label: 'Menomadin Catalyst' },
+  { value: 'all', label: 'All' },
+  ...FUNDS.map(f => ({ value: f.id, label: f.label })),
 ]
 
 const STATUS_LABELS: Record<string, string> = {

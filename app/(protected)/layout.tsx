@@ -16,22 +16,31 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   }
 
   // Fetch team_member row — auto-create on first login
-  let { data: member } = await supabase
+  const memberQuery = await supabase
     .from('team_members')
     .select('id, name, color, initials, job_title')
     .eq('id', user.id)
     .maybeSingle()
+  if (memberQuery.error) {
+    // Surface a real error instead of silently treating "DB hiccup" as "new user",
+    // which would have re-inserted on every page load and clobbered the row.
+    throw new Error(`Failed to load team member: ${memberQuery.error.message}`)
+  }
+  let member = memberQuery.data
 
   const isNewUser = !member
 
   if (!member && user.email) {
     const name = user.email.split('@')[0]
     const initials = name.slice(0, 2).toUpperCase()
-    const { data: created } = await supabase
+    const { data: created, error: insertError } = await supabase
       .from('team_members')
       .insert({ id: user.id, name, email: user.email, role: 'admin', color: '#5a7fa8', initials })
       .select('id, name, color, initials, job_title')
       .single()
+    if (insertError) {
+      throw new Error(`Failed to create team member: ${insertError.message}`)
+    }
     member = created
   }
 

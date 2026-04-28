@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 const COLORS = ['blue', 'indigo', 'purple', 'amber', 'orange', 'green', 'red', 'slate']
 
@@ -17,6 +17,10 @@ interface TrelloBoard { lists: TrelloList[]; cards: TrelloCard[] }
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { supabase } = auth
+
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -33,9 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File does not look like a Trello export' }, { status: 400 })
     }
 
-    const supabase = await createServerSupabaseClient()
-
-    // Get existing stages
+    // Get existing stages (supabase from requireAuth above)
     const { data: existingStages } = await supabase
       .from('pipeline_stages')
       .select('name, position')

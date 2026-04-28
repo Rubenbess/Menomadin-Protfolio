@@ -53,7 +53,7 @@ export default function OwnershipTable({ companyId, shareSeries, optionPools, ro
 
   const totalIssuedShares = shareSeries.reduce((s, h) => s + h.shares, 0)
   const totalFDShares     = calcFullyDilutedShares(totalIssuedShares, optionPools)
-  const unissuedOptions   = optionPools.reduce((s, p) => s + (p.shares_authorized - p.shares_issued), 0)
+  const unissuedOptions   = optionPools.reduce((s, p) => s + Math.max(0, p.shares_authorized - p.shares_issued), 0)
 
   // Group by share class for display
   const classMap = new Map<string, { shares: number; holders: ShareSeries[] }>()

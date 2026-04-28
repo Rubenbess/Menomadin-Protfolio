@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TrendingUp, Zap, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { TrendingUp, Zap, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import EmptyState from '@/components/ui/EmptyState'
 import { createWaterfallScenario, deleteWaterfallScenario } from '@/actions/waterfall-scenarios'
 import {
   buildWaterfallHolders,
   calcWaterfall,
   calcFullyDilutedShares,
   fmt$$,
+  fmtMultiple,
   fmtPct,
 } from '@/lib/calculations'
 import type { ShareSeries, OptionPool, Safe, WaterfallScenario } from '@/lib/types'
@@ -30,10 +30,6 @@ const PRESETS = [
   { label: '$100M', value: 100_000_000 },
   { label: '$250M', value: 250_000_000 },
 ]
-
-function fmtMultiple(x: number): string {
-  return `${x.toFixed(2)}x`
-}
 
 function ColorBar({ pct, color }: { pct: number; color: string }) {
   return (
@@ -59,15 +55,21 @@ export default function WaterfallScenarioPanel({
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null)
 
   const hasShareData = shareSeries.length > 0
-  const holders = buildWaterfallHolders(shareSeries, safes)
+  const { holders, warnings: holderWarnings } = useMemo(
+    () => buildWaterfallHolders(shareSeries, safes),
+    [shareSeries, safes],
+  )
 
   const activeExitValue = parseFloat(exitValue) || parseFloat(customExit) || 0
-  const result = activeExitValue > 0 && holders.length > 0
-    ? calcWaterfall(activeExitValue, holders)
-    : null
+  const result = useMemo(
+    () => (activeExitValue > 0 && holders.length > 0 ? calcWaterfall(activeExitValue, holders) : null),
+    [activeExitValue, holders],
+  )
 
-  const totalIssuedShares = shareSeries.reduce((s, h) => s + h.shares, 0)
-  const totalFDShares = calcFullyDilutedShares(totalIssuedShares, optionPools)
+  const { totalIssuedShares, totalFDShares } = useMemo(() => {
+    const tis = shareSeries.reduce((s, h) => s + h.shares, 0)
+    return { totalIssuedShares: tis, totalFDShares: calcFullyDilutedShares(tis, optionPools) }
+  }, [shareSeries, optionPools])
 
   async function handleSave() {
     if (!activeExitValue || !saveName.trim()) return
@@ -145,6 +147,18 @@ export default function WaterfallScenarioPanel({
             </div>
           </div>
 
+          {/* Excluded SAFE warnings — surface data quality so users see why some SAFEs aren't in the waterfall */}
+          {holderWarnings.length > 0 && (
+            <div className="rounded-lg ring-1 ring-amber-200 bg-amber-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                <div className="text-xs text-amber-800 space-y-1">
+                  {holderWarnings.map((w, i) => <p key={i}>{w}</p>)}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Results */}
           {result && (
             <div className="space-y-4">
@@ -219,7 +233,7 @@ export default function WaterfallScenarioPanel({
                           </p>
                         </td>
                         <td className="px-4 py-3">
-                          {h.investedAmount > 0 ? (
+                          {h.multiple != null ? (
                             <span className={`text-sm font-bold ${
                               h.multiple >= 3 ? 'text-emerald-600' :
                               h.multiple >= 1 ? 'text-slate-800' :
@@ -307,7 +321,7 @@ export default function WaterfallScenarioPanel({
                                     {fmtPct((h.proceeds / savedResult.totalProceeds) * 100)}
                                   </td>
                                   <td className="px-4 py-2 text-xs">
-                                    {h.investedAmount > 0 && (
+                                    {h.multiple != null && (
                                       <span className={h.multiple >= 1 ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium'}>
                                         {fmtMultiple(h.multiple)}
                                       </span>

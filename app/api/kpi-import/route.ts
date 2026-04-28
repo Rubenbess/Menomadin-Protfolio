@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { supabase } = auth
+
     const body = await req.json()
     const { company_id, date, arr, revenue, burn_rate, cash_runway, headcount, gross_margin } = body
 
     if (!company_id || !date) {
       return NextResponse.json({ error: 'company_id and date are required' }, { status: 400 })
     }
-
-    const supabase = await createServerSupabaseClient()
     const { error } = await supabase.from('company_kpis').insert({
       company_id,
       date,

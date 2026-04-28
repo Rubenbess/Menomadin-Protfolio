@@ -1,3 +1,4 @@
+import { differenceInDays } from 'date-fns'
 import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness, CompanyKPI, CompanyUpdate, HealthScore, LegalEntity } from './types'
 
 // Canonical sector names — any alias maps to the canonical form
@@ -81,6 +82,10 @@ export interface CashFlow {
   date: Date
 }
 
+/**
+ * Newton-Raphson XIRR. Years use a 365.25-day basis — accurate to roughly
+ * ±0.1% over multi-year horizons; not appropriate for sub-day precision.
+ */
 export function calcXIRR(cashFlows: CashFlow[]): number | null {
   if (cashFlows.length < 2) return null
   if (!cashFlows.some(cf => cf.amount < 0)) return null
@@ -149,7 +154,7 @@ export function calcSafeEffectiveValuation(
     const effectiveVal = Math.min(capVal, discountVal)
     return {
       effectiveVal,
-      mechanism: effectiveVal === capVal ? 'cap+discount' : 'cap+discount',
+      mechanism: effectiveVal === capVal ? 'cap' : 'discount',
     }
   }
   if (valuationCap != null) return { effectiveVal: capVal, mechanism: 'cap' }
@@ -180,13 +185,20 @@ export function calcSafeConversion(
   }
 }
 
-/** Estimated ownership before conversion, using the cap as proxy (ignores round dilution). */
+/**
+ * Pre-dilution estimated ownership for an unconverted SAFE, using the cap as proxy.
+ * Does NOT account for the new round's dilution, existing cap-table dilution, or
+ * other SAFEs converting at the same time — so the result is an upper bound, not a
+ * forecast. Capped at 100% to prevent obviously misleading display values; if a
+ * caller wants the raw uncapped figure they should compute it inline.
+ */
 export function calcSafeEstimatedOwnership(
   investmentAmount: number,
   valuationCap: number | null,
 ): number {
-  if (!valuationCap) return 0
-  return (investmentAmount / valuationCap) * 100
+  if (!valuationCap || valuationCap <= 0) return 0
+  const raw = (investmentAmount / valuationCap) * 100
+  return Math.min(raw, 100)
 }
 
 // ─── Institutional Cap Table Calculations ────────────────────────────────────
@@ -263,11 +275,16 @@ export function assessDataCompleteness(
  * Build WaterfallHolder array from share_series + option_pools + SAFEs.
  * Options are modeled as unissued common for FD purposes.
  * Unconverted SAFEs are added as the lowest-seniority preferred.
+ *
+ * Returns warnings for SAFEs that could not be modeled (no valuation cap),
+ * so the caller can surface them rather than silently producing a
+ * waterfall result that misallocates proceeds.
  */
 export function buildWaterfallHolders(
   shareSeries: ShareSeries[],
   safes: Safe[],
-): WaterfallHolder[] {
+): { holders: WaterfallHolder[]; warnings: string[] } {
+  const warnings: string[] = []
   const holders: WaterfallHolder[] = shareSeries.map(s => ({
     id: s.id,
     name: s.holder_name,
@@ -285,10 +302,16 @@ export function buildWaterfallHolders(
   // Add unconverted SAFEs as lowest-seniority preferred (using invested_amount as proxy)
   for (const safe of safes) {
     if (safe.status !== 'unconverted') continue
-    // Estimate shares: investment / valuation_cap (if cap exists)
-    const estimatedShares = safe.valuation_cap
-      ? Math.round((safe.investment_amount / safe.valuation_cap) * 1_000_000)
-      : 0
+    // Skip SAFEs without a valuation cap — we cannot estimate share count, so they
+    // would receive a 1× preference but no participation in the residual, silently
+    // misallocating proceeds. Surface a warning instead.
+    if (!safe.valuation_cap || safe.valuation_cap <= 0) {
+      warnings.push(
+        `Uncapped SAFE from ${safe.date.slice(0, 7)} ($${safe.investment_amount.toLocaleString()}) excluded from waterfall — add a valuation cap to include it.`
+      )
+      continue
+    }
+    const estimatedShares = Math.round((safe.investment_amount / safe.valuation_cap) * 1_000_000)
     holders.push({
       id: `safe-${safe.id}`,
       name: `SAFE (${safe.date.slice(0, 7)})`,
@@ -304,7 +327,7 @@ export function buildWaterfallHolders(
     })
   }
 
-  return holders
+  return { holders, warnings }
 }
 
 /**
@@ -346,6 +369,11 @@ export function calcWaterfall(
     const levelHolders = nonConverters.filter(h => h.seniority === level)
     const totalPref = levelHolders.reduce((s, h) => s + h.investedAmount * h.liquidationPrefMult, 0)
 
+    // If everyone in this tier has $0 invested, there's no preference to pay —
+    // skip the tier so leftover proceeds continue down to common/participating
+    // distribution rather than being silently zeroed.
+    if (totalPref === 0) continue
+
     if (remaining >= totalPref) {
       for (const h of levelHolders) {
         const pref = h.investedAmount * h.liquidationPrefMult
@@ -356,7 +384,7 @@ export function calcWaterfall(
       // Waterfall runs dry — pro-rata within this seniority tier
       for (const h of levelHolders) {
         const pref = h.investedAmount * h.liquidationPrefMult
-        const share = totalPref > 0 ? (pref / totalPref) * remaining : 0
+        const share = (pref / totalPref) * remaining
         payouts.set(h.id, (payouts.get(h.id) ?? 0) + share)
       }
       remaining = 0
@@ -424,12 +452,13 @@ export function calcWaterfall(
       ...h,
       proceeds,
       ownershipPct: totalIssuedShares > 0 ? (h.shares / totalIssuedShares) * 100 : 0,
-      multiple: h.investedAmount > 0 ? proceeds / h.investedAmount : 0,
+      // null for holders with no money in (founders' common, options) — UI renders as "—"
+      multiple: h.investedAmount > 0 ? proceeds / h.investedAmount : null,
       isConverting: convertingIds.has(h.id),
     }
   })
 
-  return { totalProceeds: exitValue, holders: holderResults }
+  return { totalProceeds: exitValue, holders: holderResults, warnings: [] }
 }
 
 // ─── Health Score ─────────────────────────────────────────────────────────────
@@ -497,8 +526,9 @@ export function calcHealthScore(
     const latest = [...updates].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )[0]
-    const diffMs = today.getTime() - new Date(latest.date).getTime()
-    lastUpdateDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    // differenceInDays normalizes both sides to local midnight, so the result
+    // is stable across DST and timezone offsets — no off-by-one at day boundaries.
+    lastUpdateDays = Math.max(0, differenceInDays(today, new Date(latest.date)))
     if (lastUpdateDays <= 30) updateScore = 20
     else if (lastUpdateDays <= 90) updateScore = 10
     else updateScore = 0

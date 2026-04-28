@@ -40,15 +40,33 @@ export default async function CompaniesPage({ searchParams }: Props) {
         { data: [] }, { data: [] }, { data: [] },
       ]))
 
+  // Pre-group sibling tables by company_id once, instead of running 5 .filter()
+  // passes per company (was O(n²)).
+  function groupByCompany<T extends { company_id: string }>(rows: T[] | null | undefined): Map<string, T[]> {
+    const m = new Map<string, T[]>()
+    for (const r of rows ?? []) {
+      const arr = m.get(r.company_id)
+      if (arr) arr.push(r); else m.set(r.company_id, [r])
+    }
+    return m
+  }
+  const kpisByCompany       = groupByCompany((kpis        ?? []) as CompanyKPI[])
+  const updatesByCompany    = groupByCompany((updates     ?? []) as CompanyUpdate[])
+  const investByCompany     = groupByCompany((investments ?? []) as Investment[])
+  const roundsByCompany     = groupByCompany((rounds      ?? []) as Round[])
+  const capByCompany        = groupByCompany((capTable    ?? []) as CapTableEntry[])
+
   const today = new Date()
   const healthScores: Record<string, HealthScore> = {}
   for (const co of (companies ?? []) as Company[]) {
-    const coKpis    = (kpis        ?? []).filter((k: CompanyKPI)       => k.company_id === co.id) as CompanyKPI[]
-    const coUpdates = (updates     ?? []).filter((u: CompanyUpdate)    => u.company_id === co.id) as CompanyUpdate[]
-    const coInvest  = (investments ?? []).filter((i: Investment)       => i.company_id === co.id) as Investment[]
-    const coRounds  = (rounds      ?? []).filter((r: Round)            => r.company_id === co.id) as Round[]
-    const coCap     = (capTable    ?? []).filter((c: CapTableEntry)    => c.company_id === co.id) as CapTableEntry[]
-    healthScores[co.id] = calcHealthScore(coKpis, coUpdates, coInvest, coRounds, coCap, today)
+    healthScores[co.id] = calcHealthScore(
+      kpisByCompany.get(co.id)    ?? [],
+      updatesByCompany.get(co.id) ?? [],
+      investByCompany.get(co.id)  ?? [],
+      roundsByCompany.get(co.id)  ?? [],
+      capByCompany.get(co.id)     ?? [],
+      today,
+    )
   }
 
   return (

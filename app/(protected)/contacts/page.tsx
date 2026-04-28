@@ -12,12 +12,30 @@ export default async function ContactsPage() {
     supabase.from('companies').select('id, name').order('name'),
   ])
 
+  if (contactsRes.error || companiesRes.error) {
+    const msg = contactsRes.error?.message ?? companiesRes.error?.message ?? 'Unknown error'
+    return (
+      <div className="p-8">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+          <p className="font-semibold mb-1">Couldn&apos;t load contacts</p>
+          <p className="text-xs">{msg}</p>
+        </div>
+      </div>
+    )
+  }
+
   const contacts = (contactsRes.data ?? []) as ContactWithCompany[]
   const ids = contacts.map(c => c.id)
 
-  const { data: interactions } = ids.length
+  const interactionsRes = ids.length
     ? await supabase.from('contact_interactions').select('*').in('contact_id', ids).order('date', { ascending: false })
-    : { data: [] }
+    : { data: [], error: null }
+  const interactions = interactionsRes.data ?? []
+  // We don't fail the whole page on an interactions error — the contact list is
+  // still useful — but log it so it isn't a totally silent miss.
+  if (interactionsRes.error) {
+    console.error('Failed to load contact interactions:', interactionsRes.error.message)
+  }
 
   const interactionsByContact: Record<string, ContactInteraction[]> = {}
   for (const i of (interactions ?? []) as ContactInteraction[]) {

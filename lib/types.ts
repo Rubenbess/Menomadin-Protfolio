@@ -324,13 +324,14 @@ export interface WaterfallHolder {
 export interface WaterfallHolderResult extends WaterfallHolder {
   proceeds: number
   ownershipPct: number
-  multiple: number
+  multiple: number | null  // null when investedAmount is 0 (e.g. founder common, options)
   isConverting: boolean
 }
 
 export interface WaterfallResult {
   totalProceeds: number
   holders: WaterfallHolderResult[]
+  warnings: string[]
 }
 
 export type NotificationType =
