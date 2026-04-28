@@ -222,7 +222,7 @@ export async function GET(req: NextRequest) {
         name: analysis.company_name,
         sector: analysis.sector,
         stage: 'Seed',
-        status: 'prospecting',
+        status: 'Prospecting',
         notes: `${analysis.description}\n\nDetected via email from: ${from}\nSubject: ${subject}`,
         hq: analysis.hq,
         fundraising_ask: analysis.fundraising_ask,

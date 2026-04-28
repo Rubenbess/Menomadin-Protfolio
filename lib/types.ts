@@ -1,13 +1,6 @@
 export type Strategy = 'impact' | 'venture'
 export type CompanyStatus = 'active' | 'exited' | 'written-off' | 'watchlist'
 export type Instrument = 'SAFE' | 'Equity' | 'Note' | 'Warrant'
-export type PipelineStatus =
-  | 'prospecting'
-  | 'initial-meeting'
-  | 'due-diligence'
-  | 'term-sheet'
-  | 'closed'
-  | 'passed'
 
 export interface Company {
   id: string

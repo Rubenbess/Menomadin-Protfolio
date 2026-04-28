@@ -77,8 +77,9 @@ CREATE TABLE IF NOT EXISTS pipeline (
   name       TEXT NOT NULL,
   sector     TEXT NOT NULL DEFAULT '',
   stage      TEXT NOT NULL DEFAULT '',
-  status     TEXT NOT NULL DEFAULT 'prospecting'
-               CHECK (status IN ('prospecting', 'initial-meeting', 'due-diligence', 'term-sheet', 'closed', 'passed')),
+  -- Stages are managed dynamically via the pipeline_stages table
+  -- (see scripts/pipeline-stages-migration.sql); status must match a stage name
+  status     TEXT NOT NULL DEFAULT 'Prospecting',
   notes      TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
