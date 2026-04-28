@@ -13,6 +13,16 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // mailparser, msgreader, and isomorphic-dompurify (which pulls in jsdom)
+  // depend on native-Node modules that can't be bundled. Without this list
+  // Next.js bundles them and the email-attachment server action throws at
+  // runtime ("Uploading…" stuck on the client).
+  serverExternalPackages: [
+    'mailparser',
+    '@kenjiuno/msgreader',
+    'isomorphic-dompurify',
+    'jsdom',
+  ],
   images: {
     remotePatterns: [
       {

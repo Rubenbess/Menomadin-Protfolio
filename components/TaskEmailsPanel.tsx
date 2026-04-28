@@ -43,26 +43,37 @@ export default function TaskEmailsPanel({ taskId, currentUserId }: Props) {
     const list = Array.from(files)
     if (list.length === 0) return
     setUploading(true)
-    for (const file of list) {
-      const lower = file.name.toLowerCase()
-      if (!lower.endsWith('.eml') && !lower.endsWith('.msg')) {
-        showError(`${file.name}: only .eml and .msg are supported`)
-        continue
+    try {
+      for (const file of list) {
+        const lower = file.name.toLowerCase()
+        if (!lower.endsWith('.eml') && !lower.endsWith('.msg')) {
+          showError(`${file.name}: only .eml and .msg are supported`)
+          continue
+        }
+        const fd = new FormData()
+        fd.append('taskId', taskId)
+        fd.append('file', file)
+        fd.append('isPrivate', uploadPrivate ? 'true' : 'false')
+        try {
+          const r = await attachEmailFileToTask(fd)
+          if (r.error) {
+            showError(`${file.name}: ${r.error}`)
+            continue
+          }
+          success(`Attached "${r.data?.subject || file.name}"`)
+        } catch (e) {
+          // Server action threw (e.g. bundle error). Surface it instead of
+          // leaving the UI stuck on "Uploading…".
+          const msg = e instanceof Error ? e.message : 'Upload failed'
+          console.error('[TaskEmailsPanel] upload threw', e)
+          showError(`${file.name}: ${msg}`)
+        }
       }
-      const fd = new FormData()
-      fd.append('taskId', taskId)
-      fd.append('file', file)
-      fd.append('isPrivate', uploadPrivate ? 'true' : 'false')
-      const r = await attachEmailFileToTask(fd)
-      if (r.error) {
-        showError(`${file.name}: ${r.error}`)
-        continue
-      }
-      success(`Attached "${r.data?.subject || file.name}"`)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      await reload()
     }
-    setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    await reload()
   }
 
   function handleDragOver(e: React.DragEvent) {

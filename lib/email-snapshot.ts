@@ -5,7 +5,27 @@
 
 import DOMPurify from 'isomorphic-dompurify'
 import { simpleParser, type AddressObject } from 'mailparser'
-import MsgReader from '@kenjiuno/msgreader'
+import MsgReaderDefault from '@kenjiuno/msgreader'
+
+// @kenjiuno/msgreader publishes the class on `default` AND nested in
+// `.default.default` depending on how the bundler resolves CJS↔ESM. Walk
+// the chain until we find the actual constructor.
+type MsgReaderCtor = new (buf: ArrayBuffer) => { getFileData: () => unknown }
+function resolveMsgReader(): MsgReaderCtor {
+  let candidate: unknown = MsgReaderDefault
+  for (let i = 0; i < 3; i++) {
+    if (typeof candidate === 'function') return candidate as MsgReaderCtor
+    if (candidate && typeof candidate === 'object' && 'default' in candidate) {
+      candidate = (candidate as { default: unknown }).default
+      continue
+    }
+    break
+  }
+  throw new Error(
+    'Could not resolve @kenjiuno/msgreader constructor — got ' +
+      typeof candidate
+  )
+}
 
 export interface EmailSnapshot {
   subject: string | null
@@ -133,7 +153,8 @@ export function snapshotFromMsg(buffer: Buffer): EmailSnapshot {
     buffer.byteOffset,
     buffer.byteOffset + buffer.byteLength
   ) as ArrayBuffer
-  const reader = new MsgReader(ab)
+  const Ctor = resolveMsgReader()
+  const reader = new Ctor(ab)
   const data = reader.getFileData() as MsgFileData
 
   const html = decodeMsgHtml(data.bodyHtml)
