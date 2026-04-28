@@ -291,7 +291,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         return (
           <div className="px-8 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-l-emerald-500">
+              <div className="bg-emerald-50/40 dark:bg-emerald-900/10 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                   <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">{fundLabel('impact')}</span>
@@ -312,7 +312,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 border-l-4 border-l-blue-500">
+              <div className="bg-blue-50/40 dark:bg-blue-900/10 rounded-xl border border-blue-200/60 dark:border-blue-800/40 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                   <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">{fundLabel('venture')}</span>

@@ -122,14 +122,14 @@ function NavLink({
         group flex items-center rounded-lg text-sm font-medium transition-all duration-150
         ${collapsed ? 'px-0 py-2 justify-center w-full' : 'gap-3 px-3 py-2.5'}
         ${active
-          ? 'bg-primary-500/15 text-blue-200'
-          : 'text-neutral-500 hover:text-slate-200 hover:bg-white/5'}
+          ? 'bg-primary-500/15 text-primary-300'
+          : 'text-neutral-500 hover:text-neutral-200 hover:bg-white/5'}
       `}
     >
       <Icon
         size={16}
         className={`flex-shrink-0 transition-colors ${
-          active ? 'text-primary-300' : 'text-neutral-600 group-hover:text-slate-300'
+          active ? 'text-primary-300' : 'text-neutral-600 group-hover:text-neutral-300'
         }`}
       />
       {!collapsed && (
@@ -259,7 +259,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <button
               onClick={onToggle}
               title="Collapse sidebar"
-              className="w-6 h-6 rounded-md flex items-center justify-center text-neutral-600 hover:text-slate-300 hover:bg-white/5 transition-all flex-shrink-0"
+              className="w-6 h-6 rounded-md flex items-center justify-center text-neutral-600 hover:text-neutral-300 hover:bg-white/5 transition-all flex-shrink-0"
             >
               <ChevronLeft size={13} />
             </button>
@@ -305,7 +305,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           title={collapsed ? 'Sign out' : undefined}
           className={`
             w-full flex items-center rounded-lg text-sm font-medium
-            text-neutral-600 hover:text-slate-200 hover:bg-white/5 transition-all
+            text-neutral-600 hover:text-neutral-200 hover:bg-white/5 transition-all
             ${collapsed ? 'py-2 justify-center' : 'gap-3 px-3 py-2.5'}
           `}
         >

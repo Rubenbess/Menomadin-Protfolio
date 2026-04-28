@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -11,6 +11,20 @@ interface ModalProps {
 }
 
 export default function Modal({ open, onClose, title, children }: ModalProps) {
+  const [visible, setVisible] = useState(open)
+  const [closing, setClosing] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      setClosing(false)
+    } else if (visible) {
+      setClosing(true)
+      const t = setTimeout(() => setVisible(false), 200)
+      return () => clearTimeout(t)
+    }
+  }, [open])
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -19,17 +33,17 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
-  if (!open) return null
+  if (!visible) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${closing ? 'animate-fade-out' : 'animate-fade-in'}`}>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-neutral-900/50"
         onClick={onClose}
       />
       {/* Panel */}
-      <div className="relative bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.08] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
+      <div className="relative bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.08] w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
           <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
           <button

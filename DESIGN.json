@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-28T00:00:00Z",
+  "title": "Design System: Menomadin",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Institutional Steel",
+        "canonical": "oklch(56% 0.07 234)",
+        "tonalRamp": ["#0d1a26", "#1a2b44", "#253d5e", "#2a405d", "#3a5576", "#4a6a8f", "#5a7fa8", "#87a3c2", "#c3d1e0", "#f0f4f9"]
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "Institutional Steel Active",
+        "canonical": "oklch(48% 0.07 234)",
+        "tonalRamp": ["#0a1520", "#17253b", "#1e3050", "#2a405d", "#3a5576", "#4a6a8f", "#5a7fa8", "#7a99be", "#aabdce", "#dde8f0"]
+      },
+      "primary-deep": {
+        "role": "primary",
+        "displayName": "Deep Portfolio Navy",
+        "canonical": "oklch(24% 0.06 234)",
+        "tonalRamp": ["#060d18", "#0d1a2e", "#101f36", "#1a2b44", "#1e3459", "#25406e", "#2e5080", "#4a6a8f", "#87a3c2", "#e1e8f0"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Canvas White",
+        "canonical": "oklch(98% 0.003 234)",
+        "tonalRamp": ["#1a1e22", "#2a2f35", "#384854", "#545e6e", "#707a88", "#8c96a2", "#c4ccd4", "#dce2e8", "#f4f6f8", "#fafbfc"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Surface Lift",
+        "canonical": "oklch(96% 0.004 234)",
+        "tonalRamp": ["#181c20", "#282d33", "#363f48", "#505a65", "#6a7480", "#8a95a0", "#bec8d2", "#d8e0e8", "#eef2f6", "#f4f6f8"]
+      },
+      "neutral-border": {
+        "role": "neutral",
+        "displayName": "Structural Border",
+        "canonical": "oklch(91% 0.006 234)",
+        "tonalRamp": ["#14181c", "#22282e", "#303840", "#48525c", "#6a7480", "#8a95a0", "#b8c4ce", "#d4dce4", "#e8ecf0", "#f4f7fa"]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "oklch(68% 0.025 234)",
+        "tonalRamp": ["#111519", "#1e2429", "#2a3138", "#3c454e", "#545e6e", "#6a7480", "#8c96a2", "#a8b2bc", "#c4ccd4", "#e8ecf0"]
+      },
+      "neutral-text": {
+        "role": "neutral",
+        "displayName": "Portfolio Charcoal",
+        "canonical": "oklch(37% 0.022 234)",
+        "tonalRamp": ["#0d1115", "#191f25", "#252d35", "#384854", "#4a5a68", "#606e7e", "#8090a0", "#a0aebb", "#c0ccd6", "#e4eaee"]
+      },
+      "status-active": {
+        "role": "status",
+        "displayName": "Portfolio Active",
+        "canonical": "oklch(44% 0.12 155)",
+        "tonalRamp": ["#052e14", "#083d1c", "#0d5c2b", "#14713a", "#15803d", "#16a34a", "#4ade80", "#86efac", "#bbf7d0", "#f0fdf4"]
+      },
+      "status-watchlist": {
+        "role": "status",
+        "displayName": "Watchlist Amber",
+        "canonical": "oklch(52% 0.14 60)",
+        "tonalRamp": ["#2d1a00", "#4a2c00", "#78350f", "#92400e", "#b45309", "#d97706", "#fbbf24", "#fde68a", "#fef3c7", "#fffbeb"]
+      },
+      "status-critical": {
+        "role": "status",
+        "displayName": "Critical Red",
+        "canonical": "oklch(58% 0.2 25)",
+        "tonalRamp": ["#2a0a0a", "#450c0c", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fee2e2"]
+      },
+      "status-exited": {
+        "role": "status",
+        "displayName": "Exited Blue",
+        "canonical": "oklch(40% 0.15 258)",
+        "tonalRamp": ["#0a1432", "#0f1e4d", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#dbeafe"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page-level section titles and company name anchors. Two per page maximum." },
+      "headline": { "displayName": "Headline", "purpose": "Section headers within a dashboard page — 'Portfolio Overview', 'Pipeline by Stage'." },
+      "title": { "displayName": "Title", "purpose": "Card headings, modal titles, sidebar section labels." },
+      "body": { "displayName": "Body", "purpose": "Table cells, form content, running descriptions. Cap at 70ch in reading contexts." },
+      "label": { "displayName": "Label", "purpose": "Section labels, column headers, metadata tags. Always uppercase, wide-tracked." }
+    },
+    "shadows": [
+      { "name": "refined", "value": "0 2px 8px rgba(0, 0, 0, 0.08)", "purpose": "Baseline card elevation at rest. Separates content surface from page canvas." },
+      { "name": "card", "value": "0 4px 16px rgba(0, 0, 0, 0.12)", "purpose": "Interactive cards in hover state; selected items one step above canvas rest." },
+      { "name": "elevated", "value": "0 12px 32px rgba(0, 0, 0, 0.16)", "purpose": "Floating panels, dropdowns, date pickers — surfaces that have left the document flow." },
+      { "name": "hover", "value": "0 16px 48px rgba(0, 0, 0, 0.20)", "purpose": "Dragged kanban cards; modals at peak elevation. Interaction-in-progress tier." }
+    ],
+    "motion": [
+      { "name": "fade-in", "value": "fadeIn 0.3s ease-out", "purpose": "Page section entrance. Applied once on mount; never loops." },
+      { "name": "slide-up", "value": "slideUp 0.4s ease-out", "purpose": "Card and modal entrance. translateY(12px) to 0 with opacity 0 to 1." },
+      { "name": "transition-colors", "value": "color 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out", "purpose": "All interactive state changes (hover, focus, active)." },
+      { "name": "transition-shadow", "value": "box-shadow 200ms ease-out", "purpose": "Card hover shadow elevation." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action trigger. Used for create, save, and confirm actions.",
+      "html": "<button class=\"ds-btn-primary\">Add Company</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background-color: #4a6a8f; color: #ffffff; padding: 10px 16px; font-size: 0.875rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.12); transition: background-color 200ms ease-out, box-shadow 200ms ease-out; } .ds-btn-primary:hover { background-color: #1a2b44; box-shadow: 0 12px 32px rgba(0,0,0,0.16); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(90, 127, 168, 0.4); } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Non-destructive secondary actions alongside a primary button.",
+      "html": "<button class=\"ds-btn-secondary\">Export CSV</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background-color: #f4f6f8; color: #384854; padding: 10px 16px; font-size: 0.875rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 8px; border: 1px solid #dce2e8; cursor: pointer; transition: background-color 200ms ease-out, border-color 200ms ease-out; } .ds-btn-secondary:hover { background-color: #e8ecf0; border-color: #c4ccd4; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(90, 127, 168, 0.4); } .ds-btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-hierarchy tertiary actions. Used in table rows, card headers, and toolbars.",
+      "html": "<button class=\"ds-btn-ghost\">View Details</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background-color: transparent; color: #5a7fa8; padding: 10px 16px; font-size: 0.875rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 8px; border: 1px solid transparent; cursor: pointer; transition: background-color 200ms ease-out, color 200ms ease-out; } .ds-btn-ghost:hover { background-color: rgba(90, 127, 168, 0.08); color: #4a6a8f; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(90, 127, 168, 0.4); }"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Primary content container. Groups related information with a clear boundary.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Portfolio Summary</h3><button class=\"ds-btn-ghost\" style=\"padding: 6px 12px; font-size: 0.75rem;\">View All</button></div><div class=\"ds-card-body\"><p style=\"color: #707a88; font-size: 0.875rem;\">12 active companies across 3 fund strategies</p></div></div>",
+      "css": ".ds-card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: box-shadow 200ms ease-out; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; } .ds-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-color: #dce2e8; } .ds-card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e8ecf0; } .ds-card-title { font-size: 0.875rem; font-weight: 600; color: #384854; margin: 0; } .ds-card-body { padding: 24px; }"
+    },
+    {
+      "name": "Metric Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Single KPI display. Use sparingly — only for the 3-4 most critical top-line numbers.",
+      "html": "<div class=\"ds-metric-card ds-metric-card--primary\"><p class=\"ds-metric-label\">Portfolio ARR</p><p class=\"ds-metric-value\">$42.3M</p><p class=\"ds-metric-sub\">+18% YoY</p></div>",
+      "css": ".ds-metric-card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: box-shadow 200ms ease-out; } .ds-metric-card--primary { border-top: 2px solid #5a7fa8; } .ds-metric-card--active { border-top: 2px solid #15803d; } .ds-metric-card--watchlist { border-top: 2px solid #d97706; } .ds-metric-label { font-size: 0.75rem; font-weight: 600; color: #8c96a2; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; } .ds-metric-value { font-size: 1.875rem; font-weight: 700; color: #384854; margin: 12px 0 0; letter-spacing: -0.02em; } .ds-metric-sub { font-size: 0.875rem; color: #8c96a2; margin: 8px 0 0; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Portfolio company status indicator. Always semantic — color encodes meaning, not aesthetics.",
+      "html": "<span class=\"ds-badge ds-badge--active\">Active</span><span class=\"ds-badge ds-badge--watchlist\">Watchlist</span><span class=\"ds-badge ds-badge--exited\">Exited</span><span class=\"ds-badge ds-badge--written-off\">Written Off</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-transform: capitalize; } .ds-badge--active { background-color: #f0fdf4; color: #15803d; box-shadow: inset 0 0 0 1px #bbf7d0; } .ds-badge--watchlist { background-color: #fffbeb; color: #b45309; box-shadow: inset 0 0 0 1px #fde68a; } .ds-badge--exited { background-color: #eff6ff; color: #1d4ed8; box-shadow: inset 0 0 0 1px #bfdbfe; } .ds-badge--written-off { background-color: #fff1f2; color: #be123c; box-shadow: inset 0 0 0 1px #fecdd3; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard form text field. Used for all single-line text inputs in forms and search.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-input-demo\">Company Name</label><input class=\"ds-field-input\" id=\"ds-input-demo\" type=\"text\" placeholder=\"e.g. Acme Technologies\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; } .ds-field-label { font-size: 0.875rem; font-weight: 600; color: #545e6e; } .ds-field-input { width: 100%; padding: 12px 16px; font-size: 1rem; font-family: inherit; background-color: #f4f6f8; border: 1px solid #dce2e8; border-radius: 8px; color: #384854; transition: border-color 200ms ease-out, box-shadow 200ms ease-out; outline: none; box-sizing: border-box; } .ds-field-input::placeholder { color: #8c96a2; } .ds-field-input:focus { border-color: #5a7fa8; box-shadow: 0 0 0 3px rgba(90, 127, 168, 0.2); background-color: #ffffff; }"
+    },
+    {
+      "name": "Section Label",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The wayfinding voice throughout the app. Used as section headers, table column labels, and metadata titles.",
+      "html": "<span class=\"ds-section-label\">Portfolio Companies</span>",
+      "css": ".ds-section-label { display: block; font-size: 0.75rem; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.08em; color: #8c96a2; margin-bottom: 12px; }"
+    },
+    {
+      "name": "Health Score",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Portfolio company health indicator. 0-100 numeric score with semantic color encoding.",
+      "html": "<div class=\"ds-health-score ds-health-score--high\"><span class=\"ds-health-value\">84</span><span class=\"ds-health-label\">Health Score</span></div>",
+      "css": ".ds-health-score { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; } .ds-health-value { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1; } .ds-health-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #8c96a2; } .ds-health-score--high .ds-health-value { color: #15803d; } .ds-health-score--medium .ds-health-value { color: #b45309; } .ds-health-score--low .ds-health-value { color: #dc2626; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Portfolio Room",
+    "overview": "This is the private, well-ordered room where serious decisions happen. The aesthetic is one of quiet authority: every element has a reason to be there, nothing decorates for its own sake, and the whole system projects the confidence of a fund that has done its homework. Think a well-organized investment office — precise, structured, unhurried.\n\nThe platform resists the impulse toward visual novelty. There are no gradient accents, no hero-metric vanity cards, no decorative chart animations. What replaces them is disciplined typographic hierarchy, calibrated spacing, and a color system that uses restraint as its signal of sophistication.\n\nDark mode is a first-class citizen. The dark surface carries the same structure and precision as the light surface — same contrast ratios, same spatial logic.",
+    "keyCharacteristics": [
+      "Serif display type (Georgia) for page-level headings; clean system sans for all operational text",
+      "Steel-blue primary acting as a precise signal, never a flood",
+      "Borders and backgrounds create hierarchy before shadows are needed",
+      "Four shadow tiers reserved for genuine structural depth",
+      "Status colors communicate facts, not aesthetics",
+      "Section labels in uppercase, wide-tracked, muted — consistent wayfinding register throughout"
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "The primary steel-blue appears on ≤15% of any given screen surface. Its presence marks interaction or selection. If everything is blue, nothing is.", "section": "colors" },
+      { "name": "The Status-Only Rule", "body": "Emerald, amber, and red are reserved for status indicators. They do not appear as decorative accents, chart colors, or background fills.", "section": "colors" },
+      { "name": "The Serif Anchor Rule", "body": "Georgia appears only at display and headline level. Never in body text, table cells, form fields, or badge labels.", "section": "typography" },
+      { "name": "The Label Uniformity Rule", "body": "Section labels are always 0.75rem, semibold, uppercase, tracked at 0.08em, in neutral-muted. Deviating from this pattern — even once — breaks the rhythm.", "section": "typography" },
+      { "name": "The Structural-Only Rule", "body": "Shadows mark depth, not importance. Nested shadows are prohibited.", "section": "elevation" },
+      { "name": "The Flat-Text Rule", "body": "Text, badges, icons, and labels cast no shadows. text-shadow is not part of this system.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Georgia exclusively for display and headline level (text-3xl and above). System sans handles everything below.",
+      "Do use the section-title pattern (uppercase, 0.75rem, semibold, wide-tracked, neutral-muted) consistently for all section labels.",
+      "Do use status colors (emerald, amber, red, blue) only when communicating portfolio status.",
+      "Do keep the steel-blue primary accent below 15% of any screen surface.",
+      "Do use the four shadow tiers with structural intent.",
+      "Do use 1px borders (all sides) on cards.",
+      "Do size buttons consistently: px-4 py-2.5 text-sm (md) or px-3 py-2 text-xs (sm).",
+      "Do left-align text columns and right-align numeric columns in data tables.",
+      "Do respect prefers-reduced-motion for all animations."
+    ],
+    "donts": [
+      "Don't use purple/teal gradients, gradient text, or gradient accent fills anywhere in the platform.",
+      "Don't build hero-metric cards: big number, small label, gradient top accent.",
+      "Don't use identical icon-heading-text card grids.",
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe.",
+      "Don't use text-shadow or nested shadows.",
+      "Don't add decorative chart animations that loop or re-animate on scroll.",
+      "Don't apply shadow-elevated or shadow-hover to cards at rest.",
+      "Don't put rounded-full pills with pastel fills, playful illustrations, or consumer-app micro-copy in product screens.",
+      "Don't use Georgia below headline size.",
+      "Don't introduce a new color outside the defined palette without assigning it a semantic role."
+    ]
+  }
+}
