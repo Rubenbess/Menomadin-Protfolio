@@ -47,6 +47,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   const { strategy } = await searchParams
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   let companiesQuery = supabase.from('companies').select('*').order('name')
   if (strategy) companiesQuery = companiesQuery.eq('strategy', strategy)
 
@@ -58,6 +60,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     { data: reserves },
     { data: safes },
     { data: legalEntities },
+    { data: currentMember },
   ] = await Promise.all([
     companiesQuery,
     supabase.from('rounds').select('*'),
@@ -66,7 +69,10 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from('reserves').select('*'),
     supabase.from('safes').select('*').order('date'),
     supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
+    supabase.from('team_members').select('name').eq('id', user?.id ?? '').maybeSingle(),
   ])
+
+  const firstName = (currentMember as { name: string } | null)?.name?.split(' ')[0] ?? 'there'
 
   const companiesList     = (companies     ?? []) as Company[]
   const roundsList        = (rounds        ?? []) as Round[]
@@ -184,7 +190,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         <div className="flex items-start justify-between gap-6 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">
-              Welcome back 👋
+              Welcome back, {firstName} 👋
             </h1>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{strategyLabel}</p>
           </div>
