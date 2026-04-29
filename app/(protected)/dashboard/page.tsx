@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Badge from '@/components/ui/Badge'
 import DashboardCharts from '@/components/DashboardCharts'
-import { TeamTasksDashboard } from '@/components/TeamTasksDashboard'
 import DashboardMetricCard from '@/components/ui/DashboardMetricCard'
 import ExportPortfolioCSV from '@/components/ExportPortfolioCSV'
 import {
@@ -18,7 +17,7 @@ import {
   fmtPct,
   type CashFlow,
 } from '@/lib/calculations'
-import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe, TaskWithRelations, TeamMember, LegalEntity } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Reserve, CompanyWithMetrics, Safe, LegalEntity } from '@/lib/types'
 import { DollarSign, TrendingUp, BarChart2, Activity, Percent, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -48,9 +47,6 @@ export default async function DashboardPage({ searchParams }: Props) {
   const { strategy } = await searchParams
   const supabase = await createServerSupabaseClient()
 
-  // Fetch current user for personalised greeting
-  const { data: { user } } = await supabase.auth.getUser()
-
   let companiesQuery = supabase.from('companies').select('*').order('name')
   if (strategy) companiesQuery = companiesQuery.eq('strategy', strategy)
 
@@ -61,9 +57,6 @@ export default async function DashboardPage({ searchParams }: Props) {
     { data: capTable },
     { data: reserves },
     { data: safes },
-    { data: tasks },
-    { data: teamMembers },
-    { data: currentMember },
     { data: legalEntities },
   ] = await Promise.all([
     companiesQuery,
@@ -72,37 +65,16 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from('cap_table').select('*'),
     supabase.from('reserves').select('*'),
     supabase.from('safes').select('*').order('date'),
-    supabase.from('tasks').select(`
-      *,
-      assignees:task_assignees(
-        id, task_id, assigned_to, assigned_at, assigned_by
-      )
-    `).order('created_at', { ascending: false }),
-    supabase.from('team_members').select('*').order('name', { ascending: true }),
-    supabase.from('team_members').select('name').eq('id', user?.id ?? '').maybeSingle(),
     supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
   ])
 
-  const firstName = (currentMember as { name: string } | null)?.name?.split(' ')[0] ?? 'there'
-
-  const companiesList   = (companies   ?? []) as Company[]
-  const roundsList      = (rounds      ?? []) as Round[]
-  const investmentsList = (investments ?? []) as Investment[]
-  const capTableList    = (capTable    ?? []) as CapTableEntry[]
-  const reservesList    = (reserves    ?? []) as Reserve[]
-  const safesList       = (safes       ?? []) as Safe[]
-  const teamMembersList   = (teamMembers   ?? []) as TeamMember[]
+  const companiesList     = (companies     ?? []) as Company[]
+  const roundsList        = (rounds        ?? []) as Round[]
+  const investmentsList   = (investments   ?? []) as Investment[]
+  const capTableList      = (capTable      ?? []) as CapTableEntry[]
+  const reservesList      = (reserves      ?? []) as Reserve[]
+  const safesList         = (safes         ?? []) as Safe[]
   const legalEntitiesList = (legalEntities ?? []) as LegalEntity[]
-
-  // Hydrate assignee team_member info
-  const memberMap = new Map(teamMembersList.map(m => [m.id, m]))
-  const tasksList = ((tasks ?? []).map(t => ({
-    ...t,
-    assignees: (t.assignees || []).map((a: any) => ({
-      ...a,
-      team_member: memberMap.get(a.assigned_to) ?? null,
-    })),
-  }))) as TaskWithRelations[]
 
   // Pre-group sibling tables by company_id once (O(n)) so the per-company loop
   // doesn't re-scan each list (was O(n²) — see daily health check report).
@@ -212,7 +184,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         <div className="flex items-start justify-between gap-6 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">
-              Welcome back, {firstName} 👋
+              Welcome back 👋
             </h1>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{strategyLabel}</p>
           </div>
@@ -367,19 +339,6 @@ export default async function DashboardPage({ searchParams }: Props) {
               safes={safesList}
             />
           )}
-        </div>
-      </div>
-
-      {/* ── Team Tasks ───────────────────────────────────────────────────── */}
-      <div className="px-8 mb-6">
-        <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Team Tasks</h2>
-            <Link href="/tasks" className="text-xs font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-              View all →
-            </Link>
-          </div>
-          <TeamTasksDashboard tasks={tasksList} teamMembers={teamMembersList} />
         </div>
       </div>
 
