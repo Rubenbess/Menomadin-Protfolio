@@ -163,7 +163,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
       fundraising_ask: num('fundraising_ask'),
       lead_partner:    str('lead_partner'),
       source:          str('source'),
-      internal_score:  compositeScore || null,
+      internal_score:  compositeScore ? parseFloat(compositeScore.toFixed(1)) : null,
       score_team:      scores.score_team     || null,
       score_market:    scores.score_market   || null,
       score_traction:  scores.score_traction || null,
