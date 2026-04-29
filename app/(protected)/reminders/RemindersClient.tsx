@@ -293,28 +293,48 @@ export default function RemindersClient({
   )
 
   async function handleToggleReminder(id: string, current: boolean) {
+    const prevReminders = reminders
     setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: !current } : r))
-    await toggleReminder(id, !current)
+    const result = await toggleReminder(id, !current)
+    if (result?.error) {
+      setReminders(prevReminders)
+      return
+    }
     router.refresh()
   }
 
   async function handleDeleteReminder(id: string) {
     if (!confirm('Delete this reminder?')) return
+    const prevReminders = reminders
     setReminders(prev => prev.filter(r => r.id !== id))
-    await deleteReminder(id)
+    const result = await deleteReminder(id)
+    if (result?.error) {
+      setReminders(prevReminders)
+      return
+    }
     router.refresh()
   }
 
   async function handleCompleteTask(id: string) {
+    const prevTasks = tasks
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'Done' as const } : t))
-    await completeTask(id)
+    const result = await completeTask(id)
+    if (result?.error) {
+      setTasks(prevTasks)
+      return
+    }
     router.refresh()
   }
 
   async function handleDeleteTask(id: string) {
     if (!confirm('Delete this task?')) return
+    const prevTasks = tasks
     setTasks(prev => prev.filter(t => t.id !== id))
-    await deleteTask(id)
+    const result = await deleteTask(id)
+    if (result?.error) {
+      setTasks(prevTasks)
+      return
+    }
     router.refresh()
   }
 

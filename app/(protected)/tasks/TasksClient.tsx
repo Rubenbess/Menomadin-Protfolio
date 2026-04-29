@@ -179,8 +179,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   const handleTaskCreated = (newTask: TaskWithRelations) => {
     setShowCreateForm(false)
     setTasks([newTask, ...tasks])
-    // Refresh to ensure server state is synced
-    setTimeout(() => router.refresh(), 100)
+    router.refresh()
   }
 
   const handleTaskUpdated = (updatedTask: TaskWithRelations) => {

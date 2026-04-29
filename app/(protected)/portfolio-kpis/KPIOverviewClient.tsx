@@ -293,16 +293,32 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
   const [onlyWithData, setOnlyWithData] = useState(false)
   const [view, setView]             = useState<'table' | 'chart'>('table')
 
-  const filtered = companies.filter(c => {
-    if (strategy !== 'all' && c.strategy !== strategy) return false
-    if (onlyWithData && !latestKPIs[c.id]) return false
-    return true
-  })
+  const filtered = useMemo(
+    () =>
+      companies.filter(c => {
+        if (strategy !== 'all' && c.strategy !== strategy) return false
+        if (onlyWithData && !latestKPIs[c.id]) return false
+        return true
+      }),
+    [companies, latestKPIs, strategy, onlyWithData]
+  )
 
-  const withData = filtered.filter(c => latestKPIs[c.id]).length
+  const withData = useMemo(
+    () => filtered.filter(c => latestKPIs[c.id]).length,
+    [filtered, latestKPIs]
+  )
 
-  // Portfolio-wide ARR (latest per company summed)
-  const totalArr = Object.values(latestKPIs).reduce((s, k) => s + (k.arr ?? 0), 0)
+  // Portfolio-wide totals (latest per company summed). Computed once per
+  // latestKPIs change instead of three times per render in the tfoot.
+  const portfolioTotals = useMemo(() => {
+    const vals = Object.values(latestKPIs)
+    return {
+      arr:       vals.reduce((s, k) => s + (k.arr ?? 0), 0),
+      revenue:   vals.reduce((s, k) => s + (k.revenue ?? 0), 0),
+      burn_rate: vals.reduce((s, k) => s + (k.burn_rate ?? 0), 0),
+    }
+  }, [latestKPIs])
+  const totalArr = portfolioTotals.arr
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -468,14 +484,14 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
                       Portfolio Total
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-neutral-900">
-                      {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.arr ?? 0), 0)) ?? '—'}
+                      {fmt$(portfolioTotals.arr) ?? '—'}
                     </td>
                     <td />
                     <td className="px-4 py-3 text-right font-bold text-neutral-900">
-                      {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.revenue ?? 0), 0)) ?? '—'}
+                      {fmt$(portfolioTotals.revenue) ?? '—'}
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-neutral-900">
-                      {fmt$(Object.values(latestKPIs).reduce((s, k) => s + (k.burn_rate ?? 0), 0)) ?? '—'}
+                      {fmt$(portfolioTotals.burn_rate) ?? '—'}
                     </td>
                     <td colSpan={4} />
                   </tr>

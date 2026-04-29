@@ -9,11 +9,11 @@ const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-
 const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
 
 interface Props {
-  companyId: string
+  token: string
   companyName: string
 }
 
-export default function FounderUpdateForm({ companyId, companyName }: Props) {
+export default function FounderUpdateForm({ token, companyName }: Props) {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
@@ -41,7 +41,7 @@ export default function FounderUpdateForm({ companyId, companyName }: Props) {
     const num = (k: string) => { const v = fd.get(k) as string; return v ? Number(v) : null }
 
     const result = await submitFounderUpdate({
-      company_id: companyId,
+      token,
       date: (fd.get('date') as string) || new Date().toISOString().split('T')[0],
       highlights: str('highlights'),
       challenges: str('challenges'),

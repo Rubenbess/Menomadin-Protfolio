@@ -90,7 +90,6 @@ export async function POST(req: NextRequest) {
       const { error } = await supabase.from('pipeline').insert({
         name: card.name,
         sector,
-        stage: '',
         status,
         notes: card.desc || null,
       })

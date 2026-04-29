@@ -8,11 +8,7 @@ import {
   validateContactRow,
   rowToCompanyData,
   rowToContactData,
-  getCompanyHeaders,
-  getContactHeaders,
   ImportResult,
-  CompanyImportData,
-  ContactImportData,
 } from '@/lib/bulk-import-utils'
 
 export async function importCompanies(
@@ -47,7 +43,6 @@ export async function importCompanies(
       }
     }
 
-    // Parse CSV
     const rows = await parseCSV(file)
     if (rows.length === 0) {
       return {
@@ -60,9 +55,7 @@ export async function importCompanies(
       }
     }
 
-    // Extract headers
     const headers = rows[0]
-    const expectedHeaders = getCompanyHeaders()
     const dataRows = rows.slice(1)
 
     const result: ImportResult = {
@@ -74,13 +67,22 @@ export async function importCompanies(
       warnings: [],
     }
 
-    // Process each row
+    // Pre-fetch existing company names once so the per-row duplicate check is
+    // O(1) instead of one Supabase round-trip per row (was an N+1 hot path).
+    const { data: existingCompanies } = await supabase
+      .from('companies')
+      .select('name')
+    const existingNames = new Set(
+      (existingCompanies ?? []).map((c: { name: string }) => c.name.toLowerCase())
+    )
+
+    const importedNames: string[] = []
+
     for (let i = 0; i < dataRows.length; i++) {
       const rowData = Object.fromEntries(
         headers.map((h, idx) => [h, dataRows[i][idx] || ''])
       ) as Record<string, string>
 
-      // Validate
       const validation = validateCompanyRow(rowData, i + 2)
       if (!validation.valid) {
         result.failed++
@@ -90,26 +92,23 @@ export async function importCompanies(
 
       result.warnings.push(...validation.warnings)
 
-      // Check for duplicates
-      const { data: existing } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('name', rowData['name'])
-        .single()
-
-      if (existing) {
+      const name = rowData['name']
+      if (existingNames.has(name.toLowerCase())) {
         result.warnings.push({
           row: i + 2,
           field: 'name',
-          message: `Company "${rowData['name']}" already exists (skipped)`,
+          message: `Company "${name}" already exists (skipped)`,
         })
         continue
       }
 
-      // Convert to company data
       const companyData = rowToCompanyData(rowData)
 
-      // Insert
+      // Only persist columns that actually exist on the `companies` table.
+      // The previous implementation also wrote totalInvested/currentValue/moic/
+      // ownershipPct, which are computed in the UI (CompanyWithMetrics) — they
+      // are not real columns, so every insert was silently failing on the
+      // Postgres "column does not exist" error and the import looked broken.
       const { error } = await supabase.from('companies').insert({
         name: companyData.name,
         sector: companyData.sector || null,
@@ -117,10 +116,6 @@ export async function importCompanies(
         hq: companyData.hq || null,
         status: companyData.status || 'active',
         strategy: companyData.strategy || null,
-        totalInvested: companyData.totalInvested || 0,
-        currentValue: companyData.currentValue || 0,
-        moic: companyData.moic || 1,
-        ownershipPct: companyData.ownershipPct || 0,
       })
 
       if (error) {
@@ -132,16 +127,22 @@ export async function importCompanies(
         })
       } else {
         result.imported++
+        existingNames.add(name.toLowerCase())
+        importedNames.push(name)
+      }
+    }
 
-        // Log activity
-        await logActivity({
+    // Log activities once at the end rather than per-row (was N+1).
+    await Promise.all(
+      importedNames.map(name =>
+        logActivity({
           entityType: 'company',
-          entityId: rowData['name'],
+          entityId: name,
           action: 'created',
           metadata: { importedFrom: 'bulk_import' },
         })
-      }
-    }
+      )
+    )
 
     return result
   } catch (error) {
@@ -194,7 +195,6 @@ export async function importContacts(
       }
     }
 
-    // Parse CSV
     const rows = await parseCSV(file)
     if (rows.length === 0) {
       return {
@@ -207,9 +207,7 @@ export async function importContacts(
       }
     }
 
-    // Extract headers
     const headers = rows[0]
-    const expectedHeaders = getContactHeaders()
     const dataRows = rows.slice(1)
 
     const result: ImportResult = {
@@ -221,13 +219,30 @@ export async function importContacts(
       warnings: [],
     }
 
-    // Process each row
+    // Pre-fetch lookup sets to remove the per-row N+1 round-trips.
+    const [{ data: existingContacts }, { data: companiesByName }] = await Promise.all([
+      supabase.from('contacts').select('email'),
+      supabase.from('companies').select('id, name'),
+    ])
+    const existingEmails = new Set(
+      (existingContacts ?? [])
+        .map((c: { email: string | null }) => c.email?.toLowerCase())
+        .filter(Boolean) as string[]
+    )
+    const companyIdByName = new Map<string, string>(
+      (companiesByName ?? []).map((c: { id: string; name: string }) => [
+        c.name.toLowerCase(),
+        c.id,
+      ])
+    )
+
+    const importedNames: string[] = []
+
     for (let i = 0; i < dataRows.length; i++) {
       const rowData = Object.fromEntries(
         headers.map((h, idx) => [h, dataRows[i][idx] || ''])
       ) as Record<string, string>
 
-      // Validate
       const validation = validateContactRow(rowData, i + 2)
       if (!validation.valid) {
         result.failed++
@@ -237,14 +252,8 @@ export async function importContacts(
 
       result.warnings.push(...validation.warnings)
 
-      // Check for duplicates
-      const { data: existing } = await supabase
-        .from('contacts')
-        .select('id')
-        .eq('email', rowData['email'])
-        .single()
-
-      if (existing && rowData['email']) {
+      const email = rowData['email']?.toLowerCase()
+      if (email && existingEmails.has(email)) {
         result.warnings.push({
           row: i + 2,
           field: 'email',
@@ -253,21 +262,12 @@ export async function importContacts(
         continue
       }
 
-      // Get company ID if needed
-      let companyId: string | null = null
-      if (rowData['company_name']) {
-        const { data: company } = await supabase
-          .from('companies')
-          .select('id')
-          .eq('name', rowData['company_name'])
-          .single()
-        companyId = company?.id || null
-      }
+      const companyId = rowData['company_name']
+        ? companyIdByName.get(rowData['company_name'].toLowerCase()) ?? null
+        : null
 
-      // Convert to contact data
       const contactData = rowToContactData(rowData)
 
-      // Insert
       const { error } = await supabase.from('contacts').insert({
         name: contactData.name,
         position: contactData.position || null,
@@ -287,16 +287,21 @@ export async function importContacts(
         })
       } else {
         result.imported++
+        if (email) existingEmails.add(email)
+        importedNames.push(rowData['name'])
+      }
+    }
 
-        // Log activity
-        await logActivity({
+    await Promise.all(
+      importedNames.map(name =>
+        logActivity({
           entityType: 'contact',
-          entityId: rowData['name'],
+          entityId: name,
           action: 'created',
           metadata: { importedFrom: 'bulk_import' },
         })
-      }
-    }
+      )
+    )
 
     return result
   } catch (error) {

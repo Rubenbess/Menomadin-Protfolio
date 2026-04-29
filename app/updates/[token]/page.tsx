@@ -16,7 +16,7 @@ export default async function FounderUpdatePage({ params }: { params: Promise<{ 
     .from('companies')
     .select('id, name, sector')
     .eq('update_token', token)
-    .single()
+    .maybeSingle()
 
   if (!company) return notFound()
 
@@ -34,7 +34,7 @@ export default async function FounderUpdatePage({ params }: { params: Promise<{ 
         </div>
 
         <div className="bg-white rounded-lg shadow-sm ring-1 ring-black/[0.06] p-6">
-          <FounderUpdateForm companyId={company.id} companyName={company.name} />
+          <FounderUpdateForm token={token} companyName={company.name} />
         </div>
 
         <p className="text-center text-xs text-neutral-500 mt-6">

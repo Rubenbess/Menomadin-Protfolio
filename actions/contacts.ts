@@ -52,11 +52,14 @@ export async function createInteraction(data: {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('contact_interactions').insert(data)
   if (error) return { error: error.message }
-  // Update last_interaction_date on the contact
+  // Bump last_interaction_date if this interaction is newer than what's
+  // recorded — or if the field is still NULL (first interaction with this
+  // contact). Without the is.null branch, a contact whose last_interaction_date
+  // has never been set never gets it populated.
   await supabase.from('contacts')
     .update({ last_interaction_date: data.date })
     .eq('id', data.contact_id)
-    .lt('last_interaction_date', data.date)
+    .or(`last_interaction_date.is.null,last_interaction_date.lt.${data.date}`)
   revalidatePath('/contacts')
   return { error: null }
 }

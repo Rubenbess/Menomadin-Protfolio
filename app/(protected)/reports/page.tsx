@@ -51,11 +51,32 @@ export default async function ReportsPage() {
   const dealReportsList  = (dealReports ?? []) as DealReport[]
   const recipientsList   = (recipients  ?? []) as DealReportRecipient[]
 
-  // Build companies with metrics for reports
+  // Pre-group by company_id so the per-company loop is O(n) instead of
+  // O(n × m) — three full filters per company across investments, rounds,
+  // and cap_table on each render.
+  const investmentsByCompany = new Map<string, Investment[]>()
+  for (const inv of investmentsList) {
+    const arr = investmentsByCompany.get(inv.company_id) ?? []
+    arr.push(inv)
+    investmentsByCompany.set(inv.company_id, arr)
+  }
+  const roundsByCompany = new Map<string, Round[]>()
+  for (const r of roundsList) {
+    const arr = roundsByCompany.get(r.company_id) ?? []
+    arr.push(r)
+    roundsByCompany.set(r.company_id, arr)
+  }
+  const capTableByCompany = new Map<string, CapTableEntry[]>()
+  for (const c of capTableList) {
+    const arr = capTableByCompany.get(c.company_id) ?? []
+    arr.push(c)
+    capTableByCompany.set(c.company_id, arr)
+  }
+
   const companiesWithMetrics = companiesList.map(co => {
-    const coInvestments = investmentsList.filter(i => i.company_id === co.id)
-    const coRounds      = roundsList.filter(r => r.company_id === co.id)
-    const coCapTable    = capTableList.filter(c => c.company_id === co.id)
+    const coInvestments = investmentsByCompany.get(co.id) ?? []
+    const coRounds      = roundsByCompany.get(co.id) ?? []
+    const coCapTable    = capTableByCompany.get(co.id) ?? []
     const totalInvested = totalInvestedInCompany(coInvestments)
     const latestRound   = getLatestRound(coRounds)
     const ownershipPct  = getFundOwnershipPct(coCapTable)

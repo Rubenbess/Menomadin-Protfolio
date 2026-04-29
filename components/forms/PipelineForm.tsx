@@ -168,7 +168,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
       score_market:    scores.score_market   || null,
       score_traction:  scores.score_traction || null,
       score_fit:       scores.score_fit      || null,
-      pass_reason:     status === 'passed' ? str('pass_reason') : null,
+      pass_reason:     status === 'Passed' ? str('pass_reason') : null,
       referred_by:     str('referred_by'),
       next_steps:      str('next_steps'),
       deck_url:        deckFile ? (entry?.deck_url ?? null) : (removeDeck ? null : deckUrl),
@@ -302,7 +302,7 @@ export default function PipelineForm({ entry, defaultStatus, stageNames, onClose
       </div>
 
       {/* Pass reason (only when status = passed) */}
-      {status === 'passed' && (
+      {status === 'Passed' && (
         <div>
           <label className={lbl}>Pass Reason</label>
           <select name="pass_reason" defaultValue={entry?.pass_reason ?? ''} className={inp}>
