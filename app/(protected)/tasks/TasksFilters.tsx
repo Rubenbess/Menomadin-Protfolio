@@ -1,6 +1,5 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
 import { TaskSavedFilters } from '@/components/TaskSavedFilters'
 import type { TaskStatus } from '@/lib/types'
 
@@ -11,6 +10,9 @@ interface Props {
   onPriorityChange: (priority: string[]) => void
   companyFilter: string
   onCompanyChange: (company: string) => void
+  assigneeFilter: string[]
+  onAssigneeChange: (ids: string[]) => void
+  teamMembers: { id: string; name: string; color: string }[]
   includeCompleted: boolean
   onIncludeCompletedChange: (include: boolean) => void
   companies: { id: string; name: string }[]
@@ -45,6 +47,9 @@ export default function TasksFilters({
   onPriorityChange,
   companyFilter,
   onCompanyChange,
+  assigneeFilter,
+  onAssigneeChange,
+  teamMembers,
   includeCompleted,
   onIncludeCompletedChange,
   companies,
@@ -67,13 +72,22 @@ export default function TasksFilters({
     }
   }
 
+  const toggleAssignee = (id: string) => {
+    if (assigneeFilter.includes(id)) {
+      onAssigneeChange(assigneeFilter.filter(a => a !== id))
+    } else {
+      onAssigneeChange([...assigneeFilter, id])
+    }
+  }
+
   const clearAllFilters = () => {
     onStatusChange([])
     onPriorityChange([])
     onCompanyChange('')
+    onAssigneeChange([])
   }
 
-  const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || companyFilter
+  const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || companyFilter || assigneeFilter.length > 0
 
   return (
     <aside className="w-64 bg-white dark:bg-neutral-800/30 border-r border-neutral-200 dark:border-neutral-700 overflow-y-auto flex flex-col">
@@ -151,6 +165,38 @@ export default function TasksFilters({
           </div>
         )}
 
+        {/* Assignee */}
+        {teamMembers.length > 0 && (
+          <div>
+            <h3 className="section-title">Assignee</h3>
+            <div className="space-y-2.5">
+              {teamMembers.map(member => {
+                const isChecked = assigneeFilter.includes(member.id)
+                const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                return (
+                  <label key={member.id} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleAssignee(member.id)}
+                      className="w-4 h-4 accent-gold-500"
+                    />
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                      style={{ backgroundColor: member.color || '#6366f1' }}
+                    >
+                      {initials}
+                    </span>
+                    <span className={`text-sm font-medium truncate ${isChecked ? 'text-neutral-900 dark:text-white' : 'text-neutral-700 dark:text-neutral-400'}`}>
+                      {member.name}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Show Completed */}
         <label className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
           <input
@@ -171,6 +217,7 @@ export default function TasksFilters({
             priority: priorityFilter,
             company_id: companyFilter,
             include_completed: includeCompleted,
+            assignee_ids: assigneeFilter,
           }}
           onFilterApply={(filters) => {
             if (filters.status) onStatusChange(filters.status)
@@ -179,6 +226,7 @@ export default function TasksFilters({
             if (typeof filters.include_completed === 'boolean') {
               onIncludeCompletedChange(filters.include_completed)
             }
+            if (Array.isArray(filters.assignee_ids)) onAssigneeChange(filters.assignee_ids)
             onApplySavedFilter?.(filters)
           }}
         />

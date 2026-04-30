@@ -39,7 +39,16 @@ export async function PUT(
   try {
     const auth = await requireAuth()
     if ('response' in auth) return auth.response
-    const { supabase } = auth
+    const { supabase, user } = auth
+
+    // Verify ownership before allowing edits
+    const { data: existing, error: fetchError } = await supabase
+      .from('task_templates')
+      .select('created_by')
+      .eq('id', id)
+      .single()
+    if (fetchError || !existing) return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    if (existing.created_by !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const body = await request.json()
 
@@ -79,7 +88,16 @@ export async function DELETE(
   try {
     const auth = await requireAuth()
     if ('response' in auth) return auth.response
-    const { supabase } = auth
+    const { supabase, user } = auth
+
+    // Verify ownership before allowing deletion
+    const { data: existing, error: fetchError } = await supabase
+      .from('task_templates')
+      .select('created_by')
+      .eq('id', id)
+      .single()
+    if (fetchError || !existing) return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    if (existing.created_by !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const { error } = await supabase
       .from('task_templates')

@@ -34,10 +34,12 @@ export default function EmailScannerClient({ searchParams }: Props) {
   }, [searchParams])
 
   useEffect(() => {
+    let mounted = true
     fetch('/api/auth/microsoft/status')
       .then(r => r.json() as Promise<{ integration: Integration | null }>)
-      .then(d => { setIntegration(d?.integration ?? null); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(d => { if (mounted) { setIntegration(d?.integration ?? null); setLoading(false) } })
+      .catch(() => { if (mounted) setLoading(false) })
+    return () => { mounted = false }
   }, [])
 
   async function handleDisconnect() {

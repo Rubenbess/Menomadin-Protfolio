@@ -36,6 +36,8 @@ function num(val: unknown): number {
 
 // ── route ──────────────────────────────────────────────────────────────────
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 MB
+
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
 
@@ -43,9 +45,24 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Reject oversized uploads before reading into memory
+  const contentLength = Number(req.headers.get('content-length') ?? 0)
+  if (contentLength > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 413 })
+  }
+
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+
+  // Secondary size check after reading (content-length may be absent on some clients)
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 413 })
+  }
+
+  // dryRun=true returns a preview of what would be imported without writing any data
+  const url = new URL(req.url)
+  const dryRun = url.searchParams.get('dryRun') === 'true'
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const workbook = XLSX.read(buffer)
@@ -75,6 +92,21 @@ export async function POST(req: NextRequest) {
 
   // ── Collect unique companies ──────────────────────────────────────────
   const uniqueNames = [...new Set(rawRows.map((r) => String(r['Investment Name']).trim()))]
+
+  // ── Dry-run: return preview without writing ───────────────────────────
+  if (dryRun) {
+    const preview = uniqueNames.map(name => {
+      const rows = rawRows.filter(r => String(r['Investment Name']).trim() === name)
+      return {
+        company: name,
+        rowCount: rows.length,
+        sector: String(rows[0]['Sector'] || 'Other').trim(),
+        strategy: mapStrategy(String(rows[0]['Entity'] || '')),
+        warning: 'Existing rounds, investments, and cap table entries for this company will be deleted and replaced.',
+      }
+    })
+    return NextResponse.json({ dryRun: true, companies: preview, totalRows: rawRows.length })
+  }
 
   const results = {
     companies: { created: 0, updated: 0 },
@@ -193,5 +225,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ success: true, results })
+  return NextResponse.json({
+    success: true,
+    results,
+    warning: 'Existing rounds, investments, and cap table entries were deleted and replaced. This operation is not reversible.',
+  })
 }

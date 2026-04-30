@@ -92,12 +92,18 @@ export default function CompanyForm({ company, contacts: initialContacts = [], o
     const file = e.target.files?.[0]
     if (!file) return
     setLogoFile(file)
-    setLogoPreview(URL.createObjectURL(file))
+    setLogoPreview(prev => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
   }
 
   function removeLogo() {
     setLogoFile(null)
-    setLogoPreview(null)
+    setLogoPreview(prev => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev)
+      return null
+    })
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 

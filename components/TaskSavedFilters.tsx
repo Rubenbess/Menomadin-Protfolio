@@ -17,6 +17,7 @@ interface Filter {
   company_id?: string
   search_query?: string
   include_completed?: boolean
+  assignee_ids?: string[]
 }
 
 interface Props {

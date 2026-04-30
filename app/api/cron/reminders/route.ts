@@ -30,13 +30,17 @@ export async function GET(req: NextRequest) {
 
   const resend = new Resend(resendKey)
 
+  function esc(s: string | null | undefined): string {
+    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  }
+
   const rows = reminders.map((r: { title: string; due_date: string; category: string; companies?: { name: string } | null; notes: string | null }) =>
     `<tr style="border-bottom:1px solid #f1f5f9">
-      <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${r.title}</td>
-      <td style="padding:10px 16px;font-size:13px;color:#64748b">${r.due_date}</td>
-      <td style="padding:10px 16px;font-size:13px;color:#64748b">${r.category}</td>
-      <td style="padding:10px 16px;font-size:13px;color:#64748b">${(r.companies as { name: string } | null)?.name ?? '—'}</td>
-      <td style="padding:10px 16px;font-size:13px;color:#64748b">${r.notes ?? ''}</td>
+      <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${esc(r.title)}</td>
+      <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(r.due_date)}</td>
+      <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(r.category)}</td>
+      <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc((r.companies as { name: string } | null)?.name)}</td>
+      <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(r.notes)}</td>
     </tr>`
   ).join('')
 

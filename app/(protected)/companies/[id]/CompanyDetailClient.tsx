@@ -713,8 +713,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-neutral-200 bg-neutral-50/70">
-                      {['Shareholder', 'Ownership %', ''].map((h) => (
-                        <th key={h} className={th}>{h}</th>
+                      {['Shareholder', 'Ownership %', 'actions'].map((h) => (
+                        <th key={h} className={th}>{h === 'actions' ? '' : h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -804,8 +804,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-neutral-200 bg-neutral-50/70">
-                        {['Date', 'Revenue', 'ARR', 'Run Rate', 'Burn/mo', 'Runway', 'HC', 'GM%', ''].map(h => (
-                          <th key={h} className={th}>{h}</th>
+                        {['Date', 'Revenue', 'ARR', 'Run Rate', 'Burn/mo', 'Runway', 'HC', 'GM%', 'actions'].map(h => (
+                          <th key={h} className={th}>{h === 'actions' ? '' : h}</th>
                         ))}
                       </tr>
                     </thead>

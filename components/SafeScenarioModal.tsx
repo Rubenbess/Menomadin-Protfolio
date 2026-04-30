@@ -43,7 +43,7 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
     discount:      'Discount triggered',
     mfn:           'MFN — converts at round price',
     'cap+discount': safe.valuation_cap && safe.discount_rate
-      ? parseFloat(preMoney) * (1 - (safe.discount_rate / 100)) < safe.valuation_cap
+      ? preMoneNum * (1 - (safe.discount_rate / 100)) < safe.valuation_cap
           ? 'Discount triggered (better for you)'
           : 'Cap triggered (better for you)'
       : 'Cap triggered',
@@ -129,7 +129,7 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
               <div>
                 <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">MOIC at conversion</p>
                 <p className="text-sm font-bold text-neutral-900">
-                  {(result.sharesValue / safe.investment_amount).toFixed(2)}x
+                  {safe.investment_amount > 0 ? `${(result.sharesValue / safe.investment_amount).toFixed(2)}x` : '—'}
                 </p>
               </div>
             </div>

@@ -64,7 +64,7 @@ export async function submitFounderUpdate(data: FounderUpdateData) {
 
   const hasMetrics = [data.arr, data.revenue, data.burn_rate, data.cash_runway, data.headcount].some(v => v != null)
   if (hasMetrics) {
-    await supabase.from('company_kpis').insert({
+    const { error: kpiError } = await supabase.from('company_kpis').insert({
       company_id: companyId,
       date: data.date,
       arr: data.arr,
@@ -73,6 +73,7 @@ export async function submitFounderUpdate(data: FounderUpdateData) {
       cash_runway: data.cash_runway,
       headcount: data.headcount,
     })
+    if (kpiError) return { error: kpiError.message }
   }
 
   revalidatePath(`/companies/${companyId}`)

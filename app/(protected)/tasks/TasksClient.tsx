@@ -39,6 +39,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
   const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([])
   const [priorityFilter, setPriorityFilter] = useState<string[]>([])
   const [companyFilter, setCompanyFilter] = useState<string | null>(null)
+  const [assigneeFilter, setAssigneeFilter] = useState<string[]>([])
   const [showCompleted, setShowCompleted] = useState(true)
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set())
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
@@ -117,12 +118,17 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
     if (companyFilter) {
       result = result.filter(t => t.company_id === companyFilter)
     }
+    if (assigneeFilter.length > 0) {
+      result = result.filter(t =>
+        t.assignees?.some(a => assigneeFilter.includes(a.assigned_to))
+      )
+    }
     if (!showCompleted) {
       result = result.filter(t => t.status !== 'Done')
     }
 
     return result
-  }, [tasks, searchQuery, quickFilter, statusFilter, priorityFilter, companyFilter, showCompleted])
+  }, [tasks, searchQuery, quickFilter, statusFilter, priorityFilter, companyFilter, assigneeFilter, showCompleted])
 
   // Group by status for board view
   const groupedByStatus = useMemo(() => {
@@ -318,11 +324,14 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
             statusFilter={statusFilter}
             priorityFilter={priorityFilter}
             companyFilter={companyFilter || ''}
+            assigneeFilter={assigneeFilter}
+            teamMembers={teamMembers}
             includeCompleted={showCompleted}
             companies={companies}
             onStatusChange={setStatusFilter}
             onPriorityChange={setPriorityFilter}
             onCompanyChange={(id) => setCompanyFilter(id || null)}
+            onAssigneeChange={setAssigneeFilter}
             onIncludeCompletedChange={setShowCompleted}
             stats={stats}
           />
@@ -349,11 +358,14 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
                 statusFilter={statusFilter}
                 priorityFilter={priorityFilter}
                 companyFilter={companyFilter || ''}
+                assigneeFilter={assigneeFilter}
+                teamMembers={teamMembers}
                 includeCompleted={showCompleted}
                 companies={companies}
                 onStatusChange={setStatusFilter}
                 onPriorityChange={setPriorityFilter}
                 onCompanyChange={(id) => setCompanyFilter(id || null)}
+                onAssigneeChange={setAssigneeFilter}
                 onIncludeCompletedChange={setShowCompleted}
                 stats={stats}
               />
@@ -397,6 +409,7 @@ export default function TasksClient({ initialTasks, allLabels, teamMembers, comp
                   setStatusFilter([])
                   setPriorityFilter([])
                   setCompanyFilter(null)
+                  setAssigneeFilter([])
                 }} variant="secondary">
                   Clear all
                 </Button>

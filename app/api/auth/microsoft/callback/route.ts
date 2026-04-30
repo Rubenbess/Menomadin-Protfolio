@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
+const NONCE_COOKIE = 'ms_oauth_nonce'
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const code = searchParams.get('code')
@@ -15,16 +17,24 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // Defence in depth: the `state` parameter is the user_id passed through
-  // Microsoft's OAuth flow (see /api/auth/microsoft/connect). On its own that's
-  // not tamper-proof — anyone could craft a /connect equivalent with another
-  // user's id as the state, finish the flow with their own Microsoft account,
-  // and overwrite the victim's email_integration row. Verify the returning
-  // request also carries the matching Supabase session so that hijack requires
-  // the victim's session cookie as well.
+  // State is "nonce:user_id" — verify both the random nonce (from HttpOnly cookie)
+  // and that the session matches the user_id embedded in state. This prevents:
+  //   1. CSRF: nonce was never issued by this server for this browser
+  //   2. Session hijack: session user must match the user who initiated the flow
+  const colonIdx = stateParam.indexOf(':')
+  const nonceFromState = colonIdx > -1 ? stateParam.slice(0, colonIdx) : ''
+  const userIdFromState = colonIdx > -1 ? stateParam.slice(colonIdx + 1) : stateParam
+
+  const nonceCookie = req.cookies.get(NONCE_COOKIE)?.value
+  if (!nonceCookie || nonceCookie !== nonceFromState) {
+    return NextResponse.redirect(
+      new URL('/settings/email-scanner?error=oauth_state_mismatch', req.url)
+    )
+  }
+
   const ssoSupabase = await createServerSupabaseClient()
   const { data: { user: sessionUser } } = await ssoSupabase.auth.getUser()
-  if (!sessionUser || sessionUser.id !== stateParam) {
+  if (!sessionUser || sessionUser.id !== userIdFromState) {
     return NextResponse.redirect(
       new URL('/settings/email-scanner?error=oauth_state_mismatch', req.url)
     )
@@ -81,7 +91,10 @@ export async function GET(req: NextRequest) {
     { onConflict: 'user_id' }
   )
 
-  return NextResponse.redirect(
+  const successResponse = NextResponse.redirect(
     new URL('/settings/email-scanner?success=connected', req.url)
   )
+  // Consume the nonce — marks it as used so it cannot be replayed
+  successResponse.cookies.delete(NONCE_COOKIE)
+  return successResponse
 }

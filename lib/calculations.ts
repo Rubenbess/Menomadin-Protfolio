@@ -119,6 +119,7 @@ export function calcXIRR(cashFlows: CashFlow[]): number | null {
     r = next
     if (r <= -1 || r > 100) return null
   }
+  console.warn('calcXIRR: did not converge after 200 iterations — check cash flows for pathological input', cashFlows)
   return null
 }
 
@@ -308,6 +309,14 @@ export function buildWaterfallHolders(
     if (!safe.valuation_cap || safe.valuation_cap <= 0) {
       warnings.push(
         `Uncapped SAFE from ${safe.date.slice(0, 7)} ($${safe.investment_amount.toLocaleString()}) excluded from waterfall — add a valuation cap to include it.`
+      )
+      continue
+    }
+    // Skip SAFEs with no investment amount — they would produce 0 shares and
+    // 0 proceeds, polluting the holders list without contributing to the waterfall.
+    if (!safe.investment_amount || safe.investment_amount <= 0) {
+      warnings.push(
+        `SAFE from ${safe.date.slice(0, 7)} excluded from waterfall — investment amount is zero.`
       )
       continue
     }

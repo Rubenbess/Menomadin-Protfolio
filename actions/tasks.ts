@@ -60,7 +60,8 @@ export async function createTask(data: {
       assigned_to: id,
       assigned_by: user.id,
     }))
-    await supabase.from('task_assignees').insert(assignees)
+    const { error: assigneeError } = await supabase.from('task_assignees').insert(assignees)
+    if (assigneeError) return { error: assigneeError.message, data: null }
   }
 
   revalidatePath('/tasks')

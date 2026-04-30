@@ -29,6 +29,11 @@ export async function requireAuth(): Promise<
  * Cron secret check that fails closed when CRON_SECRET is unset, instead of
  * matching `Bearer undefined`. Vercel cron passes the secret as an Authorization
  * header per the platform contract.
+ *
+ * ROTATION: Rotate CRON_SECRET in Vercel env vars every 90 days.
+ * Steps: generate a new secret → update it in Vercel → redeploy → verify
+ * cron jobs fire correctly. The old secret stops working immediately after
+ * the env var is updated and the deployment completes.
  */
 export function requireCronAuth(req: NextRequest): NextResponse | null {
   const secret = process.env.CRON_SECRET
