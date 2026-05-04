@@ -238,8 +238,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             title="Expand sidebar"
             className="w-full h-full flex items-center justify-center hover:bg-white/5 transition-colors"
           >
-            <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center ring-1 ring-primary-400/30">
-              <img src="/menomadin-icon.svg" alt="Menomadin" className="h-4 w-4 invert" />
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center ring-1 ring-red-400/30">
+              <img src="/menomadin-icon.svg" alt="Menomadin" className="h-4 w-4 [filter:brightness(0)_saturate(100%)_invert(27%)_sepia(51%)_saturate(2878%)_hue-rotate(346deg)_brightness(104%)_contrast(97%)]" />
             </div>
           </button>
         ) : (
