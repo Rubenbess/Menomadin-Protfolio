@@ -50,11 +50,12 @@ jobs:
           BODY=$(echo "$RESPONSE" | head -1)
           echo "Supabase response: $HTTP_CODE $BODY"
 
-          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
-            echo "Failed to save report"
+          # 200/201 = inserted, 204 = upserted existing row — all are success
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "204" ]; then
+            echo "Failed to save report (HTTP $HTTP_CODE)"
             exit 1
           fi
-          echo "Report saved to platform successfully"
+          echo "Report saved to platform successfully (HTTP $HTTP_CODE)"
 
       - name: Fetch email recipients from Supabase
         id: recipients
