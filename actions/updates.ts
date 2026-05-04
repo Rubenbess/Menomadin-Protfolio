@@ -14,6 +14,17 @@ export async function createUpdate(data: {
   return { error: error?.message ?? null }
 }
 
+export async function updateUpdate(id: string, data: {
+  date: string
+  category: string
+  title: string
+  notes: string | null
+}) {
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.from('company_updates').update(data).eq('id', id)
+  return { error: error?.message ?? null }
+}
+
 export async function deleteUpdate(id: string) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('company_updates').delete().eq('id', id)

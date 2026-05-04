@@ -78,6 +78,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [scenarioSafe, setScenarioSafe] = useState<Safe | null>(null)
   const [editingRound, setEditingRound] = useState<Round | null>(null)
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null)
+  const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null)
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -863,10 +864,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                           </span>
                           <span className="text-xs text-neutral-500">{fmtDate(u.date)}</span>
                         </div>
-                        <button
-                          onClick={async () => { if (confirm('Delete this update?')) { await deleteUpdate(u.id); router.refresh() } }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-red-500 rounded transition-all flex-shrink-0"
-                        ><Trash2 size={12} /></button>
+                        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 flex-shrink-0">
+                          <button
+                            onClick={() => setEditingUpdate(u)}
+                            className="p-1 text-neutral-500 hover:text-primary-600 rounded transition-all"
+                          ><Pencil size={12} /></button>
+                          <button
+                            onClick={async () => { if (confirm('Delete this update?')) { await deleteUpdate(u.id); router.refresh() } }}
+                            className="p-1 text-neutral-500 hover:text-red-500 rounded transition-all"
+                          ><Trash2 size={12} /></button>
+                        </div>
                       </div>
                       <p className="text-sm font-semibold text-neutral-900 mb-0.5">{u.title}</p>
                       {u.notes && <p className="text-sm text-neutral-600 leading-relaxed">{u.notes}</p>}
@@ -926,6 +933,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
       </Modal>
       <Modal open={showAddUpdate}       onClose={() => setShowAddUpdate(false)}      title="Log Update">
         <UpdateForm companyId={company.id} onClose={() => setShowAddUpdate(false)} />
+      </Modal>
+      <Modal open={!!editingUpdate} onClose={() => setEditingUpdate(null)} title="Edit Update">
+        {editingUpdate && (
+          <UpdateForm companyId={company.id} update={editingUpdate} onClose={() => { setEditingUpdate(null); router.refresh() }} />
+        )}
       </Modal>
       <Modal
         open={showAddSafe}
