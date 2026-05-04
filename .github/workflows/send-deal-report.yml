@@ -56,6 +56,27 @@ jobs:
           fi
           echo "Report saved to platform successfully"
 
+      - name: Fetch email recipients from Supabase
+        id: recipients
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          FILE="${{ steps.report.outputs.file }}"
+          if [ -z "$FILE" ]; then
+            echo "json=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          RECIPIENTS=$(curl -s "${SUPABASE_URL}/rest/v1/deal_report_recipients?select=email,name" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
+
+          echo "Recipients found: $RECIPIENTS"
+          # Compact to single line for GITHUB_OUTPUT
+          COMPACT=$(echo "$RECIPIENTS" | jq -c '.')
+          echo "json=$COMPACT" >> $GITHUB_OUTPUT
+
       - name: Send report email to recipients
         env:
           APP_URL: ${{ secrets.APP_URL }}
@@ -67,6 +88,14 @@ jobs:
             exit 0
           fi
 
+          RECIPIENTS='${{ steps.recipients.outputs.json }}'
+          COUNT=$(echo "$RECIPIENTS" | jq 'length')
+          if [ "$COUNT" = "0" ]; then
+            echo "No recipients configured, skipping email."
+            exit 0
+          fi
+          echo "Sending to $COUNT recipient(s)"
+
           CONTENT=$(cat "$FILE")
           REPORT_DATE=$(basename "$FILE" .md)
 
@@ -76,12 +105,17 @@ jobs:
             -d "$(jq -n \
               --arg date "$REPORT_DATE" \
               --arg content "$CONTENT" \
-              '{report_date: $date, content: $content}')")
+              --argjson recipients "$RECIPIENTS" \
+              '{report_date: $date, content: $content, recipients: $recipients}')")
 
           SEND_CODE=$(echo "$SEND_RESPONSE" | tail -1)
           SEND_BODY=$(echo "$SEND_RESPONSE" | head -1)
-          echo "Send response: $SEND_CODE $SEND_BODY"
+          echo "Send response: $SEND_CODE"
+          echo "Send body: $SEND_BODY"
 
           if [ "$SEND_CODE" != "200" ]; then
-            echo "Warning: email send returned $SEND_CODE"
+            echo "ERROR: email send failed with status $SEND_CODE"
+            exit 1
           fi
+
+          echo "Email sent successfully: $SEND_BODY"
