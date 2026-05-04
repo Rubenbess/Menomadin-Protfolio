@@ -171,7 +171,7 @@ PYEOF
           SUBJECT="Menomadin Israeli Tech Deal Report — Week of ${WEEK_OF}"
 
           PAYLOAD=$(jq -n \
-            --arg from "noreply@menomadin.com" \
+            --arg from "noreply@portfolio-menomadin.com" \
             --argjson to "$TO_ARRAY" \
             --arg subject "$SUBJECT" \
             --arg html "$HTML" \
