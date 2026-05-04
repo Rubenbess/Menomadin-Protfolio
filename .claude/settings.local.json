@@ -102,10 +102,13 @@
       "Bash(mv \"$f.tmp\" \"$f\")",
       "Bash(sed -i \"/const.*usePermissions/d\" \"$f\")",
       "Bash(1)",
-      "mcp__scheduled-tasks__create_scheduled_task",
-      "Bash(grep \".ts$\")",
-      "Bash(grep -E \"\\\\.tsx$\")",
-      "Bash(gh pr create --title 'Add valuation timeline chart to company overview' --body ' *)"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(gh pr create --title 'Add deal report email distribution' --body ' *)",
+      "Bash(git fetch *)",
+      "Bash(curl -s 'https://bjzrypyuofqblqvqngao.supabase.co/rest/v1/deal_reports?report_date=eq.2026-05-04&select=id,report_date,created_at' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqenJ5cHl1b2ZxYmxxdnFuZ2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjIyNzAsImV4cCI6MjA4OTk5ODI3MH0.8UImAAD2UNOdnwwnRa7fdyIFohjh60uLq_hsiMxaFSE' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqenJ5cHl1b2ZxYmxxdnFuZ2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjIyNzAsImV4cCI6MjA4OTk5ODI3MH0.8UImAAD2UNOdnwwnRa7fdyIFohjh60uLq_hsiMxaFSE')",
+      "Bash(git rebase *)",
+      "Bash(git stash *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rubenb\\.claude"
