@@ -28,7 +28,7 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
   const preMoneNum = parseFloat(preMoney) || 0
   const raiseNum   = parseFloat(raise)    || 0
 
-  const result = preMoneNum > 0 && raiseNum > 0
+  const rawResult = preMoneNum > 0 && raiseNum > 0
     ? calcSafeConversion(
         safe.investment_amount,
         safe.valuation_cap,
@@ -37,6 +37,12 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
         raiseNum,
       )
     : null
+
+  // calcSafeConversion returns a zeroed sentinel (effectiveVal === 0) when its
+  // inputs would have produced Infinity — e.g. a discount ≥ 100%. Treat that as
+  // "no result" so we render a validation hint instead of "Infinity%".
+  const result = rawResult && rawResult.effectiveVal > 0 ? rawResult : null
+  const inputsInvalid = rawResult !== null && result === null
 
   const MECH_LABELS = {
     cap:           'Valuation Cap triggered',
@@ -106,6 +112,16 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
           </div>
         </div>
 
+        {/* Validation hint when inputs degenerate (e.g. discount ≥ 100%) */}
+        {inputsInvalid && (
+          <div className="bg-red-50 rounded-lg p-3 ring-1 ring-red-200">
+            <p className="text-xs text-red-700">
+              Conversion math is undefined for these inputs. Check that the next round pre-money and the SAFE&apos;s
+              valuation cap / discount rate produce a positive effective valuation (e.g. discount must be &lt; 100%).
+            </p>
+          </div>
+        )}
+
         {/* Result */}
         {result && (
           <div className="bg-gold-50 rounded-lg p-4 ring-1 ring-violet-200 space-y-3">
@@ -164,10 +180,10 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
               <Button
                 onClick={handleConvert}
                 loading={converting}
-                disabled={!roundId || !preMoneNum || !raiseNum}
+                disabled={!roundId || !preMoneNum || !raiseNum || !result}
                 className="w-full"
               >
-                Convert SAFE → {result ? fmtPct(result.ownershipPct) : ''} ownership
+                Convert SAFE → {result ? fmtPct(result.ownershipPct) : '—'} ownership
               </Button>
             )}
           </div>

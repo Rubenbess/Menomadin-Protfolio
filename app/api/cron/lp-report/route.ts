@@ -41,6 +41,12 @@ export async function GET(req: NextRequest) {
   const now = new Date()
   const quarter = `Q${Math.ceil((now.getMonth() + 1) / 3)} ${now.getFullYear()}`
 
+  // Escape any DB-supplied string interpolated into the HTML body. A company
+  // named `<script>...</script>` would otherwise execute in LPs' email clients.
+  function esc(s: string | null | undefined): string {
+    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  }
+
   const companyRows = companies
     .filter((c: { status: string }) => c.status === 'active')
     .map((c: { id: string; name: string; sector: string; hq: string; entry_stage: string | null }) => {
@@ -52,8 +58,8 @@ export async function GET(req: NextRequest) {
         .filter((ct: { company_id: string }) => ct.company_id === c.id)
         .pop() as { ownership_percentage: number } | undefined
       return `<tr style="border-bottom:1px solid #f1f5f9">
-        <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${c.name}</td>
-        <td style="padding:10px 16px;font-size:13px;color:#64748b">${c.sector ?? '—'}</td>
+        <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${esc(c.name)}</td>
+        <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(c.sector) || '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${inv > 0 ? fmt$(inv) : '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${latestRound ? fmt$(latestRound.post_money) : '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${cap ? `${cap.ownership_percentage.toFixed(1)}%` : '—'}</td>
@@ -105,12 +111,16 @@ export async function GET(req: NextRequest) {
   const recipients = lpEmails.split(',').map((e: string) => e.trim()).filter(Boolean)
   const resend = new Resend(resendKey)
 
-  await resend.emails.send({
+  const { error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: recipients,
     subject: `Menomadin Portfolio — ${quarter} Update`,
     html,
   })
+
+  if (sendError) {
+    return NextResponse.json({ error: sendError.message }, { status: 500 })
+  }
 
   return NextResponse.json({ sent: recipients.length, quarter })
 }

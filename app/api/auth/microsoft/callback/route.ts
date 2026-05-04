@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  await supabase.from('email_integrations').upsert(
+  const { error: upsertError } = await supabase.from('email_integrations').upsert(
     {
       user_id: userId,
       access_token: tokens.access_token,
@@ -90,6 +90,12 @@ export async function GET(req: NextRequest) {
     },
     { onConflict: 'user_id' }
   )
+
+  if (upsertError) {
+    return NextResponse.redirect(
+      new URL('/settings/email-scanner?error=store_failed', req.url)
+    )
+  }
 
   const successResponse = NextResponse.redirect(
     new URL('/settings/email-scanner?success=connected', req.url)

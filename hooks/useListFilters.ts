@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { FilterGroup, applyFilters } from '@/lib/filter-utils'
 
 /**
@@ -14,16 +14,13 @@ export function useListFilters<T extends Record<string, any>>(
     direction: 'asc' | 'desc'
   } | null>(null)
 
-  // Apply filters and search
-  const filteredData = useCallback(() => {
+  const data = useMemo(() => {
     let result = allData
 
-    // Apply advanced filters
     if (filterGroup) {
       result = applyFilters(result, filterGroup)
     }
 
-    // Apply search (simple text search across all string fields)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       result = result.filter((item) => {
@@ -33,7 +30,6 @@ export function useListFilters<T extends Record<string, any>>(
       })
     }
 
-    // Apply sorting
     if (sortBy) {
       result = [...result].sort((a, b) => {
         const aVal = a[sortBy.field]
@@ -50,8 +46,6 @@ export function useListFilters<T extends Record<string, any>>(
 
     return result
   }, [allData, filterGroup, searchQuery, sortBy])
-
-  const data = filteredData()
 
   const applyFilter = useCallback((filters: FilterGroup | null) => {
     setFilterGroup(filters)

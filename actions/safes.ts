@@ -72,6 +72,14 @@ export async function convertSafe(
     roundRaise,
   )
 
+  // calcSafeConversion returns the zeroed sentinel when its inputs would
+  // produce Infinity (non-positive pre-money / discount ≥ 100% / no investment).
+  // Refuse to write a degenerate cap-table entry — once persisted, NaN/0 ownership
+  // would corrupt downstream waterfall math.
+  if (!Number.isFinite(result.ownershipPct) || result.ownershipPct <= 0 || result.effectiveVal <= 0) {
+    return { error: 'Cannot convert: the round inputs do not produce a valid ownership percentage. Check that pre-money is positive and the SAFE has a usable valuation cap or discount.' }
+  }
+
   // Mark SAFE as converted
   const { error: updateErr } = await supabase
     .from('safes')

@@ -172,6 +172,22 @@ describe('calcSafeConversion', () => {
     const large = calcSafeConversion(900_000, 5_000_000, null, 10_000_000, 2_000_000)
     expect(large.ownershipPct).toBeGreaterThan(small.ownershipPct)
   })
+  it('returns zeroed sentinel — never Infinity — when next pre-money is zero', () => {
+    const result = calcSafeConversion(500_000, 5_000_000, null, 0, 2_000_000)
+    expect(result.effectiveVal).toBe(0)
+    expect(result.ownershipPct).toBe(0)
+    expect(result.sharesValue).toBe(0)
+    expect(Number.isFinite(result.ownershipPct)).toBe(true)
+  })
+  it('returns zeroed sentinel when discount rate ≥ 100% (effective val ≤ 0)', () => {
+    const result = calcSafeConversion(500_000, null, 100, 10_000_000, 2_000_000)
+    expect(result.effectiveVal).toBe(0)
+    expect(result.ownershipPct).toBe(0)
+  })
+  it('returns zeroed sentinel for non-positive investment amount', () => {
+    const result = calcSafeConversion(0, 5_000_000, null, 10_000_000, 2_000_000)
+    expect(result.ownershipPct).toBe(0)
+  })
 })
 
 describe('calcSafeEstimatedOwnership', () => {

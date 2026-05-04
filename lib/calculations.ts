@@ -119,7 +119,6 @@ export function calcXIRR(cashFlows: CashFlow[]): number | null {
     r = next
     if (r <= -1 || r > 100) return null
   }
-  console.warn('calcXIRR: did not converge after 200 iterations — check cash flows for pathological input', cashFlows)
   return null
 }
 
@@ -163,7 +162,16 @@ export function calcSafeEffectiveValuation(
   return { effectiveVal: nextPreMoney, mechanism: 'mfn' }
 }
 
-/** Full post-conversion ownership calculation given a hypothetical next round. */
+/**
+ * Full post-conversion ownership calculation given a hypothetical next round.
+ *
+ * Returns a zeroed sentinel `{ effectiveVal: 0, ownershipPct: 0, sharesValue: 0 }`
+ * when any denominator would be non-positive (next pre-money ≤ 0, derived
+ * effective valuation ≤ 0, e.g. a discount rate ≥ 100%, or a non-positive
+ * investment amount). Callers must treat `effectiveVal === 0` as "input
+ * incomplete/invalid" rather than rendering or persisting the result, since
+ * an Infinity ownership written to the cap table would corrupt the dataset.
+ */
 export function calcSafeConversion(
   investmentAmount: number,
   valuationCap: number | null,
@@ -172,6 +180,15 @@ export function calcSafeConversion(
   roundRaise: number,
 ): SafeConversionResult {
   const { effectiveVal, mechanism } = calcSafeEffectiveValuation(valuationCap, discountRate, nextPreMoney)
+
+  if (
+    !Number.isFinite(effectiveVal) || effectiveVal <= 0 ||
+    !Number.isFinite(nextPreMoney) || nextPreMoney <= 0 ||
+    !Number.isFinite(investmentAmount) || investmentAmount <= 0 ||
+    !Number.isFinite(roundRaise) || roundRaise < 0
+  ) {
+    return { effectiveVal: 0, mechanism, ownershipPct: 0, sharesValue: 0 }
+  }
 
   const safeUnits   = investmentAmount / effectiveVal
   const newInvUnits = roundRaise / nextPreMoney

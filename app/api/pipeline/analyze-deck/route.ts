@@ -30,24 +30,26 @@ export async function POST(req: NextRequest) {
 
   const client = new Anthropic({ apiKey })
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'document',
-            source: {
-              type: 'base64',
-              media_type: 'application/pdf',
-              data: base64,
+  let text: string
+  try {
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: 'application/pdf',
+                data: base64,
+              },
             },
-          },
-          {
-            type: 'text',
-            text: `Analyze this pitch deck and extract the following information. Return ONLY a valid JSON object with these exact keys (use null for missing fields):
+            {
+              type: 'text',
+              text: `Analyze this pitch deck and extract the following information. Return ONLY a valid JSON object with these exact keys (use null for missing fields):
 
 {
   "company_name": string or null,
@@ -64,13 +66,17 @@ export async function POST(req: NextRequest) {
   "hq": string or null (city, country),
   "summary": string or null (2-3 sentence overall summary)
 }`,
-          },
-        ],
-      },
-    ],
-  })
-
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+            },
+          ],
+        },
+      ],
+    })
+    text = message.content[0].type === 'text' ? message.content[0].text : ''
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    console.error('analyze-deck: Anthropic API call failed', err)
+    return NextResponse.json({ error: `AI analysis failed: ${msg}` }, { status: 500 })
+  }
 
   // Extract JSON from response
   const jsonMatch = text.match(/\{[\s\S]*\}/)

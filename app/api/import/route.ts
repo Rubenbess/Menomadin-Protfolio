@@ -132,12 +132,16 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       // Update
-      await supabase.from('companies').update({
+      const { error: updErr } = await supabase.from('companies').update({
         sector: String(firstRow['Sector'] || 'Other').trim(),
         strategy: mapStrategy(String(firstRow['Entity'] || '')),
         hq: String(firstRow['Geography'] || '').trim(),
         status: 'active',
       }).eq('id', existing.id)
+      if (updErr) {
+        results.errors.push(`Failed to update company "${name}": ${updErr.message}`)
+        continue
+      }
       companyId = existing.id
       results.companies.updated++
     } else {
@@ -162,10 +166,19 @@ export async function POST(req: NextRequest) {
       results.companies.created++
     }
 
-    // Delete existing rounds/investments/cap_table for a clean sync
-    await supabase.from('rounds').delete().eq('company_id', companyId)
-    await supabase.from('investments').delete().eq('company_id', companyId)
-    await supabase.from('cap_table').delete().eq('company_id', companyId)
+    // Delete existing rounds/investments/cap_table for a clean sync.
+    // If any of these fail mid-import the database is left partially-replaced
+    // (FK cascades may have already removed rows on one table but not another),
+    // so we surface the failure and skip re-inserting for this company —
+    // resuming the import will re-attempt the delete pass.
+    const delRounds = await supabase.from('rounds').delete().eq('company_id', companyId)
+    const delInv = await supabase.from('investments').delete().eq('company_id', companyId)
+    const delCt = await supabase.from('cap_table').delete().eq('company_id', companyId)
+    const delErr = delRounds.error?.message ?? delInv.error?.message ?? delCt.error?.message
+    if (delErr) {
+      results.errors.push(`Failed to clear prior data for "${name}": ${delErr}`)
+      continue
+    }
 
     // Insert fresh data from each row
     for (const row of rows) {
@@ -210,7 +223,11 @@ export async function POST(req: NextRequest) {
         instrument,
         valuation_cap: null,
       })
-      if (!invErr) results.investments.created++
+      if (invErr) {
+        results.errors.push(`Investment row failed for "${name}" (${date}): ${invErr.message}`)
+      } else {
+        results.investments.created++
+      }
 
       // Cap table
       if (ownershipPctVal > 0) {
@@ -220,7 +237,11 @@ export async function POST(req: NextRequest) {
           shareholder_name: entity || 'Fund',
           ownership_percentage: ownershipPctVal,
         })
-        if (!ctErr) results.capTable.created++
+        if (ctErr) {
+          results.errors.push(`Cap-table row failed for "${name}" (${date}): ${ctErr.message}`)
+        } else {
+          results.capTable.created++
+        }
       }
     }
   }

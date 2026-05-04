@@ -50,18 +50,23 @@ export async function POST(req: NextRequest) {
     const activeLists = board.lists.filter(l => !l.closed)
     const listMap: Record<string, string> = {} // id → name
     let stagesCreated = 0
+    const errors: string[] = []
 
     for (let i = 0; i < activeLists.length; i++) {
       const list = activeLists[i]
       listMap[list.id] = list.name
       if (!existingNames.has(list.name)) {
         const color = COLORS[i % COLORS.length]
-        await supabase.from('pipeline_stages').insert({
+        const { error: stageErr } = await supabase.from('pipeline_stages').insert({
           name: list.name,
           color,
           position: nextPosition + i,
         })
-        stagesCreated++
+        if (stageErr) {
+          errors.push(`Stage "${list.name}": ${stageErr.message}`)
+        } else {
+          stagesCreated++
+        }
       }
     }
 
@@ -71,7 +76,6 @@ export async function POST(req: NextRequest) {
     // Import cards (skip archived)
     const activeCards = board.cards.filter(c => !c.closed)
     let cardsCreated = 0
-    const errors: string[] = []
 
     // Fetch existing pipeline entry names to avoid duplicates
     const { data: existingEntries } = await supabase.from('pipeline').select('name')

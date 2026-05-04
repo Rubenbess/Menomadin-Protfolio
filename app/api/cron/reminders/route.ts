@@ -71,12 +71,16 @@ export async function GET(req: NextRequest) {
     </div>
   `
 
-  await resend.emails.send({
+  const { error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: toEmail,
     subject: `[Menomadin] ${reminders.length} reminder${reminders.length > 1 ? 's' : ''} due`,
     html,
   })
+
+  if (sendError) {
+    return NextResponse.json({ error: sendError.message }, { status: 500 })
+  }
 
   return NextResponse.json({ sent: reminders.length })
 }

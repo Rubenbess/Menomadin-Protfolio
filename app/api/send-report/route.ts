@@ -4,14 +4,27 @@ import { Resend } from 'resend'
 export async function POST(req: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY
 
-  // Fail closed when the env var is unset — otherwise `Bearer undefined` would
-  // match a `Bearer undefined` request and bypass auth entirely.
+  // Inbound auth must use a dedicated secret — never the Resend API key.
+  // Reusing RESEND_API_KEY as the bearer token leaks inbound auth to anyone
+  // with legitimate access to the outbound mail credential. Prefer a dedicated
+  // REPORT_API_KEY; fall back to CRON_SECRET so this endpoint can be invoked
+  // by Vercel cron with the same shared secret used elsewhere.
+  const inboundSecret = process.env.REPORT_API_KEY ?? process.env.CRON_SECRET
+
+  // Fail closed when neither secret is set — otherwise `Bearer undefined`
+  // would match a `Bearer undefined` request and bypass auth entirely.
+  if (!inboundSecret) {
+    return NextResponse.json(
+      { error: 'Missing REPORT_API_KEY (or CRON_SECRET fallback)' },
+      { status: 503 }
+    )
+  }
   if (!resendKey) {
     return NextResponse.json({ error: 'Missing RESEND_API_KEY' }, { status: 503 })
   }
 
   const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${resendKey}`) {
+  if (authHeader !== `Bearer ${inboundSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'

@@ -5,14 +5,30 @@ function parseCSV(text: string): Record<string, string>[] {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim())
   if (lines.length < 2) return []
 
-  // Parse header — handle quoted fields
+  // RFC 4180-aware line splitter: inside a quoted field, a doubled `""` is the
+  // escape for a literal double-quote. Toggling on every `"` (the previous
+  // implementation) misparses fields like `"Smith, ""Bob"" Co."`.
   function splitLine(line: string): string[] {
     const fields: string[] = []
-    let cur = '', inQ = false
+    let cur = ''
+    let inQ = false
     for (let i = 0; i < line.length; i++) {
       const ch = line[i]
-      if (ch === '"') { inQ = !inQ; continue }
-      if (ch === ',' && !inQ) { fields.push(cur.trim()); cur = ''; continue }
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') {
+          // Escaped quote inside a quoted field — emit a single `"` and skip the next char.
+          cur += '"'
+          i++
+          continue
+        }
+        inQ = !inQ
+        continue
+      }
+      if (ch === ',' && !inQ) {
+        fields.push(cur.trim())
+        cur = ''
+        continue
+      }
       cur += ch
     }
     fields.push(cur.trim())
@@ -28,15 +44,27 @@ function parseCSV(text: string): Record<string, string>[] {
   }).filter(row => Object.values(row).some(v => v))
 }
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 MB — matches /api/import
+
 export async function POST(req: NextRequest) {
   const auth = await requireAuth()
   if ('response' in auth) return auth.response
   const { supabase } = auth
 
+  // Reject oversized uploads before reading into memory
+  const contentLength = Number(req.headers.get('content-length') ?? 0)
+  if (contentLength > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 413 })
+  }
+
   const type = req.nextUrl.searchParams.get('type') // 'contacts' | 'companies'
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 413 })
+  }
 
   const text = await file.text()
   const rows = parseCSV(text)

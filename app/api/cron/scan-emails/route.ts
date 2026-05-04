@@ -136,6 +136,7 @@ export async function GET(req: NextRequest) {
 
   let totalScanned = 0
   let totalOpportunities = 0
+  const errors: { integrationId: string; stage: string; message: string }[] = []
 
   for (const integration of integrations as EmailIntegration[]) {
     const accessToken = await getValidAccessToken(integration, supabase)
@@ -147,6 +148,8 @@ export async function GET(req: NextRequest) {
 
     const emails = await fetchEmails(accessToken, since)
     totalScanned += emails.length
+
+    let integrationFailedInsert = false
 
     for (const email of emails) {
       const body = email.body?.contentType === 'html'
@@ -170,7 +173,7 @@ export async function GET(req: NextRequest) {
 
       if (existing) continue
 
-      await supabase.from('pipeline').insert({
+      const { error: insertErr } = await supabase.from('pipeline').insert({
         name: analysis.company_name,
         sector: analysis.sector,
         stage: 'Seed',
@@ -182,14 +185,32 @@ export async function GET(req: NextRequest) {
         source: 'Email Scanner',
       })
 
+      if (insertErr) {
+        integrationFailedInsert = true
+        errors.push({ integrationId: integration.id, stage: 'pipeline.insert', message: insertErr.message })
+        continue
+      }
+
       totalOpportunities++
     }
 
-    await supabase
-      .from('email_integrations')
-      .update({ last_scanned_at: new Date().toISOString() })
-      .eq('id', integration.id)
+    // Only advance the cursor when every email in this window was processed
+    // successfully. If an insert failed, leave last_scanned_at untouched so the
+    // next cron re-tries the window rather than permanently skipping messages.
+    if (!integrationFailedInsert) {
+      const { error: cursorErr } = await supabase
+        .from('email_integrations')
+        .update({ last_scanned_at: new Date().toISOString() })
+        .eq('id', integration.id)
+      if (cursorErr) {
+        errors.push({ integrationId: integration.id, stage: 'email_integrations.update', message: cursorErr.message })
+      }
+    }
   }
 
-  return NextResponse.json({ scanned: totalScanned, opportunities: totalOpportunities })
+  return NextResponse.json({
+    scanned: totalScanned,
+    opportunities: totalOpportunities,
+    errors: errors.length ? errors : undefined,
+  }, { status: errors.length ? 207 : 200 })
 }

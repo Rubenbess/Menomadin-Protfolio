@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { isAllowedFileUrl } from '@/lib/url-allowlist'
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth()
@@ -18,6 +19,12 @@ export async function POST(req: NextRequest) {
   }
   if (!body.file_url || typeof body.file_url !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid file_url' }, { status: 400 })
+  }
+  // Pin file_url to the same storage allowlist used by /api/extract and
+  // /api/pipeline/analyze-deck so callers cannot register arbitrary external
+  // URLs as company documents (which would later be fetched by extract).
+  if (!isAllowedFileUrl(body.file_url)) {
+    return NextResponse.json({ error: 'file_url is not on the allowed storage host' }, { status: 400 })
   }
   if (!body.file_name || typeof body.file_name !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid file_name' }, { status: 400 })

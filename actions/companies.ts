@@ -43,7 +43,11 @@ export async function upsertContacts(
   contacts: { name: string; position: string }[]
 ) {
   const supabase = await createServerSupabaseClient()
-  await supabase.from('contacts').delete().eq('company_id', companyId)
+  // If the delete fails (RLS, connectivity), abort — otherwise the subsequent
+  // insert merges the new contacts on top of stale rows and the user sees
+  // duplicates.
+  const { error: delErr } = await supabase.from('contacts').delete().eq('company_id', companyId)
+  if (delErr) return { error: delErr.message }
   if (contacts.length === 0) return { error: null }
   const { error } = await supabase.from('contacts').insert(
     contacts.map(c => ({ ...c, company_id: companyId }))

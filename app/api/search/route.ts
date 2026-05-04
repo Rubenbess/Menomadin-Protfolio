@@ -13,7 +13,10 @@ export async function GET(req: NextRequest) {
   const escaped = q.replace(/[\\%_]/g, m => `\\${m}`)
   const pattern = `%${escaped}%`
 
-  const [companies, contacts, pipeline] = await Promise.all([
+  // PostgREST .or() uses commas as condition separators, so a user query
+  // containing a comma (or `()`/`.`) corrupts the filter. Split the OR into
+  // two separate queries and merge results client-side instead.
+  const [companies, contactsByName, contactsByEmail, pipeline] = await Promise.all([
     supabase
       .from('companies')
       .select('id, name, sector, status, logo_url')
@@ -22,7 +25,12 @@ export async function GET(req: NextRequest) {
     supabase
       .from('contacts')
       .select('id, name, position, email')
-      .or(`name.ilike.${pattern},email.ilike.${pattern}`)
+      .ilike('name', pattern)
+      .limit(5),
+    supabase
+      .from('contacts')
+      .select('id, name, position, email')
+      .ilike('email', pattern)
       .limit(5),
     supabase
       .from('pipeline')
@@ -30,6 +38,13 @@ export async function GET(req: NextRequest) {
       .ilike('name', pattern)
       .limit(5),
   ])
+
+  // De-duplicate contacts by id when a row matched both name and email.
+  const contactsById = new Map<string, { id: string; name: string; position: string | null; email: string | null }>()
+  for (const c of [...(contactsByName.data ?? []), ...(contactsByEmail.data ?? [])]) {
+    if (!contactsById.has(c.id)) contactsById.set(c.id, c)
+  }
+  const contactsMerged = [...contactsById.values()].slice(0, 5)
 
   const results = [
     ...(companies.data ?? []).map(c => ({
@@ -40,7 +55,7 @@ export async function GET(req: NextRequest) {
       href: `/companies/${c.id}`,
       logo: c.logo_url,
     })),
-    ...(contacts.data ?? []).map(c => ({
+    ...contactsMerged.map(c => ({
       type: 'contact' as const,
       id: c.id,
       title: c.name,
