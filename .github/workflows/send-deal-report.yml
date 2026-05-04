@@ -36,7 +36,7 @@ jobs:
           CONTENT=$(cat "$FILE")
           REPORT_DATE=$(basename "$FILE" .md)
 
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${SUPABASE_URL}/rest/v1/deal_reports" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${SUPABASE_URL}/rest/v1/deal_reports?on_conflict=report_date" \
             -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Content-Type: application/json" \
