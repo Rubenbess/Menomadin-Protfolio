@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     let snapshot
     try {
-      snapshot = isEml ? await snapshotFromEml(buf) : snapshotFromMsg(buf)
+      snapshot = isEml ? await snapshotFromEml(buf) : await snapshotFromMsg(buf)
     } catch (e) {
       console.error('[api/tasks/emails] parse failed', e)
       const msg = e instanceof Error ? e.message : 'Failed to parse email file'

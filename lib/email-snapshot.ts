@@ -3,15 +3,19 @@
  * task_email_attachments columns. HTML is sanitized via DOMPurify.
  */
 
-import DOMPurify from 'isomorphic-dompurify'
-import { simpleParser, type AddressObject } from 'mailparser'
-import MsgReaderDefault from '@kenjiuno/msgreader'
+// All three packages are imported dynamically inside their respective
+// functions so they are never resolved during Next.js build-time page-data
+// collection. Static top-level imports caused ERR_REQUIRE_ESM because
+// html-encoding-sniffer (a transitive dep of mailparser) CJS-requires an
+// ESM-only file from @exodus/bytes.
+import type { AddressObject } from 'mailparser'
 
 // @kenjiuno/msgreader publishes the class on `default` AND nested in
 // `.default.default` depending on how the bundler resolves CJS<->ESM. Walk
 // the chain until we find the actual constructor.
 type MsgReaderCtor = new (buf: ArrayBuffer) => { getFileData: () => unknown }
-function resolveMsgReader(): MsgReaderCtor {
+async function resolveMsgReader(): Promise<MsgReaderCtor> {
+  const MsgReaderDefault = (await import('@kenjiuno/msgreader')).default
   let candidate: unknown = MsgReaderDefault
   for (let i = 0; i < 3; i++) {
     if (typeof candidate === 'function') return candidate as MsgReaderCtor
@@ -66,7 +70,8 @@ function htmlToText(html: string): string {
     .trim()
 }
 
-export function sanitizeHtml(html: string): string {
+export async function sanitizeHtml(html: string): Promise<string> {
+  const { default: DOMPurify } = await import('isomorphic-dompurify')
   return DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true },
     FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'link', 'meta'],
@@ -95,9 +100,10 @@ function flattenAddresses(
 }
 
 export async function snapshotFromEml(buffer: Buffer): Promise<EmailSnapshot> {
+  const { simpleParser } = await import('mailparser')
   const parsed = await simpleParser(buffer)
   const html = parsed.html || null
-  const safeHtml = html ? sanitizeHtml(html) : null
+  const safeHtml = html ? await sanitizeHtml(html) : null
   const text = parsed.text || (html ? htmlToText(html) : null)
 
   const fromList = flattenAddresses(parsed.from)
@@ -208,18 +214,18 @@ function decodeMsgHtml(value: string | Uint8Array | undefined): string | null {
   }
 }
 
-export function snapshotFromMsg(buffer: Buffer): EmailSnapshot {
+export async function snapshotFromMsg(buffer: Buffer): Promise<EmailSnapshot> {
   // msgreader expects ArrayBuffer; slice to detach from the underlying pool
   const ab = buffer.buffer.slice(
     buffer.byteOffset,
     buffer.byteOffset + buffer.byteLength
   ) as ArrayBuffer
-  const Ctor = resolveMsgReader()
+  const Ctor = await resolveMsgReader()
   const reader = new Ctor(ab)
   const data = reader.getFileData() as MsgFileData
 
   const html = decodeMsgHtml(data.bodyHtml)
-  const safeHtml = html ? sanitizeHtml(html) : null
+  const safeHtml = html ? await sanitizeHtml(html) : null
   const text = data.body ?? (html ? htmlToText(html) : null)
 
   const recipients = (data.recipients ?? []).map((r) => ({
