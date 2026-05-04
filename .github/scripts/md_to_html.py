@@ -60,16 +60,18 @@ while i < len(lines):
         body += '<div style="height:6px"></div>'
     i += 1
 
-print(f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+print(f"""<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:0;background:#f1f5f9">
 <div style="max-width:760px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
   <div style="background:#4f46e5;padding:28px 32px">
-    <p style="margin:0 0 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#c7d2fe">Deal Report</p>
-    <h1 style="margin:0 0 4px;font-size:22px;font-weight:700;color:#fff">Israeli Tech Ecosystem</h1>
+    <p style="margin:0 0 2px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#c7d2fe">Prepared for: Menomadin Investments</p>
+    <h1 style="margin:4px 0;font-size:22px;font-weight:700;color:#fff">Israeli Tech Ecosystem &mdash; Deal Report</h1>
     <p style="margin:0;font-size:13px;color:#c7d2fe">Week of {week_of}</p>
   </div>
   <div style="padding:28px 32px">{body}</div>
   <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af">
-    Menomadin Catalyst &middot; Automated weekly report
+    Menomadin Investments &middot; This report is prepared and distributed exclusively for internal use.
   </div>
 </div></body></html>""")

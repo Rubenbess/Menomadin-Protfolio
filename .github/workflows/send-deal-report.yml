@@ -117,11 +117,12 @@ jobs:
           SUBJECT="Menomadin Israeli Tech Deal Report — Week of ${WEEK_OF}"
 
           PAYLOAD=$(jq -n \
-            --arg from "noreply@portfolio-menomadin.com" \
+            --arg from "Menomadin Investments <noreply@portfolio-menomadin.com>" \
             --argjson to "$TO_ARRAY" \
             --arg subject "$SUBJECT" \
             --arg html "$HTML" \
-            '{from: $from, to: $to, subject: $subject, html: $html}')
+            --arg reply_to "rubenb@menomadin.com" \
+            '{from: $from, to: $to, subject: $subject, html: $html, reply_to: $reply_to}')
 
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.resend.com/emails" \
             -H "Authorization: Bearer ${RESEND_API_KEY}" \
