@@ -6,6 +6,11 @@ on:
       - 'reports/**.md'
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: 'Report date (YYYY-MM-DD) — leave blank to use latest'
+        required: false
 
 jobs:
   save-report:
@@ -18,7 +23,11 @@ jobs:
       - name: Get changed report file
         id: report
         run: |
-          FILE=$(git diff --name-only HEAD~1 HEAD -- 'reports/*.md' | head -1)
+          if [ -n "${{ github.event.inputs.report_date }}" ]; then
+            FILE="reports/${{ github.event.inputs.report_date }}.md"
+          else
+            FILE=$(git diff --name-only HEAD~1 HEAD -- 'reports/*.md' | head -1)
+          fi
           echo "file=$FILE" >> $GITHUB_OUTPUT
           echo "Found report: $FILE"
 
