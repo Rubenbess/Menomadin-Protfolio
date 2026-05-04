@@ -100,7 +100,7 @@ jobs:
           CONTENT=$(cat "$FILE")
           REPORT_DATE=$(basename "$FILE" .md)
 
-          SEND_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${APP_URL}/api/send-deal-report" \
+          SEND_RESPONSE=$(curl -s -L -w "\n%{http_code}" -X POST "${APP_URL}/api/send-deal-report" \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
