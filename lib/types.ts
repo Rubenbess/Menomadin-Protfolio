@@ -222,6 +222,7 @@ export interface CompanyUpdate {
   category: string
   title: string
   notes: string | null
+  created_by: string | null
   created_at: string
 }
 

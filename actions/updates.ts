@@ -10,7 +10,20 @@ export async function createUpdate(data: {
   notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('company_updates').insert(data)
+
+  // Auto-capture the logged-in user's name as author
+  const { data: { user } } = await supabase.auth.getUser()
+  let created_by: string | null = null
+  if (user) {
+    const { data: member } = await supabase
+      .from('team_members')
+      .select('name')
+      .eq('id', user.id)
+      .maybeSingle()
+    created_by = member?.name ?? null
+  }
+
+  const { error } = await supabase.from('company_updates').insert({ ...data, created_by })
   return { error: error?.message ?? null }
 }
 

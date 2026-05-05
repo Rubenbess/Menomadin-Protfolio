@@ -863,6 +863,9 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                             {u.category}
                           </span>
                           <span className="text-xs text-neutral-500">{fmtDate(u.date)}</span>
+                          {u.created_by && (
+                            <span className="text-xs text-neutral-400">· {u.created_by}</span>
+                          )}
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 flex-shrink-0">
                           <button
