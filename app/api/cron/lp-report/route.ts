@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const lpEmails  = process.env.LP_EMAILS // comma-separated list of LP email addresses
 
   if (!resendKey || !lpEmails) {
-    return NextResponse.json({ error: 'Missing RESEND_API_KEY or LP_EMAILS env vars' }, { status: 500 })
+    return NextResponse.json({ error: 'Missing RESEND_API_KEY or LP_EMAILS env vars' }, { status: 503 })
   }
 
   const supabase = await createServerSupabaseClient()

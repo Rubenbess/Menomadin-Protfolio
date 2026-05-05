@@ -2,20 +2,6 @@
  * Analytics utilities for portfolio metrics and calculations
  */
 
-export interface PortfolioMetrics {
-  totalInvested: number
-  currentValue: number
-  gainLoss: number
-  gainLossPercent: number
-  tvpi: number
-  moic: number
-  irr: number
-  dpi: number
-  numCompanies: number
-  numActiveDeals: number
-  numExits: number
-}
-
 export interface InvestmentByStage {
   stage: string
   amount: number
@@ -44,51 +30,25 @@ export interface CompanyPerformance {
 }
 
 /**
- * Calculate portfolio metrics from companies data
+ * Shape produced by Server Components after pre-computing metrics on the
+ * raw `companies` rows (see app/(protected)/analytics/page.tsx and
+ * dashboard/page.tsx). Optional fields tolerate callers that haven't
+ * computed every metric — `c.moic ?? …` style is used everywhere.
  */
-export function calculatePortfolioMetrics(companies: any[]): PortfolioMetrics {
-  const totalInvested = companies.reduce((sum, c) => sum + (c.totalInvested || 0), 0)
-  const currentValue = companies.reduce((sum, c) => sum + (c.currentValue || 0), 0)
-  const gainLoss = currentValue - totalInvested
-  const gainLossPercent = totalInvested > 0 ? (gainLoss / totalInvested) * 100 : 0
-
-  // Calculate weighted averages
-  const weights = companies.map(c => c.totalInvested || 0)
-  const totalWeight = weights.reduce((a, b) => a + b, 0)
-
-  const tvpi = totalInvested > 0 ? currentValue / totalInvested : 0
-  const moic = totalWeight > 0
-    ? companies.reduce((sum, c, i) => sum + ((c.moic || 1) * weights[i]), 0) / totalWeight
-    : 0
-  const irr = totalWeight > 0
-    ? companies.reduce((sum, c, i) => sum + ((c.irr || 0) * weights[i]), 0) / totalWeight
-    : 0
-  const dpi = totalWeight > 0
-    ? companies.reduce((sum, c, i) => sum + ((c.dpi || 0) * weights[i]), 0) / totalWeight
-    : 0
-
-  const numActiveDeals = companies.filter(c => c.status === 'active').length
-  const numExits = companies.filter(c => c.status === 'exited').length
-
-  return {
-    totalInvested,
-    currentValue,
-    gainLoss,
-    gainLossPercent,
-    tvpi,
-    moic,
-    irr,
-    dpi,
-    numCompanies: companies.length,
-    numActiveDeals,
-    numExits,
-  }
+export interface CompanyWithMetrics {
+  name?: string
+  sector?: string | null
+  status?: string
+  entry_stage?: string | null
+  totalInvested?: number
+  currentValue?: number
+  moic?: number
 }
 
 /**
  * Group investments by stage
  */
-export function getInvestmentsByStage(companies: any[]): InvestmentByStage[] {
+export function getInvestmentsByStage(companies: CompanyWithMetrics[]): InvestmentByStage[] {
   const stages = new Map<string, { amount: number; count: number }>()
 
   companies.forEach(c => {
@@ -109,7 +69,7 @@ export function getInvestmentsByStage(companies: any[]): InvestmentByStage[] {
 /**
  * Group investments by sector
  */
-export function getInvestmentsBySector(companies: any[]): SectorMetrics[] {
+export function getInvestmentsBySector(companies: CompanyWithMetrics[]): SectorMetrics[] {
   const sectors = new Map<string, { invested: number; currentValue: number; count: number }>()
 
   companies.forEach(c => {
@@ -133,10 +93,10 @@ export function getInvestmentsBySector(companies: any[]): SectorMetrics[] {
 /**
  * Get performance rankings
  */
-export function getTopPerformers(companies: any[], limit = 5): CompanyPerformance[] {
+export function getTopPerformers(companies: CompanyWithMetrics[], limit = 5): CompanyPerformance[] {
   return companies
     .map(c => ({
-      name: c.name,
+      name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
       moic: c.moic || 1,
@@ -149,10 +109,10 @@ export function getTopPerformers(companies: any[], limit = 5): CompanyPerformanc
 /**
  * Get underperformers
  */
-export function getUnderperformers(companies: any[], limit = 5): CompanyPerformance[] {
+export function getUnderperformers(companies: CompanyWithMetrics[], limit = 5): CompanyPerformance[] {
   return companies
     .map(c => ({
-      name: c.name,
+      name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
       moic: c.moic || 1,

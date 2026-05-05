@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase'
 import { createCompany, updateCompany, upsertContacts } from '@/actions/companies'
 import { normalizeSector } from '@/lib/calculations'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { Company, Contact } from '@/lib/types'
 
 interface Props {
@@ -21,8 +22,8 @@ const STATUSES = ['active', 'exited', 'written-off', 'watchlist']
 const ENTRY_STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Late Stage', 'Other']
 const LS_KEY = 'custom_sectors'
 
-const input = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const label = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const input = inputClasses
+const label = labelClasses
 
 function loadCustomSectors(): string[] {
   try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] }

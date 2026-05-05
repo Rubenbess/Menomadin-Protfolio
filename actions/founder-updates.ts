@@ -20,6 +20,36 @@ interface FounderUpdateData {
 }
 
 /**
+ * Maximum byte sizes for free-text fields. The service-role client used below
+ * bypasses RLS, so a leaked token would otherwise let any caller insert
+ * megabyte-sized strings until the row hit Postgres limits. Values are
+ * deliberately generous for normal founder usage.
+ */
+const MAX_FREE_TEXT_LEN = 5_000
+
+function clampText(s: string | null): string | null {
+  if (s == null) return null
+  if (s.length <= MAX_FREE_TEXT_LEN) return s
+  return s.slice(0, MAX_FREE_TEXT_LEN)
+}
+
+/**
+ * Reject metric values that are non-finite, negative (where it's never
+ * meaningful), or absurdly large. KPI fields write directly into the same
+ * `company_kpis` table the team uses for reporting; bad input here corrupts
+ * downstream MOIC and runway charts.
+ */
+function isInvalidMetric(v: number | null, allowNegative = false): boolean {
+  if (v == null) return false
+  if (!Number.isFinite(v)) return true
+  if (!allowNegative && v < 0) return true
+  // 1e15 catches accidentally-typed million-billions ($1e15 = $1Q) and
+  // most arithmetic-overflow inputs.
+  if (Math.abs(v) > 1e15) return true
+  return false
+}
+
+/**
  * Public founder-update submission. Accepts the per-company `update_token`
  * (NOT a raw company_id from the client) and resolves the company server-side.
  * This is the only authentication on this endpoint, so the token must be
@@ -29,6 +59,28 @@ interface FounderUpdateData {
  */
 export async function submitFounderUpdate(data: FounderUpdateData) {
   if (!data.token) return { error: 'Missing token' }
+
+  // Defensive bounds — see helper docs above.
+  if (
+    isInvalidMetric(data.arr) ||
+    isInvalidMetric(data.revenue) ||
+    isInvalidMetric(data.burn_rate) ||
+    isInvalidMetric(data.cash_runway) ||
+    isInvalidMetric(data.headcount)
+  ) {
+    return { error: 'One or more metric values are out of range.' }
+  }
+
+  // Date sanity — must parse, must not be more than a year in the future.
+  const parsedDate = data.date ? new Date(data.date) : null
+  if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+    return { error: 'Invalid date' }
+  }
+  const oneYearAhead = new Date()
+  oneYearAhead.setFullYear(oneYearAhead.getFullYear() + 1)
+  if (parsedDate.getTime() > oneYearAhead.getTime()) {
+    return { error: 'Date cannot be more than a year in the future' }
+  }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,11 +97,11 @@ export async function submitFounderUpdate(data: FounderUpdateData) {
   const companyId = company.id as string
 
   const noteLines = [
-    data.highlights && `**Highlights**\n${data.highlights}`,
-    data.challenges && `**Challenges**\n${data.challenges}`,
-    data.next_quarter && `**Next Quarter**\n${data.next_quarter}`,
-    data.ask && `**Ask**\n${data.ask}`,
-    data.notes,
+    clampText(data.highlights) && `**Highlights**\n${clampText(data.highlights)}`,
+    clampText(data.challenges) && `**Challenges**\n${clampText(data.challenges)}`,
+    clampText(data.next_quarter) && `**Next Quarter**\n${clampText(data.next_quarter)}`,
+    clampText(data.ask) && `**Ask**\n${clampText(data.ask)}`,
+    clampText(data.notes),
   ].filter(Boolean)
 
   const { error: updateError } = await supabase.from('company_updates').insert({

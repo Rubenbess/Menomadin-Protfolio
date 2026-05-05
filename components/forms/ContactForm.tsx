@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createContact, updateContact } from '@/actions/contacts'
 import { createCompany } from '@/actions/companies'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { Contact } from '@/lib/types'
 
 const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 'Other'] as const
 
-const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const inp = inputClasses
+const lbl = labelClasses
 
 interface Props {
   contact?: Contact

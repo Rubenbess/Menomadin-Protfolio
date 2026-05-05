@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
@@ -110,7 +111,7 @@ export default function AppShell({ children, initialNotifications, userProfile }
           </button>
           <div className="flex items-center gap-2 flex-1">
             <div className="w-6 h-6 rounded-md bg-primary-500/20 flex items-center justify-center ring-1 ring-primary-400/30">
-              <img src="/menomadin-icon.svg" alt="" className="h-3 w-3 invert" />
+              <Image src="/menomadin-icon.svg" alt="" width={12} height={12} className="h-3 w-3 invert" />
             </div>
             <span className="text-sm font-bold text-neutral-900 dark:text-white">Menomadin</span>
           </div>

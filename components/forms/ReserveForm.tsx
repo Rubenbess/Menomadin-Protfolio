@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { upsertReserve } from '@/actions/reserves'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { Reserve } from '@/lib/types'
 
 const ROUNDS = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Bridge']
@@ -15,8 +16,8 @@ interface Props {
   onClose: () => void
 }
 
-const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const inp = inputClasses
+const lbl = labelClasses
 
 export default function ReserveForm({ companyId, companyName, reserve, onClose }: Props) {
   const router = useRouter()

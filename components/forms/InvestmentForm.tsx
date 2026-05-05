@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createInvestment, updateInvestment } from '@/actions/investments'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { Round, LegalEntity, Investment } from '@/lib/types'
 
 const INSTRUMENTS = ['SAFE', 'Equity', 'Note', 'Warrant']
@@ -16,8 +17,8 @@ interface Props {
   onClose: () => void
 }
 
-const input = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const label = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const input = inputClasses
+const label = labelClasses
 
 export default function InvestmentForm({ companyId, rounds, legalEntities, investment, onClose }: Props) {
   const router = useRouter()

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createCapTableEntry } from '@/actions/cap-table'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { Round } from '@/lib/types'
 
 interface Props {
@@ -12,8 +13,8 @@ interface Props {
   onClose: () => void
 }
 
-const input = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const label = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const input = inputClasses
+const label = labelClasses
 
 export default function CapTableForm({ companyId, rounds, onClose }: Props) {
   const router = useRouter()

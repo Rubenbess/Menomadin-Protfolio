@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const toEmail   = process.env.TEAM_EMAIL
 
   if (!resendKey || !toEmail) {
-    return NextResponse.json({ error: 'Missing RESEND_API_KEY or TEAM_EMAIL env vars' }, { status: 500 })
+    return NextResponse.json({ error: 'Missing RESEND_API_KEY or TEAM_EMAIL env vars' }, { status: 503 })
   }
 
   const supabase = await createServerSupabaseClient()

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createOptionPool, updateOptionPool } from '@/actions/option-pools'
 import type { OptionPool } from '@/lib/types'
 import Button from '@/components/ui/Button'
+import { inputClasses } from './inputStyles'
 
 interface Props {
   companyId: string
@@ -11,7 +12,7 @@ interface Props {
   onClose: () => void
 }
 
-const fi = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
+const fi = inputClasses
 
 export default function OptionPoolForm({ companyId, pool, onClose }: Props) {
   const [name, setName]               = useState(pool?.name ?? 'ESOP')

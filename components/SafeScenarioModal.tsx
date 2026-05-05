@@ -19,11 +19,13 @@ interface Props {
 
 export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props) {
   const router = useRouter()
-  const [preMoney, setPreMoney]   = useState('')
-  const [raise, setRaise]         = useState('')
-  const [roundId, setRoundId]     = useState('')
-  const [converting, setConverting] = useState(false)
-  const [convertErr, setConvertErr] = useState<string | null>(null)
+  const [preMoney, setPreMoney]         = useState('')
+  const [raise, setRaise]               = useState('')
+  const [roundId, setRoundId]           = useState('')
+  const [convShares, setConvShares]     = useState(safe.converted_shares?.toString() ?? '')
+  const [convPrice, setConvPrice]       = useState(safe.converted_price_per_share?.toString() ?? '')
+  const [converting, setConverting]     = useState(false)
+  const [convertErr, setConvertErr]     = useState<string | null>(null)
 
   const preMoneNum = parseFloat(preMoney) || 0
   const raiseNum   = parseFloat(raise)    || 0
@@ -59,7 +61,10 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
     if (!roundId || !preMoneNum || !raiseNum) return
     setConverting(true)
     setConvertErr(null)
-    const res = await convertSafe(safe.id, roundId, preMoneNum, raiseNum)
+    const res = await convertSafe(safe.id, roundId, preMoneNum, raiseNum, {
+      shares: convShares ? parseInt(convShares) : undefined,
+      pricePerShare: convPrice ? parseFloat(convPrice) : undefined,
+    })
     setConverting(false)
     if (res.error) { setConvertErr(res.error); return }
     router.refresh()
@@ -72,6 +77,12 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
 
         {/* SAFE summary */}
         <div className="bg-neutral-50 rounded-lg p-4 ring-1 ring-slate-200 grid grid-cols-2 gap-3">
+          {safe.investor_name && (
+            <div className="col-span-2">
+              <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Investor</p>
+              <p className="text-sm font-bold text-neutral-900">{safe.investor_name}</p>
+            </div>
+          )}
           <div>
             <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Investment</p>
             <p className="text-sm font-bold text-neutral-900">{fmt$$(safe.investment_amount)}</p>
@@ -170,6 +181,18 @@ export default function SafeScenarioModal({ safe, rounds, open, onClose }: Props
                   <option key={r.id} value={r.id}>{r.type} — {r.date}</option>
                 ))}
               </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="field-label">Shares Issued (optional)</label>
+                <input type="number" className="field-input" placeholder="e.g. 125000"
+                  value={convShares} onChange={e => setConvShares(e.target.value)} min="0" step="1" />
+              </div>
+              <div>
+                <label className="field-label">Price per Share (optional)</label>
+                <input type="number" className="field-input" placeholder="e.g. 4.00"
+                  value={convPrice} onChange={e => setConvPrice(e.target.value)} min="0" step="any" />
+              </div>
             </div>
             {convertErr && <p className="text-xs text-red-500 mb-2">{convertErr}</p>}
             {!preMoneNum || !raiseNum ? (

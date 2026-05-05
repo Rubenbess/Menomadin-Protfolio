@@ -6,6 +6,7 @@ import { Plus, X, Paperclip, ExternalLink, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase'
 import { createPipelineEntry, updatePipelineEntry } from '@/actions/pipeline'
+import { inputClasses, labelClasses } from './inputStyles'
 import type { PipelineEntry } from '@/lib/types'
 
 const BASE_SECTORS = ['SaaS', 'Fintech', 'Healthtech', 'Cleantech', 'Consumer', 'Deep Tech', 'Marketplace', 'Agritech', 'Cybersecurity', 'EdTech', 'Other']
@@ -21,8 +22,8 @@ const SCORE_DIMS = [
   { key: 'score_fit',      label: 'Strategic Fit',     description: '1 = low   · 5 = perfect fit' },
 ] as const
 
-const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const inp = inputClasses
+const lbl = labelClasses
 
 type ScoreKey = typeof SCORE_DIMS[number]['key']
 

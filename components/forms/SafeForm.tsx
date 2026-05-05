@@ -18,6 +18,7 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
   const [discount, setDiscount]           = useState(safe?.discount_rate?.toString() ?? '')
   const [hasMfn, setHasMfn]               = useState(safe?.has_mfn ?? false)
   const [hasProRata, setHasProRata]       = useState(safe?.has_pro_rata ?? false)
+  const [investorName, setInvestorName]   = useState(safe?.investor_name ?? '')
   const [notes, setNotes]                 = useState(safe?.notes ?? '')
   const [error, setError]                 = useState<string | null>(null)
   const [loading, setLoading]             = useState(false)
@@ -32,10 +33,11 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
       company_id:        companyId,
       date,
       investment_amount: parseFloat(amount),
-      valuation_cap:     cap     ? parseFloat(cap)      : null,
+      valuation_cap:     cap      ? parseFloat(cap)      : null,
       discount_rate:     discount ? parseFloat(discount) : null,
       has_mfn:           hasMfn,
       has_pro_rata:      hasProRata,
+      investor_name:     investorName.trim() || null,
       notes:             notes.trim() || null,
     }
 
@@ -50,6 +52,22 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
+      {/* Investor */}
+      <div>
+        <label className="field-label">Investor</label>
+        <input
+          type="text"
+          className="field-input"
+          placeholder="Leave blank if Menomadin's own SAFE"
+          value={investorName}
+          onChange={e => setInvestorName(e.target.value)}
+        />
+        <p className="text-[11px] text-neutral-500 mt-1">
+          Fill in to record a third-party investor's SAFE (e.g. "Sequoia", "John Smith")
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="field-label">Date <span className="text-red-500">*</span></label>

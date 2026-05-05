@@ -37,7 +37,7 @@ export default async function AnalyticsPage() {
     supabase.from('investments').select('*').order('date').limit(FULL_LIST_FETCH_LIMIT),
     supabase.from('cap_table').select('*').limit(FULL_LIST_FETCH_LIMIT),
     supabase.from('reserves').select('*').limit(FULL_LIST_FETCH_LIMIT),
-    supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
+    supabase.from('legal_entities').select('*').order('created_at', { ascending: true }).limit(FULL_LIST_FETCH_LIMIT),
   ])
 
   const companiesList   = (companies   ?? []) as Company[]

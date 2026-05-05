@@ -19,7 +19,7 @@ export async function deleteWaterfallScenario(id: string) {
   const supabase = await createServerSupabaseClient()
   const { data: existing, error: fetchErr } = await supabase
     .from('waterfall_scenarios').select('company_id').eq('id', id).single()
-  if (fetchErr) return { error: fetchErr.message }
+  if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Scenario not found' }
 
   const { error } = await supabase.from('waterfall_scenarios').delete().eq('id', id)
   if (error) return { error: error.message }

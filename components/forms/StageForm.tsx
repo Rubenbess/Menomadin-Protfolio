@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import { createStage, updateStage } from '@/actions/pipeline-stages'
+import { inputClasses, labelClasses } from './inputStyles'
 import { useRouter } from 'next/navigation'
 
 const COLORS = [
@@ -54,19 +55,19 @@ export default function StageForm({ stage, nextPosition = 0, onClose }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-neutral-800 mb-1.5">Stage name *</label>
+        <label className={labelClasses}>Stage name *</label>
         <input
           required
           value={name}
           onChange={e => setName(e.target.value)}
-          className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all"
+          className={inputClasses}
           placeholder="e.g. Portfolio Review"
           autoFocus
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-800 mb-2">Color</label>
+        <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-2">Color</label>
         <div className="flex flex-wrap gap-2">
           {COLORS.map(c => (
             <button

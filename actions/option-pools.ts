@@ -18,7 +18,7 @@ export async function updateOptionPool(id: string, data: Partial<OptionPoolData>
   const supabase = await createServerSupabaseClient()
   const { data: existing, error: fetchErr } = await supabase
     .from('option_pools').select('company_id').eq('id', id).single()
-  if (fetchErr) return { error: fetchErr.message }
+  if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Option pool not found' }
 
   const { error } = await supabase.from('option_pools').update(data).eq('id', id)
   if (error) return { error: error.message }
@@ -30,7 +30,7 @@ export async function deleteOptionPool(id: string) {
   const supabase = await createServerSupabaseClient()
   const { data: existing, error: fetchErr } = await supabase
     .from('option_pools').select('company_id').eq('id', id).single()
-  if (fetchErr) return { error: fetchErr.message }
+  if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Option pool not found' }
 
   const { error } = await supabase.from('option_pools').delete().eq('id', id)
   if (error) return { error: error.message }

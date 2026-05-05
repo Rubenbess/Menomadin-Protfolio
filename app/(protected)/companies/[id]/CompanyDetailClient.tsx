@@ -503,6 +503,11 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               <div className="sm:w-36 flex-shrink-0">
                                 <p className="text-sm font-bold text-neutral-900">SAFE</p>
                                 <p className="text-xs text-neutral-500 mt-0.5">{fmtDate(safe.date)}</p>
+                                {safe.investor_name ? (
+                                  <p className="text-xs font-semibold text-orange-600 mt-0.5">{safe.investor_name}</p>
+                                ) : (
+                                  <p className="text-xs text-neutral-400 mt-0.5">Menomadin</p>
+                                )}
                                 <span className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                                   safe.status === 'converted'
                                     ? 'bg-emerald-100 text-emerald-700'
@@ -519,8 +524,13 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                   { label: 'Valuation Cap', value: safe.valuation_cap ? fmt$$(safe.valuation_cap) : '—' },
                                   { label: 'Discount',      value: safe.discount_rate ? `${safe.discount_rate}%` : '—' },
                                   { label: 'MFN / Pro-rata', value: [safe.has_mfn && 'MFN', safe.has_pro_rata && 'Pro-rata'].filter(Boolean).join(' · ') || '—' },
-                                  { label: 'Est. Ownership', value: estOwnership > 0 ? fmtPct(estOwnership) : '—', accent: estOwnership > 0 },
-                                ].map(({ label, value, highlight, accent }) => (
+                                  safe.status === 'converted' && safe.converted_shares
+                                    ? { label: 'Shares Issued', value: safe.converted_shares.toLocaleString(), accent: false }
+                                    : { label: 'Est. Ownership', value: estOwnership > 0 ? fmtPct(estOwnership) : '—', accent: estOwnership > 0 },
+                                  ...(safe.status === 'converted' && safe.converted_price_per_share
+                                    ? [{ label: 'Price / Share', value: `$${safe.converted_price_per_share.toFixed(4)}` }]
+                                    : []),
+                                ].filter(Boolean).map(({ label, value, highlight, accent }: any) => (
                                   <div key={label}>
                                     <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-0.5">{label}</p>
                                     <p className={`text-sm font-medium ${accent ? 'text-orange-600' : highlight ? 'text-primary-600' : 'text-neutral-900'}`}>{value}</p>

@@ -35,6 +35,12 @@ export async function deleteStage(id: string, stageName: string) {
   if (stagesErr) return { error: `Failed to load remaining stages: ${stagesErr.message}` }
 
   const fallbackName = remainingStages?.[0]?.name
+
+  // Track which cards we moved so we can revert *exactly those* if the
+  // subsequent delete fails — moving them back by `eq('status', fallbackName)`
+  // would also drag pre-existing fallback-stage cards into the source stage.
+  let movedCardIds: string[] = []
+
   if (!fallbackName) {
     // Refuse to delete the last stage while it still has cards — there's
     // nowhere to move them and we don't want to orphan or hard-delete them.
@@ -47,15 +53,36 @@ export async function deleteStage(id: string, stageName: string) {
       return { error: 'Cannot delete the last pipeline stage while it still contains cards. Move the cards first.' }
     }
   } else {
-    const { error: moveErr } = await supabase
+    const { data: toMove, error: listErr } = await supabase
       .from('pipeline')
-      .update({ status: fallbackName })
+      .select('id')
       .eq('status', stageName)
-    if (moveErr) return { error: `Failed to move cards out of stage: ${moveErr.message}` }
+    if (listErr) return { error: `Failed to list cards in stage: ${listErr.message}` }
+    movedCardIds = (toMove ?? []).map(c => c.id as string)
+
+    if (movedCardIds.length > 0) {
+      const { error: moveErr } = await supabase
+        .from('pipeline')
+        .update({ status: fallbackName })
+        .in('id', movedCardIds)
+      if (moveErr) return { error: `Failed to move cards out of stage: ${moveErr.message}` }
+    }
   }
 
   const { error } = await supabase.from('pipeline_stages').delete().eq('id', id)
-  if (error) return { error: error.message }
+  if (error) {
+    // Compensating move-back: the stage row deletion failed, so the source
+    // stage still exists. Restore the cards we just moved (and only those)
+    // so the board reflects the pre-attempt state. No DB transaction is
+    // available here — the proper fix is a Postgres function.
+    if (movedCardIds.length > 0) {
+      await supabase
+        .from('pipeline')
+        .update({ status: stageName })
+        .in('id', movedCardIds)
+    }
+    return { error: `Failed to delete stage: ${error.message}. Cards were restored to the original stage.` }
+  }
   revalidatePath('/pipeline')
   return { error: null }
 }

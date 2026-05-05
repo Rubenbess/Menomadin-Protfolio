@@ -262,6 +262,9 @@ export interface Safe {
   has_pro_rata: boolean
   status: 'unconverted' | 'converted'
   converted_round_id: string | null
+  converted_shares: number | null
+  converted_price_per_share: number | null
+  investor_name: string | null      // null = Menomadin's own SAFE; filled = external investor
   notes: string | null
   created_at: string
 }

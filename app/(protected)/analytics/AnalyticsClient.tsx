@@ -14,12 +14,14 @@ import {
   formatCurrency,
   formatPercent,
   formatMultiple,
+  type CompanyWithMetrics,
 } from '@/lib/analytics-utils'
+import type { Investment } from '@/lib/types'
 import { TrendingUp, Target, Zap, BarChart3 } from 'lucide-react'
 
 interface Props {
-  companies: any[]
-  investments: any[]
+  companies: CompanyWithMetrics[]
+  investments: Investment[]
   portfolioIrr: number
   portfolioDpi: number
 }

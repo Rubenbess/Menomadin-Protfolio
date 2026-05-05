@@ -18,7 +18,7 @@ export async function updateShareSeries(id: string, data: Partial<ShareSeriesDat
   const supabase = await createServerSupabaseClient()
   const { data: existing, error: fetchErr } = await supabase
     .from('share_series').select('company_id').eq('id', id).single()
-  if (fetchErr) return { error: fetchErr.message }
+  if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Share series not found' }
 
   const { error } = await supabase.from('share_series').update(data).eq('id', id)
   if (error) return { error: error.message }
@@ -30,7 +30,7 @@ export async function deleteShareSeries(id: string) {
   const supabase = await createServerSupabaseClient()
   const { data: existing, error: fetchErr } = await supabase
     .from('share_series').select('company_id').eq('id', id).single()
-  if (fetchErr) return { error: fetchErr.message }
+  if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Share series not found' }
 
   const { error } = await supabase.from('share_series').delete().eq('id', id)
   if (error) return { error: error.message }
