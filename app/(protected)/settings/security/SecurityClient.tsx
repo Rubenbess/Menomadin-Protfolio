@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { ShieldCheck, ShieldOff, Trash2, CheckCircle2, AlertCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { labelClasses } from '@/lib/form-styles'
 
 type Step = 'idle' | 'enrolling' | 'enrolled'
 
@@ -214,7 +215,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-800 mb-1.5">
+            <label className={labelClasses}>
               Enter the 6-digit code to confirm
             </label>
             <input

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createOptionPool, updateOptionPool } from '@/actions/option-pools'
 import type { OptionPool } from '@/lib/types'
 import Button from '@/components/ui/Button'
-import { inputClasses } from './inputStyles'
+import { inputClasses } from '@/lib/form-styles'
 
 interface Props {
   companyId: string

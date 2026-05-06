@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase'
 import { createCompany, updateCompany, upsertContacts } from '@/actions/companies'
 import { normalizeSector } from '@/lib/calculations'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { Company, Contact } from '@/lib/types'
 
 interface Props {

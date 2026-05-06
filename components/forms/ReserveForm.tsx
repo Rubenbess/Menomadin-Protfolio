@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { upsertReserve } from '@/actions/reserves'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { Reserve } from '@/lib/types'
 
 const ROUNDS = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Bridge']

@@ -142,26 +142,26 @@ function ContactPanel({
 
   return (
     <>
-      <div className="fixed inset-0 bg-neutral-900/30 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-neutral-900/30 dark:bg-black/60 z-40" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-[420px] bg-white dark:bg-neutral-900 shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-4">
             <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0 ${avatarColor(contact.name)}`}>
               {initials(contact.name)}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-neutral-900">{contact.name}</h2>
-              {contact.position && <p className="text-sm text-neutral-600 mt-0.5">{contact.position}</p>}
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-50">{contact.name}</h2>
+              {contact.position && <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">{contact.position}</p>}
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {contact.companies && (
-                  <p className="text-xs text-primary-500 font-medium flex items-center gap-1">
+                  <p className="text-xs text-primary-500 dark:text-primary-300 font-medium flex items-center gap-1">
                     <Building2 size={11} /> {contact.companies.name}
                   </p>
                 )}
                 {contact.contact_type && (
-                  <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">
                     {contact.contact_type}
                   </span>
                 )}
@@ -170,20 +170,20 @@ function ContactPanel({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors flex-shrink-0"
+            className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-neutral-200 bg-neutral-50/60 px-6">
+        <div className="flex border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-800/60 px-6">
           <button
             onClick={() => setTab('interactions')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'interactions'
-                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
-                : 'text-neutral-500 hover:text-neutral-700'
+                ? 'text-primary-500 dark:text-primary-300 border-b-2 border-primary-500 -mb-px bg-white dark:bg-neutral-900'
+                : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
           >
             Interactions

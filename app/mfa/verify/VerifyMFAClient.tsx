@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { ShieldCheck, LogOut } from 'lucide-react'
+import { labelClasses } from '@/lib/form-styles'
 
 export default function VerifyMFAClient() {
   const [code, setCode] = useState('')
@@ -67,7 +68,7 @@ export default function VerifyMFAClient() {
         <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-7">
           <form onSubmit={handleVerify} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-1.5">Authentication code</label>
+              <label className={labelClasses}>Authentication code</label>
               <input
                 ref={inputRef}
                 type="text"

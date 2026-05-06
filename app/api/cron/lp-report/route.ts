@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
+import { FUND_FULL_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
 
 export async function GET(req: NextRequest) {
   const cronError = requireCronAuth(req)
@@ -15,7 +16,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing RESEND_API_KEY or LP_EMAILS env vars' }, { status: 503 })
   }
 
-  const supabase = await createServerSupabaseClient()
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'Missing Supabase env vars' }, { status: 503 })
+  }
+
+  // Cron runs without a user session. After rls_tighten_team_members.sql every
+  // core table requires auth.uid() to be a registered team member, which is
+  // never true here. Use the service role to read the portfolio data directly;
+  // bearer auth via requireCronAuth above is the perimeter.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  )
 
   const [companiesRes, investmentsRes, roundsRes, capTableRes] = await Promise.all([
     supabase.from('companies').select('*').order('name'),
@@ -69,7 +81,7 @@ export async function GET(req: NextRequest) {
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:700px;margin:0 auto;padding:32px 16px">
       <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:16px;padding:24px 32px;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:20px;font-weight:700">Menomadin Portfolio</h1>
+        <h1 style="color:white;margin:0;font-size:20px;font-weight:700">${FUND_PORTFOLIO_NAME}</h1>
         <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:14px">${quarter} LP Update</p>
       </div>
 
@@ -103,7 +115,7 @@ export async function GET(req: NextRequest) {
       </table>
 
       <p style="color:#94a3b8;font-size:12px;text-align:center">
-        Menomadin Group · This report was auto-generated from the portfolio platform.
+        ${FUND_FULL_NAME} · This report was auto-generated from the portfolio platform.
       </p>
     </div>
   `
@@ -114,12 +126,15 @@ export async function GET(req: NextRequest) {
   const { error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: recipients,
-    subject: `Menomadin Portfolio — ${quarter} Update`,
+    subject: `${FUND_PORTFOLIO_NAME} — ${quarter} Update`,
     html,
   })
 
   if (sendError) {
-    return NextResponse.json({ error: sendError.message }, { status: 500 })
+    // 502 not 500: Resend is an external dependency, so a send failure is a
+    // bad-gateway condition rather than a bug in our code. Lets monitoring
+    // distinguish "Resend was down" from "our handler crashed".
+    return NextResponse.json({ error: sendError.message }, { status: 502 })
   }
 
   return NextResponse.json({ sent: recipients.length, quarter })

@@ -47,7 +47,7 @@ export default async function TasksSummary() {
   return (
     <div className="space-y-4 mb-6 md:mb-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+        <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 flex items-center gap-2">
           <CheckSquare size={16} className="text-primary-500" />
           Tasks Overview
         </h2>

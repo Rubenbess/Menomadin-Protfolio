@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import { createStage, updateStage } from '@/actions/pipeline-stages'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import { useRouter } from 'next/navigation'
 
 const COLORS = [

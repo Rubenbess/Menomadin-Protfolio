@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { calcSafeConversion } from '@/lib/calculations'
+import { FUND_NAME } from '@/lib/branding'
 
 interface SafeData {
   company_id: string
@@ -94,8 +95,13 @@ export async function convertSafe(
     .eq('id', safeId)
   if (updateErr) return { error: updateErr.message }
 
-  // Auto-create cap table entry using investor name if external SAFE
-  const holderName = safe.investor_name ? `${safe.investor_name} (SAFE)` : 'Menomadin (SAFE)'
+  // Auto-create cap table entry using investor name if external SAFE.
+  // Use the bare holder name (no "(SAFE)" suffix) so legal_entities alias
+  // matching and ownership-summation in the company detail page roll the
+  // converted shares into the same holder's other cap-table rows. The SAFE
+  // row itself remains as the canonical record of the conversion event
+  // (status='converted', converted_round_id).
+  const holderName = safe.investor_name ?? FUND_NAME
 
   // Auto-create cap table entry. If this fails the SAFE is already marked
   // converted, so we must compensate by reverting the SAFE row — otherwise the

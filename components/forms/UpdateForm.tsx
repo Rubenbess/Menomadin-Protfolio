@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createUpdate, updateUpdate } from '@/actions/updates'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { CompanyUpdate } from '@/lib/types'
 
 interface Props {

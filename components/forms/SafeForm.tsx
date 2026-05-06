@@ -4,14 +4,17 @@ import { useState } from 'react'
 import { createSafe, updateSafe } from '@/actions/safes'
 import type { Safe } from '@/lib/types'
 import Button from '@/components/ui/Button'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { FUND_NAME } from '@/lib/branding'
 
-interface Props {
+const fi = inputClasses
+const lbl = labelClasses
+
+export default function SafeForm({ companyId, safe, onClose }: {
   companyId: string
   safe?: Safe | null
   onClose: () => void
-}
-
-export default function SafeForm({ companyId, safe, onClose }: Props) {
+}) {
   const [date, setDate]                   = useState(safe?.date ?? '')
   const [amount, setAmount]               = useState(safe?.investment_amount?.toString() ?? '')
   const [cap, setCap]                     = useState(safe?.valuation_cap?.toString() ?? '')
@@ -55,11 +58,11 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
 
       {/* Investor */}
       <div>
-        <label className="field-label">Investor</label>
+        <label className={lbl}>Investor</label>
         <input
           type="text"
-          className="field-input"
-          placeholder="Leave blank if Menomadin's own SAFE"
+          className={fi}
+          placeholder={`Leave blank if ${FUND_NAME}'s own SAFE`}
           value={investorName}
           onChange={e => setInvestorName(e.target.value)}
         />
@@ -70,27 +73,27 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="field-label">Date <span className="text-red-500">*</span></label>
-          <input type="date" className="field-input" value={date}
+          <label className={lbl}>Date <span className="text-red-500">*</span></label>
+          <input type="date" className={fi} value={date}
             onChange={e => setDate(e.target.value)} required />
         </div>
         <div>
-          <label className="field-label">Investment Amount ($) <span className="text-red-500">*</span></label>
-          <input type="number" className="field-input" placeholder="e.g. 500000"
+          <label className={lbl}>Investment Amount ($) <span className="text-red-500">*</span></label>
+          <input type="number" className={fi} placeholder="e.g. 500000"
             value={amount} onChange={e => setAmount(e.target.value)} required min="0" step="any" />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="field-label">Valuation Cap ($)</label>
-          <input type="number" className="field-input" placeholder="e.g. 8000000"
+          <label className={lbl}>Valuation Cap ($)</label>
+          <input type="number" className={fi} placeholder="e.g. 8000000"
             value={cap} onChange={e => setCap(e.target.value)} min="0" step="any" />
           <p className="text-[11px] text-neutral-500 mt-1">Leave blank if no cap</p>
         </div>
         <div>
-          <label className="field-label">Discount Rate (%)</label>
-          <input type="number" className="field-input" placeholder="e.g. 20"
+          <label className={lbl}>Discount Rate (%)</label>
+          <input type="number" className={fi} placeholder="e.g. 20"
             value={discount} onChange={e => setDiscount(e.target.value)} min="0" max="100" step="any" />
           <p className="text-[11px] text-neutral-500 mt-1">Leave blank if no discount</p>
         </div>
@@ -100,18 +103,18 @@ export default function SafeForm({ companyId, safe, onClose }: Props) {
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasMfn} onChange={e => setHasMfn(e.target.checked)} />
-          <span className="text-sm text-neutral-800 font-medium">MFN Clause</span>
+          <span className="text-sm text-neutral-800 dark:text-neutral-200 font-medium">MFN Clause</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" className="w-4 h-4 rounded accent-gold-500"
             checked={hasProRata} onChange={e => setHasProRata(e.target.checked)} />
-          <span className="text-sm text-neutral-800 font-medium">Pro-rata Rights</span>
+          <span className="text-sm text-neutral-800 dark:text-neutral-200 font-medium">Pro-rata Rights</span>
         </label>
       </div>
 
       <div>
-        <label className="field-label">Notes</label>
-        <textarea className="field-input min-h-[72px] resize-none" placeholder="Optional notes..."
+        <label className={lbl}>Notes</label>
+        <textarea className={`${fi} min-h-[72px] resize-none`} placeholder="Optional notes..."
           value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
       </div>
 

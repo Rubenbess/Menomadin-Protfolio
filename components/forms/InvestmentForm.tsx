@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createInvestment, updateInvestment } from '@/actions/investments'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { Round, LegalEntity, Investment } from '@/lib/types'
 
 const INSTRUMENTS = ['SAFE', 'Equity', 'Note', 'Warrant']

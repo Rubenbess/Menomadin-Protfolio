@@ -6,8 +6,8 @@
  * `dark:` variants, so dark mode rendered fields as black-on-white. Centralize
  * here so dark-mode and a11y improvements happen in one place.
  *
- * Used both via `import` and via a copy of this exact substring inline in
- * legacy forms; if you change the class strings, update both call sites.
+ * Used by every form under `components/forms/` and by login / settings /
+ * MFA / founder-update inputs that are not part of the modal-form set.
  */
 
 export const inputClasses =

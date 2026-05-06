@@ -6,7 +6,7 @@ import { Plus, X, Paperclip, ExternalLink, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase'
 import { createPipelineEntry, updatePipelineEntry } from '@/actions/pipeline'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { PipelineEntry } from '@/lib/types'
 
 const BASE_SECTORS = ['SaaS', 'Fintech', 'Healthtech', 'Cleantech', 'Consumer', 'Deep Tech', 'Marketplace', 'Agritech', 'Cybersecurity', 'EdTech', 'Other']

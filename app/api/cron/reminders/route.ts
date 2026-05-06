@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
+import { FUND_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
 
 export async function GET(req: NextRequest) {
   const cronError = requireCronAuth(req)
@@ -15,7 +16,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing RESEND_API_KEY or TEAM_EMAIL env vars' }, { status: 503 })
   }
 
-  const supabase = await createServerSupabaseClient()
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'Missing Supabase env vars' }, { status: 503 })
+  }
+
+  // Cron runs without a user session. After rls_tighten_team_members.sql the
+  // reminders table requires auth.uid() to match a team_members row, which is
+  // never true here. Use the service role to read; bearer auth via
+  // requireCronAuth is the perimeter.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  )
   const today = new Date().toISOString().split('T')[0]
 
   const { data: reminders, error } = await supabase
@@ -47,7 +59,7 @@ export async function GET(req: NextRequest) {
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:700px;margin:0 auto;padding:32px 16px">
       <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:16px;padding:24px 32px;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:20px;font-weight:700">Menomadin Portfolio</h1>
+        <h1 style="color:white;margin:0;font-size:20px;font-weight:700">${FUND_PORTFOLIO_NAME}</h1>
         <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:14px">Daily Reminder Digest</p>
       </div>
       <p style="color:#475569;font-size:14px;margin-bottom:24px">
@@ -66,7 +78,7 @@ export async function GET(req: NextRequest) {
         <tbody>${rows}</tbody>
       </table>
       <p style="color:#94a3b8;font-size:12px;margin-top:24px;text-align:center">
-        Menomadin Portfolio Platform · <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/reminders" style="color:#6366f1">View all reminders →</a>
+        ${FUND_PORTFOLIO_NAME} Platform · <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/reminders" style="color:#6366f1">View all reminders →</a>
       </p>
     </div>
   `
@@ -74,12 +86,15 @@ export async function GET(req: NextRequest) {
   const { error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: toEmail,
-    subject: `[Menomadin] ${reminders.length} reminder${reminders.length > 1 ? 's' : ''} due`,
+    subject: `[${FUND_NAME}] ${reminders.length} reminder${reminders.length > 1 ? 's' : ''} due`,
     html,
   })
 
   if (sendError) {
-    return NextResponse.json({ error: sendError.message }, { status: 500 })
+    // 502 not 500: Resend is an external dependency, so a send failure is a
+    // bad-gateway condition rather than a bug in our code. Lets monitoring
+    // distinguish "Resend was down" from "our handler crashed".
+    return NextResponse.json({ error: sendError.message }, { status: 502 })
   }
 
   return NextResponse.json({ sent: reminders.length })

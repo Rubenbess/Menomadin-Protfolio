@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { submitFounderUpdate } from '@/actions/founder-updates'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { FUND_NAME } from '@/lib/branding'
 
-const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const inp = inputClasses
+const lbl = labelClasses
 
 interface Props {
   token: string
@@ -26,7 +28,7 @@ export default function FounderUpdateForm({ token, companyName }: Props) {
         </div>
         <h2 className="text-lg font-bold text-neutral-900 mb-2">Update submitted!</h2>
         <p className="text-sm text-neutral-600">
-          Thank you — the Menomadin team will review your update shortly.
+          Thank you — the {FUND_NAME} team will review your update shortly.
         </p>
       </div>
     )
@@ -92,7 +94,7 @@ export default function FounderUpdateForm({ token, companyName }: Props) {
       </div>
 
       <div>
-        <label className={lbl}>Ask from Menomadin</label>
+        <label className={lbl}>Ask from {FUND_NAME}</label>
         <textarea name="ask" rows={2} className={`${inp} resize-none`} placeholder="Any specific help or introductions needed?" />
       </div>
 

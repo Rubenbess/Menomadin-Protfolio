@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createReminder, updateReminder } from '@/actions/reminders'
-import { inputClasses, labelClasses } from './inputStyles'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { Reminder } from '@/lib/types'
 
 const CATEGORIES = ['Follow-up', 'Board Meeting', 'Report Due', 'KPI Review', 'Contract Renewal', 'Call', 'Other']

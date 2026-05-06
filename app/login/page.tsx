@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
+import { inputClasses } from '@/lib/form-styles'
 
 type Tab = 'signin' | 'signup' | 'reset' | 'recovery'
 
@@ -218,10 +219,7 @@ export default function LoginPage() {
     { id: 'reset', label: 'Reset password' },
   ]
 
-  const inputClass =
-    'w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 ' +
-    'placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 ' +
-    'focus:border-primary-500 focus:bg-white transition-all'
+  const inputClass = inputClasses
 
   return (
     <div

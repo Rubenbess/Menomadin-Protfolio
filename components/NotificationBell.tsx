@@ -87,12 +87,12 @@ export default function NotificationBell({ initialNotifications }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[380px] bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.06] z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-[380px] bg-white dark:bg-neutral-900 rounded-lg shadow-2xl ring-1 ring-black/[0.06] dark:ring-white/[0.08] z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-700">
             <div className="flex items-center gap-2">
-              <Bell size={15} className="text-neutral-600" />
-              <span className="text-sm font-semibold text-neutral-900">Notifications</span>
+              <Bell size={15} className="text-neutral-600 dark:text-neutral-400" />
+              <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Notifications</span>
               {unread > 0 && (
                 <span className="text-xs font-bold text-white bg-red-500 rounded-full px-1.5 py-0.5 leading-none">
                   {unread}
@@ -108,34 +108,34 @@ export default function NotificationBell({ initialNotifications }: Props) {
                   <CheckCheck size={12} /> Mark all read
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 hover:text-neutral-700 rounded-lg transition-colors">
+              <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 rounded-lg transition-colors">
                 <X size={14} />
               </button>
             </div>
           </div>
 
           {/* List */}
-          <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50">
+          <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50 dark:divide-neutral-800">
             {notifications.length === 0 ? (
               <div className="py-8 text-center">
-                <Bell size={24} className="text-slate-200 mx-auto mb-2" />
-                <p className="text-xs text-neutral-500">No notifications yet</p>
+                <Bell size={24} className="text-slate-200 dark:text-neutral-700 mx-auto mb-2" />
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">No notifications yet</p>
               </div>
             ) : (
               notifications.map(n => (
                 <div
                   key={n.id}
-                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-50/60 ${n.read ? 'bg-white' : 'bg-gold-50/40'}`}
+                  className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-50/60 dark:hover:bg-neutral-800/60 ${n.read ? 'bg-white dark:bg-neutral-900' : 'bg-gold-50/40 dark:bg-gold-900/10'}`}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{TYPE_ICONS[n.type] ?? '🔔'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm leading-snug ${n.read ? 'text-neutral-700' : 'text-neutral-900 font-medium'}`}>
+                    <p className={`text-sm leading-snug ${n.read ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-900 dark:text-neutral-50 font-medium'}`}>
                       {n.title}
                     </p>
                     {n.body && (
-                      <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
                     )}
-                    <p className="text-[10px] text-neutral-500 mt-1">{fmtRelative(n.created_at)}</p>
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-500 mt-1">{fmtRelative(n.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 ml-1">
                     {!n.read && (
@@ -164,8 +164,8 @@ export default function NotificationBell({ initialNotifications }: Props) {
           </div>
 
           {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-neutral-200 text-center">
-              <p className="text-xs text-neutral-500">{notifications.length} notification{notifications.length !== 1 ? 's' : ''}</p>
+            <div className="px-4 py-2.5 border-t border-neutral-200 dark:border-neutral-700 text-center">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">{notifications.length} notification{notifications.length !== 1 ? 's' : ''}</p>
             </div>
           )}
         </div>

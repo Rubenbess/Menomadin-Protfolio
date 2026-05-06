@@ -11,6 +11,7 @@ import Modal from '@/components/ui/Modal'
 import EmptyState from '@/components/EmptyState'
 import { createClient } from '@/lib/supabase'
 import { createGlobalDocument, deleteGlobalDocument } from '@/actions/global-documents'
+import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { GlobalDocument, DocumentCategory, Company } from '@/lib/types'
 
 const CATEGORIES: DocumentCategory[] = [
@@ -43,8 +44,8 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const inp = 'w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all'
-const lbl = 'block text-sm font-medium text-neutral-800 mb-1.5'
+const inp = inputClasses
+const lbl = labelClasses
 
 // ── Upload Modal ─────────────────────────────────────────────────────────────
 
