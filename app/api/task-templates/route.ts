@@ -32,9 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data }, { status: 201 })
   } catch (err) {
     console.error('Error creating template:', err)
-    return NextResponse.json(
-      { error: 'Failed to create template' },
-      { status: 500 }
-    )
+    const msg = err instanceof Error ? err.message : 'Failed to create template'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

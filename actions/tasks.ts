@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createNotification } from './notifications'
 import type { Task, TaskStatus } from '@/lib/types'
@@ -45,15 +46,29 @@ export async function createTask(data: {
     updated_at: new Date().toISOString(),
   }
 
+  // Insert + select with relations in a single round-trip. Assignees are
+  // inserted separately because they're a different table; we re-select with
+  // the assignees join only if any were provided.
   const { data: task, error } = await supabase
     .from('tasks')
     .insert(taskData)
-    .select('*')
+    .select(`
+      *,
+      assignees:task_assignees(
+        id,
+        task_id,
+        assigned_to,
+        assigned_at,
+        assigned_by,
+        team_member:team_members(id, name, color)
+      ),
+      company:companies(id, name)
+    `)
     .single()
 
   if (error) return { error: error.message, data: null }
 
-  // Add assignees if provided
+  // Add assignees if provided, then re-select to include them
   if (data.assignee_ids && data.assignee_ids.length > 0) {
     const assignees = data.assignee_ids.map(id => ({
       task_id: task.id,
@@ -62,6 +77,24 @@ export async function createTask(data: {
     }))
     const { error: assigneeError } = await supabase.from('task_assignees').insert(assignees)
     if (assigneeError) return { error: assigneeError.message, data: null }
+
+    const { data: withAssignees } = await supabase
+      .from('tasks')
+      .select(`
+        *,
+        assignees:task_assignees(
+          id,
+          task_id,
+          assigned_to,
+          assigned_at,
+          assigned_by,
+          team_member:team_members(id, name, color)
+        ),
+        company:companies(id, name)
+      `)
+      .eq('id', task.id)
+      .single()
+    if (withAssignees) Object.assign(task, withAssignees)
   }
 
   revalidatePath('/tasks')
@@ -75,25 +108,7 @@ export async function createTask(data: {
     link: `/tasks`,
   })
 
-  // Fetch the complete task with relations
-  const { data: fullTask } = await supabase
-    .from('tasks')
-    .select(`
-      *,
-      assignees:task_assignees(
-        id,
-        task_id,
-        assigned_to,
-        assigned_at,
-        assigned_by,
-        team_member:team_members(id, name, color)
-      ),
-      company:companies(id, name)
-    `)
-    .eq('id', task.id)
-    .single()
-
-  return { error: null, data: fullTask || task }
+  return { error: null, data: task }
 }
 
 export async function getTask(id: string) {
@@ -134,16 +149,6 @@ export async function updateTask(id: string, data: Partial<Task>) {
     .from('tasks')
     .update(updateData)
     .eq('id', id)
-    .select('*')
-    .single()
-
-  if (error) return { error: error.message, data: null }
-
-  revalidatePath('/tasks')
-
-  // Fetch the complete task with relations
-  const { data: fullTask } = await supabase
-    .from('tasks')
     .select(`
       *,
       assignees:task_assignees(
@@ -156,10 +161,12 @@ export async function updateTask(id: string, data: Partial<Task>) {
       ),
       company:companies(id, name)
     `)
-    .eq('id', id)
     .single()
 
-  return { error: null, data: fullTask || task }
+  if (error) return { error: error.message, data: null }
+
+  revalidatePath('/tasks')
+  return { error: null, data: task }
 }
 
 export async function deleteTask(id: string) {
@@ -190,7 +197,7 @@ export async function completeTask(id: string) {
   if (error) return { error: error.message }
 
   // Log activity
-  await createTaskActivity(id, user.id, 'completed', null, 'Done')
+  await createTaskActivity(supabase, id, user.id, 'completed', null, 'Done')
 
   revalidatePath('/tasks')
   return { error: null }
@@ -213,7 +220,7 @@ export async function cancelTask(id: string) {
   if (error) return { error: error.message }
 
   // Log activity
-  await createTaskActivity(id, user.id, 'cancelled', null, 'Cancelled')
+  await createTaskActivity(supabase, id, user.id, 'cancelled', null, 'Cancelled')
 
   revalidatePath('/tasks')
   return { error: null }
@@ -246,7 +253,7 @@ export async function assignTask(taskId: string, assigneeId: string) {
   if (error) return { error: error.message }
 
   // Log activity
-  await createTaskActivity(taskId, user.id, 'assignee_added', null, assigneeId)
+  await createTaskActivity(supabase, taskId, user.id, 'assignee_added', null, assigneeId)
 
   revalidatePath('/tasks')
 
@@ -275,7 +282,7 @@ export async function removeAssignee(taskId: string, assigneeId: string) {
   if (error) return { error: error.message }
 
   // Log activity
-  await createTaskActivity(taskId, user.id, 'assignee_removed', assigneeId, null)
+  await createTaskActivity(supabase, taskId, user.id, 'assignee_removed', assigneeId, null)
 
   revalidatePath('/tasks')
   return { error: null }
@@ -335,15 +342,14 @@ export async function deleteComment(id: string) {
 // ─── ACTIVITY LOGGING ───────────────────────────────────────────────────────
 
 async function createTaskActivity(
+  supabase: SupabaseClient,
   taskId: string,
   actorId: string,
   actionType: string,
   oldValue: string | null,
   newValue: string | null
 ) {
-  const supabase = await createServerSupabaseClient()
-
-  await supabase.from('task_activities').insert({
+  const { error } = await supabase.from('task_activities').insert({
     task_id: taskId,
     actor_id: actorId,
     action_type: actionType,
@@ -351,6 +357,10 @@ async function createTaskActivity(
     new_value: newValue,
     metadata: null,
   })
+  // Activity-log failures shouldn't fail the parent action — they're an audit
+  // trail, not the main effect — but they should be visible. Log so a missing
+  // entry surfaces in monitoring instead of silently disappearing.
+  if (error) console.error('[createTaskActivity]', { taskId, actionType, error: error.message })
 }
 
 // ─── LABELS ─────────────────────────────────────────────────────────────────

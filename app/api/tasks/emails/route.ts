@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import { snapshotFromEml, snapshotFromMsg } from '@/lib/email-snapshot'
 
 /**
@@ -14,14 +14,9 @@ import { snapshotFromEml, snapshotFromMsg } from '@/lib/email-snapshot'
  */
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const {
-      data: { user },
-      error: userErr,
-    } = await supabase.auth.getUser()
-    if (userErr || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-    }
+    const auth = await requireAuth()
+    if ('response' in auth) return auth.response
+    const { user, supabase } = auth
 
     let formData: FormData
     try {

@@ -151,27 +151,46 @@ export async function GET(req: NextRequest) {
 
     let integrationFailedInsert = false
 
+    // First pass: detect opportunities for every email so we know the full set
+    // of candidate company names before any DB call. Then do a single batched
+    // dedup query against `pipeline.name` instead of one query per email.
+    type Candidate = { email: GraphEmail; analysis: OpportunityData }
+    const candidates: Candidate[] = []
     for (const email of emails) {
       const body = email.body?.contentType === 'html'
         ? email.body.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
         : (email.body?.content ?? email.bodyPreview ?? '')
+      const fromName = email.from?.emailAddress?.name ?? ''
+      const fromEmail = email.from?.emailAddress?.address ?? ''
+      const subject = email.subject ?? '(no subject)'
+      const analysis = detectOpportunity(subject, body, fromName, fromEmail)
+      if (!analysis) continue
+      if (!analysis.company_name || analysis.company_name === 'Unknown Company') continue
+      candidates.push({ email, analysis })
+    }
+
+    // Batched dedup: lowercase each candidate name and use a single `in` query.
+    // This is case-sensitive at the SQL layer but we lower both sides in JS,
+    // matching what `ilike '<exact>'` was doing before for a fixed string.
+    const existingNames = new Set<string>()
+    if (candidates.length > 0) {
+      const candidateNames = [...new Set(candidates.map(c => c.analysis.company_name))]
+      const { data: existingRows } = await supabase
+        .from('pipeline')
+        .select('name')
+        .in('name', candidateNames)
+      for (const row of (existingRows ?? []) as { name: string }[]) {
+        existingNames.add(row.name.toLowerCase())
+      }
+    }
+
+    for (const { email, analysis } of candidates) {
+      if (existingNames.has(analysis.company_name.toLowerCase())) continue
 
       const fromName = email.from?.emailAddress?.name ?? ''
       const fromEmail = email.from?.emailAddress?.address ?? ''
       const from = `${fromName} <${fromEmail}>`
       const subject = email.subject ?? '(no subject)'
-
-      const analysis = detectOpportunity(subject, body, fromName, fromEmail)
-      if (!analysis) continue
-      if (!analysis.company_name || analysis.company_name === 'Unknown Company') continue
-
-      const { data: existing } = await supabase
-        .from('pipeline')
-        .select('id')
-        .ilike('name', analysis.company_name)
-        .maybeSingle()
-
-      if (existing) continue
 
       const { error: insertErr } = await supabase.from('pipeline').insert({
         name: analysis.company_name,

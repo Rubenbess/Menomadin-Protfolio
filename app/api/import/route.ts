@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as XLSX from 'xlsx'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -39,11 +39,9 @@ function num(val: unknown): number {
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 MB
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServerSupabaseClient()
-
-  // Auth check
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const auth = await requireAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
 
   // Reject oversized uploads before reading into memory
   const contentLength = Number(req.headers.get('content-length') ?? 0)

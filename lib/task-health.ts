@@ -1,10 +1,10 @@
 import type { TaskWithRelations } from '@/lib/types'
 
-export type HealthScore = 'critical' | 'poor' | 'warning' | 'good' | 'excellent'
+export type TaskHealthLevel = 'critical' | 'poor' | 'warning' | 'good' | 'excellent'
 
 export interface TaskHealthMetrics {
   score: number // 0-100
-  level: HealthScore
+  level: TaskHealthLevel
   factors: {
     overdue: { score: number; weight: number; label: string }
     priority: { score: number; weight: number; label: string }
@@ -181,7 +181,7 @@ function evaluateProgress(task: TaskWithRelations): {
   }
 }
 
-function getHealthLevel(score: number): HealthScore {
+function getHealthLevel(score: number): TaskHealthLevel {
   if (score >= 85) return 'excellent'
   if (score >= 70) return 'good'
   if (score >= 50) return 'warning'
@@ -235,7 +235,7 @@ function getRecommendations(
   return recommendations
 }
 
-export function getHealthColor(level: HealthScore): string {
+export function getHealthColor(level: TaskHealthLevel): string {
   switch (level) {
     case 'excellent':
       return 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
@@ -250,7 +250,7 @@ export function getHealthColor(level: HealthScore): string {
   }
 }
 
-export function getHealthIcon(level: HealthScore): string {
+export function getHealthIcon(level: TaskHealthLevel): string {
   switch (level) {
     case 'excellent':
       return '✅'

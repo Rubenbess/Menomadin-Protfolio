@@ -58,6 +58,9 @@ export default async function AnalyticsPage() {
     const ownershipPct = calcCombinedOwnershipPct(coCapTable, legalEntitiesList)
     const currentValue = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
     const moic         = calcMOIC(currentValue, invested)
+    const coReserves   = reservesList.filter(r => r.company_id === co.id)
+    const plannedReserves  = coReserves.reduce((s, r) => s + r.reserved_amount, 0)
+    const deployedReserves = coReserves.reduce((s, r) => s + r.deployed_amount, 0)
 
     return {
       ...co,
@@ -65,6 +68,9 @@ export default async function AnalyticsPage() {
       currentValue,
       moic,
       ownershipPct,
+      plannedReserves,
+      deployedReserves,
+      initialInvestment: coInvestments[0]?.amount ?? 0,
     }
   })
 

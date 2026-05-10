@@ -581,26 +581,7 @@ export function calcDPI(totalDistributions: number, totalInvested: number): numb
 }
 
 // ─── Formatting ─────────────────────────────────────────────────────────────
+// Re-exported from lib/format.ts (canonical home). Kept here so existing
+// imports continue to work without churn.
 
-export function fmt$$(amount: number): string {
-  if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toFixed(1)}B`
-  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`
-  return `$${amount.toLocaleString()}`
-}
-
-export function fmtMultiple(x: number): string {
-  return `${x.toFixed(2)}x`
-}
-
-export function fmtPct(p: number): string {
-  return `${p.toFixed(2)}%`
-}
-
-export function fmtDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+export { fmt$$, fmtMultiple, fmtPct, fmtDate } from './format'

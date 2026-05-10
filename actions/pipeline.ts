@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 interface PipelineData {
@@ -27,6 +28,7 @@ export async function createPipelineEntry(data: PipelineData) {
   const supabase = await createServerSupabaseClient()
   const { data: row, error } = await supabase.from('pipeline').insert(data).select('id').single()
   if (error) return { error: error.message, id: null }
+  revalidatePath('/pipeline')
   return { error: null, id: row.id as string }
 }
 
@@ -34,6 +36,7 @@ export async function updatePipelineEntry(id: string, data: PipelineData) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('pipeline').update(data).eq('id', id)
   if (error) return { error: error.message }
+  revalidatePath('/pipeline')
   return { error: null }
 }
 
@@ -41,5 +44,6 @@ export async function deletePipelineEntry(id: string) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('pipeline').delete().eq('id', id)
   if (error) return { error: error.message }
+  revalidatePath('/pipeline')
   return { error: null }
 }

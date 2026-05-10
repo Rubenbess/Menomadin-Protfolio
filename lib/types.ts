@@ -1,3 +1,21 @@
+/**
+ * Canonical return shape for server actions. New actions should use this so
+ * callers can pattern-match consistently:
+ *
+ *   const result = await someAction()
+ *   if (result.error) toast(result.error)
+ *
+ * For actions that return a value on success, use `ActionResult<T>` and read
+ * `result.data`. For void-returning actions, use the bare `ActionResult` form.
+ *
+ * Existing actions return ad-hoc shapes; migrate them opportunistically rather
+ * than in a single sweep — every consumer must be updated together.
+ */
+export type ActionResult<T = void> =
+  T extends void
+    ? { error: string | null }
+    : { error: string | null; data: T | null }
+
 export type Strategy = 'impact' | 'venture'
 export type CompanyStatus = 'active' | 'exited' | 'written-off' | 'watchlist'
 export type Instrument = 'SAFE' | 'Equity' | 'Note' | 'Warrant'
@@ -372,7 +390,9 @@ export interface Reminder {
   created_at: string
 }
 
-// Aggregated types used in UI
+// Aggregated types used in UI. All metric fields are required; callers that
+// don't populate a metric should pass 0. Dashboard and PortfolioTable rely on
+// these being concrete numbers for sums and sorts.
 export interface CompanyWithMetrics extends Company {
   totalInvested: number
   currentValue: number

@@ -24,10 +24,8 @@ export async function GET(
     return NextResponse.json({ data })
   } catch (err) {
     console.error('Error fetching template:', err)
-    return NextResponse.json(
-      { error: 'Failed to fetch template' },
-      { status: 500 }
-    )
+    const msg = err instanceof Error ? err.message : 'Failed to fetch template'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
@@ -73,10 +71,8 @@ export async function PUT(
     return NextResponse.json({ data })
   } catch (err) {
     console.error('Error updating template:', err)
-    return NextResponse.json(
-      { error: 'Failed to update template' },
-      { status: 500 }
-    )
+    const msg = err instanceof Error ? err.message : 'Failed to update template'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
@@ -112,9 +108,7 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Error deleting template:', err)
-    return NextResponse.json(
-      { error: 'Failed to delete template' },
-      { status: 500 }
-    )
+    const msg = err instanceof Error ? err.message : 'Failed to delete template'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

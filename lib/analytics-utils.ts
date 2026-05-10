@@ -1,6 +1,10 @@
 /**
  * Analytics utilities for portfolio metrics and calculations
  */
+import type { CompanyWithMetrics } from './types'
+
+// Re-export so callers can keep importing the type from this module.
+export type { CompanyWithMetrics }
 
 export interface InvestmentByStage {
   stage: string
@@ -27,22 +31,6 @@ export interface CompanyPerformance {
   value: number
   moic: number
   status: string
-}
-
-/**
- * Shape produced by Server Components after pre-computing metrics on the
- * raw `companies` rows (see app/(protected)/analytics/page.tsx and
- * dashboard/page.tsx). Optional fields tolerate callers that haven't
- * computed every metric — `c.moic ?? …` style is used everywhere.
- */
-export interface CompanyWithMetrics {
-  name?: string
-  sector?: string | null
-  status?: string
-  entry_stage?: string | null
-  totalInvested?: number
-  currentValue?: number
-  moic?: number
 }
 
 /**
@@ -99,7 +87,7 @@ export function getTopPerformers(companies: CompanyWithMetrics[], limit = 5): Co
       name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
-      moic: c.moic || 1,
+      moic: c.moic ?? 0,
       status: c.status || 'unknown',
     }))
     .sort((a, b) => b.moic - a.moic)
@@ -115,7 +103,7 @@ export function getUnderperformers(companies: CompanyWithMetrics[], limit = 5): 
       name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
-      moic: c.moic || 1,
+      moic: c.moic ?? 0,
       status: c.status || 'unknown',
     }))
     .filter(c => c.moic < 1)
@@ -123,29 +111,5 @@ export function getUnderperformers(companies: CompanyWithMetrics[], limit = 5): 
     .slice(0, limit)
 }
 
-/**
- * Format currency for display
- */
-export function formatCurrency(value: number): string {
-  if (value >= 1_000_000) {
-    return `$${(value / 1_000_000).toFixed(2)}M`
-  }
-  if (value >= 1_000) {
-    return `$${(value / 1_000).toFixed(1)}K`
-  }
-  return `$${value.toFixed(0)}`
-}
-
-/**
- * Format percentage
- */
-export function formatPercent(value: number, decimals = 1): string {
-  return `${(value * 100).toFixed(decimals)}%`
-}
-
-/**
- * Format multiple (MOIC, TVPI, DPI)
- */
-export function formatMultiple(value: number, decimals = 2): string {
-  return `${value.toFixed(decimals)}x`
-}
+// Formatters live in lib/format.ts. Re-exported so existing imports keep working.
+export { formatCurrency, formatPercent, formatMultiple } from './format'
