@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const NONCE_COOKIE = 'ms_oauth_nonce'
@@ -74,12 +73,11 @@ export async function GET(req: NextRequest) {
   })
   const me = await meRes.json() as { mail?: string; userPrincipalName?: string }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  const { error: upsertError } = await supabase.from('email_integrations').upsert(
+  // Re-use the user-context client we already created above for session validation —
+  // RLS on email_integrations (`user_id = auth.uid()`) is the perimeter, and we've
+  // verified the session userId matches the OAuth state, so the upsert is scoped
+  // to the calling user's own row.
+  const { error: upsertError } = await ssoSupabase.from('email_integrations').upsert(
     {
       user_id: userId,
       access_token: tokens.access_token,

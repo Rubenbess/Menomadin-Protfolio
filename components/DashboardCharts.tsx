@@ -7,6 +7,7 @@ import {
 import { useMemo } from 'react'
 import { normalizeSector, fmt$$ as fmt, fmtPct } from '@/lib/calculations'
 import { PERFORMANCE_CHART_MONTHS } from '@/lib/limits'
+import { useTheme } from '@/lib/theme-context'
 
 interface CompanyData {
   name: string
@@ -35,25 +36,46 @@ const SECTOR_COLORS = [
 ]
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; text: string }> = {
-  active:        { label: 'Active',       color: '#10b981', bg: 'bg-emerald-50',  text: 'text-emerald-700' },
-  exited:        { label: 'Exited',       color: '#6366f1', bg: 'bg-indigo-50',   text: 'text-indigo-700'  },
-  watchlist:     { label: 'Watchlist',    color: '#f59e0b', bg: 'bg-amber-50',    text: 'text-amber-700'   },
-  'written-off': { label: 'Written off',  color: '#ef4444', bg: 'bg-red-50',      text: 'text-red-600'     },
+  active:        { label: 'Active',       color: '#10b981', bg: 'bg-emerald-50 dark:bg-emerald-900/20',  text: 'text-emerald-700 dark:text-emerald-300' },
+  exited:        { label: 'Exited',       color: '#6366f1', bg: 'bg-indigo-50 dark:bg-indigo-900/20',    text: 'text-indigo-700 dark:text-indigo-300'  },
+  watchlist:     { label: 'Watchlist',    color: '#f59e0b', bg: 'bg-amber-50 dark:bg-amber-900/20',      text: 'text-amber-700 dark:text-amber-300'    },
+  'written-off': { label: 'Written off',  color: '#ef4444', bg: 'bg-red-50 dark:bg-red-900/20',          text: 'text-red-600 dark:text-red-300'        },
 }
 
 // fmt / fmtPct imported from lib/calculations to keep formatting consistent across the app.
 
-const tooltipStyle = {
-  borderRadius: 12,
-  border: '1px solid #f1f5f9',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-  fontSize: 12,
-  padding: '8px 12px',
+// Theme-aware grid/axis colors — recharts SVG props can't be Tailwind classes,
+// so we resolve them at render time from the active theme.
+function chartColors(isDark: boolean) {
+  return {
+    gridStroke: isDark ? '#334155' : '#f1f5f9',         // slate-700 / slate-100
+    axisTick:   isDark ? '#94a3b8' : '#94a3b8',         // slate-400 (legible in both)
+    yAxisTick:  isDark ? '#cbd5e1' : '#475569',         // slate-300 / slate-600
+    cursorFill: isDark ? '#1e293b' : '#f8fafc',         // slate-800 / slate-50
+    legendLabelText: isDark ? '#94a3b8' : '#94a3b8',
+  }
+}
+
+function tooltipStyleFor(isDark: boolean) {
+  return {
+    borderRadius: 12,
+    border: isDark ? '1px solid #334155' : '1px solid #f1f5f9',
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#e2e8f0' : '#0f172a',
+    boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.08)',
+    fontSize: 12,
+    padding: '8px 12px',
+  }
 }
 
 // ── Invested vs Value ─────────────────────────────────────────────────────────
 
 function PerformanceChart({ companies }: Props) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const cc = chartColors(isDark)
+  const tooltipStyle = tooltipStyleFor(isDark)
+
   // Memoized so re-renders driven by parent state don't re-sort the full company list.
   const data = useMemo(() => (
     companies
@@ -77,11 +99,11 @@ function PerformanceChart({ companies }: Props) {
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Per company · sorted by capital deployed</p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-xs text-neutral-600">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
             <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block" />
             Invested
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-neutral-600">
+          <span className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
             <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />
             Current Value
           </span>
@@ -89,16 +111,16 @@ function PerformanceChart({ companies }: Props) {
       </div>
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data} barCategoryGap="35%" barGap={3} margin={{ top: 0, right: 4, left: 0, bottom: 0 }}>
-          <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="0" />
+          <CartesianGrid vertical={false} stroke={cc.gridStroke} strokeDasharray="0" />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            tick={{ fontSize: 11, fill: cc.axisTick }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={fmt}
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            tick={{ fontSize: 11, fill: cc.axisTick }}
             axisLine={false}
             tickLine={false}
             width={52}
@@ -106,7 +128,7 @@ function PerformanceChart({ companies }: Props) {
           <Tooltip
             formatter={(v, name) => [fmt(Number(v)), name]}
             contentStyle={tooltipStyle}
-            cursor={{ fill: '#f8fafc', radius: 4 }}
+            cursor={{ fill: cc.cursorFill, radius: 4 }}
           />
           <Bar dataKey="Invested" fill="#6366f1" radius={[4, 4, 0, 0]} />
           <Bar dataKey="Value"    fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -119,6 +141,9 @@ function PerformanceChart({ companies }: Props) {
 // ── Sector Allocation ─────────────────────────────────────────────────────────
 
 function SectorChart({ companies }: Props) {
+  const { theme } = useTheme()
+  const tooltipStyle = tooltipStyleFor(theme === 'dark')
+
   const sectorMap: Record<string, number> = {}
   for (const c of companies) {
     const s = normalizeSector(c.sector || 'Other')
@@ -172,14 +197,14 @@ function SectorChart({ companies }: Props) {
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ background: SECTOR_COLORS[i % SECTOR_COLORS.length] }}
               />
-              <span className="text-xs text-neutral-700 truncate flex-1">{entry.name}</span>
-              <span className="text-xs font-semibold text-neutral-800 flex-shrink-0">
+              <span className="text-xs text-neutral-700 dark:text-neutral-300 truncate flex-1">{entry.name}</span>
+              <span className="text-xs font-semibold text-neutral-800 dark:text-neutral-100 flex-shrink-0">
                 {total > 0 ? fmtPct((entry.value / total) * 100) : '—'}
               </span>
             </div>
           ))}
           {data.length > 6 && (
-            <p className="text-xs text-neutral-500">+{data.length - 6} more</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">+{data.length - 6} more</p>
           )}
         </div>
       </div>
@@ -190,6 +215,11 @@ function SectorChart({ companies }: Props) {
 // ── MOIC Ranking ──────────────────────────────────────────────────────────────
 
 function MoicChart({ companies }: Props) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const cc = chartColors(isDark)
+  const tooltipStyle = tooltipStyleFor(isDark)
+
   const data = companies
     .filter(c => c.moic > 0)
     .sort((a, b) => b.moic - a.moic)
@@ -207,18 +237,18 @@ function MoicChart({ companies }: Props) {
       <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-5">Top performers ranked by return multiple</p>
       <ResponsiveContainer width="100%" height={data.length * 32 + 20}>
         <BarChart data={data} layout="vertical" barCategoryGap="30%" margin={{ top: 0, right: 32, left: 0, bottom: 0 }}>
-          <CartesianGrid horizontal={false} stroke="#f1f5f9" />
+          <CartesianGrid horizontal={false} stroke={cc.gridStroke} />
           <XAxis
             type="number"
             tickFormatter={v => `${v}x`}
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            tick={{ fontSize: 11, fill: cc.axisTick }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 11, fill: '#475569' }}
+            tick={{ fontSize: 11, fill: cc.yAxisTick }}
             axisLine={false}
             tickLine={false}
             width={120}
@@ -226,9 +256,9 @@ function MoicChart({ companies }: Props) {
           <Tooltip
             formatter={(v) => [`${Number(v).toFixed(2)}x`, 'MOIC']}
             contentStyle={tooltipStyle}
-            cursor={{ fill: '#f8fafc' }}
+            cursor={{ fill: cc.cursorFill }}
           />
-          <Bar dataKey="moic" radius={[0, 4, 4, 0]} label={{ position: 'right', fontSize: 11, fill: '#94a3b8', formatter: (v: unknown) => `${v}x` }}>
+          <Bar dataKey="moic" radius={[0, 4, 4, 0]} label={{ position: 'right', fontSize: 11, fill: cc.legendLabelText, formatter: (v: unknown) => `${v}x` }}>
             {data.map((entry, i) => (
               <Cell
                 key={i}
@@ -240,13 +270,13 @@ function MoicChart({ companies }: Props) {
       </ResponsiveContainer>
 
       {/* Legend */}
-      <div className="flex items-center gap-5 mt-4 pt-4 border-t border-slate-50">
+      <div className="flex items-center gap-5 mt-4 pt-4 border-t border-slate-50 dark:border-neutral-700">
         {[
           { label: '≥ 2x', color: '#10b981' },
           { label: '1–2x', color: '#6366f1' },
           { label: '< 1x', color: '#f59e0b' },
         ].map(l => (
-          <span key={l.label} className="flex items-center gap-1.5 text-xs text-neutral-500">
+          <span key={l.label} className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
             <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
             {l.label}
           </span>

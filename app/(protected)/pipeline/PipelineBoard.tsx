@@ -22,18 +22,19 @@ import { movePipelineCard, deleteStage } from '@/actions/pipeline-stages'
 import { deletePipelineEntry } from '@/actions/pipeline'
 import DealTasks from './DealTasks'
 import type { PipelineEntry } from '@/lib/types'
+import { fmt$$ } from '@/lib/calculations'
 
 // ── Color maps ────────────────────────────────────────────────────────────
 
 const COLOR_HEADER: Record<string, string> = {
-  slate:  'bg-neutral-100 text-neutral-800 border-neutral-200',
-  blue:   'bg-blue-100 text-blue-700 border-blue-200',
-  indigo: 'bg-gold-100 text-primary-600 border-violet-200',
-  purple: 'bg-purple-100 text-purple-700 border-purple-200',
-  amber:  'bg-amber-100 text-amber-700 border-amber-200',
-  orange: 'bg-orange-100 text-orange-700 border-orange-200',
-  green:  'bg-emerald-100 text-emerald-700 border-emerald-200',
-  red:    'bg-red-100 text-red-700 border-red-200',
+  slate:  'bg-neutral-100 text-neutral-800 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700',
+  blue:   'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-900/40',
+  indigo: 'bg-gold-100 text-primary-600 border-violet-200 dark:bg-gold-900/30 dark:text-primary-300 dark:border-violet-900/40',
+  purple: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-900/40',
+  amber:  'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40',
+  orange: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-900/40',
+  green:  'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40',
+  red:    'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-900/40',
 }
 
 const COLOR_DOT: Record<string, string> = {
@@ -58,18 +59,11 @@ interface Stage {
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-function fmtMoney(n: number) {
-  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n}`
-}
+const fmtMoney = fmt$$
 
 function fmtAsk(n: number | null) {
   if (!n) return null
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M ask`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K ask`
-  return `$${n} ask`
+  return `${fmt$$(n)} ask`
 }
 
 function StarRow({ score, size = 14 }: { score: number | null; size?: number }) {
@@ -124,9 +118,9 @@ function AnalyticsBar({ entries, stages }: { entries: PipelineEntry[]; stages: S
   return (
     <div className="grid grid-cols-5 gap-3 mb-5">
       {stats.map(s => (
-        <div key={s.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 shadow-sm">
-          <p className="text-xs text-neutral-500 font-medium mb-1">{s.label}</p>
-          <p className="text-xl font-bold text-neutral-900">{s.value}</p>
+        <div key={s.label} className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 px-4 py-3 shadow-sm">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium mb-1">{s.label}</p>
+          <p className="text-xl font-bold text-neutral-900 dark:text-neutral-50">{s.value}</p>
         </div>
       ))}
     </div>
@@ -195,39 +189,39 @@ function DealPanel({
 
   return (
     <>
-      <div className="fixed inset-0 bg-neutral-900/30 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-[400px] bg-white shadow-2xl z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-neutral-900/30 dark:bg-neutral-950/60 z-40" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-[400px] bg-white dark:bg-neutral-900 shadow-2xl z-50 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex-1 min-w-0 pr-3">
-            <h2 className="text-lg font-bold text-neutral-900">{entry.name}</h2>
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-50">{entry.name}</h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {entry.sector && <span className="text-xs text-neutral-600">{entry.sector}</span>}
+              {entry.sector && <span className="text-xs text-neutral-600 dark:text-neutral-400">{entry.sector}</span>}
               {entry.hq && (
                 <>
-                  <span className="text-slate-300 text-xs">·</span>
-                  <span className="text-xs text-neutral-600">{entry.hq}</span>
+                  <span className="text-slate-300 dark:text-neutral-600 text-xs">·</span>
+                  <span className="text-xs text-neutral-600 dark:text-neutral-400">{entry.hq}</span>
                 </>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors flex-shrink-0"
+            className="p-1.5 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-neutral-200 bg-neutral-50/60 px-6">
+        <div className="flex border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-800/40 px-6">
           <button
             onClick={() => setTab('details')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'details'
-                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
-                : 'text-neutral-500 hover:text-neutral-700'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white dark:bg-neutral-900'
+                : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
           >
             Details
@@ -236,8 +230,8 @@ function DealPanel({
             onClick={() => setTab('tasks')}
             className={`py-3 px-4 text-xs font-semibold transition-all ${
               tab === 'tasks'
-                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white'
-                : 'text-neutral-500 hover:text-neutral-700'
+                ? 'text-primary-500 border-b-2 border-primary-500 -mb-px bg-white dark:bg-neutral-900'
+                : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
           >
             Tasks
@@ -252,18 +246,18 @@ function DealPanel({
 
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-neutral-50 rounded-lg p-3">
-              <p className="text-xs text-neutral-500 font-medium mb-0.5">Fundraising Ask</p>
-              <p className="text-lg font-bold text-neutral-900">
+            <div className="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-3">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium mb-0.5">Fundraising Ask</p>
+              <p className="text-lg font-bold text-neutral-900 dark:text-neutral-50">
                 {entry.fundraising_ask ? fmtMoney(entry.fundraising_ask) : '—'}
               </p>
             </div>
-            <div className="bg-neutral-50 rounded-lg p-3">
-              <p className="text-xs text-neutral-500 font-medium mb-1">Internal Score</p>
+            <div className="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-3">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium mb-1">Internal Score</p>
               {entry.internal_score ? (
                 <StarRow score={entry.internal_score} size={16} />
               ) : (
-                <p className="text-sm text-neutral-500">Not rated</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Not rated</p>
               )}
             </div>
           </div>
@@ -271,58 +265,58 @@ function DealPanel({
           {/* Detail rows */}
           {detailRows.map(({ label, value }) => value ? (
             <div key={label}>
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">{label}</p>
-              <p className="text-sm text-slate-800">{value}</p>
+              <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-sm text-slate-800 dark:text-neutral-200">{value}</p>
             </div>
           ) : null)}
 
           {entry.next_steps && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Next Steps</p>
-              <p className="text-sm text-slate-800 whitespace-pre-wrap">{entry.next_steps}</p>
+              <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Next Steps</p>
+              <p className="text-sm text-slate-800 dark:text-neutral-200 whitespace-pre-wrap">{entry.next_steps}</p>
             </div>
           )}
 
           {entry.notes && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Notes</p>
-              <p className="text-sm text-slate-800 whitespace-pre-wrap">{entry.notes}</p>
+              <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Notes</p>
+              <p className="text-sm text-slate-800 dark:text-neutral-200 whitespace-pre-wrap">{entry.notes}</p>
             </div>
           )}
 
           {entry.deck_url && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Pitch Deck</p>
+              <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2">Pitch Deck</p>
               <div className="flex items-center gap-2">
                 <a
                   href={entry.deck_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-primary-500 hover:text-primary-600 hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                 >
                   <Paperclip size={13} /> View deck
                 </a>
                 <button
                   onClick={analyzeDeck}
                   disabled={analyzing}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 rounded-lg text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors disabled:opacity-50"
                 >
                   <Sparkles size={11} /> {analyzing ? 'Analyzing…' : 'AI Summary'}
                 </button>
               </div>
-              {aiError && <p className="mt-2 text-xs text-red-500">{aiError}</p>}
+              {aiError && <p className="mt-2 text-xs text-red-500 dark:text-red-400">{aiError}</p>}
               {aiSummary && (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                  <p className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI Analysis</p>
-                  <p className="text-xs text-neutral-800 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
+                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/40 rounded-xl">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1.5 flex items-center gap-1"><Sparkles size={11} /> AI Analysis</p>
+                  <p className="text-xs text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">{aiSummary}</p>
                 </div>
               )}
             </div>
           )}
 
           <div>
-            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Added</p>
-            <p className="text-sm text-neutral-600">{createdDate}</p>
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Added</p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">{createdDate}</p>
           </div>
 
             </>
@@ -334,7 +328,7 @@ function DealPanel({
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-neutral-200 flex gap-3">
+        <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 flex gap-3">
           <button
             onClick={() => { onClose(); onEdit(entry) }}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
@@ -343,7 +337,7 @@ function DealPanel({
           </button>
           <button
             onClick={() => { onClose(); onDelete(entry.id, entry.name) }}
-            className="px-3 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="px-3 py-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
           >
             <Trash2 size={16} />
           </button>
@@ -381,8 +375,8 @@ function DealCard({
       ref={setNodeRef}
       style={style}
       onClick={() => onView(entry)}
-      className={`bg-white rounded-lg border border-neutral-200 p-3 shadow-sm dark:shadow-md group cursor-pointer transition-shadow ${
-        isDragging ? 'opacity-40' : 'hover:shadow-sm dark:shadow-md-hover hover:border-violet-200'
+      className={`bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 shadow-sm group cursor-pointer transition-shadow ${
+        isDragging ? 'opacity-40' : 'hover:shadow-md dark:hover:border-violet-700 hover:border-violet-200'
       }`}
     >
       <div className="flex items-start gap-2">
@@ -390,28 +384,28 @@ function DealCard({
           {...listeners}
           {...attributes}
           onClick={e => e.stopPropagation()}
-          className="mt-0.5 text-slate-300 hover:text-neutral-600 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+          className="mt-0.5 text-slate-300 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-300 flex-shrink-0 cursor-grab active:cursor-grabbing transition-colors"
         >
           <GripVertical size={14} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-neutral-900 truncate">{entry.name}</p>
+          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 truncate">{entry.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {entry.sector && <p className="text-xs text-neutral-500">{entry.sector}</p>}
+            {entry.sector && <p className="text-xs text-neutral-500 dark:text-neutral-400">{entry.sector}</p>}
             {entry.hq && (
               <>
-                <span className="text-slate-200 text-xs">·</span>
-                <p className="text-xs text-neutral-500">{entry.hq}</p>
+                <span className="text-slate-200 dark:text-neutral-600 text-xs">·</span>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">{entry.hq}</p>
               </>
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             {entry.stage && (
-              <span className="text-xs bg-neutral-100 text-neutral-700 rounded-lg px-2 py-0.5">{entry.stage}</span>
+              <span className="text-xs bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-lg px-2 py-0.5">{entry.stage}</span>
             )}
             {askLabel && (
-              <span className="text-xs bg-gold-50 text-primary-500 rounded-lg px-2 py-0.5">{askLabel}</span>
+              <span className="text-xs bg-gold-50 dark:bg-gold-900/20 text-primary-500 dark:text-primary-300 rounded-lg px-2 py-0.5">{askLabel}</span>
             )}
           </div>
           {entry.internal_score != null && entry.internal_score > 0 && (
@@ -427,13 +421,13 @@ function DealCard({
         >
           <button
             onClick={() => onEdit(entry)}
-            className="p-1 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onDelete(entry.id, entry.name)}
-            className="p-1 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1 text-neutral-500 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
           >
             <Trash2 size={12} />
           </button>
@@ -495,18 +489,18 @@ function Column({
           </button>
           {showMenu && (
             <div
-              className="absolute right-0 top-8 z-20 bg-white rounded-lg shadow-xl ring-1 ring-black/[0.06] py-1 w-36"
+              className="absolute right-0 top-8 z-20 bg-white dark:bg-neutral-800 rounded-lg shadow-xl ring-1 ring-black/[0.06] dark:ring-white/[0.06] py-1 w-36"
               onMouseLeave={() => setShowMenu(false)}
             >
               <button
                 onClick={() => { onEditStage(stage); setShowMenu(false) }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-neutral-800 hover:bg-neutral-50"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-700"
               >
                 <Pencil size={12} /> Edit stage
               </button>
               <button
                 onClick={() => { onDeleteStage(stage); setShowMenu(false) }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <Trash2 size={12} /> Delete stage
               </button>
@@ -518,7 +512,7 @@ function Column({
       <div
         ref={setNodeRef}
         className={`flex-1 flex flex-col gap-2 min-h-24 rounded-lg p-1.5 transition-colors ${
-          isOver ? 'bg-gold-50 ring-2 ring-violet-200 ring-dashed' : ''
+          isOver ? 'bg-gold-50 dark:bg-gold-900/10 ring-2 ring-violet-200 dark:ring-violet-700 ring-dashed' : ''
         }`}
       >
         {entries.map(entry => (
@@ -535,7 +529,7 @@ function Column({
         {entries.length === 0 && !isOver && (
           <button
             onClick={() => onAddCard(stage.name)}
-            className="flex items-center justify-center gap-1.5 p-3 rounded-lg border-2 border-dashed border-neutral-200 text-xs text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
+            className="flex items-center justify-center gap-1.5 p-3 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 hover:border-gold-200 dark:hover:border-gold-700 hover:text-primary-500 transition-colors"
           >
             <Plus size={12} /> Add deal
           </button>
@@ -613,16 +607,16 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
     <div className="animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Deal Pipeline</h1>
-        <div className="flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg p-1 shadow-sm">
+        <div className="flex items-center gap-1.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-1 shadow-sm">
           <button
             onClick={() => setView('board')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-800'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'board' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-100'}`}
           >
             <Plus size={12} /> Board
           </button>
           <button
             onClick={() => setView('analytics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-800'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${view === 'analytics' ? 'bg-primary-500 text-white shadow-sm' : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-100'}`}
           >
             <BarChart2 size={12} /> Analytics
           </button>
@@ -645,18 +639,18 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
 
       {/* Search bar */}
       <div className="relative mb-4">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 pointer-events-none" />
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search deals by name, sector, stage, notes…"
-          className="w-full pl-9 pr-9 py-2 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all shadow-sm"
+          className="w-full pl-9 pr-9 py-2 text-sm bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all shadow-sm"
         />
         {search && (
           <button
             onClick={() => setSearch('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 transition-colors"
           >
             <X size={14} />
           </button>
@@ -683,7 +677,7 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
           <div className="flex-shrink-0 w-64">
             <button
               onClick={() => setShowAddStage(true)}
-              className="w-full h-12 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 text-sm text-neutral-500 hover:border-gold-200 hover:text-primary-500 transition-colors"
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-700 text-sm text-neutral-500 dark:text-neutral-400 hover:border-gold-200 dark:hover:border-gold-700 hover:text-primary-500 transition-colors"
             >
               <Plus size={15} /> Add stage
             </button>
