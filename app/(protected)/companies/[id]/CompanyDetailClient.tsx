@@ -113,13 +113,21 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const totalSafeInvested = safes.reduce((s, safe) => s + safe.investment_amount, 0)
 
   // Institutional ownership (from share_series if available)
-  const fundSeries = shareSeries.filter(s =>
-    s.holder_name.toLowerCase().includes('menomadin') ||
-    s.holder_name.toLowerCase().includes('fund')
-  )
   const totalIssuedShares = shareSeries.reduce((s, h) => s + h.shares, 0)
   const totalFDShares = calcFullyDilutedShares(totalIssuedShares, optionPools)
-  const fundFDShares = fundSeries.reduce((s, h) => s + h.shares, 0)
+  const fundFDShares = legalEntities.length > 0
+    ? legalEntities.reduce((sum, entity) => {
+        const alias = (entity.cap_table_alias || entity.name).toLowerCase()
+        return sum + shareSeries
+          .filter(s => s.holder_name.toLowerCase() === alias)
+          .reduce((s, h) => s + h.shares, 0)
+      }, 0)
+    : shareSeries
+        .filter(s =>
+          s.holder_name.toLowerCase().includes('menomadin') ||
+          s.holder_name.toLowerCase().includes('fund')
+        )
+        .reduce((s, h) => s + h.shares, 0)
   const fundFDPct = fundFDShares > 0 ? calcFullyDilutedOwnershipPct(fundFDShares, totalFDShares) : 0
 
   const healthScore = calcHealthScore(kpis, updates, investments, rounds, capTable)
