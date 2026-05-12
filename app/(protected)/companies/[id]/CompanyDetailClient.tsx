@@ -539,12 +539,20 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                   ...(safe.status === 'converted' && safe.converted_price_per_share
                                     ? [{ label: 'Price / Share', value: `$${safe.converted_price_per_share.toFixed(4)}` }]
                                     : []),
-                                ].filter(Boolean).map(({ label, value, highlight, accent }: any) => (
+                                ].filter(Boolean).map(row => {
+                                  const { label, value, highlight, accent } = row as {
+                                    label: string
+                                    value: string
+                                    highlight?: boolean
+                                    accent?: boolean
+                                  }
+                                  return (
                                   <div key={label}>
                                     <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-0.5">{label}</p>
                                     <p className={`text-sm font-medium ${accent ? 'text-orange-600 dark:text-orange-300' : highlight ? 'text-primary-600 dark:text-primary-300' : 'text-neutral-900 dark:text-neutral-50'}`}>{value}</p>
                                   </div>
-                                ))}
+                                  )
+                                })}
                               </div>
 
                               {/* Action hint */}

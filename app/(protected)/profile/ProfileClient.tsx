@@ -72,13 +72,57 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(hours / 24)}d ago`
 }
 
+// Narrow shapes for what this view actually reads. The server query already
+// projects exactly these columns, so re-typing here is just making the
+// implicit contract explicit (and catches drift if a column is renamed).
+interface ProfileTask {
+  id: string
+  title: string
+  priority: string
+  status: string
+  due_date: string | null
+  company: { id: string; name: string } | null
+}
+interface ProfileDeal {
+  id: string
+  name: string
+  sector: string | null
+  stage: string | null
+  fundraising_ask: number | null
+  updated_at: string
+}
+interface ProfileCompany {
+  id: string
+  name: string
+  sector: string | null
+  strategy: string | null
+  status: string
+}
+interface ProfileActivity {
+  id: string
+  action: string
+  entity_type: string
+  field_changed?: string | null
+  old_value?: string | null
+  new_value?: string | null
+  created_at: string
+}
+interface ProfileTeammate {
+  id: string
+  name: string
+  initials: string | null
+  color: string | null
+  job_title: string | null
+  email: string
+}
+
 interface Props {
   profile: TeamMember
-  tasks: any[]
-  deals: any[]
-  companies: any[]
-  activities: any[]
-  teamMembers: any[]
+  tasks: ProfileTask[]
+  deals: ProfileDeal[]
+  companies: ProfileCompany[]
+  activities: ProfileActivity[]
+  teamMembers: ProfileTeammate[]
   isWelcome?: boolean
 }
 
@@ -381,7 +425,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
               ? <EmptyState icon={CheckSquare} message="No active tasks assigned to you" />
               : (
                 <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                  {tasks.map((task: any) => (
+                  {tasks.map(task => (
                     <div key={task.id} className="py-3 flex items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">{task.title}</p>
@@ -419,7 +463,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
               ? <EmptyState icon={TrendingUp} message="No pipeline deals assigned to you yet" />
               : (
                 <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                  {deals.map((deal: any) => (
+                  {deals.map(deal => (
                     <Link key={deal.id} href={`/pipeline`} className="py-3 flex items-center gap-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 -mx-5 px-5 transition-colors group">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-900 dark:text-white group-hover:text-primary-500 transition-colors truncate">{deal.name}</p>
@@ -443,7 +487,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
               ? <EmptyState icon={Building2} message="No portfolio companies assigned to you yet" />
               : (
                 <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                  {companies.map((co: any) => (
+                  {companies.map(co => (
                     <Link key={co.id} href={`/companies/${co.id}`} className="py-3 flex items-center gap-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 -mx-5 px-5 transition-colors group">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-900 dark:text-white group-hover:text-primary-500 transition-colors truncate">{co.name}</p>
@@ -468,7 +512,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
               ? <EmptyState icon={Activity} message="No activity recorded yet" />
               : (
                 <div className="space-y-1">
-                  {activities.map((act: any) => (
+                  {activities.map(act => (
                     <div key={act.id} className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-neutral-800 last:border-0">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary-400 mt-2 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -498,7 +542,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
               ? <EmptyState icon={Users} message="No team members found" />
               : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {teamMembers.map((member: any) => (
+                  {teamMembers.map(member => (
                     <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/30">
                       <InitialsAvatar
                         name={member.name}

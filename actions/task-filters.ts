@@ -24,7 +24,11 @@ export interface SavedTaskFilter {
   created_by: string
 }
 
-export async function createSavedFilter(name: string, description: string | null, filters: any) {
+export async function createSavedFilter(
+  name: string,
+  description: string | null,
+  filters: SavedTaskFilter['filters'],
+) {
   const supabase = await createServerSupabaseClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -49,7 +53,10 @@ export async function createSavedFilter(name: string, description: string | null
   return { data: filter as SavedTaskFilter }
 }
 
-export async function updateSavedFilter(filterId: string, updates: any) {
+export async function updateSavedFilter(
+  filterId: string,
+  updates: Partial<Pick<SavedTaskFilter, 'name' | 'description' | 'filters' | 'is_default'>>,
+) {
   const supabase = await createServerSupabaseClient()
 
   const { data: { user } } = await supabase.auth.getUser()
