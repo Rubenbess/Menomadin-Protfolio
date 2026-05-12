@@ -107,10 +107,10 @@ function UploadModal({
           onChange={e => setFile(e.target.files?.[0] ?? null)}
         />
         {file ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 bg-gold-50 border border-violet-200 rounded-xl">
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-gold-50 dark:bg-gold-900/20 border border-violet-200 dark:border-violet-700/40 rounded-xl">
             <span>{fileIcon(file.name)}</span>
-            <span className="text-sm text-primary-600 flex-1 truncate">{file.name}</span>
-            <button type="button" onClick={() => setFile(null)} className="text-neutral-500 hover:text-red-500">
+            <span className="text-sm text-primary-600 dark:text-primary-400 flex-1 truncate">{file.name}</span>
+            <button type="button" onClick={() => setFile(null)} className="text-neutral-500 dark:text-neutral-400 hover:text-red-500">
               <X size={14} />
             </button>
           </div>
@@ -168,17 +168,17 @@ function UploadModal({
 function PdfPreview({ url, name, onClose }: { url: string; name: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center gap-2">
             <span>{fileIcon(name)}</span>
-            <span className="text-sm font-semibold text-slate-800 truncate max-w-xs">{name}</span>
+            <span className="text-sm font-semibold text-slate-800 dark:text-neutral-100 truncate max-w-xs">{name}</span>
           </div>
           <div className="flex items-center gap-2">
             <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium">
               Open <ExternalLink size={12} />
             </a>
-            <button onClick={onClose} className="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors">
+            <button onClick={onClose} className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -351,7 +351,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                       className="flex items-center gap-2.5 text-left group"
                     >
                       <span className="text-lg flex-shrink-0">{fileIcon(doc.file_name)}</span>
-                      <span className="font-medium text-slate-800 group-hover:text-primary-500 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
+                      <span className="font-medium text-slate-800 dark:text-neutral-100 group-hover:text-primary-500 transition-colors truncate max-w-[200px]">{doc.file_name}</span>
                     </button>
                   </td>
                   <td className="px-4 py-3.5">
@@ -361,29 +361,29 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
                   </td>
                   <td className="px-4 py-3.5 hidden md:table-cell">
                     {doc.company_id && companyMap[doc.company_id] ? (
-                      <span className="text-sm text-neutral-700 flex items-center gap-1">
-                        <Building2 size={12} className="text-slate-300" />
+                      <span className="text-sm text-neutral-700 dark:text-neutral-300 flex items-center gap-1">
+                        <Building2 size={12} className="text-slate-300 dark:text-neutral-600" />
                         {companyMap[doc.company_id]}
                       </span>
                     ) : (
-                      <span className="text-slate-300 text-sm">—</span>
+                      <span className="text-slate-300 dark:text-neutral-600 text-sm">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3.5 hidden lg:table-cell">
                     {doc.doc_date ? (
-                      <span className="text-xs text-neutral-600 flex items-center gap-1">
-                        <Calendar size={11} className="text-slate-300" />
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-1">
+                        <Calendar size={11} className="text-slate-300 dark:text-neutral-600" />
                         {fmtDate(doc.doc_date)}
                       </span>
                     ) : (
-                      <span className="text-slate-300 text-sm">—</span>
+                      <span className="text-slate-300 dark:text-neutral-600 text-sm">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3.5 hidden xl:table-cell">
                     {doc.notes ? (
-                      <span className="text-xs text-neutral-600 truncate max-w-[160px] block">{doc.notes}</span>
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400 truncate max-w-[160px] block">{doc.notes}</span>
                     ) : (
-                      <span className="text-slate-300 text-sm">—</span>
+                      <span className="text-slate-300 dark:text-neutral-600 text-sm">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3.5">

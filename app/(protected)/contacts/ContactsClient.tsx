@@ -209,21 +209,21 @@ function ContactPanel({
           {/* Contact info */}
           <div className="space-y-2.5">
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-lg hover:bg-gold-50 hover:text-primary-600 transition-colors group">
-                <Mail size={15} className="text-neutral-500 group-hover:text-primary-500 flex-shrink-0" />
-                <span className="text-sm text-neutral-800 group-hover:text-primary-600 truncate">{contact.email}</span>
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-900/20 hover:text-primary-600 transition-colors group">
+                <Mail size={15} className="text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 dark:text-neutral-200 group-hover:text-primary-600 truncate">{contact.email}</span>
               </a>
             )}
             {contact.phone && (
-              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-lg hover:bg-gold-50 hover:text-primary-600 transition-colors group">
-                <Phone size={15} className="text-neutral-500 group-hover:text-primary-500 flex-shrink-0" />
-                <span className="text-sm text-neutral-800 group-hover:text-primary-600">{contact.phone}</span>
+              <a href={`tel:${contact.phone}`} className="flex items-center gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-lg hover:bg-gold-50 dark:hover:bg-gold-900/20 hover:text-primary-600 transition-colors group">
+                <Phone size={15} className="text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 dark:text-neutral-200 group-hover:text-primary-600">{contact.phone}</span>
               </a>
             )}
             {contact.address && (
-              <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-xl">
-                <MapPin size={15} className="text-neutral-500 flex-shrink-0" />
-                <span className="text-sm text-neutral-800">{contact.address}</span>
+              <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-xl">
+                <MapPin size={15} className="text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
+                <span className="text-sm text-neutral-800 dark:text-neutral-200">{contact.address}</span>
               </div>
             )}
             {contact.linkedin_url && (
@@ -477,7 +477,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
             />
           </div>
         ) : (
-          <div className="card overflow-hidden">
+          <div className="card overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
@@ -503,7 +503,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                           {initials(contact.name)}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-neutral-900">{contact.name}</p>
+                          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{contact.name}</p>
                           {contact.position && <p className="text-xs text-neutral-500">{contact.position}</p>}
                         </div>
                       </div>
@@ -515,19 +515,19 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
                       {contact.companies ? (
-                        <span className="text-sm text-neutral-700">{contact.companies.name}</span>
+                        <span className="text-sm text-neutral-700 dark:text-neutral-300">{contact.companies.name}</span>
                       ) : (
-                        <span className="text-sm text-slate-300">—</span>
+                        <span className="text-sm text-slate-300 dark:text-neutral-600">—</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">
                       {contact.email ? (
-                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-neutral-700 hover:text-primary-500 transition-colors flex items-center gap-1.5">
-                          <Mail size={12} className="text-slate-300 flex-shrink-0" />
+                        <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} className="text-sm text-neutral-700 dark:text-neutral-300 hover:text-primary-500 transition-colors flex items-center gap-1.5">
+                          <Mail size={12} className="text-slate-300 dark:text-neutral-600 flex-shrink-0" />
                           {contact.email}
                         </a>
                       ) : (
-                        <span className="text-sm text-slate-300">—</span>
+                        <span className="text-sm text-slate-300 dark:text-neutral-600">—</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 hidden xl:table-cell">

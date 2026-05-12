@@ -52,7 +52,7 @@ function FilterSelect({
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
           active
             ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
-            : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300 hover:text-slate-800'
+            : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 hover:text-slate-800 dark:hover:text-white dark:hover:border-neutral-600'
         }`}
       >
         {active ? value : label}
@@ -65,15 +65,15 @@ function FilterSelect({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full mt-1.5 z-20 bg-white rounded-lg shadow-xl ring-1 ring-black/[0.06] py-1 min-w-[160px]">
+          <div className="absolute left-0 top-full mt-1.5 z-20 bg-white dark:bg-neutral-900 rounded-lg shadow-xl ring-1 ring-black/[0.06] dark:ring-white/10 py-1 min-w-[160px]">
             {options.map(opt => (
               <button
                 key={opt}
                 onClick={() => { onChange(opt === value ? '' : opt); setOpen(false) }}
                 className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                   opt === value
-                    ? 'bg-gold-50 text-primary-600 font-medium'
-                    : 'text-neutral-800 hover:bg-neutral-50'
+                    ? 'bg-gold-50 dark:bg-gold-900/20 text-primary-600 dark:text-primary-400 font-medium'
+                    : 'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                 }`}
               >
                 {opt}
@@ -237,7 +237,7 @@ export default function CompaniesClient({
 
         <button
           onClick={() => setShowAdvancedFilter(true)}
-          className="text-xs text-neutral-700 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors border border-neutral-200"
+          className="text-xs text-neutral-700 dark:text-neutral-300 hover:text-slate-800 dark:hover:text-white px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors border border-neutral-200 dark:border-neutral-700"
         >
           Advanced Filter
         </button>
@@ -248,7 +248,7 @@ export default function CompaniesClient({
               clearAll()
               setAdvancedFilterGroup(null)
             }}
-            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="flex items-center gap-1 text-xs text-neutral-600 dark:text-neutral-300 hover:text-slate-800 dark:hover:text-white px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <X size={12} /> Clear all
           </button>
