@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { requireCronAuth } from '@/lib/api-auth'
+import { BRAND_NO_REPLY_EMAIL } from '@/lib/branding'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 interface Recipient { email: string; name?: string | null }
 
@@ -8,8 +10,11 @@ export async function POST(req: NextRequest) {
   const cronError = requireCronAuth(req)
   if (cronError) return cronError
 
+  const rl = checkRateLimit('send-deal-report', 5, 60_000)
+  if (rl) return NextResponse.json({ error: rl }, { status: 429 })
+
   const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? BRAND_NO_REPLY_EMAIL
 
   if (!resendKey) {
     return NextResponse.json({ error: 'Missing RESEND_API_KEY' }, { status: 500 })

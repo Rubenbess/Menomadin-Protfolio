@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
-import { FUND_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
+import { BRAND_NO_REPLY_EMAIL, FUND_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
   const cronError = requireCronAuth(req)
   if (cronError) return cronError
 
+  // Vercel cron fires this route once/day; 60/min is the leaked-bearer cap.
+  const rl = checkRateLimit('cron-reminders', 60, 60_000)
+  if (rl) return NextResponse.json({ error: rl }, { status: 429 })
+
   const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? BRAND_NO_REPLY_EMAIL
   const toEmail   = process.env.TEAM_EMAIL
 
   if (!resendKey || !toEmail) {

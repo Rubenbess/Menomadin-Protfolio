@@ -2,14 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
-import { FUND_FULL_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
+import { BRAND_NO_REPLY_EMAIL, FUND_FULL_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
+import { fmt$$ } from '@/lib/calculations'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
   const cronError = requireCronAuth(req)
   if (cronError) return cronError
 
+  // Vercel cron fires this route ~once/day; cap at 60/min purely to detect
+  // a leaked-bearer scenario where a single instance gets pounded.
+  const rl = checkRateLimit('cron-lp-report', 60, 60_000)
+  if (rl) return NextResponse.json({ error: rl }, { status: 429 })
+
   const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? BRAND_NO_REPLY_EMAIL
   const lpEmails  = process.env.LP_EMAILS // comma-separated list of LP email addresses
 
   if (!resendKey || !lpEmails) {
@@ -29,11 +36,13 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
   )
 
+  // Narrow each select to the columns actually rendered in the email template
+  // — keeps memory bounded and lets the index-only scans short-circuit.
   const [companiesRes, investmentsRes, roundsRes, capTableRes] = await Promise.all([
-    supabase.from('companies').select('*').order('name'),
-    supabase.from('investments').select('*'),
-    supabase.from('rounds').select('*').order('date', { ascending: false }),
-    supabase.from('cap_table').select('*'),
+    supabase.from('companies').select('id, name, sector, hq, entry_stage, status').order('name'),
+    supabase.from('investments').select('company_id, amount'),
+    supabase.from('rounds').select('company_id, date, post_money').order('date', { ascending: false }),
+    supabase.from('cap_table').select('company_id, ownership_percentage'),
   ])
 
   const companies   = companiesRes.data   ?? []
@@ -43,12 +52,6 @@ export async function GET(req: NextRequest) {
 
   const totalInvested = investments.reduce((s: number, i: { amount: number }) => s + i.amount, 0)
   const activeCount   = companies.filter((c: { status: string }) => c.status === 'active').length
-
-  function fmt$(n: number) {
-    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-    if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-    return `$${n}`
-  }
 
   const now = new Date()
   const quarter = `Q${Math.ceil((now.getMonth() + 1) / 3)} ${now.getFullYear()}`
@@ -72,8 +75,8 @@ export async function GET(req: NextRequest) {
       return `<tr style="border-bottom:1px solid #f1f5f9">
         <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${esc(c.name)}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(c.sector) || '—'}</td>
-        <td style="padding:10px 16px;font-size:13px;color:#64748b">${inv > 0 ? fmt$(inv) : '—'}</td>
-        <td style="padding:10px 16px;font-size:13px;color:#64748b">${latestRound ? fmt$(latestRound.post_money) : '—'}</td>
+        <td style="padding:10px 16px;font-size:13px;color:#64748b">${inv > 0 ? fmt$$(inv) : '—'}</td>
+        <td style="padding:10px 16px;font-size:13px;color:#64748b">${latestRound ? fmt$$(latestRound.post_money) : '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${cap ? `${cap.ownership_percentage.toFixed(1)}%` : '—'}</td>
       </tr>`
     }).join('')
@@ -88,7 +91,7 @@ export async function GET(req: NextRequest) {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
         <div style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:16px">
           <p style="margin:0;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">Total Invested</p>
-          <p style="margin:4px 0 0;font-size:22px;font-weight:700;color:#0f172a">${fmt$(totalInvested)}</p>
+          <p style="margin:4px 0 0;font-size:22px;font-weight:700;color:#0f172a">${fmt$$(totalInvested)}</p>
         </div>
         <div style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:16px">
           <p style="margin:0;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">Portfolio Companies</p>

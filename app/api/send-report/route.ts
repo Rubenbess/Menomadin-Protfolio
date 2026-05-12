@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { BRAND_NO_REPLY_EMAIL } from '@/lib/branding'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY
 
-  // Inbound auth must use a dedicated secret — never the Resend API key.
-  // Reusing RESEND_API_KEY as the bearer token leaks inbound auth to anyone
-  // with legitimate access to the outbound mail credential. Prefer a dedicated
-  // REPORT_API_KEY; fall back to CRON_SECRET so this endpoint can be invoked
-  // by Vercel cron with the same shared secret used elsewhere.
-  const inboundSecret = process.env.REPORT_API_KEY ?? process.env.CRON_SECRET
+  // Inbound auth uses a dedicated secret. Previously fell back to CRON_SECRET
+  // for convenience, but that coupled "Vercel cron can fire reports" with
+  // "anyone with the cron token can blast arbitrary email" — a leaked cron
+  // token shouldn't grant the ability to send mail.
+  const inboundSecret = process.env.REPORT_API_KEY
 
-  // Fail closed when neither secret is set — otherwise `Bearer undefined`
-  // would match a `Bearer undefined` request and bypass auth entirely.
+  // Fail closed when the secret is unset — otherwise `Bearer undefined` would
+  // match a `Bearer undefined` request and bypass auth entirely.
   if (!inboundSecret) {
     return NextResponse.json(
-      { error: 'Missing REPORT_API_KEY (or CRON_SECRET fallback)' },
+      { error: 'Missing REPORT_API_KEY' },
       { status: 503 }
     )
   }
@@ -27,7 +28,12 @@ export async function POST(req: NextRequest) {
   if (authHeader !== `Bearer ${inboundSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@menomadin.com'
+
+  // Cap per-process throughput so a leaked bearer can't blast unlimited mail.
+  const rl = checkRateLimit('send-report', 10, 60_000)
+  if (rl) return NextResponse.json({ error: rl }, { status: 429 })
+
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? BRAND_NO_REPLY_EMAIL
 
   let body: { report?: string; subject?: string; to?: string }
   try {
