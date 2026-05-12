@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { useToast } from '@/hooks/useToast'
 import type { TaskWithRelations } from '@/lib/types'
 
 interface Props {
@@ -13,16 +14,20 @@ interface Props {
 export default function ContactTasks({ contactId, contactName }: Props) {
   const [tasks, setTasks] = useState<TaskWithRelations[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [creating, setCreating] = useState(false)
+  const toast = useToast()
 
   // Load tasks on mount
   useEffect(() => {
     loadTasks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId])
 
   async function loadTasks() {
+    setLoadError(null)
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -42,11 +47,12 @@ export default function ContactTasks({ contactId, contactName }: Props) {
         .eq('contact_id', contactId)
         .order('created_at', { ascending: false })
 
-      if (!error && data) {
-        setTasks(data as unknown as TaskWithRelations[])
-      }
+      if (error) throw error
+      setTasks((data ?? []) as unknown as TaskWithRelations[])
     } catch (err) {
-      console.error('Failed to load tasks:', err)
+      const msg = err instanceof Error ? err.message : 'Could not load tasks'
+      setLoadError(msg)
+      toast.error('Failed to load tasks', { description: msg })
     } finally {
       setLoading(false)
     }
@@ -68,14 +74,22 @@ export default function ContactTasks({ contactId, contactName }: Props) {
         }),
       })
 
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}))
+        throw new Error(errBody.error ?? `Request failed (${response.status})`)
+      }
       const result = await response.json()
       if (result.data) {
         setTasks([result.data, ...tasks])
         setNewTaskTitle('')
         setShowCreateForm(false)
+        toast.success('Task created')
+      } else {
+        throw new Error('Server returned no task')
       }
     } catch (err) {
-      console.error('Failed to create task:', err)
+      const msg = err instanceof Error ? err.message : 'Could not create task'
+      toast.error('Failed to create task', { description: msg })
     } finally {
       setCreating(false)
     }
@@ -133,8 +147,28 @@ export default function ContactTasks({ contactId, contactName }: Props) {
         </div>
       )}
 
-      {tasks.length === 0 ? (
-        <p className="text-xs text-neutral-500 text-center py-4">No follow-up tasks yet.</p>
+      {loadError ? (
+        <div className="text-xs text-red-600 text-center py-4 space-y-2">
+          <p>Couldn't load tasks: {loadError}</p>
+          <button
+            type="button"
+            onClick={() => { setLoading(true); loadTasks() }}
+            className="text-primary-500 hover:text-primary-600 font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      ) : tasks.length === 0 ? (
+        <div className="text-center py-4 space-y-2">
+          <p className="text-xs text-neutral-500">No follow-up tasks yet.</p>
+          <button
+            type="button"
+            onClick={() => setShowCreateForm(true)}
+            className="inline-flex items-center gap-1 text-xs text-primary-500 hover:text-primary-600 font-medium"
+          >
+            <Plus size={12} /> Create follow-up task
+          </button>
+        </div>
       ) : (
         <div className="space-y-2">
           {tasks.map(task => {
