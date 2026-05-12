@@ -26,6 +26,42 @@ export async function requireAuth(): Promise<
 }
 
 /**
+ * Same shape as requireAuth, but additionally verifies the caller has admin
+ * role in team_members. Use for destructive bulk operations (full-portfolio
+ * import, mass delete) where RLS row-isolation is not a sufficient gate.
+ *
+ * Roles are defined in supabase/migrations/table_permissions.sql:
+ *   - admin     — full access, gets this gate.
+ *   - associate — can create/update but not bulk-destroy.
+ *   - viewer    — read-only.
+ *
+ * New users default to 'admin' (see handle_new_user_trigger.sql) so this is a
+ * forward-compatible gate: it locks down the route the moment any user is
+ * downgraded to associate/viewer, without changing today's behaviour.
+ */
+export async function requireAdminAuth(): Promise<
+  { user: User; supabase: SupabaseClient; role: 'admin' } | { response: NextResponse }
+> {
+  const baseAuth = await requireAuth()
+  if ('response' in baseAuth) return baseAuth
+  const { user, supabase } = baseAuth
+
+  const { data: member, error } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (error || !member) {
+    return { response: NextResponse.json({ error: 'Forbidden — not a team member' }, { status: 403 }) }
+  }
+  if (member.role !== 'admin') {
+    return { response: NextResponse.json({ error: 'Forbidden — admin role required' }, { status: 403 }) }
+  }
+  return { user, supabase, role: 'admin' }
+}
+
+/**
  * Cron secret check that fails closed when CRON_SECRET is unset, instead of
  * matching `Bearer undefined`. Vercel cron passes the secret as an Authorization
  * header per the platform contract.

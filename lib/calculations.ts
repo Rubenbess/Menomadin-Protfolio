@@ -589,6 +589,15 @@ export function fmt$$(amount: number): string {
   return `$${amount.toLocaleString()}`
 }
 
+/**
+ * Nullable variant of fmt$$. Returns null for null/undefined inputs so callers
+ * can render a placeholder (e.g. an em-dash) instead of "$null" or "$NaN".
+ */
+export function fmt$Nullable(amount: number | null | undefined): string | null {
+  if (amount == null || !Number.isFinite(amount)) return null
+  return fmt$$(amount)
+}
+
 export function fmtMultiple(x: number): string {
   return `${x.toFixed(2)}x`
 }

@@ -10,3 +10,10 @@
 export const FUND_NAME = 'Menomadin'
 export const FUND_FULL_NAME = 'Menomadin Group'
 export const FUND_PORTFOLIO_NAME = 'Menomadin Portfolio'
+
+/**
+ * Default `from` address for outbound system mail (LP reports, cron alerts,
+ * weekly deal reports). Real env should override this via `RESEND_FROM_EMAIL`.
+ * Centralizing here avoids the address being scattered across cron routes.
+ */
+export const BRAND_NO_REPLY_EMAIL = 'noreply@menomadin.com'
