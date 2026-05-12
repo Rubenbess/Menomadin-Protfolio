@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as XLSX from 'xlsx'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { requireAdminAuth } from '@/lib/api-auth'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -39,11 +39,13 @@ function num(val: unknown): number {
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 MB
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServerSupabaseClient()
-
-  // Auth check
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Bulk import is destructive — it deletes every existing rounds/investments/
+  // cap_table row for each company in the upload and re-inserts from the
+  // workbook. Gate on admin role: RLS scopes access per team-member but does
+  // not stop a non-admin from blowing away another company's history.
+  const auth = await requireAdminAuth()
+  if ('response' in auth) return auth.response
+  const { supabase } = auth
 
   // Reject oversized uploads before reading into memory
   const contentLength = Number(req.headers.get('content-length') ?? 0)
@@ -116,36 +118,40 @@ export async function POST(req: NextRequest) {
     errors: [] as string[],
   }
 
+  // ── Resolve all existing companies in one round-trip (was N+1) ───────
+  const { data: existingCompanies, error: existingErr } = await supabase
+    .from('companies')
+    .select('id, name')
+    .in('name', uniqueNames)
+  if (existingErr) {
+    return NextResponse.json({ error: `Failed to look up companies: ${existingErr.message}` }, { status: 500 })
+  }
+  const existingByName = new Map<string, string>(
+    (existingCompanies ?? []).map(c => [c.name, c.id])
+  )
+
   // ── Process each company ─────────────────────────────────────────────
   for (const name of uniqueNames) {
     const rows = rawRows.filter((r) => String(r['Investment Name']).trim() === name)
     const firstRow = rows[0]
 
-    // Upsert company by name
-    const { data: existing } = await supabase
-      .from('companies')
-      .select('id')
-      .eq('name', name)
-      .single()
-
     let companyId: string
+    const existingId = existingByName.get(name)
 
-    if (existing) {
-      // Update
+    if (existingId) {
       const { error: updErr } = await supabase.from('companies').update({
         sector: String(firstRow['Sector'] || 'Other').trim(),
         strategy: mapStrategy(String(firstRow['Entity'] || '')),
         hq: String(firstRow['Geography'] || '').trim(),
         status: 'active',
-      }).eq('id', existing.id)
+      }).eq('id', existingId)
       if (updErr) {
         results.errors.push(`Failed to update company "${name}": ${updErr.message}`)
         continue
       }
-      companyId = existing.id
+      companyId = existingId
       results.companies.updated++
     } else {
-      // Create
       const { data: created, error } = await supabase
         .from('companies')
         .insert({
@@ -166,82 +172,103 @@ export async function POST(req: NextRequest) {
       results.companies.created++
     }
 
-    // Delete existing rounds/investments/cap_table for a clean sync.
-    // If any of these fail mid-import the database is left partially-replaced
-    // (FK cascades may have already removed rows on one table but not another),
-    // so we surface the failure and skip re-inserting for this company —
-    // resuming the import will re-attempt the delete pass.
-    const delRounds = await supabase.from('rounds').delete().eq('company_id', companyId)
+    // Delete existing data for a clean sync. Leaf tables go first so that a
+    // mid-step failure leaves the parent (rounds) untouched and FKs intact,
+    // making a re-run safe.
+    const delCt  = await supabase.from('cap_table').delete().eq('company_id', companyId)
+    if (delCt.error) {
+      results.errors.push(`Failed to clear cap_table for "${name}": ${delCt.error.message}`)
+      continue
+    }
     const delInv = await supabase.from('investments').delete().eq('company_id', companyId)
-    const delCt = await supabase.from('cap_table').delete().eq('company_id', companyId)
-    const delErr = delRounds.error?.message ?? delInv.error?.message ?? delCt.error?.message
-    if (delErr) {
-      results.errors.push(`Failed to clear prior data for "${name}": ${delErr}`)
+    if (delInv.error) {
+      results.errors.push(`Failed to clear investments for "${name}": ${delInv.error.message}`)
+      continue
+    }
+    const delRounds = await supabase.from('rounds').delete().eq('company_id', companyId)
+    if (delRounds.error) {
+      results.errors.push(`Failed to clear rounds for "${name}": ${delRounds.error.message}`)
       continue
     }
 
-    // Insert fresh data from each row
-    for (const row of rows) {
-      const entity = String(row['Entity'] || '').trim()
-      const stage = String(row['Stage'] || '').trim()
-      const date = toDate(row['Date of First Investment'])
-      const preMoney = num(row['Pre-money Valuation'])
-      const postMoney = num(row['Post Money Valuation'])
-      const currentVal = num(row['Current Valuation'])
-      const totalRound = num(row['Total Round'])
-      const investedAmount = num(row['Invested Amount'])
-      const ownershipPctVal = pct(row['Ownership Percentage'])
-      const instrument = mapInstrument(String(row['Type'] || 'Equity'))
+    // ── Batch inserts ──────────────────────────────────────────────────
+    // Build all round payloads up front, insert them in a single call, then
+    // use the returned IDs to build investments and cap_table payloads. This
+    // replaces 3 × N round-trips with 3 round-trips per company.
+    const rowPayloads = rows.map(row => ({
+      entity:         String(row['Entity'] || '').trim(),
+      stage:          String(row['Stage'] || '').trim(),
+      date:           toDate(row['Date of First Investment']),
+      preMoney:       num(row['Pre-money Valuation']),
+      postMoney:      num(row['Post Money Valuation']),
+      currentVal:     num(row['Current Valuation']),
+      totalRound:     num(row['Total Round']),
+      investedAmount: num(row['Invested Amount']),
+      ownershipPct:   pct(row['Ownership Percentage']),
+      instrument:     mapInstrument(String(row['Type'] || 'Equity')),
+    }))
 
-      // Round — use current valuation as latest post-money if available
-      const { data: roundData, error: roundErr } = await supabase
-        .from('rounds')
-        .insert({
-          company_id: companyId,
-          date,
-          type: stage || 'Seed',
-          pre_money: preMoney,
-          post_money: currentVal > 0 ? currentVal : postMoney,
-          amount_raised: totalRound,
-        })
+    const roundsPayload = rowPayloads.map(p => ({
+      company_id: companyId,
+      date: p.date,
+      type: p.stage || 'Seed',
+      pre_money: p.preMoney,
+      post_money: p.currentVal > 0 ? p.currentVal : p.postMoney,
+      amount_raised: p.totalRound,
+    }))
+
+    const { data: insertedRounds, error: roundErr } = await supabase
+      .from('rounds')
+      .insert(roundsPayload)
+      .select('id')
+
+    if (roundErr || !insertedRounds || insertedRounds.length !== rowPayloads.length) {
+      // PostgREST returns inserted rows in input order. If the count drifts
+      // (RLS denial on a subset, partial failure), abort the rest of the
+      // company instead of silently writing investments without matching rounds.
+      results.errors.push(`Rounds insert failed for "${name}": ${roundErr?.message ?? 'unexpected row count'}`)
+      continue
+    }
+    results.rounds.created += insertedRounds.length
+
+    const investmentsPayload = rowPayloads.map((p, i) => ({
+      company_id: companyId,
+      round_id: insertedRounds[i].id,
+      date: p.date,
+      amount: p.investedAmount,
+      instrument: p.instrument,
+      valuation_cap: null,
+    }))
+    const { data: insertedInv, error: invErr } = await supabase
+      .from('investments')
+      .insert(investmentsPayload)
+      .select('id')
+    if (invErr) {
+      results.errors.push(`Investments insert failed for "${name}": ${invErr.message}`)
+    } else {
+      results.investments.created += insertedInv?.length ?? 0
+    }
+
+    const capTablePayload = rowPayloads
+      .map((p, i) => p.ownershipPct > 0
+        ? {
+            company_id: companyId,
+            round_id: insertedRounds[i].id,
+            shareholder_name: p.entity || 'Fund',
+            ownership_percentage: p.ownershipPct,
+          }
+        : null)
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+
+    if (capTablePayload.length > 0) {
+      const { data: insertedCt, error: ctErr } = await supabase
+        .from('cap_table')
+        .insert(capTablePayload)
         .select('id')
-        .single()
-
-      if (roundErr || !roundData) {
-        results.errors.push(`Round error for "${name}": ${roundErr?.message}`)
-        continue
-      }
-
-      results.rounds.created++
-
-      // Investment
-      const { error: invErr } = await supabase.from('investments').insert({
-        company_id: companyId,
-        round_id: roundData.id,
-        date,
-        amount: investedAmount,
-        instrument,
-        valuation_cap: null,
-      })
-      if (invErr) {
-        results.errors.push(`Investment row failed for "${name}" (${date}): ${invErr.message}`)
+      if (ctErr) {
+        results.errors.push(`Cap-table insert failed for "${name}": ${ctErr.message}`)
       } else {
-        results.investments.created++
-      }
-
-      // Cap table
-      if (ownershipPctVal > 0) {
-        const { error: ctErr } = await supabase.from('cap_table').insert({
-          company_id: companyId,
-          round_id: roundData.id,
-          shareholder_name: entity || 'Fund',
-          ownership_percentage: ownershipPctVal,
-        })
-        if (ctErr) {
-          results.errors.push(`Cap-table row failed for "${name}" (${date}): ${ctErr.message}`)
-        } else {
-          results.capTable.created++
-        }
+        results.capTable.created += insertedCt?.length ?? 0
       }
     }
   }

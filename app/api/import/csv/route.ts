@@ -87,18 +87,45 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === 'companies') {
-    const records = rows.map(r => ({
-      name:        r.name || r.company_name || r.company || '',
-      sector:      r.sector || r.industry || null,
-      hq:          r.hq || r.location || r.geography || r.country || null,
-      strategy:    (['impact', 'venture'].includes(r.strategy?.toLowerCase()) ? r.strategy.toLowerCase() : 'venture') as 'impact' | 'venture',
-      status:      (['active', 'exited', 'written-off', 'watchlist'].includes(r.status?.toLowerCase()) ? r.status.toLowerCase() : 'active') as 'active' | 'exited' | 'written-off' | 'watchlist',
-      description: r.description || r.notes || null,
-    })).filter(r => r.name)
+    const STRATEGIES = ['impact', 'venture'] as const
+    const STATUSES = ['active', 'exited', 'written-off', 'watchlist'] as const
+
+    // Collect rows that got coerced to a default because the enum was invalid,
+    // so the user can see which rows need cleanup instead of silently shipping
+    // wrong data into the portfolio.
+    const enumWarnings: { row: number; field: 'strategy' | 'status'; value: string; coercedTo: string }[] = []
+
+    const records = rows.map((r, idx) => {
+      const strategyRaw = r.strategy?.toLowerCase()
+      const statusRaw = r.status?.toLowerCase()
+      const strategy: 'impact' | 'venture' =
+        (STRATEGIES as readonly string[]).includes(strategyRaw) ? (strategyRaw as 'impact' | 'venture') : 'venture'
+      const status: typeof STATUSES[number] =
+        (STATUSES as readonly string[]).includes(statusRaw) ? (statusRaw as typeof STATUSES[number]) : 'active'
+
+      if (r.strategy && strategyRaw !== strategy) {
+        enumWarnings.push({ row: idx + 2, field: 'strategy', value: r.strategy, coercedTo: strategy })
+      }
+      if (r.status && statusRaw !== status) {
+        enumWarnings.push({ row: idx + 2, field: 'status', value: r.status, coercedTo: status })
+      }
+
+      return {
+        name:        r.name || r.company_name || r.company || '',
+        sector:      r.sector || r.industry || null,
+        hq:          r.hq || r.location || r.geography || r.country || null,
+        strategy,
+        status,
+        description: r.description || r.notes || null,
+      }
+    }).filter(r => r.name)
 
     const { data, error } = await supabase.from('companies').insert(records).select('id')
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ created: data?.length ?? 0 })
+    return NextResponse.json({
+      created: data?.length ?? 0,
+      ...(enumWarnings.length ? { enumWarnings } : {}),
+    })
   }
 
   return NextResponse.json({ error: 'Invalid type. Use ?type=contacts or ?type=companies' }, { status: 400 })
