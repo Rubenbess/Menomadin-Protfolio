@@ -16,7 +16,7 @@ interface GlobalDocumentData {
 export async function createGlobalDocument(data: GlobalDocumentData) {
   const supabase = await createServerSupabaseClient()
   const { data: row, error } = await supabase.from('global_documents').insert(data).select('id').single()
-  if (error) return { error: error.message, id: null }
+  if (error || !row) return { error: error?.message ?? 'Global document not created', id: null }
   revalidatePath('/documents')
   return { error: null, id: row.id as string }
 }

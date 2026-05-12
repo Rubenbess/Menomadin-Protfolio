@@ -17,7 +17,7 @@ export async function createCompany(data: {
 }) {
   const supabase = await createServerSupabaseClient()
   const { data: company, error } = await supabase.from('companies').insert(data).select('id').single()
-  if (error) return { error: error.message, id: null }
+  if (error || !company) return { error: error?.message ?? 'Company not created', id: null }
   return { error: null, id: company.id }
 }
 

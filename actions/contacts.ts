@@ -20,7 +20,7 @@ interface ContactData {
 export async function createContact(data: ContactData) {
   const supabase = await createServerSupabaseClient()
   const { data: row, error } = await supabase.from('contacts').insert(data).select('id').single()
-  if (error) return { error: error.message, id: null }
+  if (error || !row) return { error: error?.message ?? 'Contact not created', id: null }
   revalidatePath('/contacts')
   return { error: null, id: row.id as string }
 }
@@ -50,16 +50,23 @@ export async function createInteraction(data: {
   notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
+  // Reject malformed dates before interpolating into the PostgREST .or() filter
+  // below — a comma, parenthesis, or quote in data.date would corrupt the filter
+  // shape (and theoretically allow filter-injection).
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+    return { error: 'Invalid interaction date (expected YYYY-MM-DD).' }
+  }
   const { error } = await supabase.from('contact_interactions').insert(data)
   if (error) return { error: error.message }
   // Bump last_interaction_date if this interaction is newer than what's
   // recorded — or if the field is still NULL (first interaction with this
   // contact). Without the is.null branch, a contact whose last_interaction_date
   // has never been set never gets it populated.
-  await supabase.from('contacts')
+  const { error: bumpErr } = await supabase.from('contacts')
     .update({ last_interaction_date: data.date })
     .eq('id', data.contact_id)
     .or(`last_interaction_date.is.null,last_interaction_date.lt.${data.date}`)
+  if (bumpErr) return { error: `Interaction logged but contact timeline not updated: ${bumpErr.message}` }
   revalidatePath('/contacts')
   return { error: null }
 }
