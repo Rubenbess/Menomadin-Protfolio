@@ -11,16 +11,14 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from 'recharts'
+import { fmt$Nullable, fmt$$ } from '@/lib/calculations'
 import type { CompanyKPI } from '@/lib/types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmt$(n: number | null) {
-  if (n == null) return null
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n}`
-}
+// Use the shared formatter from lib/calculations so rounding/thousands-separator
+// rules can't drift between this page, cron emails, and the rest of the app.
+const fmt$ = fmt$Nullable
 
 function RunwayBadge({ months }: { months: number | null }) {
   if (months == null) return <span className="text-slate-300">—</span>
@@ -208,37 +206,40 @@ function PortfolioArrChart({
   companies: { id: string; name: string }[]
   kpisByCompany: Record<string, CompanyKPI[]>
 }) {
-  // Build a combined timeline keyed by date
-  const dateSet = new Set<string>()
-  for (const kpis of Object.values(kpisByCompany)) {
-    for (const k of kpis) {
-      if (k.arr != null) dateSet.add(k.date.slice(0, 7)) // YYYY-MM
+  // Build the dates timeline, the list of companies that contribute, and the
+  // forward-filled per-month series once per data change instead of on every
+  // parent render. With ~hundreds of companies × tens of months this loop
+  // dominates the render budget when the table sorts/filters above the chart.
+  const { dates, companiesWithArr, data } = useMemo(() => {
+    const dateSet = new Set<string>()
+    for (const kpis of Object.values(kpisByCompany)) {
+      for (const k of kpis) {
+        if (k.arr != null) dateSet.add(k.date.slice(0, 7)) // YYYY-MM
+      }
     }
-  }
-  const dates = [...dateSet].sort()
+    const sortedDates = [...dateSet].sort()
+    const withArr = companies.filter(c =>
+      (kpisByCompany[c.id] ?? []).some(k => k.arr != null)
+    )
+    const series = sortedDates.map(month => {
+      const point: Record<string, number | string> = { month }
+      for (const co of withArr) {
+        const kpis = kpisByCompany[co.id] ?? []
+        const matching = kpis
+          .filter(k => k.arr != null && k.date.slice(0, 7) <= month)
+          .sort((a, b) => b.date.localeCompare(a.date))
+        point[co.name] = matching[0]?.arr ?? 0
+      }
+      return point
+    })
+    return { dates: sortedDates, companiesWithArr: withArr, data: series }
+  }, [companies, kpisByCompany])
+
   if (dates.length < 2) return (
     <div className="flex items-center justify-center h-40 text-sm text-neutral-500">
       Not enough ARR data to display chart. Add KPIs with ARR values to companies.
     </div>
   )
-
-  // For each date, get ARR per company (forward-fill last known)
-  const companiesWithArr = companies.filter(c =>
-    (kpisByCompany[c.id] ?? []).some(k => k.arr != null)
-  )
-
-  const data = dates.map(month => {
-    const point: Record<string, number | string> = { month }
-    for (const co of companiesWithArr) {
-      const kpis = kpisByCompany[co.id] ?? []
-      // Latest KPI at or before this month
-      const matching = kpis
-        .filter(k => k.arr != null && k.date.slice(0, 7) <= month)
-        .sort((a, b) => b.date.localeCompare(a.date))
-      point[co.name] = matching[0]?.arr ?? 0
-    }
-    return point
-  })
 
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -247,7 +248,7 @@ function PortfolioArrChart({
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} />
         <YAxis
           tick={{ fontSize: 11, fill: '#94a3b8' }}
-          tickFormatter={v => v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `$${(v / 1_000).toFixed(0)}K` : `$${v}`}
+          tickFormatter={v => fmt$$(v)}
         />
         <Tooltip
           formatter={(v, name) => [typeof v === 'number' ? (fmt$(v) ?? '—') : '—', name as string]}
