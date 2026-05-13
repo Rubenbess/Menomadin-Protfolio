@@ -648,7 +648,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                       const moic          = fmv != null && roundInvested > 0 ? fmv / roundInvested : null
 
                       return (
-                        <div key={`round-${round.id}`} className="p-5 sm:p-6">
+                        <div key={`round-${round.id}`} className="p-5 sm:p-6 group">
                           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                             {/* Round label */}
                             <div className="sm:w-36 flex-shrink-0">
