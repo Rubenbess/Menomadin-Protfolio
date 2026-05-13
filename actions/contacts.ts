@@ -78,3 +78,21 @@ export async function deleteInteraction(id: string) {
   revalidatePath('/contacts')
   return { error: null }
 }
+
+export async function linkContactToCompany(contactId: string, companyId: string) {
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.from('contacts').update({ company_id: companyId }).eq('id', contactId)
+  if (error) return { error: error.message }
+  revalidatePath('/contacts')
+  revalidatePath(`/companies/${companyId}`)
+  return { error: null }
+}
+
+export async function unlinkContactFromCompany(contactId: string, companyId: string) {
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.from('contacts').update({ company_id: null }).eq('id', contactId)
+  if (error) return { error: error.message }
+  revalidatePath('/contacts')
+  revalidatePath(`/companies/${companyId}`)
+  return { error: null }
+}

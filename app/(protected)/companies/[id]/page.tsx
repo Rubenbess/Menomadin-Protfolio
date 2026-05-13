@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import CompanyDetailClient from './CompanyDetailClient'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity, Contact } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +27,14 @@ export default async function CompanyDetailPage({ params }: Props) {
     supabase.from('waterfall_scenarios').select('*').eq('company_id', id).order('created_at', { ascending: false }),
     supabase.from('tasks').select('*').eq('company_id', id).order('created_at', { ascending: false }),
     supabase.from('legal_entities').select('*').order('created_at', { ascending: true }),
+    supabase.from('contacts').select('*').eq('company_id', id).order('name', { ascending: true }),
+    supabase.from('contacts').select('id, name, position, contact_type').is('company_id', null).order('name', { ascending: true }),
   ])
 
   const queryNames = [
     'companies', 'rounds', 'investments', 'cap_table', 'documents', 'company_kpis',
     'company_updates', 'safes', 'share_series', 'option_pools', 'waterfall_scenarios',
-    'tasks', 'legal_entities',
+    'tasks', 'legal_entities', 'contacts', 'linkable_contacts',
   ]
 
   // The companies row "no rows" PGRST116 is the legitimate not-found path —
@@ -65,6 +67,8 @@ export default async function CompanyDetailPage({ params }: Props) {
     { data: waterfallScenarios },
     { data: tasks },
     { data: legalEntities },
+    { data: contacts },
+    { data: linkableContacts },
   ] = queries
 
   if (!company) notFound()
@@ -84,6 +88,8 @@ export default async function CompanyDetailPage({ params }: Props) {
       waterfallScenarios={(waterfallScenarios ?? []) as WaterfallScenario[]}
       tasks={(tasks ?? []) as TaskWithRelations[]}
       legalEntities={(legalEntities ?? []) as LegalEntity[]}
+      contacts={(contacts ?? []) as Contact[]}
+      linkableContacts={(linkableContacts ?? []) as Pick<Contact, 'id' | 'name' | 'position' | 'contact_type'>[]}
     />
   )
 }
