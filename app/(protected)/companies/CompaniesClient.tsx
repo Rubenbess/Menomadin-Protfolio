@@ -10,11 +10,10 @@ import Modal from '@/components/ui/Modal'
 import CompanyForm from '@/components/forms/CompanyForm'
 import EmptyState from '@/components/EmptyState'
 import { deleteCompany } from '@/actions/companies'
-import { HealthScorePill } from '@/components/HealthScoreBadge'
 import { AdvancedFilterPanel } from '@/components/AdvancedFilterPanel'
 import { applyFilters, FilterGroup } from '@/lib/filter-utils'
 import { usePermissions } from '@/hooks/usePermissions'
-import type { Company, Contact, HealthScore } from '@/lib/types'
+import type { Company, Contact } from '@/lib/types'
 import { FUNDS } from '@/lib/funds'
 
 const STRATEGY_FILTERS = [
@@ -91,11 +90,9 @@ function FilterSelect({
 export default function CompaniesClient({
   companies,
   contacts,
-  healthScores,
 }: {
   companies: Company[]
   contacts: Contact[]
-  healthScores: Record<string, HealthScore>
   strategyLabel: string | null
 }) {
   const router = useRouter()
@@ -301,7 +298,6 @@ export default function CompaniesClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((co) => {
             const coContacts = contactsFor(co.id)
-            const hs = healthScores[co.id]
             return (
               <div
                 key={co.id}
@@ -322,7 +318,6 @@ export default function CompaniesClient({
                       </Link>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
-                      {hs && <HealthScorePill score={hs} />}
                       <Badge value={co.strategy} type="strategy" />
                       <Badge value={co.status} />
                     </div>
@@ -402,13 +397,11 @@ export default function CompaniesClient({
                 <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Stage</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Status</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Strategy</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-500 uppercase tracking-widest">Health</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {filtered.map(co => {
-                const hs = healthScores[co.id]
                 return (
                   <tr key={co.id} className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200">
                     <td className="px-4 py-3">
@@ -430,9 +423,6 @@ export default function CompaniesClient({
                     <td className="px-4 py-3 text-xs text-neutral-600">{co.entry_stage ?? '—'}</td>
                     <td className="px-4 py-3"><Badge value={co.status} /></td>
                     <td className="px-4 py-3"><Badge value={co.strategy} type="strategy" /></td>
-                    <td className="px-4 py-3 text-center">
-                      {hs && <HealthScorePill score={hs} />}
-                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         {canUpdate.allowed && (
