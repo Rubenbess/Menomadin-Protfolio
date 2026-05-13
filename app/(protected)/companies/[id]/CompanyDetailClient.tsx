@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Pencil, Link2, X } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
@@ -20,6 +20,7 @@ import UpdateLinkButton from '@/components/UpdateLinkButton'
 import { KPITrendChart, ValuationChart } from '@/components/CompanyCharts'
 import CompanyTasks from '@/components/CompanyTasks'
 import { deleteInvestment } from '@/actions/investments'
+import { linkContactToCompany, unlinkContactFromCompany } from '@/actions/contacts'
 import { deleteCapTableEntry } from '@/actions/cap-table'
 import { deleteKPI } from '@/actions/kpis'
 import { deleteUpdate } from '@/actions/updates'
@@ -45,7 +46,7 @@ import {
   fmtDate,
 } from '@/lib/calculations'
 import { FUND_NAME } from '@/lib/branding'
-import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity } from '@/lib/types'
+import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity, Contact } from '@/lib/types'
 
 type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall' | 'tasks'
 
@@ -63,9 +64,11 @@ interface Props {
   waterfallScenarios: WaterfallScenario[]
   tasks: TaskWithRelations[]
   legalEntities: LegalEntity[]
+  contacts: Contact[]
+  linkableContacts: Pick<Contact, 'id' | 'name' | 'position' | 'contact_type'>[]
 }
 
-export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks, legalEntities }: Props) {
+export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks, legalEntities, contacts, linkableContacts }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
@@ -80,6 +83,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   const [editingRound, setEditingRound] = useState<Round | null>(null)
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null)
   const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null)
+  const [showLinkContact, setShowLinkContact] = useState(false)
+  const [contactSearch, setContactSearch] = useState('')
 
   const totalInvested = totalInvestedInCompany(investments)
   const latestRound   = getLatestRound(rounds)
@@ -106,6 +111,19 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
   async function handleDeleteCapTable(id: string) {
     if (!confirm('Delete this cap table entry?')) return
     await deleteCapTableEntry(id)
+    router.refresh()
+  }
+
+  async function handleLinkContact(contactId: string) {
+    await linkContactToCompany(contactId, company.id)
+    setShowLinkContact(false)
+    setContactSearch('')
+    router.refresh()
+  }
+
+  async function handleUnlinkContact(contactId: string) {
+    if (!confirm('Remove this contact from the company?')) return
+    await unlinkContactFromCompany(contactId, company.id)
     router.refresh()
   }
 
@@ -304,6 +322,48 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                   </div>
                 ) : (
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">—</p>
+                )}
+              </div>
+
+              {/* Contacts */}
+              <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Contacts</h3>
+                  <button
+                    onClick={() => setShowLinkContact(true)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 transition-colors"
+                  >
+                    <Link2 size={12} /> Link contact
+                  </button>
+                </div>
+                {contacts.length === 0 ? (
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No contacts linked yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {contacts.map(contact => (
+                      <div key={contact.id} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50 truncate">{contact.name}</p>
+                            {contact.position && (
+                              <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{contact.position}</p>
+                            )}
+                          </div>
+                          {contact.contact_type && (
+                            <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
+                              {contact.contact_type}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleUnlinkContact(contact.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all flex-shrink-0"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
@@ -988,6 +1048,47 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
           onClose={() => setScenarioSafe(null)}
         />
       )}
+      <Modal
+        open={showLinkContact}
+        onClose={() => { setShowLinkContact(false); setContactSearch('') }}
+        title="Link Existing Contact"
+      >
+        <div className="space-y-3">
+          <input
+            type="text"
+            placeholder="Search contacts…"
+            value={contactSearch}
+            onChange={e => setContactSearch(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+          <div className="max-h-64 overflow-y-auto space-y-0.5">
+            {linkableContacts
+              .filter(c => c.name.toLowerCase().includes(contactSearch.toLowerCase()))
+              .map(contact => (
+                <button
+                  key={contact.id}
+                  onClick={() => handleLinkContact(contact.id)}
+                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">{contact.name}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {contact.position && (
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">{contact.position}</span>
+                    )}
+                    {contact.contact_type && (
+                      <span className="px-1.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+                        {contact.contact_type}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            {linkableContacts.filter(c => c.name.toLowerCase().includes(contactSearch.toLowerCase())).length === 0 && (
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-6">No unlinked contacts found.</p>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
