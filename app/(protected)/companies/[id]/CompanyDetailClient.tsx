@@ -44,6 +44,7 @@ import {
   fmtDate,
 } from '@/lib/calculations'
 import { FUND_NAME } from '@/lib/branding'
+import { useToast } from '@/hooks/useToast'
 import type { Company, Round, Investment, CapTableEntry, Document, CompanyKPI, CompanyUpdate, Safe, ShareSeries, OptionPool, WaterfallScenario, TaskWithRelations, LegalEntity, Contact } from '@/lib/types'
 
 type Tab = 'overview' | 'history' | 'kpis' | 'updates' | 'investments' | 'captable' | 'documents' | 'safes' | 'ownership' | 'waterfall' | 'tasks'
@@ -68,6 +69,7 @@ interface Props {
 
 export default function CompanyDetailClient({ company, rounds, investments, capTable, documents, kpis, updates, safes, shareSeries, optionPools, waterfallScenarios, tasks, legalEntities, contacts, linkableContacts }: Props) {
   const router = useRouter()
+  const { error: showError } = useToast()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [showEdit, setShowEdit] = useState(false)
   const [showAddRound, setShowAddRound] = useState(false)
@@ -102,18 +104,21 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
   async function handleDeleteInvestment(id: string) {
     if (!confirm('Delete this investment?')) return
-    await deleteInvestment(id)
+    const res = await deleteInvestment(id)
+    if (res.error) { showError(`Could not delete investment: ${res.error}`); return }
     router.refresh()
   }
 
   async function handleDeleteCapTable(id: string) {
     if (!confirm('Delete this cap table entry?')) return
-    await deleteCapTableEntry(id)
+    const res = await deleteCapTableEntry(id)
+    if (res.error) { showError(`Could not delete cap-table entry: ${res.error}`); return }
     router.refresh()
   }
 
   async function handleLinkContact(contactId: string) {
-    await linkContactToCompany(contactId, company.id)
+    const res = await linkContactToCompany(contactId, company.id)
+    if (res.error) { showError(`Could not link contact: ${res.error}`); return }
     setShowLinkContact(false)
     setContactSearch('')
     router.refresh()
@@ -121,7 +126,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
 
   async function handleUnlinkContact(contactId: string) {
     if (!confirm('Remove this contact from the company?')) return
-    await unlinkContactFromCompany(contactId, company.id)
+    const res = await unlinkContactFromCompany(contactId, company.id)
+    if (res.error) { showError(`Could not unlink contact: ${res.error}`); return }
     router.refresh()
   }
 
@@ -692,7 +698,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 <button
                                   onClick={async () => {
                                     if (!confirm('Delete this round and all its investments?')) return
-                                    await import('@/actions/rounds').then(m => m.deleteRound(round.id))
+                                    const res = await import('@/actions/rounds').then(m => m.deleteRound(round.id))
+                                    if (res.error) { showError(`Could not delete round: ${res.error}`); return }
                                     router.refresh()
                                   }}
                                   className="p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
