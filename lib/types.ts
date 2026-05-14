@@ -60,6 +60,7 @@ export interface Round {
   pre_money: number
   post_money: number
   amount_raised: number
+  notes: string | null
 }
 
 export interface Investment {
@@ -71,6 +72,7 @@ export interface Investment {
   instrument: Instrument
   valuation_cap: number | null
   legal_entity: string | null
+  notes: string | null
 }
 
 export interface LegalEntity {

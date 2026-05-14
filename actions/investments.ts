@@ -10,6 +10,7 @@ export async function createInvestment(data: {
   instrument: string
   valuation_cap: number | null
   legal_entity: string | null
+  notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('investments').insert(data)
@@ -23,6 +24,7 @@ export async function updateInvestment(id: string, data: {
   instrument: string
   valuation_cap: number | null
   legal_entity: string | null
+  notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('investments').update(data).eq('id', id)

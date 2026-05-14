@@ -36,6 +36,7 @@ export default function RoundForm({ companyId, round, onClose }: Props) {
       pre_money:     parseFloat(fd.get('pre_money')     as string) || 0,
       post_money:    parseFloat(fd.get('post_money')    as string) || 0,
       amount_raised: parseFloat(fd.get('amount_raised') as string) || 0,
+      notes:         (fd.get('notes') as string) || null,
     }
 
     const result = isEdit
@@ -81,6 +82,17 @@ export default function RoundForm({ companyId, round, onClose }: Props) {
           <label className={label}>Amount Raised ($)</label>
           <input name="amount_raised" type="number" min="0" step="any" defaultValue={round?.amount_raised || ''} className={input} placeholder="1,000,000" />
         </div>
+      </div>
+
+      <div>
+        <label className={label}>Notes</label>
+        <textarea
+          name="notes"
+          rows={3}
+          defaultValue={round?.notes ?? ''}
+          className={input}
+          placeholder="What happened during this round? Key terms, context, lead investor…"
+        />
       </div>
 
       {error && (

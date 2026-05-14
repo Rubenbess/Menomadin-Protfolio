@@ -40,6 +40,7 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
       instrument:    fd.get('instrument') as string,
       valuation_cap: fd.get('valuation_cap') ? parseFloat(fd.get('valuation_cap') as string) : null,
       legal_entity:  legalEntity || null,
+      notes:         (fd.get('notes') as string) || null,
     }
 
     const result = isEdit
@@ -115,6 +116,17 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
           <input name="valuation_cap" type="number" min="0" step="any" defaultValue={investment?.valuation_cap || ''} className={input} placeholder="10,000,000" />
         </div>
       )}
+
+      <div>
+        <label className={label}>Notes</label>
+        <textarea
+          name="notes"
+          rows={3}
+          defaultValue={investment?.notes ?? ''}
+          className={input}
+          placeholder="Context for this investment — terms, rationale, follow-on trigger…"
+        />
+      </div>
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>

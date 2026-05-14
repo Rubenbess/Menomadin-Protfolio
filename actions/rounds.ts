@@ -9,6 +9,7 @@ export async function createRound(data: {
   pre_money: number
   post_money: number
   amount_raised: number
+  notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('rounds').insert(data)
@@ -22,6 +23,7 @@ export async function updateRound(id: string, data: {
   pre_money: number
   post_money: number
   amount_raised: number
+  notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('rounds').update(data).eq('id', id)

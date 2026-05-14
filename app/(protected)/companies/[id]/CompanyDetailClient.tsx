@@ -701,30 +701,40 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                             </div>
                           </div>
 
+                          {/* Round notes */}
+                          {round.notes && (
+                            <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400 italic leading-relaxed border-t border-neutral-100 dark:border-neutral-800 pt-3">{round.notes}</p>
+                          )}
+
                           {/* Investment line items for this round */}
                           {roundInvs.length > 0 && (
                             <div className="mt-3 ml-0 sm:ml-40 border-t border-neutral-200 dark:border-neutral-700 pt-3 space-y-1.5">
                               {roundInvs.map(inv => (
-                                <div key={inv.id} className="flex items-center justify-between group">
-                                  <div className="flex items-center gap-3 text-xs text-neutral-600 dark:text-neutral-400">
-                                    <span>{fmtDate(inv.date)}</span>
-                                    <span className="font-semibold text-neutral-800 dark:text-neutral-200">{fmt$$(inv.amount)}</span>
-                                    <span className="px-2 py-0.5 rounded-full bg-gold-50 dark:bg-gold-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-violet-200 dark:ring-violet-800/60">{inv.instrument}</span>
-                                    {inv.legal_entity && (
-                                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800/60 font-semibold">{inv.legal_entity}</span>
-                                    )}
-                                    {inv.valuation_cap && <span className="text-neutral-500 dark:text-neutral-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
+                                <div key={inv.id} className="group">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3 text-xs text-neutral-600 dark:text-neutral-400">
+                                      <span>{fmtDate(inv.date)}</span>
+                                      <span className="font-semibold text-neutral-800 dark:text-neutral-200">{fmt$$(inv.amount)}</span>
+                                      <span className="px-2 py-0.5 rounded-full bg-gold-50 dark:bg-gold-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-violet-200 dark:ring-violet-800/60">{inv.instrument}</span>
+                                      {inv.legal_entity && (
+                                        <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800/60 font-semibold">{inv.legal_entity}</span>
+                                      )}
+                                      {inv.valuation_cap && <span className="text-neutral-500 dark:text-neutral-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
+                                    </div>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                      <button
+                                        onClick={() => setEditingInvestment(inv)}
+                                        className="p-1 text-slate-300 dark:text-neutral-600 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
+                                      ><Pencil size={11} /></button>
+                                      <button
+                                        onClick={() => handleDeleteInvestment(inv.id)}
+                                        className="p-1 text-slate-300 dark:text-neutral-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                      ><Trash2 size={11} /></button>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                    <button
-                                      onClick={() => setEditingInvestment(inv)}
-                                      className="p-1 text-slate-300 dark:text-neutral-600 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
-                                    ><Pencil size={11} /></button>
-                                    <button
-                                      onClick={() => handleDeleteInvestment(inv.id)}
-                                      className="p-1 text-slate-300 dark:text-neutral-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                    ><Trash2 size={11} /></button>
-                                  </div>
+                                  {inv.notes && (
+                                    <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400 italic">{inv.notes}</p>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -740,7 +750,8 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                       <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Other Investments (no round)</p>
                       <div className="space-y-2">
                         {unlinkedInvs.map(inv => (
-                          <div key={inv.id} className="flex items-center justify-between group">
+                          <div key={inv.id} className="group">
+                            <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 text-xs text-neutral-600 dark:text-neutral-400">
                               <span>{fmtDate(inv.date)}</span>
                               <span className="font-semibold text-neutral-800 dark:text-neutral-200">{fmt$$(inv.amount)}</span>
@@ -760,6 +771,10 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 className="p-1 text-slate-300 dark:text-neutral-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                               ><Trash2 size={11} /></button>
                             </div>
+                            </div>
+                            {inv.notes && (
+                              <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400 italic">{inv.notes}</p>
+                            )}
                           </div>
                         ))}
                       </div>
