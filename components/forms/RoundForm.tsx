@@ -7,7 +7,7 @@ import { createRound, updateRound } from '@/actions/rounds'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { Round } from '@/lib/types'
 
-const ROUND_TYPES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'Bridge', 'Other']
+const ROUND_TYPE_SUGGESTIONS = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'Growth', 'Bridge', 'Convertible Note', 'Other']
 
 interface Props {
   companyId: string
@@ -36,7 +36,7 @@ export default function RoundForm({ companyId, round, onClose }: Props) {
       pre_money:     parseFloat(fd.get('pre_money')     as string) || 0,
       post_money:    parseFloat(fd.get('post_money')    as string) || 0,
       amount_raised: parseFloat(fd.get('amount_raised') as string) || 0,
-      notes:         (fd.get('notes') as string) || null,
+      notes:         ((fd.get('notes') as string) ?? '').trim() || null,
     }
 
     const result = isEdit
@@ -62,10 +62,18 @@ export default function RoundForm({ companyId, round, onClose }: Props) {
         </div>
         <div>
           <label className={label}>Round Type *</label>
-          <select name="type" required defaultValue={round?.type ?? ''} className={input}>
-            <option value="" disabled>Select…</option>
-            {ROUND_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <input
+            name="type"
+            type="text"
+            required
+            list="round-type-suggestions"
+            defaultValue={round?.type ?? ''}
+            className={input}
+            placeholder="e.g. Series A, Bridge…"
+          />
+          <datalist id="round-type-suggestions">
+            {ROUND_TYPE_SUGGESTIONS.map((t) => <option key={t} value={t} />)}
+          </datalist>
         </div>
       </div>
 
@@ -89,6 +97,7 @@ export default function RoundForm({ companyId, round, onClose }: Props) {
         <textarea
           name="notes"
           rows={3}
+          maxLength={5000}
           defaultValue={round?.notes ?? ''}
           className={input}
           placeholder="What happened during this round? Key terms, context, lead investor…"
