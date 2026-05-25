@@ -66,29 +66,10 @@ jobs:
           fi
           echo "Report saved to platform successfully (HTTP $HTTP_CODE)"
 
-      - name: Fetch email recipients from Supabase
-        id: recipients
+      - name: Send report email to recipients
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          FILE="${{ steps.report.outputs.file }}"
-          if [ -z "$FILE" ]; then
-            echo "json=[]" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          RECIPIENTS=$(curl -s "${SUPABASE_URL}/rest/v1/deal_report_recipients?select=email,name" \
-            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
-
-          echo "Recipients found: $RECIPIENTS"
-          # Compact to single line for GITHUB_OUTPUT
-          COMPACT=$(echo "$RECIPIENTS" | jq -c '.')
-          echo "json=$COMPACT" >> $GITHUB_OUTPUT
-
-      - name: Send report email to recipients
-        env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
           FILE="${{ steps.report.outputs.file }}"
@@ -96,24 +77,34 @@ jobs:
             echo "No report file, skipping email."
             exit 0
           fi
+          echo "Sending email for report: $FILE"
 
-          RECIPIENTS='${{ steps.recipients.outputs.json }}'
-          COUNT=$(echo "$RECIPIENTS" | jq 'length')
-          if [ "$COUNT" = "0" ]; then
+          # Query recipients directly — avoids fragile GITHUB_OUTPUT JSON handoff
+          echo "Fetching recipients from Supabase..."
+          RECIPIENTS=$(curl -s "${SUPABASE_URL}/rest/v1/deal_report_recipients?select=email,name" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
+          echo "Raw recipients response: $RECIPIENTS"
+
+          COUNT=$(echo "$RECIPIENTS" | jq 'length // 0' 2>/dev/null || echo "0")
+          echo "Recipient count: $COUNT"
+
+          if [ "$COUNT" = "0" ] || [ -z "$COUNT" ]; then
             echo "No recipients configured, skipping email."
             exit 0
           fi
-          echo "Sending to $COUNT recipient(s)"
 
           CONTENT=$(cat "$FILE")
           REPORT_DATE=$(basename "$FILE" .md)
           WEEK_OF=$(date -d "$REPORT_DATE" "+%B %-d, %Y" 2>/dev/null || date -j -f "%Y-%m-%d" "$REPORT_DATE" "+%B %-d, %Y" 2>/dev/null || echo "$REPORT_DATE")
+          echo "Report date: $REPORT_DATE  Week of: $WEEK_OF"
 
           # Convert markdown to clean HTML using the checked-in script
           HTML=$(echo "$CONTENT" | python3 .github/scripts/md_to_html.py "$REPORT_DATE" "$WEEK_OF")
 
           # Build to-array and payload
           TO_ARRAY=$(echo "$RECIPIENTS" | jq '[.[] | if .name and .name != "" then .name + " <" + .email + ">" else .email end]')
+          echo "Sending to: $TO_ARRAY"
           SUBJECT="Menomadin Israeli Tech Deal Report — Week of ${WEEK_OF}"
 
           PAYLOAD=$(jq -n \
@@ -135,7 +126,7 @@ jobs:
           echo "Resend body: $BODY"
 
           if [ "$CODE" != "200" ]; then
-            echo "ERROR: email send failed"
+            echo "ERROR: email send failed (HTTP $CODE)"
             exit 1
           fi
-          echo "Email sent successfully"
+          echo "Email sent successfully to $COUNT recipient(s)"
