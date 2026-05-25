@@ -85,7 +85,7 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
       router.refresh()
       onClose()
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(err instanceof Error ? err.message : String(err))
       setLoading(false)
     }
   }
