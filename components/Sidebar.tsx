@@ -240,14 +240,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             className="w-full h-full flex items-center justify-center hover:bg-white/5 transition-colors"
           >
             <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center ring-1 ring-primary-400/30">
-              <Image src="/menomadin-icon.svg" alt="Menomadin" width={16} height={16} className="h-4 w-4" />
+              <Image src="/menomadin-icon.svg" alt="Menomadin" width={16} height={16} className="h-4 w-4 invert" />
             </div>
           </button>
         ) : (
           /* Expanded: logo + text + collapse button */
           <div className="h-full flex items-center gap-3 px-4">
             <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-400/30">
-              <Image src="/menomadin-icon.svg" alt="Menomadin" width={16} height={16} className="h-4 w-4" />
+              <Image src="/menomadin-icon.svg" alt="Menomadin" width={16} height={16} className="h-4 w-4 invert" />
             </div>
             <div className="leading-tight flex-1 min-w-0">
               <p className="text-white font-bold text-sm tracking-tight leading-none truncate">
