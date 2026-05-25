@@ -155,9 +155,9 @@ function ContactPanel({
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-50">{contact.name}</h2>
               {contact.position && <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">{contact.position}</p>}
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                {contact.companies && (
+                {(contact.companies || contact.company_name) && (
                   <p className="text-xs text-primary-500 dark:text-primary-300 font-medium flex items-center gap-1">
-                    <Building2 size={11} /> {contact.companies.name}
+                    <Building2 size={11} /> {contact.companies?.name ?? contact.company_name}
                   </p>
                 )}
                 {contact.contact_type && (
@@ -366,6 +366,7 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
         (c.email?.toLowerCase().includes(q) ?? false) ||
         (c.position?.toLowerCase().includes(q) ?? false) ||
         (c.companies?.name.toLowerCase().includes(q) ?? false) ||
+        (c.company_name?.toLowerCase().includes(q) ?? false) ||
         (c.phone?.includes(q) ?? false) ||
         (c.relationship_owner?.toLowerCase().includes(q) ?? false)
       const matchCompany = !filterCompany || c.company_id === filterCompany
@@ -514,8 +515,10 @@ export default function ContactsClient({ contacts, companies, interactionsByCont
                       ) : <span className="text-slate-300 text-sm">—</span>}
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
-                      {contact.companies ? (
-                        <span className="text-sm text-neutral-700 dark:text-neutral-300">{contact.companies.name}</span>
+                      {contact.companies || contact.company_name ? (
+                        <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                          {contact.companies?.name ?? contact.company_name}
+                        </span>
                       ) : (
                         <span className="text-sm text-slate-300 dark:text-neutral-600">—</span>
                       )}

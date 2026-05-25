@@ -12,6 +12,7 @@ interface ContactData {
   address: string | null
   linkedin_url: string | null
   company_id: string | null
+  company_name: string | null
   notes: string | null
   contact_type: string | null
   relationship_owner: string | null

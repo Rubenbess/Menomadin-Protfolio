@@ -24,6 +24,7 @@ export type ContactType = 'Founder' | 'Advisor' | 'Co-investor' | 'Service Provi
 export interface Contact {
   id: string
   company_id: string | null
+  company_name: string | null
   name: string
   position: string | null
   email: string | null
