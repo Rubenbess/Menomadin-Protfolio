@@ -1,5 +1,9 @@
 """Convert a markdown deal report to a styled HTML email body.
 Usage: echo "$CONTENT" | python3 md_to_html.py REPORT_DATE WEEK_OF
+
+All external URLs are stripped from the output so Microsoft Defender ATP
+does not flag the email as malicious. Recipients view the full report on
+the platform.
 """
 import sys, re, html as html_mod
 
@@ -7,13 +11,26 @@ report_date = sys.argv[1]
 week_of     = sys.argv[2]
 content     = sys.stdin.read()
 
+# ── URL patterns to strip ────────────────────────────────────────────────────
+# Bare URLs: http(s)://... up to whitespace/punctuation
+_BARE_URL = re.compile(r'https?://[^\s\)\]>,"\']+')
+
+def strip_urls(s):
+    """Remove any bare URLs remaining after markdown processing."""
+    return _BARE_URL.sub('', s)
+
 def esc(s):
     return html_mod.escape(s)
 
 def inline(s):
+    # 1. Strip markdown links — keep the visible label, drop the URL entirely
+    s = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', s)
+    # 2. Remove any bare URLs left in the text
+    s = strip_urls(s)
+    # 3. HTML-escape what remains (now safe — no URLs to flag)
     s = esc(s)
+    # 4. Bold
     s = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
-    s = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', s)
     return s
 
 lines = content.split('\n')
@@ -37,7 +54,7 @@ while i < len(lines):
                 for h in heads) + '</tr></thead>'
             body += '<tbody>' + ''.join(
                 '<tr style="background:' + ('#fff' if ri % 2 == 0 else '#f8fafc') + '">' +
-                ''.join(f'<td style="padding:6px 10px;border-bottom:1px solid #e5e7eb">{esc(c)}</td>' for c in row) +
+                ''.join(f'<td style="padding:6px 10px;border-bottom:1px solid #e5e7eb">{inline(c)}</td>' for c in row) +
                 '</tr>'
                 for ri, row in enumerate(rows)) + '</tbody>'
             body += '</table>'
@@ -60,8 +77,13 @@ while i < len(lines):
         body += '<div style="height:6px"></div>'
     i += 1
 
-print(f"""<!DOCTYPE html><html><head><meta charset="utf-8">
+print(f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<title>Menomadin Israeli Tech Deal Report &mdash; Week of {week_of}</title>
 </head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:0;background:#f1f5f9">
 <div style="max-width:760px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
@@ -73,5 +95,8 @@ print(f"""<!DOCTYPE html><html><head><meta charset="utf-8">
   <div style="padding:28px 32px">{body}</div>
   <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af">
     Menomadin Investments &middot; This report is prepared and distributed exclusively for internal use.
+    Full reports and historical data are available on the Menomadin Portfolio Platform.
   </div>
-</div></body></html>""")
+</div>
+</body>
+</html>""")
