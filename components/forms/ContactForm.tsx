@@ -12,9 +12,6 @@ const CONTACT_TYPES = ['Founder', 'Advisor', 'Co-investor', 'Service Provider', 
 const inp = inputClasses
 const lbl = labelClasses
 
-// Sentinel value used in the <select> to mean "type a company name manually"
-const EXTERNAL = '__external__'
-
 interface Props {
   contact?: Contact
   companies: { id: string; name: string }[]
@@ -25,31 +22,7 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  // Determine initial mode: portfolio company, external (free-text), or none
-  const initMode = contact?.company_id
-    ? 'portfolio'
-    : contact?.company_name
-      ? 'external'
-      : 'none'
-
-  const [companyMode, setCompanyMode] = useState<'none' | 'portfolio' | 'external'>(initMode)
-  const [selectedCompany, setSelectedCompany] = useState(contact?.company_id ?? '')
-  const [externalCompanyName, setExternalCompanyName] = useState(contact?.company_name ?? '')
   const isEdit = !!contact
-
-  function handleCompanySelect(value: string) {
-    if (value === EXTERNAL) {
-      setCompanyMode('external')
-      setSelectedCompany('')
-    } else if (value === '') {
-      setCompanyMode('none')
-      setSelectedCompany('')
-    } else {
-      setCompanyMode('portfolio')
-      setSelectedCompany(value)
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -67,8 +40,8 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
         phone:                str('phone'),
         address:              str('address'),
         linkedin_url:         str('linkedin_url'),
-        company_id:           companyMode === 'portfolio' ? (selectedCompany || null) : null,
-        company_name:         companyMode === 'external' ? (externalCompanyName.trim() || null) : null,
+        company_id:           str('company_id'),
+        company_name:         str('company_name'),
         notes:                str('notes'),
         contact_type:         str('contact_type'),
         relationship_owner:   str('relationship_owner'),
@@ -113,43 +86,28 @@ export default function ContactForm({ contact, companies, onClose }: Props) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={lbl}>Company</label>
-          {companyMode !== 'external' ? (
-            <select
-              value={companyMode === 'portfolio' ? selectedCompany : ''}
-              onChange={e => handleCompanySelect(e.target.value)}
-              className={inp}
-            >
-              <option value="">— No company —</option>
-              {companies.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-              <option value={EXTERNAL}>+ External company…</option>
-            </select>
-          ) : (
-            <>
-              <input
-                type="text"
-                value={externalCompanyName}
-                onChange={e => setExternalCompanyName(e.target.value)}
-                placeholder="Company name"
-                className={inp}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => { setCompanyMode('none'); setExternalCompanyName('') }}
-                className="text-xs text-neutral-500 hover:text-neutral-800 mt-1"
-              >
-                ← Back to portfolio list
-              </button>
-            </>
-          )}
+          <label className={lbl}>Portfolio Company</label>
+          <select name="company_id" defaultValue={contact?.company_id ?? ''} className={inp}>
+            <option value="">—</option>
+            {companies.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
         <div>
-          <label className={lbl}>Relationship Owner</label>
-          <input name="relationship_owner" defaultValue={contact?.relationship_owner ?? ''} className={inp} placeholder="Team member name" />
+          <label className={lbl}>External Company</label>
+          <input
+            name="company_name"
+            defaultValue={contact?.company_name ?? ''}
+            className={inp}
+            placeholder="Non-portfolio company name"
+          />
         </div>
+      </div>
+
+      <div>
+        <label className={lbl}>Relationship Owner</label>
+        <input name="relationship_owner" defaultValue={contact?.relationship_owner ?? ''} className={inp} placeholder="Team member name" />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
