@@ -19,19 +19,27 @@ interface ContactData {
 }
 
 export async function createContact(data: ContactData) {
-  const supabase = await createServerSupabaseClient()
-  const { data: row, error } = await supabase.from('contacts').insert(data).select('id').single()
-  if (error || !row) return { error: error?.message ?? 'Contact not created', id: null }
-  revalidatePath('/contacts')
-  return { error: null, id: row.id as string }
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data: row, error } = await supabase.from('contacts').insert(data).select('id').single()
+    if (error || !row) return { error: error?.message ?? 'Contact not created', id: null }
+    revalidatePath('/contacts')
+    return { error: null, id: row.id as string }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err), id: null }
+  }
 }
 
 export async function updateContact(id: string, data: ContactData) {
-  const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('contacts').update(data).eq('id', id)
-  if (error) return { error: error.message }
-  revalidatePath('/contacts')
-  return { error: null }
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { error } = await supabase.from('contacts').update(data).eq('id', id)
+    if (error) return { error: error.message }
+    revalidatePath('/contacts')
+    return { error: null }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) }
+  }
 }
 
 export async function deleteContact(id: string) {
