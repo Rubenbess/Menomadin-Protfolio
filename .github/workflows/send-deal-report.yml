@@ -102,7 +102,16 @@ jobs:
           # Convert markdown to clean HTML using the checked-in script
           HTML=$(echo "$CONTENT" | python3 .github/scripts/md_to_html.py "$REPORT_DATE" "$WEEK_OF")
 
+          # Plain-text version: strip markdown formatting and URLs for Defender compatibility
+          TEXT=$(echo "$CONTENT" | \
+            sed 's/\[([^]]*)\]([^)]*)/\1/g' | \
+            sed 's/https\?:\/\/[^ )]*/[link removed]/g' | \
+            sed 's/\*\*//g' | \
+            sed 's/^#+  *//')
+
           # Build to-array and payload
+          # NOTE: reply_to is intentionally omitted — a cross-domain FROM/REPLY-TO
+          # (portfolio-menomadin.com → menomadin.com) triggers Microsoft Defender phishing heuristics.
           TO_ARRAY=$(echo "$RECIPIENTS" | jq '[.[] | if .name and .name != "" then .name + " <" + .email + ">" else .email end]')
           echo "Sending to: $TO_ARRAY"
           SUBJECT="Menomadin Israeli Tech Deal Report — Week of ${WEEK_OF}"
@@ -112,8 +121,8 @@ jobs:
             --argjson to "$TO_ARRAY" \
             --arg subject "$SUBJECT" \
             --arg html "$HTML" \
-            --arg reply_to "rubenb@menomadin.com" \
-            '{from: $from, to: $to, subject: $subject, html: $html, reply_to: $reply_to}')
+            --arg text "$TEXT" \
+            '{from: $from, to: $to, subject: $subject, html: $html, text: $text}')
 
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.resend.com/emails" \
             -H "Authorization: Bearer ${RESEND_API_KEY}" \
