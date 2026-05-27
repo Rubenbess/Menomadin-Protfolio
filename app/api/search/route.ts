@@ -7,7 +7,12 @@ export async function GET(req: NextRequest) {
   const { supabase } = auth
 
   const q = req.nextUrl.searchParams.get('q')?.trim()
-  if (!q || q.length < 2) return NextResponse.json({ results: [] })
+  if (!q || q.length < 2) return NextResponse.json({ results: [], hasMore: false })
+
+  const limitParam = Number(req.nextUrl.searchParams.get('limit') ?? 8)
+  const limit = Math.min(Math.max(limitParam, 1), 20)
+  // Fetch one extra row per category to detect whether more results exist
+  const fetchLimit = limit + 1
 
   // ilike pattern — escape % and _ so user input can't match-all the table.
   const escaped = q.replace(/[\\%_]/g, m => `\\${m}`)
@@ -21,22 +26,22 @@ export async function GET(req: NextRequest) {
       .from('companies')
       .select('id, name, sector, status, logo_url')
       .ilike('name', pattern)
-      .limit(5),
+      .limit(fetchLimit),
     supabase
       .from('contacts')
       .select('id, name, position, email')
       .ilike('name', pattern)
-      .limit(5),
+      .limit(fetchLimit),
     supabase
       .from('contacts')
       .select('id, name, position, email')
       .ilike('email', pattern)
-      .limit(5),
+      .limit(fetchLimit),
     supabase
       .from('pipeline')
       .select('id, name, sector, status')
       .ilike('name', pattern)
-      .limit(5),
+      .limit(fetchLimit),
   ])
 
   // De-duplicate contacts by id when a row matched both name and email.
@@ -44,10 +49,19 @@ export async function GET(req: NextRequest) {
   for (const c of [...(contactsByName.data ?? []), ...(contactsByEmail.data ?? [])]) {
     if (!contactsById.has(c.id)) contactsById.set(c.id, c)
   }
-  const contactsMerged = [...contactsById.values()].slice(0, 5)
+  const allContacts = [...contactsById.values()]
+
+  // Trim to requested limit and record whether there were more rows
+  const companiesRows  = (companies.data ?? []).slice(0, limit)
+  const contactsRows   = allContacts.slice(0, limit)
+  const pipelineRows   = (pipeline.data ?? []).slice(0, limit)
+  const hasMore =
+    (companies.data ?? []).length > limit ||
+    allContacts.length > limit ||
+    (pipeline.data ?? []).length > limit
 
   const results = [
-    ...(companies.data ?? []).map(c => ({
+    ...companiesRows.map(c => ({
       type: 'company' as const,
       id: c.id,
       title: c.name,
@@ -55,7 +69,7 @@ export async function GET(req: NextRequest) {
       href: `/companies/${c.id}`,
       logo: c.logo_url,
     })),
-    ...contactsMerged.map(c => ({
+    ...contactsRows.map(c => ({
       type: 'contact' as const,
       id: c.id,
       title: c.name,
@@ -63,7 +77,7 @@ export async function GET(req: NextRequest) {
       href: `/contacts`,
       logo: null,
     })),
-    ...(pipeline.data ?? []).map(c => ({
+    ...pipelineRows.map(c => ({
       type: 'deal' as const,
       id: c.id,
       title: c.name,
@@ -73,5 +87,5 @@ export async function GET(req: NextRequest) {
     })),
   ]
 
-  return NextResponse.json({ results })
+  return NextResponse.json({ results, hasMore })
 }
