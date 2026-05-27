@@ -13,7 +13,10 @@ export async function createInvestment(data: {
   notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('investments').insert(data)
+  const { error } = await supabase.from('investments').insert({
+    ...data,
+    notes: data.notes ? data.notes.slice(0, 5000) : null,
+  })
   if (error) return { error: error.message }
   return { error: null }
 }
@@ -27,7 +30,10 @@ export async function updateInvestment(id: string, data: {
   notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('investments').update(data).eq('id', id)
+  const { error } = await supabase.from('investments').update({
+    ...data,
+    notes: data.notes ? data.notes.slice(0, 5000) : null,
+  }).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
 }
