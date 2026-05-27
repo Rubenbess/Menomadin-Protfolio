@@ -386,18 +386,6 @@ export interface CompanyWithMetrics extends Company {
   initialInvestment: number
 }
 
-export interface HealthScore {
-  total: number           // 0-100
-  kpiScore: number        // 0-30
-  runwayScore: number     // 0-30
-  updateScore: number     // 0-20
-  moicScore: number       // 0-20
-  runwayMonths: number | null
-  lastUpdateDays: number | null
-  kpiTrend: 'up' | 'down' | 'flat' | null
-  moic: number
-}
-
 export interface DashboardMetrics {
   totalInvested: number
   totalCurrentValue: number

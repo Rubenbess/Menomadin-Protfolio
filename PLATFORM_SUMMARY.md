@@ -8,12 +8,10 @@
 
 ## ✅ IMPLEMENTED FEATURES (6 Total)
 
-### 1. **Health Score Algorithm** ✅
-- Calculates 0-100 score from: KPI trends, runway, update recency, MOIC
-- Displays in Companies page cards and detail views
-- Color-coded: green (70+), yellow (40-69), red (<40)
-- Server-side calculation in `lib/calculations.ts`
-- Component: `HealthScoreBadge.tsx`
+### 1. **Health Score Algorithm** — _removed_
+- Previously calculated a 0-100 company health score (KPI trends, runway, update recency, MOIC).
+- The `HealthScoreBadge.tsx` component, the `calcHealthScore` export, and the `HealthScore` interface were deleted (see `.health-reports/2026-05-14.md` and successors).
+- Re-introduction is tracked in `DESIGN_SYSTEM_AND_FEATURES_ROADMAP.md` → Phase 25 as aspirational.
 
 ### 2. **Pipeline Deal Scoring Rubric** ✅
 - 1-5 star ratings for: Team, Market, Traction, Strategic Fit
@@ -271,7 +269,6 @@ interface CompanyKPI { id, date, revenue, arr, burn_rate, runway, ... }
 interface Task { id, title, status, priority, due_date, company_id, assignee_id } (NOT IMPLEMENTED)
 interface Notification { id, type, title, body, company_id, link, read }
 interface TeamMember { id, name, email, role, color }
-interface HealthScore { total, kpiScore, runwayScore, updateScore, moicScore }
 interface PipelineEntry { id, name, score_team, score_market, ... }
 ```
 
