@@ -13,6 +13,7 @@ import { deleteCompany } from '@/actions/companies'
 import { AdvancedFilterPanel } from '@/components/AdvancedFilterPanel'
 import { applyFilters, FilterGroup } from '@/lib/filter-utils'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useToast } from '@/hooks/useToast'
 import type { Company, Contact } from '@/lib/types'
 import { FUNDS } from '@/lib/funds'
 
@@ -93,9 +94,9 @@ export default function CompaniesClient({
 }: {
   companies: Company[]
   contacts: Contact[]
-  strategyLabel: string | null
 }) {
   const router = useRouter()
+  const { error: showError } = useToast()
   const [showAdd, setShowAdd] = useState(false)
   const [editCompany, setEditCompany] = useState<Company | null>(null)
   const [strategyFilter, setStrategyFilter] = useState<'all' | 'impact' | 'venture'>('all')
@@ -153,7 +154,8 @@ export default function CompaniesClient({
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
-    await deleteCompany(id)
+    const result = await deleteCompany(id)
+    if (result?.error) { showError(result.error); return }
     router.refresh()
   }
 

@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import TasksClient from './TasksClient'
 import type { TaskWithRelations } from '@/lib/types'
@@ -9,7 +10,8 @@ export default async function TasksPage() {
 
   // Get current user ID
   const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id || ''
+  if (!user) redirect('/login')
+  const userId = user.id
 
   // Fetch tasks with relations — assignees fetched separately to avoid FK cache issues
   const { data: tasks, error } = await supabase
@@ -27,15 +29,12 @@ export default async function TasksPage() {
       pipeline_deal:pipeline(id, name),
       contact:contacts(id, name)
     `)
+    .limit(500)
     .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching tasks:', JSON.stringify(error), error)
-    return (
-      <div className="p-8 text-center">
-        <p className="text-red-600 font-mono text-sm">{error.message || JSON.stringify(error)}</p>
-      </div>
-    )
+    throw new Error(error.message)
   }
 
   // Fetch all labels for the label selector

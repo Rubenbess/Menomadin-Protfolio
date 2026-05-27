@@ -11,6 +11,7 @@ import Modal from '@/components/ui/Modal'
 import EmptyState from '@/components/EmptyState'
 import { createClient } from '@/lib/supabase'
 import { createGlobalDocument, deleteGlobalDocument } from '@/actions/global-documents'
+import { useToast } from '@/hooks/useToast'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
 import type { GlobalDocument, DocumentCategory, Company } from '@/lib/types'
 
@@ -198,6 +199,7 @@ interface Props {
 
 export default function DocumentsVaultClient({ documents, companies }: Props) {
   const router = useRouter()
+  const { error: showError } = useToast()
   const [showUpload, setShowUpload]     = useState(false)
   const [search, setSearch]             = useState('')
   const [catFilter, setCatFilter]       = useState('')
@@ -228,7 +230,8 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
     const url = new URL(doc.file_url)
     const path = url.pathname.split('/documents/')[1]
     if (path) await supabase.storage.from('documents').remove([path])
-    await deleteGlobalDocument(doc.id)
+    const result = await deleteGlobalDocument(doc.id)
+    if (result?.error) { showError(result.error); return }
     router.refresh()
   }
 
@@ -260,7 +263,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         <button
           onClick={() => setCatFilter('')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-            !catFilter ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300'
+            !catFilter ? 'bg-slate-900 text-white border-slate-900 dark:bg-neutral-100 dark:text-neutral-900 dark:border-neutral-100' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300 dark:bg-neutral-800/60 dark:text-neutral-200 dark:border-neutral-700 dark:hover:border-neutral-600'
           }`}
         >
           All ({documents.length})
@@ -270,7 +273,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
             key={cat}
             onClick={() => setCatFilter(cat === catFilter ? '' : cat)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-              catFilter === cat ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300'
+              catFilter === cat ? 'bg-slate-900 text-white border-slate-900 dark:bg-neutral-100 dark:text-neutral-900 dark:border-neutral-100' : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300 dark:bg-neutral-800/60 dark:text-neutral-200 dark:border-neutral-700 dark:hover:border-neutral-600'
             }`}
           >
             {cat} ({catCounts[cat]})
@@ -286,7 +289,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search documents…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500"
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 dark:bg-neutral-800/60 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700">
@@ -296,7 +299,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         </div>
 
         {uniqueCompanies.length > 0 && (
-          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 cursor-pointer">
+          <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="py-1.5 px-3 text-sm bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500/30 cursor-pointer dark:bg-neutral-800/60 dark:border-neutral-700 dark:text-neutral-100">
             <option value="">All companies</option>
             {uniqueCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -305,7 +308,7 @@ export default function DocumentsVaultClient({ documents, companies }: Props) {
         {hasFilters && (
           <button
             onClick={() => { setSearch(''); setCatFilter(''); setCompanyFilter('') }}
-            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-slate-800 px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-100 dark:hover:bg-neutral-800/60"
           >
             <X size={12} /> Clear
           </button>

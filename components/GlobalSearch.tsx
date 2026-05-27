@@ -24,10 +24,12 @@ export default function GlobalSearch() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Result[]>([])
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(false)
   const [cursor, setCursor] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   // Keyboard shortcut Cmd/Ctrl+K
   useEffect(() => {
@@ -48,18 +50,27 @@ export default function GlobalSearch() {
       setTimeout(() => inputRef.current?.focus(), 50)
       setQuery('')
       setResults([])
+      setHasMore(false)
       setCursor(0)
     }
+    return () => abortRef.current?.abort()
   }, [open])
 
   const search = useCallback(async (q: string) => {
-    if (q.length < 2) { setResults([]); return }
+    if (q.length < 2) { setResults([]); setHasMore(false); return }
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
     setLoading(true)
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
       const json = await res.json()
       setResults(json.results ?? [])
+      setHasMore(json.hasMore ?? false)
       setCursor(0)
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return
+      throw err
     } finally {
       setLoading(false)
     }
@@ -86,7 +97,7 @@ export default function GlobalSearch() {
   if (!open) return (
     <button
       onClick={() => setOpen(true)}
-      className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg text-xs text-neutral-500 transition-all"
+      className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg text-xs text-neutral-500 dark:text-neutral-400 transition-all"
     >
       <Search size={12} />
       <span className="hidden sm:inline">Search…</span>
@@ -97,28 +108,28 @@ export default function GlobalSearch() {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+      <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
       {/* Panel */}
-      <div className="relative w-full max-w-xl bg-white rounded-lg shadow-2xl ring-1 ring-black/[0.08] overflow-hidden">
+      <div className="relative w-full max-w-xl bg-white dark:bg-neutral-900 rounded-lg shadow-2xl ring-1 ring-black/[0.08] dark:ring-white/[0.08] overflow-hidden">
         {/* Input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-200">
-          <Search size={16} className="text-neutral-500 flex-shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-200 dark:border-neutral-700">
+          <Search size={16} className="text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder="Search companies, contacts, deals…"
-            className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 dark:placeholder:text-neutral-500 focus:outline-none"
           />
           {loading && (
-            <svg className="animate-spin h-4 w-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-4 w-4 text-slate-300 dark:text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           )}
-          <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 hover:text-neutral-700 rounded-lg transition-colors flex-shrink-0">
+          <button onClick={() => setOpen(false)} className="p-1 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg transition-colors flex-shrink-0">
             <X size={14} />
           </button>
         </div>
@@ -135,19 +146,19 @@ export default function GlobalSearch() {
                   onClick={() => navigate(r.href)}
                   onMouseEnter={() => setCursor(i)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                    i === cursor ? 'bg-gold-50' : 'hover:bg-neutral-50'
+                    i === cursor ? 'bg-gold-50 dark:bg-gold-900/20' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
                   }`}
                 >
                   {r.logo ? (
-                    <img src={r.logo} alt="" className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                    <img src={r.logo} alt="" className="w-7 h-7 rounded-lg object-contain bg-neutral-50 dark:bg-neutral-800 ring-1 ring-slate-100 dark:ring-neutral-700 flex-shrink-0" />
                   ) : (
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
                       <Icon size={13} />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-neutral-900 truncate">{r.title}</p>
-                    {r.subtitle && <p className="text-xs text-neutral-500 truncate">{r.subtitle}</p>}
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">{r.title}</p>
+                    {r.subtitle && <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{r.subtitle}</p>}
                   </div>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.color}`}>
                     {cfg.label}
@@ -157,10 +168,10 @@ export default function GlobalSearch() {
             })}
           </div>
         ) : query.length >= 2 && !loading ? (
-          <div className="py-10 text-center text-sm text-neutral-500">No results for "{query}"</div>
+          <div className="py-10 text-center text-sm text-neutral-500 dark:text-neutral-400">No results for "{query}"</div>
         ) : query.length === 0 ? (
           <div className="py-6 px-4">
-            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Quick navigation</p>
+            <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Quick navigation</p>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: 'Companies', href: '/companies', icon: Building2, color: 'bg-gold-50 text-primary-500' },
@@ -170,7 +181,7 @@ export default function GlobalSearch() {
                 <button
                   key={href}
                   onClick={() => navigate(href)}
-                  className="flex items-center gap-2 px-3 py-2.5 bg-neutral-50 hover:bg-neutral-100 rounded-lg text-xs font-semibold text-neutral-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2.5 bg-neutral-50 dark:bg-neutral-800/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-xs font-semibold text-neutral-700 dark:text-neutral-200 transition-colors"
                 >
                   <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
                     <Icon size={12} />
@@ -183,10 +194,13 @@ export default function GlobalSearch() {
         ) : null}
 
         {results.length > 0 && (
-          <div className="px-4 py-2.5 border-t border-neutral-200 flex items-center gap-4 text-[11px] text-neutral-500">
-            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">↑↓</kbd> navigate</span>
-            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">↵</kbd> open</span>
-            <span><kbd className="bg-neutral-100 px-1.5 py-0.5 rounded font-mono">Esc</kbd> close</span>
+          <div className="px-4 py-2.5 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-4 text-[11px] text-neutral-500 dark:text-neutral-400">
+            <span><kbd className="bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-1.5 py-0.5 rounded font-mono">↑↓</kbd> navigate</span>
+            <span><kbd className="bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-1.5 py-0.5 rounded font-mono">↵</kbd> open</span>
+            <span><kbd className="bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 px-1.5 py-0.5 rounded font-mono">Esc</kbd> close</span>
+            {hasMore && (
+              <span className="ml-auto text-neutral-400 dark:text-neutral-500">More results — refine your query</span>
+            )}
           </div>
         )}
       </div>

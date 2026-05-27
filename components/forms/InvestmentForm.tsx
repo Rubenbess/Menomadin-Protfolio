@@ -40,7 +40,7 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
       instrument:    fd.get('instrument') as string,
       valuation_cap: fd.get('valuation_cap') ? parseFloat(fd.get('valuation_cap') as string) : null,
       legal_entity:  legalEntity || null,
-      notes:         (fd.get('notes') as string) || null,
+      notes:         ((fd.get('notes') as string) ?? '').trim() || null,
     }
 
     const result = isEdit
@@ -122,6 +122,7 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
         <textarea
           name="notes"
           rows={3}
+          maxLength={5000}
           defaultValue={investment?.notes ?? ''}
           className={input}
           placeholder="Context for this investment — terms, rationale, follow-on trigger…"
@@ -129,7 +130,7 @@ export default function InvestmentForm({ companyId, rounds, legalEntities, inves
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2.5 ring-1 ring-red-200">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2.5 ring-1 ring-red-200 dark:ring-red-900/40">{error}</p>
       )}
 
       <div className="flex gap-3 pt-2">

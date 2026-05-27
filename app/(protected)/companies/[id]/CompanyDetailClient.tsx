@@ -619,7 +619,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                 <div className="flex items-center gap-1 justify-end">
                                   <button
                                     onClick={e => { e.stopPropagation(); setEditingSafe(safe); setShowAddSafe(true) }}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
+                                    className="opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
                                   ><Pencil size={12} /></button>
                                   <button
                                     onClick={async e => {
@@ -628,7 +628,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                       await deleteSafe(safe.id)
                                       router.refresh()
                                     }}
-                                    className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                    className="opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                   ><Trash2 size={12} /></button>
                                 </div>
                                 {safe.status === 'unconverted' && (
@@ -690,7 +690,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               <p className={`text-sm font-bold ${moic != null && moic >= 1 ? 'text-emerald-600 dark:text-emerald-400' : moic != null ? 'text-red-500 dark:text-red-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
                                 {moic != null ? fmtMultiple(moic) : '—'}
                               </p>
-                              <div className="flex items-center gap-1 justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-1 justify-end mt-2 opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => setEditingRound(round)}
                                   className="p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
@@ -728,7 +728,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                                       )}
                                       {inv.valuation_cap && <span className="text-neutral-500 dark:text-neutral-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
                                     </div>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                    <div className="flex items-center gap-1 opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all">
                                       <button
                                         onClick={() => setEditingInvestment(inv)}
                                         className="p-1 text-slate-300 dark:text-neutral-600 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
@@ -768,7 +768,7 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                               )}
                               {inv.valuation_cap && <span className="text-neutral-500 dark:text-neutral-400">Cap: {fmt$$(inv.valuation_cap)}</span>}
                             </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <div className="flex items-center gap-1 opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all">
                               <button
                                 onClick={() => setEditingInvestment(inv)}
                                 className="p-1 text-slate-300 dark:text-neutral-600 hover:text-primary-500 dark:hover:text-primary-300 hover:bg-gold-50 dark:hover:bg-gold-900/20 rounded-lg transition-all"
@@ -1077,30 +1077,37 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
             className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           <div className="max-h-64 overflow-y-auto space-y-0.5">
-            {linkableContacts
-              .filter(c => c.name.toLowerCase().includes(contactSearch.toLowerCase()))
-              .map(contact => (
+            {(() => {
+              const filtered = linkableContacts.filter(c =>
+                c.name.toLowerCase().includes(contactSearch.toLowerCase())
+              )
+              if (filtered.length === 0) {
+                return (
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 py-4 text-center">
+                    {contactSearch ? 'No contacts match your search.' : 'No unlinked contacts available.'}
+                  </p>
+                )
+              }
+              return filtered.map(c => (
                 <button
-                  key={contact.id}
-                  onClick={() => handleLinkContact(contact.id)}
+                  key={c.id}
+                  onClick={() => handleLinkContact(c.id)}
                   className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                 >
-                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">{contact.name}</p>
+                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">{c.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    {contact.position && (
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">{contact.position}</span>
+                    {c.position && (
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">{c.position}</span>
                     )}
-                    {contact.contact_type && (
+                    {c.contact_type && (
                       <span className="px-1.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
-                        {contact.contact_type}
+                        {c.contact_type}
                       </span>
                     )}
                   </div>
                 </button>
-              ))}
-            {linkableContacts.filter(c => c.name.toLowerCase().includes(contactSearch.toLowerCase())).length === 0 && (
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-6">No unlinked contacts found.</p>
-            )}
+              ))
+            })()}
           </div>
         </div>
       </Modal>

@@ -8,8 +8,8 @@ export default async function ContactsPage() {
   const supabase = await createServerSupabaseClient()
 
   const [contactsRes, companiesRes] = await Promise.all([
-    supabase.from('contacts').select('*, companies(id,name)').order('name'),
-    supabase.from('companies').select('id, name').order('name'),
+    supabase.from('contacts').select('*, companies(id,name)').limit(500).order('name'),
+    supabase.from('companies').select('id, name').limit(500).order('name'),
   ])
 
   if (contactsRes.error || companiesRes.error) {
@@ -28,7 +28,7 @@ export default async function ContactsPage() {
   const ids = contacts.map(c => c.id)
 
   const interactionsRes = ids.length
-    ? await supabase.from('contact_interactions').select('*').in('contact_id', ids).order('date', { ascending: false })
+    ? await supabase.from('contact_interactions').select('*').limit(500).in('contact_id', ids).order('date', { ascending: false })
     : { data: [], error: null }
   const interactions = interactionsRes.data ?? []
   // We don't fail the whole page on an interactions error — the contact list is

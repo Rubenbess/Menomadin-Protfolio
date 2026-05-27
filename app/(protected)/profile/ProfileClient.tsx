@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/useToast'
 import { updateProfile } from '@/actions/profile'
+import { fmt$$ } from '@/lib/calculations'
 import type { TeamMember } from '@/lib/types'
 
 type Tab = 'tasks' | 'pipeline' | 'portfolio' | 'activity' | 'team'
@@ -471,7 +472,7 @@ export default function ProfileClient({ profile, tasks, deals, companies, activi
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {deal.fundraising_ask && (
-                          <span className="text-xs text-neutral-500">${(deal.fundraising_ask / 1e6).toFixed(1)}M</span>
+                          <span className="text-xs text-neutral-500">{fmt$$(deal.fundraising_ask)}</span>
                         )}
                         <span className="text-xs text-neutral-400">{formatDate(deal.updated_at)}</span>
                       </div>
