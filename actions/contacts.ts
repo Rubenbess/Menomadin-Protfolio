@@ -99,7 +99,7 @@ export async function linkContactToCompany(contactId: string, companyId: string)
 
 export async function unlinkContactFromCompany(contactId: string, companyId: string) {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('contacts').update({ company_id: null }).eq('id', contactId)
+  const { error } = await supabase.from('contacts').update({ company_id: null }).eq('id', contactId).eq('company_id', companyId)
   if (error) return { error: error.message }
   revalidatePath('/contacts')
   revalidatePath(`/companies/${companyId}`)
