@@ -96,7 +96,11 @@ export function ValuationChart({ rounds, ownershipPct }: { rounds: Round[]; owne
     name: `${r.type ?? ''} (${fmtDate(r.date)})`.trim().replace(/^\(/, '('),
     'Post-Money': r.post_money,
     'Pre-Money':  r.pre_money > 0 ? r.pre_money : null,
-    ...(showFMV ? { 'Our FMV': Math.round((ownershipPct! / 100) * r.post_money) } : {}),
+    ...(showFMV ? {
+      'Our FMV': Number.isFinite(ownershipPct) && Number.isFinite(r.post_money) && r.post_money > 0
+        ? Math.round((ownershipPct! / 100) * r.post_money)
+        : null,
+    } : {}),
   }))
 
   return (
