@@ -46,10 +46,14 @@ export async function updateAutomationRule(
 ) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
   const { data: rule, error } = await supabase
     .from('task_automation_rules')
     .update(data)
     .eq('id', ruleId)
+    .eq('created_by', user.id)
     .select()
     .single()
 
@@ -62,10 +66,14 @@ export async function updateAutomationRule(
 export async function deleteAutomationRule(ruleId: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
   const { error } = await supabase
     .from('task_automation_rules')
     .delete()
     .eq('id', ruleId)
+    .eq('created_by', user.id)
 
   if (error) return { error: error.message }
 
@@ -91,6 +99,9 @@ export async function getAutomationRules() {
 export async function triggerAutomationRules(trigger: AutomationTrigger, context: Record<string, any>) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
   // Get all active rules for this trigger
   const { data: rules } = await supabase
     .from('task_automation_rules')
@@ -115,10 +126,6 @@ export async function triggerAutomationRules(trigger: AutomationTrigger, context
 
       if (!template) continue
 
-      // Create task based on context
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) continue
-
       const dueDate = new Date()
       dueDate.setDate(dueDate.getDate() + (template.template_content?.due_days || 7))
 
@@ -137,11 +144,23 @@ export async function triggerAutomationRules(trigger: AutomationTrigger, context
           },
         ])
     } else if (rule.action_type === 'notify_team') {
-      // TODO: Implement notification trigger
-      console.log('Notification triggered:', rule.config)
+      await supabase.from('notifications').insert({
+        type: 'general',
+        title: rule.config.title ?? rule.name,
+        body: rule.config.message ?? null,
+        company_id: context.company_id ?? null,
+        link: context.company_id ? `/companies/${context.company_id}` : null,
+      })
     } else if (rule.action_type === 'assign_to') {
-      // TODO: Implement task assignment
-      console.log('Assignment triggered:', rule.config)
+      const assigneeId = rule.config.assignee_id as string | undefined
+      const taskId = context.task_id as string | undefined
+      if (assigneeId && taskId) {
+        await supabase.from('task_assignees').upsert({
+          task_id: taskId,
+          assigned_to: assigneeId,
+          assigned_by: user.id,
+        }, { onConflict: 'task_id,assigned_to' })
+      }
     }
   }
 }

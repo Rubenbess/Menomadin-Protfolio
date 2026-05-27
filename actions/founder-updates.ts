@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 interface FounderUpdateData {
   token: string
@@ -59,6 +60,9 @@ function isInvalidMetric(v: number | null, allowNegative = false): boolean {
  */
 export async function submitFounderUpdate(data: FounderUpdateData) {
   if (!data.token) return { error: 'Missing token' }
+
+  const rl = checkRateLimit('founder-update:' + data.token, 5, 60_000)
+  if (rl) return { error: 'Too many requests' }
 
   // Defensive bounds — see helper docs above.
   if (

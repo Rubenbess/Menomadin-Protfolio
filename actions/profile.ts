@@ -19,10 +19,16 @@ export async function updateProfile(updates: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  // Whitelist allowed fields explicitly — never spread the caller payload.
+  // TypeScript types are erased at runtime, so a client could otherwise smuggle
+  // privileged fields (e.g. `role`) into the update.
   const payload: Record<string, unknown> = {
-    ...updates,
     updated_at: new Date().toISOString(),
   }
+  if (updates.name !== undefined) payload.name = updates.name
+  if (updates.job_title !== undefined) payload.job_title = updates.job_title
+  if (updates.phone !== undefined) payload.phone = updates.phone
+  if (updates.linkedin_url !== undefined) payload.linkedin_url = updates.linkedin_url
   if (updates.name) {
     payload.initials = deriveInitials(updates.name)
   }
