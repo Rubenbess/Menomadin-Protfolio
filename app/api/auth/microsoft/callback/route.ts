@@ -3,6 +3,16 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const NONCE_COOKIE = 'ms_oauth_nonce'
 
+// Helper: redirect with nonce cookie consumed. Every terminal outcome (success
+// or failure) must invalidate the nonce so it can't be replayed by a subsequent
+// callback. Without this, an interrupted/failed flow leaves the nonce alive in
+// the browser until cookie expiry.
+function terminalRedirect(req: NextRequest, target: string) {
+  const r = NextResponse.redirect(new URL(target, req.url))
+  r.cookies.delete(NONCE_COOKIE)
+  return r
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const code = searchParams.get('code')
@@ -11,9 +21,7 @@ export async function GET(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
   if (oauthError || !code || !stateParam) {
-    return NextResponse.redirect(
-      new URL('/settings/email-scanner?error=oauth_failed', req.url)
-    )
+    return terminalRedirect(req, '/settings/email-scanner?error=oauth_failed')
   }
 
   // State is "nonce:user_id" — verify both the random nonce (from HttpOnly cookie)
@@ -26,17 +34,16 @@ export async function GET(req: NextRequest) {
 
   const nonceCookie = req.cookies.get(NONCE_COOKIE)?.value
   if (!nonceCookie || nonceCookie !== nonceFromState) {
-    return NextResponse.redirect(
-      new URL('/settings/email-scanner?error=oauth_state_mismatch', req.url)
-    )
+    return terminalRedirect(req, '/settings/email-scanner?error=oauth_state_mismatch')
   }
 
   const ssoSupabase = await createServerSupabaseClient()
-  const { data: { user: sessionUser } } = await ssoSupabase.auth.getUser()
+  const { data: { user: sessionUser }, error: authError } = await ssoSupabase.auth.getUser()
+  if (authError) {
+    return terminalRedirect(req, '/settings/email-scanner?error=auth_unavailable')
+  }
   if (!sessionUser || sessionUser.id !== userIdFromState) {
-    return NextResponse.redirect(
-      new URL('/settings/email-scanner?error=oauth_state_mismatch', req.url)
-    )
+    return terminalRedirect(req, '/settings/email-scanner?error=oauth_state_mismatch')
   }
   const userId = sessionUser.id
 
@@ -62,9 +69,7 @@ export async function GET(req: NextRequest) {
 
   const tokens = await tokenRes.json() as { access_token?: string; refresh_token?: string; expires_in?: number }
   if (!tokens?.access_token) {
-    return NextResponse.redirect(
-      new URL('/settings/email-scanner?error=token_failed', req.url)
-    )
+    return terminalRedirect(req, '/settings/email-scanner?error=token_failed')
   }
 
   // Fetch the user's email address from Microsoft Graph
@@ -90,15 +95,9 @@ export async function GET(req: NextRequest) {
   )
 
   if (upsertError) {
-    return NextResponse.redirect(
-      new URL('/settings/email-scanner?error=store_failed', req.url)
-    )
+    return terminalRedirect(req, '/settings/email-scanner?error=store_failed')
   }
 
-  const successResponse = NextResponse.redirect(
-    new URL('/settings/email-scanner?success=connected', req.url)
-  )
   // Consume the nonce — marks it as used so it cannot be replayed
-  successResponse.cookies.delete(NONCE_COOKIE)
-  return successResponse
+  return terminalRedirect(req, '/settings/email-scanner?success=connected')
 }
