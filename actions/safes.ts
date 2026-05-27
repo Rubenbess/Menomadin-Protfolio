@@ -83,51 +83,23 @@ export async function convertSafe(
     return { error: 'Cannot convert: the round inputs do not produce a valid ownership percentage. Check that pre-money is positive and the SAFE has a usable valuation cap or discount.' }
   }
 
-  // Mark SAFE as converted, storing conversion details
-  const { error: updateErr } = await supabase
-    .from('safes')
-    .update({
-      status: 'converted',
-      converted_round_id: roundId,
-      converted_shares: conversionDetails?.shares ?? null,
-      converted_price_per_share: conversionDetails?.pricePerShare ?? null,
-    })
-    .eq('id', safeId)
-  if (updateErr) return { error: updateErr.message }
-
-  // Auto-create cap table entry using investor name if external SAFE.
   // Use the bare holder name (no "(SAFE)" suffix) so legal_entities alias
   // matching and ownership-summation in the company detail page roll the
-  // converted shares into the same holder's other cap-table rows. The SAFE
-  // row itself remains as the canonical record of the conversion event
-  // (status='converted', converted_round_id).
+  // converted shares into the same holder's other cap-table rows.
   const holderName = safe.investor_name ?? FUND_NAME
 
-  // Auto-create cap table entry. If this fails the SAFE is already marked
-  // converted, so we must compensate by reverting the SAFE row — otherwise the
-  // company's cap table silently misses this holder and downstream waterfall /
-  // MOIC calculations are corrupted. This is a best-effort rollback (no DB
-  // transaction); the proper fix is a Postgres function with BEGIN/COMMIT.
-  const { error: capErr } = await supabase.from('cap_table').insert({
-    company_id: safe.company_id,
-    round_id: roundId,
-    shareholder_name: holderName,
-    ownership_percentage: result.ownershipPct,
+  // Atomic conversion via Postgres RPC: marks the SAFE as converted AND inserts
+  // the cap-table entry in a single transaction, eliminating the race window that
+  // existed when these were two sequential API calls with a best-effort rollback.
+  const { error: rpcErr } = await supabase.rpc('convert_safe', {
+    p_safe_id:         safeId,
+    p_round_id:        roundId,
+    p_holder_name:     holderName,
+    p_ownership_pct:   result.ownershipPct,
+    p_shares:          conversionDetails?.shares ?? null,
+    p_price_per_share: conversionDetails?.pricePerShare ?? null,
   })
-  if (capErr) {
-    const { error: revertErr } = await supabase
-      .from('safes')
-      .update({ status: 'unconverted', converted_round_id: null })
-      .eq('id', safeId)
-    if (revertErr) {
-      // Both writes failed — surface a combined error so the operator knows the
-      // SAFE is in an inconsistent state and needs manual cleanup.
-      return {
-        error: `Cap-table insert failed (${capErr.message}); rollback also failed (${revertErr.message}). SAFE ${safeId} is marked converted but has no cap-table entry — fix manually.`,
-      }
-    }
-    return { error: `Cap-table insert failed: ${capErr.message}. SAFE conversion was rolled back.` }
-  }
+  if (rpcErr) return { error: rpcErr.message }
 
   revalidatePath(`/companies/${safe.company_id}`)
   return { error: null, ownershipPct: result.ownershipPct }
