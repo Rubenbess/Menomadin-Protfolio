@@ -14,19 +14,20 @@ export default async function CompaniesPage({ searchParams }: Props) {
 
   let query = supabase.from('companies').select('*').order('name')
   if (strategy) query = query.eq('strategy', strategy)
-  const { data: companies } = await query
+  const { data: companies, error: companiesError } = await query
+  if (companiesError) throw new Error(companiesError.message)
 
   const ids = (companies ?? []).map((c: Company) => c.id)
 
-  const [{ data: contacts }] = await (ids.length
-    ? Promise.all([supabase.from('contacts').select('*').in('company_id', ids)])
-    : Promise.resolve([{ data: [] }]))
+  const [{ data: contacts, error: contactsError }] = await (ids.length
+    ? Promise.all([supabase.from('contacts').select('*').in('company_id', ids).limit(500)])
+    : Promise.resolve([{ data: [], error: null }]))
+  if (contactsError) throw new Error(contactsError.message)
 
   return (
     <CompaniesClient
       companies={(companies ?? []) as Company[]}
       contacts={(contacts ?? []) as Contact[]}
-      strategyLabel={null}
     />
   )
 }
