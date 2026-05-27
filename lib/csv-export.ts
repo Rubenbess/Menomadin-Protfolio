@@ -1,10 +1,10 @@
 /**
  * Export data as CSV file
  */
-export function exportToCSV(
+export function exportToCSV<T extends Record<string, unknown>>(
   filename: string,
-  data: any[],
-  columns?: Array<{ header: string; key: string }>
+  data: T[],
+  columns?: Array<{ header: string; key: keyof T & string }>
 ) {
   if (data.length === 0) {
     console.warn('No data to export')
@@ -30,9 +30,9 @@ export function exportToCSV(
 /**
  * Generate CSV content from data array
  */
-function generateCSV(
-  data: any[],
-  columns: Array<{ header: string; key: string }>
+function generateCSV<T extends Record<string, unknown>>(
+  data: T[],
+  columns: Array<{ header: string; key: keyof T & string }>
 ): string {
   const headers = columns.map(col => escapeCSV(col.header))
   const rows = data.map(row =>
@@ -47,22 +47,35 @@ function generateCSV(
 }
 
 /**
- * Escape special characters in CSV values
+ * Escape special characters in CSV values.
+ *
+ * Also prefixes leading `=`, `+`, `-`, `@`, TAB, and CR with a single-quote to
+ * neutralise spreadsheet formula injection (OWASP CSV injection). Excel and
+ * Google Sheets treat a cell whose first character is one of those as a
+ * formula, so an attacker who can set any exported text field (company name,
+ * notes, holder name, contact name) could otherwise embed `=HYPERLINK(...)`,
+ * `=cmd|'/c calc'!A0`, etc. that fire when an LP opens the CSV.
  */
 function escapeCSV(value: string): string {
   if (!value) return '""'
 
-  const needsQuotes =
-    value.includes(',') ||
-    value.includes('"') ||
-    value.includes('\n') ||
-    value.includes('\r')
-
-  if (needsQuotes) {
-    return `"${value.replace(/"/g, '""')}"`
+  // Neutralise formula injection on leading dangerous characters.
+  let safe = value
+  if (/^[=+\-@\t\r]/.test(safe)) {
+    safe = `'${safe}`
   }
 
-  return value
+  const needsQuotes =
+    safe.includes(',') ||
+    safe.includes('"') ||
+    safe.includes('\n') ||
+    safe.includes('\r')
+
+  if (needsQuotes) {
+    return `"${safe.replace(/"/g, '""')}"`
+  }
+
+  return safe
 }
 
 /**
