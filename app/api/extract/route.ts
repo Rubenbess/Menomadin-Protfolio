@@ -47,6 +47,9 @@ export async function POST(req: NextRequest) {
   const anthropic = new Anthropic({ apiKey })
   let extracted: { summary?: string; metrics?: Record<string, string>; key_points?: string[] } = {}
 
+  const ALLOWED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'] as const
+  type AllowedMediaType = typeof ALLOWED_MEDIA_TYPES[number]
+
   const ext = (file_name ?? '').split('.').pop()?.toLowerCase() ?? ''
   const isPdf    = file_type?.includes('pdf') || ext === 'pdf'
   const isImage  = file_type?.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
       const buffer = await fileRes.arrayBuffer()
       const base64 = Buffer.from(buffer).toString('base64')
       const msg = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
@@ -68,25 +71,33 @@ export async function POST(req: NextRequest) {
           ],
         }],
       })
-      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
+      const pdfText = msg.content[0]?.type === 'text' ? msg.content[0].text : null
+      if (!pdfText) throw new Error('Unexpected empty response from model')
+      extracted = parseClaudeJSON(pdfText)
 
     } else if (isImage) {
       const buffer = await fileRes.arrayBuffer()
       const base64 = Buffer.from(buffer).toString('base64')
-      const mediaType = (file_type?.startsWith('image/') ? file_type : `image/${ext}`) as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+      const mediaType = (file_type?.startsWith('image/') ? file_type : `image/${ext}`)
+      if (!ALLOWED_MEDIA_TYPES.includes(mediaType as AllowedMediaType)) {
+        return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
+      }
+      const validatedMediaType = mediaType as AllowedMediaType
       const msg = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'image', source: { type: 'base64', media_type: validatedMediaType, data: base64 } },
             { type: 'text', text: 'Extract all financial metrics and key business information visible in this image.' },
           ],
         }],
       })
-      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
+      const imgText = msg.content[0]?.type === 'text' ? msg.content[0].text : null
+      if (!imgText) throw new Error('Unexpected empty response from model')
+      extracted = parseClaudeJSON(imgText)
 
     } else if (isExcel) {
       const buffer = await fileRes.arrayBuffer()
@@ -96,7 +107,7 @@ export async function POST(req: NextRequest) {
         return `=== Sheet: ${name} ===\n${csv}`
       }).join('\n\n')
       const msg = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
@@ -104,13 +115,15 @@ export async function POST(req: NextRequest) {
           content: `Extract all financial metrics and key business information from this spreadsheet:\n\n${text.slice(0, 20000)}`,
         }],
       })
-      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
+      const xlsText = msg.content[0]?.type === 'text' ? msg.content[0].text : null
+      if (!xlsText) throw new Error('Unexpected empty response from model')
+      extracted = parseClaudeJSON(xlsText)
 
     } else {
       // Try as plain text (Word docs, PPT exports, etc.)
       const text = await fileRes.text()
       const msg = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{
@@ -118,7 +131,9 @@ export async function POST(req: NextRequest) {
           content: `Extract all financial metrics and key business information from this document:\n\n${text.slice(0, 20000)}`,
         }],
       })
-      extracted = parseClaudeJSON((msg.content[0] as { text: string }).text)
+      const plainText = msg.content[0]?.type === 'text' ? msg.content[0].text : null
+      if (!plainText) throw new Error('Unexpected empty response from model')
+      extracted = parseClaudeJSON(plainText)
     }
   } catch (err) {
     return NextResponse.json({ error: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 500 })
