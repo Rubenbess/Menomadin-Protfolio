@@ -10,6 +10,34 @@ function parseClaudeJSON(text: string) {
   return JSON.parse(cleaned)
 }
 
+// Per-type upload caps. Anthropic limits image payloads to ~5MB and document
+// payloads to ~32MB; we cap below those to keep memory bounded and avoid
+// downloading enormous files just to bounce them. Mirrors the pattern in
+// app/api/import/route.ts:51-54.
+const MAX_PDF_BYTES        = 20 * 1024 * 1024
+const MAX_IMAGE_BYTES      = 5  * 1024 * 1024
+const MAX_SPREADSHEET_BYTES = 10 * 1024 * 1024
+const MAX_TEXT_BYTES       = 5  * 1024 * 1024
+
+async function fetchWithSizeCap(url: string, maxBytes: number): Promise<{ ok: true; buffer: ArrayBuffer } | { ok: false; error: string; status: number }> {
+  const res = await fetch(url)
+  if (!res.ok) return { ok: false, error: 'Could not fetch file', status: 400 }
+
+  // Trust the server's Content-Length when present — short-circuits before
+  // we read the body. Some storage backends omit it on signed URLs.
+  const declared = Number(res.headers.get('content-length') ?? 0)
+  if (declared > maxBytes) {
+    return { ok: false, error: `File too large (max ${(maxBytes / 1024 / 1024).toFixed(0)} MB)`, status: 413 }
+  }
+
+  const buffer = await res.arrayBuffer()
+  if (buffer.byteLength > maxBytes) {
+    return { ok: false, error: `File too large (max ${(maxBytes / 1024 / 1024).toFixed(0)} MB)`, status: 413 }
+  }
+
+  return { ok: true, buffer }
+}
+
 const SYSTEM_PROMPT = `You are a financial analyst assistant. Extract key financial and business metrics from the provided document.
 Return ONLY raw valid JSON with no markdown formatting, no code fences, no explanation. The JSON must have this exact structure:
 {
@@ -40,10 +68,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'file_url is not on the allowed storage host' }, { status: 400 })
   }
 
-  // Download the file
-  const fileRes = await fetch(file_url)
-  if (!fileRes.ok) return NextResponse.json({ error: 'Could not fetch file' }, { status: 400 })
-
   const anthropic = new Anthropic({ apiKey })
   let extracted: { summary?: string; metrics?: Record<string, string>; key_points?: string[] } = {}
 
@@ -55,10 +79,17 @@ export async function POST(req: NextRequest) {
   const isImage  = file_type?.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)
   const isExcel  = ['xlsx', 'xls', 'csv'].includes(ext)
 
+  const sizeCap = isPdf ? MAX_PDF_BYTES
+    : isImage ? MAX_IMAGE_BYTES
+    : isExcel ? MAX_SPREADSHEET_BYTES
+    : MAX_TEXT_BYTES
+
+  const fetched = await fetchWithSizeCap(file_url, sizeCap)
+  if (!fetched.ok) return NextResponse.json({ error: fetched.error }, { status: fetched.status })
+
   try {
     if (isPdf) {
-      const buffer = await fileRes.arrayBuffer()
-      const base64 = Buffer.from(buffer).toString('base64')
+      const base64 = Buffer.from(fetched.buffer).toString('base64')
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
@@ -76,8 +107,7 @@ export async function POST(req: NextRequest) {
       extracted = parseClaudeJSON(pdfText)
 
     } else if (isImage) {
-      const buffer = await fileRes.arrayBuffer()
-      const base64 = Buffer.from(buffer).toString('base64')
+      const base64 = Buffer.from(fetched.buffer).toString('base64')
       const mediaType = (file_type?.startsWith('image/') ? file_type : `image/${ext}`)
       if (!ALLOWED_MEDIA_TYPES.includes(mediaType as AllowedMediaType)) {
         return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
@@ -100,8 +130,7 @@ export async function POST(req: NextRequest) {
       extracted = parseClaudeJSON(imgText)
 
     } else if (isExcel) {
-      const buffer = await fileRes.arrayBuffer()
-      const wb = XLSX.read(buffer, { type: 'array' })
+      const wb = XLSX.read(fetched.buffer, { type: 'array' })
       const text = wb.SheetNames.map(name => {
         const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name])
         return `=== Sheet: ${name} ===\n${csv}`
@@ -121,7 +150,7 @@ export async function POST(req: NextRequest) {
 
     } else {
       // Try as plain text (Word docs, PPT exports, etc.)
-      const text = await fileRes.text()
+      const text = new TextDecoder().decode(fetched.buffer)
       const msg = await anthropic.messages.create({
         model: 'claude-opus-4-6-20251001',
         max_tokens: 4096,
