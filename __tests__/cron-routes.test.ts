@@ -72,10 +72,16 @@ describe('GET /api/cron/lp-report', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://x.supabase.co'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key'
 
+    // Each table query in lp-report uses a different chain:
+    //   companies/rounds: select().order()
+    //   investments:      select() (no order)
+    //   cap_table:        select().in().order()  ← filters to fund holdings
+    const emptyResult = Promise.resolve({ data: [], error: null })
     createClientMock.mockReturnValue({
       from: () => ({
-        select: () => ({
-          order: () => Promise.resolve({ data: [], error: null }),
+        select: () => Object.assign(emptyResult, {
+          order: () => emptyResult,
+          in: () => ({ order: () => emptyResult }),
         }),
       }),
     })
@@ -95,10 +101,16 @@ describe('GET /api/cron/lp-report', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://x.supabase.co'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key'
 
+    // Each table query in lp-report uses a different chain:
+    //   companies/rounds: select().order()
+    //   investments:      select() (no order)
+    //   cap_table:        select().in().order()  ← filters to fund holdings
+    const emptyResult = Promise.resolve({ data: [], error: null })
     createClientMock.mockReturnValue({
       from: () => ({
-        select: () => ({
-          order: () => Promise.resolve({ data: [], error: null }),
+        select: () => Object.assign(emptyResult, {
+          order: () => emptyResult,
+          in: () => ({ order: () => emptyResult }),
         }),
       }),
     })

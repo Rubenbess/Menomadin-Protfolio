@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
-import { BRAND_NO_REPLY_EMAIL, FUND_FULL_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
+import { BRAND_NO_REPLY_EMAIL, FUND_FULL_NAME, FUND_PORTFOLIO_NAME, FUND_SHAREHOLDER_ALIASES, isFundShareholder } from '@/lib/branding'
 import { fmt$$ } from '@/lib/calculations'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -38,11 +38,20 @@ export async function GET(req: NextRequest) {
 
   // Narrow each select to the columns actually rendered in the email template
   // — keeps memory bounded and lets the index-only scans short-circuit.
+  //
+  // cap_table is restricted to the fund's own holdings (the LP-facing
+  // "Ownership" column means "what does Menomadin own"). Without this filter
+  // any cap_table row could be picked — founders, employees, angels — and
+  // mislabeled as the fund's stake in LP communications.
   const [companiesRes, investmentsRes, roundsRes, capTableRes] = await Promise.all([
     supabase.from('companies').select('id, name, sector, hq, entry_stage, status').order('name'),
     supabase.from('investments').select('company_id, amount'),
     supabase.from('rounds').select('company_id, date, post_money').order('date', { ascending: false }),
-    supabase.from('cap_table').select('company_id, ownership_percentage'),
+    supabase
+      .from('cap_table')
+      .select('company_id, shareholder_name, ownership_percentage, created_at')
+      .in('shareholder_name', FUND_SHAREHOLDER_ALIASES as readonly string[])
+      .order('created_at', { ascending: false }),
   ])
 
   const companies   = companiesRes.data   ?? []
@@ -69,9 +78,14 @@ export async function GET(req: NextRequest) {
         .filter((i: { company_id: string }) => i.company_id === c.id)
         .reduce((s: number, i: { amount: number }) => s + i.amount, 0)
       const latestRound = rounds.find((r: { company_id: string }) => r.company_id === c.id)
-      const cap = capTable
-        .filter((ct: { company_id: string }) => ct.company_id === c.id)
-        .pop() as { ownership_percentage: number } | undefined
+      // capTable is already filtered to fund-aliased rows and ordered by
+      // created_at desc, so the first hit is the most recent fund holding.
+      // .find() is safer than .pop() — it doesn't mutate, and the prior
+      // .pop() relied on an unordered query that could return any holder.
+      const cap = capTable.find(
+        (ct: { company_id: string; shareholder_name: string }) =>
+          ct.company_id === c.id && isFundShareholder(ct.shareholder_name)
+      ) as { ownership_percentage: number } | undefined
       return `<tr style="border-bottom:1px solid #f1f5f9">
         <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${esc(c.name)}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(c.sector) || '—'}</td>
