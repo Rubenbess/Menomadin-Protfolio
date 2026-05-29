@@ -6,6 +6,10 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 // Each test reconfigures the mocked Supabase client.
 const supabaseMock = {
   from: vi.fn(),
+  rpc: vi.fn(),
+  auth: {
+    getUser: vi.fn(),
+  },
 }
 
 vi.mock('@/lib/supabase-server', () => ({
@@ -18,20 +22,26 @@ const { convertSafe } = await import('../actions/safes')
 interface SafeRow {
   id: string
   company_id: string
+  status: 'unconverted' | 'converted'
   investment_amount: number
   valuation_cap: number | null
   discount_rate: number | null
+  investor_name?: string | null
 }
 
 function buildSupabase(opts: {
   safeRow: SafeRow | null
   fetchErr?: { message: string } | null
-  updateErr?: { message: string } | null
-  capInsertErr?: { message: string } | null
-  revertErr?: { message: string } | null
+  rpcErr?: { message: string } | null
+  authed?: boolean
 }) {
-  const safeUpdates: Array<Record<string, unknown>> = []
-  const capInserts: Array<Record<string, unknown>> = []
+  const rpcCalls: Array<{ name: string; payload: Record<string, unknown> }> = []
+
+  supabaseMock.auth.getUser.mockResolvedValue(
+    opts.authed === false
+      ? { data: { user: null } }
+      : { data: { user: { id: 'user-1' } } }
+  )
 
   supabaseMock.from.mockImplementation((table: string) => {
     if (table === 'safes') {
@@ -44,42 +54,32 @@ function buildSupabase(opts: {
             }),
           }),
         }),
-        update: (payload: Record<string, unknown>) => {
-          safeUpdates.push(payload)
-          // First update is the convert; second is the revert (if any).
-          const isRevert = payload.status === 'unconverted'
-          return {
-            eq: () => Promise.resolve({
-              error: isRevert ? (opts.revertErr ?? null) : (opts.updateErr ?? null),
-            }),
-          }
-        },
-      }
-    }
-    if (table === 'cap_table') {
-      return {
-        insert: (payload: Record<string, unknown>) => {
-          capInserts.push(payload)
-          return Promise.resolve({ error: opts.capInsertErr ?? null })
-        },
       }
     }
     throw new Error(`Unexpected table: ${table}`)
   })
 
-  return { safeUpdates, capInserts }
+  supabaseMock.rpc.mockImplementation((name: string, payload: Record<string, unknown>) => {
+    rpcCalls.push({ name, payload })
+    return Promise.resolve({ error: opts.rpcErr ?? null })
+  })
+
+  return { rpcCalls }
 }
 
 beforeEach(() => {
   supabaseMock.from.mockReset()
+  supabaseMock.rpc.mockReset()
+  supabaseMock.auth.getUser.mockReset()
 })
 
 describe('convertSafe', () => {
-  it('happy path: marks SAFE converted and inserts cap-table entry', async () => {
-    const { safeUpdates, capInserts } = buildSupabase({
+  it('happy path: invokes convert_safe RPC with the calculated ownership %', async () => {
+    const { rpcCalls } = buildSupabase({
       safeRow: {
         id: 'safe-1',
         company_id: 'co-1',
+        status: 'unconverted',
         investment_amount: 500_000,
         valuation_cap: 5_000_000,
         discount_rate: null,
@@ -90,38 +90,42 @@ describe('convertSafe', () => {
 
     expect(result.error).toBeNull()
     expect(result.ownershipPct).toBeGreaterThan(0)
-    expect(safeUpdates).toHaveLength(1)
-    expect(safeUpdates[0]).toMatchObject({ status: 'converted', converted_round_id: 'round-1' })
-    expect(capInserts).toHaveLength(1)
-    expect(capInserts[0]).toMatchObject({ company_id: 'co-1', round_id: 'round-1' })
-    // Holder name must use the bare fund name (no "(SAFE)" suffix) so legal-
-    // entities alias matching rolls the converted shares into the same holder.
-    expect(capInserts[0].shareholder_name).toBe('Menomadin')
+    expect(rpcCalls).toHaveLength(1)
+    expect(rpcCalls[0].name).toBe('convert_safe')
+    expect(rpcCalls[0].payload).toMatchObject({
+      p_safe_id: 'safe-1',
+      p_round_id: 'round-1',
+      // Holder name uses the bare fund name (no "(SAFE)" suffix) so legal-
+      // entities alias matching rolls the converted shares into the same holder.
+      p_holder_name: 'Menomadin',
+    })
   })
 
   it('uses the external investor name when investor_name is set, without a "(SAFE)" suffix', async () => {
-    const { capInserts } = buildSupabase({
+    const { rpcCalls } = buildSupabase({
       safeRow: {
         id: 'safe-1',
         company_id: 'co-1',
+        status: 'unconverted',
         investment_amount: 500_000,
         valuation_cap: 5_000_000,
         discount_rate: null,
         investor_name: 'Sequoia',
-      } as SafeRow & { investor_name: string },
+      },
     })
 
     await convertSafe('safe-1', 'round-1', 10_000_000, 2_000_000)
 
-    expect(capInserts[0].shareholder_name).toBe('Sequoia')
+    expect(rpcCalls[0].payload.p_holder_name).toBe('Sequoia')
   })
 
-  it('zero-ownership early-return leaves the SAFE untouched', async () => {
+  it('zero-ownership early-return: never invokes the RPC', async () => {
     // Pre-money of 0 forces calcSafeConversion to return the zeroed sentinel
-    const { safeUpdates, capInserts } = buildSupabase({
+    const { rpcCalls } = buildSupabase({
       safeRow: {
         id: 'safe-1',
         company_id: 'co-1',
+        status: 'unconverted',
         investment_amount: 500_000,
         valuation_cap: 5_000_000,
         discount_rate: null,
@@ -132,58 +136,48 @@ describe('convertSafe', () => {
 
     expect(result.error).toBeTruthy()
     expect(result.error).toMatch(/valid ownership/)
-    // Crucial: no writes should have happened
-    expect(safeUpdates).toHaveLength(0)
-    expect(capInserts).toHaveLength(0)
+    expect(rpcCalls).toHaveLength(0)
   })
 
-  it('rolls back the SAFE update if the cap-table insert fails', async () => {
-    const { safeUpdates, capInserts } = buildSupabase({
+  it('idempotency: refuses to re-convert an already-converted SAFE', async () => {
+    const { rpcCalls } = buildSupabase({
       safeRow: {
         id: 'safe-1',
         company_id: 'co-1',
+        status: 'converted',
         investment_amount: 500_000,
         valuation_cap: 5_000_000,
         discount_rate: null,
       },
-      capInsertErr: { message: 'rls violation' },
     })
 
     const result = await convertSafe('safe-1', 'round-1', 10_000_000, 2_000_000)
 
-    expect(result.error).toMatch(/rolled back/i)
-    expect(capInserts).toHaveLength(1)
-    // The convert update + the rollback update — exactly two writes
-    expect(safeUpdates).toHaveLength(2)
-    expect(safeUpdates[0]).toMatchObject({ status: 'converted' })
-    expect(safeUpdates[1]).toMatchObject({ status: 'unconverted', converted_round_id: null })
+    expect(result.error).toMatch(/already been converted/i)
+    expect(rpcCalls).toHaveLength(0)
   })
 
-  it('reports a combined error when both the cap-table insert and the rollback fail', async () => {
-    const { safeUpdates } = buildSupabase({
+  it('propagates the RPC error when the DB-side conversion fails', async () => {
+    const { rpcCalls } = buildSupabase({
       safeRow: {
         id: 'safe-1',
         company_id: 'co-1',
+        status: 'unconverted',
         investment_amount: 500_000,
         valuation_cap: 5_000_000,
         discount_rate: null,
       },
-      capInsertErr: { message: 'rls violation' },
-      revertErr: { message: 'transient db error' },
+      rpcErr: { message: 'SAFE safe-1 is already converted or does not exist' },
     })
 
     const result = await convertSafe('safe-1', 'round-1', 10_000_000, 2_000_000)
 
-    expect(result.error).toMatch(/rls violation/)
-    expect(result.error).toMatch(/transient db error/)
-    expect(result.error).toMatch(/safe-1/)
-    expect(result.error).toMatch(/manual/i)
-    // Two attempts: convert + (failed) revert
-    expect(safeUpdates).toHaveLength(2)
+    expect(result.error).toMatch(/already converted or does not exist/)
+    expect(rpcCalls).toHaveLength(1)
   })
 
-  it('returns an error and does not write when the SAFE does not exist', async () => {
-    const { safeUpdates, capInserts } = buildSupabase({
+  it('returns an error and does not call the RPC when the SAFE does not exist', async () => {
+    const { rpcCalls } = buildSupabase({
       safeRow: null,
       fetchErr: { message: 'no row' },
     })
@@ -191,7 +185,46 @@ describe('convertSafe', () => {
     const result = await convertSafe('missing-safe', 'round-1', 10_000_000, 2_000_000)
 
     expect(result.error).toBeTruthy()
-    expect(safeUpdates).toHaveLength(0)
-    expect(capInserts).toHaveLength(0)
+    expect(rpcCalls).toHaveLength(0)
+  })
+
+  it('rejects unauthenticated callers without touching the DB', async () => {
+    const { rpcCalls } = buildSupabase({
+      safeRow: {
+        id: 'safe-1',
+        company_id: 'co-1',
+        status: 'unconverted',
+        investment_amount: 500_000,
+        valuation_cap: 5_000_000,
+        discount_rate: null,
+      },
+      authed: false,
+    })
+
+    const result = await convertSafe('safe-1', 'round-1', 10_000_000, 2_000_000)
+
+    expect(result.error).toBe('Not authenticated')
+    expect(rpcCalls).toHaveLength(0)
+  })
+
+  it('rejects degenerate numeric inputs (NaN / negative)', async () => {
+    const { rpcCalls } = buildSupabase({
+      safeRow: {
+        id: 'safe-1',
+        company_id: 'co-1',
+        status: 'unconverted',
+        investment_amount: 500_000,
+        valuation_cap: 5_000_000,
+        discount_rate: null,
+      },
+    })
+
+    const negResult = await convertSafe('safe-1', 'round-1', -10_000_000, 2_000_000)
+    expect(negResult.error).toMatch(/finite, non-negative/)
+    expect(rpcCalls).toHaveLength(0)
+
+    const nanResult = await convertSafe('safe-1', 'round-1', Number.NaN, 2_000_000)
+    expect(nanResult.error).toMatch(/finite, non-negative/)
+    expect(rpcCalls).toHaveLength(0)
   })
 })
