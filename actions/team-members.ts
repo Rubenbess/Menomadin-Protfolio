@@ -68,6 +68,11 @@ export async function deleteTeamMember(id: string) {
     .single()
   if (caller?.role !== 'admin') return { error: 'Forbidden' }
 
+  // An admin deleting themselves can produce a zero-admin org. updateTeamMember
+  // already strips self-role-escalation (lines above); refuse the same self-target
+  // on delete for the same admin-loss reason.
+  if (id === user.id) return { error: 'You cannot delete your own account.' }
+
   const { error } = await supabase.from('team_members').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/tasks')
