@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { encryptToken } from '@/lib/token-crypto'
 
 const NONCE_COOKIE = 'ms_oauth_nonce'
 
@@ -82,11 +83,14 @@ export async function GET(req: NextRequest) {
   // RLS on email_integrations (`user_id = auth.uid()`) is the perimeter, and we've
   // verified the session userId matches the OAuth state, so the upsert is scoped
   // to the calling user's own row.
+  //
+  // Tokens are encrypted at rest via lib/token-crypto. When EMAIL_TOKEN_KEY is
+  // unset (e.g. local dev), encryptToken returns plaintext for backward compat.
   const { error: upsertError } = await ssoSupabase.from('email_integrations').upsert(
     {
       user_id: userId,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token ?? null,
+      access_token: encryptToken(tokens.access_token),
+      refresh_token: encryptToken(tokens.refresh_token ?? null),
       token_expires_at: new Date(Date.now() + ((tokens.expires_in ?? 3600) * 1000)).toISOString(),
       email: me.mail ?? me.userPrincipalName ?? null,
       last_scanned_at: null,

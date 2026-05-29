@@ -13,6 +13,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { encryptToken, decryptToken } from './token-crypto'
 
 export interface EmailIntegration {
   id: string
@@ -33,14 +34,16 @@ export function createServiceRoleClient(): SupabaseClient {
 
 /**
  * Refresh the access token for a user's Outlook integration via Microsoft's
- * refresh-token grant. Persists the new tokens back to email_integrations.
+ * refresh-token grant. Persists the new tokens back to email_integrations
+ * (re-encrypted at rest when EMAIL_TOKEN_KEY is configured).
  * Returns the new access token, or null if refresh failed.
  */
 export async function refreshAccessToken(
   integration: EmailIntegration,
   supabase: SupabaseClient
 ): Promise<string | null> {
-  if (!integration.refresh_token) return null
+  const refreshToken = decryptToken(integration.refresh_token)
+  if (!refreshToken) return null
 
   const res = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
     method: 'POST',
@@ -49,7 +52,7 @@ export async function refreshAccessToken(
       client_id: process.env.MICROSOFT_CLIENT_ID!,
       client_secret: process.env.MICROSOFT_CLIENT_SECRET!,
       grant_type: 'refresh_token',
-      refresh_token: integration.refresh_token,
+      refresh_token: refreshToken,
       scope: 'offline_access Mail.Read User.Read',
     }),
   })
@@ -64,8 +67,12 @@ export async function refreshAccessToken(
   await supabase
     .from('email_integrations')
     .update({
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token ?? integration.refresh_token,
+      access_token: encryptToken(tokens.access_token),
+      // Microsoft may rotate the refresh_token; otherwise keep the existing
+      // stored value (still encrypted/plaintext per its original shape).
+      refresh_token: tokens.refresh_token
+        ? encryptToken(tokens.refresh_token)
+        : integration.refresh_token,
       token_expires_at: new Date(
         Date.now() + (tokens.expires_in ?? 3600) * 1000
       ).toISOString(),
@@ -85,7 +92,7 @@ export async function getValidAccessToken(
   if (Date.now() > expiresAt - 5 * 60 * 1000) {
     return refreshAccessToken(integration, supabase)
   }
-  return integration.access_token
+  return decryptToken(integration.access_token)
 }
 
 /**
