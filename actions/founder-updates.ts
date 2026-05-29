@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { clampText, isInvalidMetric } from '@/lib/validation'
 
 interface FounderUpdateData {
   token: string
@@ -18,36 +19,6 @@ interface FounderUpdateData {
   cash_runway: number | null
   headcount: number | null
   notes: string | null
-}
-
-/**
- * Maximum byte sizes for free-text fields. The service-role client used below
- * bypasses RLS, so a leaked token would otherwise let any caller insert
- * megabyte-sized strings until the row hit Postgres limits. Values are
- * deliberately generous for normal founder usage.
- */
-const MAX_FREE_TEXT_LEN = 5_000
-
-function clampText(s: string | null): string | null {
-  if (s == null) return null
-  if (s.length <= MAX_FREE_TEXT_LEN) return s
-  return s.slice(0, MAX_FREE_TEXT_LEN)
-}
-
-/**
- * Reject metric values that are non-finite, negative (where it's never
- * meaningful), or absurdly large. KPI fields write directly into the same
- * `company_kpis` table the team uses for reporting; bad input here corrupts
- * downstream MOIC and runway charts.
- */
-function isInvalidMetric(v: number | null, allowNegative = false): boolean {
-  if (v == null) return false
-  if (!Number.isFinite(v)) return true
-  if (!allowNegative && v < 0) return true
-  // 1e15 catches accidentally-typed million-billions ($1e15 = $1Q) and
-  // most arithmetic-overflow inputs.
-  if (Math.abs(v) > 1e15) return true
-  return false
 }
 
 /**
