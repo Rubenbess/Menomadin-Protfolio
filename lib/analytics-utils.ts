@@ -99,7 +99,7 @@ export function getTopPerformers(companies: CompanyWithMetrics[], limit = 5): Co
       name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
-      moic: c.moic || 1,
+      moic: c.moic ?? 0,
       status: c.status || 'unknown',
     }))
     .sort((a, b) => b.moic - a.moic)
@@ -115,7 +115,7 @@ export function getUnderperformers(companies: CompanyWithMetrics[], limit = 5): 
       name: c.name ?? 'Unknown',
       invested: c.totalInvested || 0,
       value: c.currentValue || 0,
-      moic: c.moic || 1,
+      moic: c.moic ?? 0,
       status: c.status || 'unknown',
     }))
     .filter(c => c.moic < 1)

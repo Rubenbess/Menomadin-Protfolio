@@ -9,11 +9,27 @@ import {
   calcSafeEstimatedOwnership,
   buildWaterfallHolders,
   calcWaterfall,
+  clampOwnershipPct,
+  getFundOwnershipPct,
+  calcCombinedOwnershipPct,
   fmt$$,
   fmtPct,
   normalizeSector,
 } from '../lib/calculations'
-import type { Safe, ShareSeries } from '../lib/types'
+import { getTopPerformers, getUnderperformers } from '../lib/analytics-utils'
+import type { Safe, ShareSeries, CapTableEntry, LegalEntity } from '../lib/types'
+
+function makeCapEntry(overrides: Partial<CapTableEntry> = {}): CapTableEntry {
+  return {
+    id: 'c-1',
+    company_id: 'co-1',
+    round_id: null,
+    shareholder_name: 'Menomadin Fund',
+    ownership_percentage: 20,
+    created_at: '2024-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -125,6 +141,92 @@ describe('calcXIRR', () => {
     ])
     expect(result).not.toBeNull()
     expect(result!).toBeCloseTo(0, 3)
+  })
+  // M-006: a loss must yield a real negative IRR, never null/0.
+  it('computes a negative IRR for a partial loss (≈ -50%)', () => {
+    const result = calcXIRR([
+      { amount: -1_000_000, date: new Date('2023-01-01') },
+      { amount:    500_000, date: new Date('2024-01-01') },
+    ])
+    expect(result).not.toBeNull()
+    expect(result!).toBeCloseTo(-0.5, 2)
+  })
+  it('solves a multi-cashflow series to a finite IRR in range', () => {
+    const result = calcXIRR([
+      { amount: -1_000_000, date: new Date('2022-01-01') },
+      { amount:  -500_000, date: new Date('2023-01-01') },
+      { amount: 2_500_000, date: new Date('2025-01-01') },
+    ])
+    expect(result).not.toBeNull()
+    expect(Number.isFinite(result!)).toBe(true)
+    expect(result!).toBeGreaterThan(0)
+    expect(result!).toBeLessThan(100)
+  })
+})
+
+// ── Ownership % guards (M-002 / M-003) ─────────────────────────────────────────
+
+describe('clampOwnershipPct', () => {
+  it('clamps above 100', () => { expect(clampOwnershipPct(150)).toBe(100) })
+  it('clamps below 0', () => { expect(clampOwnershipPct(-5)).toBe(0) })
+  it('maps non-finite to 0', () => {
+    expect(clampOwnershipPct(NaN)).toBe(0)
+    expect(clampOwnershipPct(Infinity)).toBe(0)
+  })
+  it('passes through a valid value', () => { expect(clampOwnershipPct(42)).toBe(42) })
+})
+
+describe('getFundOwnershipPct', () => {
+  it('returns 0 for an empty cap table', () => { expect(getFundOwnershipPct([])).toBe(0) })
+  it('clamps an out-of-range stored % to 100', () => {
+    expect(getFundOwnershipPct([makeCapEntry({ ownership_percentage: 250 })])).toBe(100)
+  })
+})
+
+describe('calcCombinedOwnershipPct', () => {
+  it('falls back to the fund entry when no legal entities are configured', () => {
+    expect(calcCombinedOwnershipPct([makeCapEntry({ ownership_percentage: 30 })], [])).toBe(30)
+  })
+  it('clamps a double-counted sum to 100 rather than emitting an impossible %', () => {
+    const capTable = [
+      makeCapEntry({ id: 'a', shareholder_name: 'Menomadin Fund', ownership_percentage: 80 }),
+      makeCapEntry({ id: 'b', shareholder_name: 'Menomadin Fund', ownership_percentage: 70 }),
+    ]
+    const entities: LegalEntity[] = [
+      { id: 'e1', name: 'Menomadin Fund', cap_table_alias: null, created_at: '2024-01-01T00:00:00Z' },
+    ]
+    expect(calcCombinedOwnershipPct(capTable, entities)).toBe(100)
+  })
+  it('ignores NaN ownership rows instead of propagating NaN', () => {
+    const capTable = [
+      makeCapEntry({ id: 'a', shareholder_name: 'Menomadin Fund', ownership_percentage: 25 }),
+      makeCapEntry({ id: 'b', shareholder_name: 'Menomadin Fund', ownership_percentage: NaN }),
+    ]
+    const entities: LegalEntity[] = [
+      { id: 'e1', name: 'Menomadin Fund', cap_table_alias: null, created_at: '2024-01-01T00:00:00Z' },
+    ]
+    expect(calcCombinedOwnershipPct(capTable, entities)).toBe(25)
+  })
+})
+
+// ── Performer rankings (M-007) ─────────────────────────────────────────────────
+
+describe('getTopPerformers / getUnderperformers MOIC handling', () => {
+  it('does not inflate a written-off (0x) company to break-even', () => {
+    const top = getTopPerformers([
+      { name: 'Winner', moic: 3, totalInvested: 1_000_000, currentValue: 3_000_000, status: 'active' },
+      { name: 'WriteOff', moic: 0, totalInvested: 1_000_000, currentValue: 0, status: 'written-off' },
+    ])
+    expect(top.find(c => c.name === 'WriteOff')!.moic).toBe(0)
+    expect(top[0].name).toBe('Winner')
+  })
+  it('includes a genuine 0x company among underperformers', () => {
+    const under = getUnderperformers([
+      { name: 'WriteOff', moic: 0, totalInvested: 1_000_000, currentValue: 0, status: 'written-off' },
+      { name: 'Winner', moic: 3, totalInvested: 1_000_000, currentValue: 3_000_000, status: 'active' },
+    ])
+    expect(under.some(c => c.name === 'WriteOff' && c.moic === 0)).toBe(true)
+    expect(under.some(c => c.name === 'Winner')).toBe(false)
   })
 })
 
@@ -243,6 +345,21 @@ describe('buildWaterfallHolders', () => {
     expect(holders).toHaveLength(1)
     expect(holders[0].shares).toBe(2_000_000)
     expect(holders[0].investedAmount).toBe(2_000_000)
+  })
+  // M-004: an unconverted SAFE must be sized on the SAME share basis as the real
+  // holders so its pro-rata residual is comparable. (investment/cap) = 0.1, so a
+  // 4M-share pool implies 400k SAFE shares — NOT the old fixed 1e6 scale (100k).
+  it('sizes an unconverted SAFE relative to the real share pool', () => {
+    const series = makeSeries({ shares: 4_000_000 })
+    const safe = makeSafe({ investment_amount: 500_000, valuation_cap: 5_000_000 })
+    const { holders } = buildWaterfallHolders([series], [safe])
+    const safeHolder = holders.find(h => h.shareClass === 'SAFE')!
+    expect(safeHolder.shares).toBe(400_000)
+  })
+  it('falls back to the 1e6 unit scale for a SAFE-only company (no real shares)', () => {
+    const safe = makeSafe({ investment_amount: 500_000, valuation_cap: 5_000_000 })
+    const { holders } = buildWaterfallHolders([], [safe])
+    expect(holders.find(h => h.shareClass === 'SAFE')!.shares).toBe(100_000)
   })
 })
 

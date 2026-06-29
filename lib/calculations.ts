@@ -43,11 +43,19 @@ export function getLatestRound(rounds: Round[]): Round | null {
   return [...rounds].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 }
 
+/** Clamp a percentage into the physically-possible [0, 100] range; non-finite → 0. */
+export function clampOwnershipPct(pct: number): number {
+  if (!Number.isFinite(pct)) return 0
+  return Math.min(Math.max(pct, 0), 100)
+}
+
 /** Returns the fund's ownership % from the latest cap table entry. */
 export function getFundOwnershipPct(capTable: CapTableEntry[]): number {
   if (!capTable.length) return 0
-  // Use the last entry (most recent) — users should add the fund entry last
-  return capTable[capTable.length - 1].ownership_percentage
+  // Use the last entry (most recent) — users should add the fund entry last.
+  // NOTE: this relies on row insertion order rather than an explicit fund marker;
+  // the schema-level fix is tracked as M-002 in the daily health-check report.
+  return clampOwnershipPct(capTable[capTable.length - 1].ownership_percentage)
 }
 
 /**
@@ -55,6 +63,12 @@ export function getFundOwnershipPct(capTable: CapTableEntry[]): number {
  * Sums cap table entries whose shareholder_name matches each entity's
  * cap_table_alias (or name if no alias set). Falls back to getFundOwnershipPct
  * when no entities are configured or no entries match.
+ *
+ * The result is NaN-guarded and clamped to [0, 100] so a malformed or
+ * double-counted cap table can never produce an impossible ownership % that
+ * would then inflate currentValue / MOIC. (Root-cause de-duplication of
+ * multiple rows per holder is tracked as M-003 — it needs the data convention
+ * confirmed; clamping is the safe interim guard against impossible values.)
  */
 export function calcCombinedOwnershipPct(
   capTable: CapTableEntry[],
@@ -65,9 +79,9 @@ export function calcCombinedOwnershipPct(
     const alias = entity.cap_table_alias || entity.name
     return sum + capTable
       .filter(c => c.shareholder_name.toLowerCase() === alias.toLowerCase())
-      .reduce((s, c) => s + c.ownership_percentage, 0)
+      .reduce((s, c) => s + (Number.isFinite(c.ownership_percentage) ? c.ownership_percentage : 0), 0)
   }, 0)
-  return total || getFundOwnershipPct(capTable)
+  return total > 0 ? clampOwnershipPct(total) : getFundOwnershipPct(capTable)
 }
 
 export function totalInvestedInCompany(investments: Investment[]): number {
@@ -108,17 +122,42 @@ export function calcXIRR(cashFlows: CashFlow[]): number | null {
     }, 0)
   }
 
+  // 1) Newton-Raphson from a sensible seed — fast when it converges.
   let r = 0.15
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 100; i++) {
     const f  = npv(r)
     const df = dnpv(r)
-    if (Math.abs(df) < 1e-12) break
+    if (!Number.isFinite(f) || Math.abs(df) < 1e-12) break  // flat/ill-conditioned → bisection
     const next = r - f / df
-    if (Math.abs(next - r) < 1e-8) return next > -1 ? next : null
+    if (!Number.isFinite(next)) break
+    if (next <= -0.9999999 || next > 1e6) break             // shot out of a sane range → bisection
+    if (Math.abs(next - r) < 1e-9) return next > -1 ? next : null
     r = next
-    if (r <= -1 || r > 100) return null
   }
-  return null
+
+  // 2) Bisection fallback. Newton can oscillate or diverge for flat/curved NPV
+  //    or multiple sign changes and previously returned null on perfectly valid
+  //    series — silently blanking (or, in analytics, zeroing) a real IRR.
+  //    Bisection always finds a root when NPV changes sign over the bracket,
+  //    which it must for a well-formed series (≥1 inflow and ≥1 outflow).
+  //    Bracket: just above -100% (a rate can't be ≤ -100%) up to 10,000%.
+  let lo = -0.9999
+  let hi = 100
+  let fLo = npv(lo)
+  let fHi = npv(hi)
+  if (!Number.isFinite(fLo) || !Number.isFinite(fHi)) return null
+  if (fLo === 0) return lo
+  if (fHi === 0) return hi
+  if (fLo * fHi > 0) return null  // no sign change in range — no IRR we can bracket
+
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2
+    const fMid = npv(mid)
+    if (!Number.isFinite(fMid)) return null
+    if (Math.abs(fMid) < 1e-7 || (hi - lo) / 2 < 1e-9) return mid
+    if (fLo * fMid < 0) { hi = mid; fHi = fMid } else { lo = mid; fLo = fMid }
+  }
+  return (lo + hi) / 2
 }
 
 // ─── SAFE Calculations (Pre-money SAFE) ─────────────────────────────────────
@@ -302,6 +341,11 @@ export function buildWaterfallHolders(
   safes: Safe[],
 ): { holders: WaterfallHolder[]; warnings: string[] } {
   const warnings: string[] = []
+  // Real holders' share counts define the unit basis for the whole waterfall.
+  // Unconverted SAFEs must be expressed on the SAME basis (see the SAFE loop
+  // below) or their pro-rata residual in calcWaterfall is computed on an
+  // incompatible scale and misallocates proceeds.
+  const totalRealShares = shareSeries.reduce((sum, s) => sum + s.shares, 0)
   const holders: WaterfallHolder[] = shareSeries.map(s => ({
     id: s.id,
     name: s.holder_name,
@@ -336,7 +380,12 @@ export function buildWaterfallHolders(
       )
       continue
     }
-    const estimatedShares = Math.round((safe.investment_amount / safe.valuation_cap) * 1_000_000)
+    // (investment / cap) is the SAFE's implied ownership fraction relative to the
+    // existing pre-round share pool, so anchor its share count to the real total.
+    // Fall back to a 1e6 unit scale only when there are no real shares to anchor
+    // to (e.g. a SAFE-only company), preserving the prior behaviour in that case.
+    const basis = totalRealShares > 0 ? totalRealShares : 1_000_000
+    const estimatedShares = Math.max(1, Math.round((safe.investment_amount / safe.valuation_cap) * basis))
     holders.push({
       id: `safe-${safe.id}`,
       name: `SAFE (${safe.date.slice(0, 7)})`,
