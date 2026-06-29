@@ -5,6 +5,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 export async function createTaskLabel(name: string, color?: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', id: null }
 
   // Check if label already exists
   const { data: existing } = await supabase
@@ -32,6 +34,8 @@ export async function createTaskLabel(name: string, color?: string) {
 
 export async function updateTaskLabel(id: string, name: string, color?: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('task_labels')
@@ -49,6 +53,8 @@ export async function updateTaskLabel(id: string, name: string, color?: string) 
 
 export async function deleteTaskLabel(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   // Delete all links first
   await supabase.from('task_label_links').delete().eq('label_id', id)
@@ -64,6 +70,8 @@ export async function deleteTaskLabel(id: string) {
 
 export async function addLabelToTask(taskId: string, labelId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   // Check if link already exists
   const { data: existing } = await supabase
@@ -88,6 +96,8 @@ export async function addLabelToTask(taskId: string, labelId: string) {
 
 export async function removeLabelFromTask(taskId: string, labelId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('task_label_links')
@@ -103,6 +113,8 @@ export async function removeLabelFromTask(taskId: string, labelId: string) {
 
 export async function getAllLabels() {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', labels: [] }
 
   const { data: labels, error } = await supabase
     .from('task_labels')
@@ -115,6 +127,8 @@ export async function getAllLabels() {
 
 export async function getTaskLabels(taskId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', labels: [] }
 
   const { data: links, error } = await supabase
     .from('task_label_links')

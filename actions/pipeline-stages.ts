@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function createStage(data: { name: string; color: string; position: number }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('pipeline_stages').insert(data)
   if (error) return { error: error.message }
   revalidatePath('/pipeline')
@@ -13,6 +15,8 @@ export async function createStage(data: { name: string; color: string; position:
 
 export async function updateStage(id: string, data: { name?: string; color?: string; position?: number }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('pipeline_stages').update(data).eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/pipeline')
@@ -21,6 +25,8 @@ export async function updateStage(id: string, data: { name?: string; color?: str
 
 export async function deleteStage(id: string, stageName: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   // Find the lowest-position remaining stage to receive any orphaned cards.
   // Setting status to '' (the previous behavior) silently orphans cards because
@@ -89,6 +95,8 @@ export async function deleteStage(id: string, stageName: string) {
 
 export async function reorderStages(stages: { id: string; position: number }[]) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   // Each update returns its own { data, error }. Without inspecting them, a
   // single failed row (RLS, FK) silently desyncs the board from the database.
   const results = await Promise.all(
@@ -110,6 +118,8 @@ export async function reorderStages(stages: { id: string; position: number }[]) 
 
 export async function movePipelineCard(cardId: string, newStatus: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('pipeline').update({ status: newStatus }).eq('id', cardId)
   if (error) return { error: error.message }
   return { error: null }

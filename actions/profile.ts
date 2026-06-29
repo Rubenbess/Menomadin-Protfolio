@@ -114,6 +114,8 @@ export async function getMyActivity() {
 
 export async function getAllTeamMembers() {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { members: [], error: 'Not authenticated' }
 
   const { data, error } = await supabase
     .from('team_members')

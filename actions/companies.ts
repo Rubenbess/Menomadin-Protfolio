@@ -16,6 +16,8 @@ export async function createCompany(data: {
   co_investors: string[] | null
 }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', id: null }
   const { data: company, error } = await supabase.from('companies').insert(data).select('id').single()
   if (error || !company) return { error: error?.message ?? 'Company not created', id: null }
   return { error: null, id: company.id }
@@ -26,6 +28,8 @@ export async function updateCompany(
   data: { name: string; sector: string; strategy: string; hq: string; status: string; description: string | null; logo_url: string | null; entry_stage: string | null; investment_owner: string | null; board_seat: string | null; co_investors: string[] | null }
 ) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('companies').update(data).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
@@ -33,6 +37,8 @@ export async function updateCompany(
 
 export async function deleteCompany(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('companies').delete().eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
@@ -43,6 +49,8 @@ export async function upsertContacts(
   contacts: { name: string; position: string }[]
 ) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   // If the delete fails (RLS, connectivity), abort — otherwise the subsequent
   // insert merges the new contacts on top of stale rows and the user sees
   // duplicates.

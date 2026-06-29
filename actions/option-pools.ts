@@ -2,12 +2,31 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { isInvalidMetric } from '@/lib/validation'
 import type { OptionPool } from '@/lib/types'
 
 type OptionPoolData = Omit<OptionPool, 'id' | 'created_at'>
 
+/**
+ * Option-pool share counts dilute the fully-diluted total used by ownership and
+ * waterfall math, so a NaN/Infinity/negative value here corrupts those figures.
+ * Reject impossible values before they persist. (Closes the option-pools half of M-012.)
+ */
+function invalidOptionPool(data: Partial<OptionPoolData>): boolean {
+  return (
+    isInvalidMetric(data.shares_authorized) ||
+    isInvalidMetric(data.shares_issued) ||
+    isInvalidMetric(data.price_per_share)
+  )
+}
+
 export async function createOptionPool(data: OptionPoolData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+  if (invalidOptionPool(data)) {
+    return { error: 'Option pool values must be finite, non-negative numbers.' }
+  }
   const { error } = await supabase.from('option_pools').insert(data)
   if (error) return { error: error.message }
   revalidatePath(`/companies/${data.company_id}`)
@@ -16,6 +35,11 @@ export async function createOptionPool(data: OptionPoolData) {
 
 export async function updateOptionPool(id: string, data: Partial<OptionPoolData>) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+  if (invalidOptionPool(data)) {
+    return { error: 'Option pool values must be finite, non-negative numbers.' }
+  }
   const { data: existing, error: fetchErr } = await supabase
     .from('option_pools').select('company_id').eq('id', id).single()
   if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Option pool not found' }
@@ -28,6 +52,8 @@ export async function updateOptionPool(id: string, data: Partial<OptionPoolData>
 
 export async function deleteOptionPool(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { data: existing, error: fetchErr } = await supabase
     .from('option_pools').select('company_id').eq('id', id).single()
   if (fetchErr || !existing) return { error: fetchErr?.message ?? 'Option pool not found' }

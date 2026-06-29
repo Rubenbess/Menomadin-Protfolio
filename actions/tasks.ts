@@ -98,6 +98,8 @@ export async function createTask(data: {
 
 export async function getTask(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', data: null }
 
   const { data: task, error } = await supabase
     .from('tasks')
@@ -124,6 +126,9 @@ export async function getTask(id: string) {
 
 export async function updateTask(id: string, data: Partial<Task>) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated', data: null }
 
   const updateData = {
     ...data,
@@ -164,6 +169,10 @@ export async function updateTask(id: string, data: Partial<Task>) {
 
 export async function deleteTask(id: string) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   if (error) return { error: error.message }
 
@@ -309,6 +318,9 @@ export async function addComment(taskId: string, content: string) {
 export async function updateComment(id: string, content: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase
     .from('task_comments')
     .update({
@@ -325,6 +337,10 @@ export async function updateComment(id: string, content: string) {
 
 export async function deleteComment(id: string) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase.from('task_comments').delete().eq('id', id)
   if (error) return { error: error.message }
 
@@ -358,6 +374,9 @@ async function createTaskActivity(
 export async function createLabel(name: string, color?: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated', id: null }
+
   const { data: label, error } = await supabase
     .from('task_labels')
     .insert({
@@ -374,6 +393,9 @@ export async function createLabel(name: string, color?: string) {
 export async function addLabelToTask(taskId: string, labelId: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase.from('task_label_links').insert({
     task_id: taskId,
     label_id: labelId,
@@ -387,6 +409,9 @@ export async function addLabelToTask(taskId: string, labelId: string) {
 
 export async function removeLabelFromTask(taskId: string, labelId: string) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('task_label_links')
@@ -459,6 +484,9 @@ export async function createTaskFromTemplate(
 export async function bulkUpdateTaskStatus(taskIds: string[], status: TaskStatus) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase
     .from('tasks')
     .update({
@@ -475,6 +503,9 @@ export async function bulkUpdateTaskStatus(taskIds: string[], status: TaskStatus
 
 export async function bulkDeleteTasks(taskIds: string[]) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
 
   const { error } = await supabase.from('tasks').delete().in('id', taskIds)
   if (error) return { error: error.message }

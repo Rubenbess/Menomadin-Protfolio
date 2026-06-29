@@ -134,6 +134,9 @@ export async function updateRecurrenceRule(
 ) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
   const { data: rule, error } = await supabase
     .from('task_recurrence_rules')
     .update(data)
@@ -149,6 +152,9 @@ export async function updateRecurrenceRule(
 
 export async function deleteRecurrenceRule(ruleId: string) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('task_recurrence_rules')

@@ -83,6 +83,9 @@ export async function deleteComment(commentId: string) {
 export async function getTaskComments(taskId: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', comments: [] }
+
   const { data: rawComments, error } = await supabase
     .from('task_comments')
     .select(`

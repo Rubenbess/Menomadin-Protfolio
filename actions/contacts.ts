@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { clampText } from '@/lib/validation'
 import type { InteractionType } from '@/lib/types'
 
 interface ContactData {
@@ -21,6 +22,9 @@ interface ContactData {
 export async function createContact(data: ContactData) {
   try {
     const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated', id: null }
+    data = { ...data, notes: clampText(data.notes) }
     const { data: row, error } = await supabase.from('contacts').insert(data).select('id').single()
     if (error || !row) return { error: error?.message ?? 'Contact not created', id: null }
     revalidatePath('/contacts')
@@ -33,6 +37,9 @@ export async function createContact(data: ContactData) {
 export async function updateContact(id: string, data: ContactData) {
   try {
     const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+    data = { ...data, notes: clampText(data.notes) }
     const { error } = await supabase.from('contacts').update(data).eq('id', id)
     if (error) return { error: error.message }
     revalidatePath('/contacts')
@@ -44,6 +51,8 @@ export async function updateContact(id: string, data: ContactData) {
 
 export async function deleteContact(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('contacts').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/contacts')
@@ -59,6 +68,8 @@ export async function createInteraction(data: {
   notes: string | null
 }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   // Reject malformed dates before interpolating into the PostgREST .or() filter
   // below — a comma, parenthesis, or quote in data.date would corrupt the filter
   // shape (and theoretically allow filter-injection).
@@ -82,6 +93,8 @@ export async function createInteraction(data: {
 
 export async function deleteInteraction(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('contact_interactions').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/contacts')
@@ -90,6 +103,8 @@ export async function deleteInteraction(id: string) {
 
 export async function linkContactToCompany(contactId: string, companyId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('contacts').update({ company_id: companyId }).eq('id', contactId)
   if (error) return { error: error.message }
   revalidatePath('/contacts')
@@ -99,6 +114,8 @@ export async function linkContactToCompany(contactId: string, companyId: string)
 
 export async function unlinkContactFromCompany(contactId: string, companyId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('contacts').update({ company_id: null }).eq('id', contactId).eq('company_id', companyId)
   if (error) return { error: error.message }
   revalidatePath('/contacts')

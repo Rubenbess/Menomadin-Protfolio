@@ -25,13 +25,17 @@ interface PipelineData {
 
 export async function createPipelineEntry(data: PipelineData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', id: null }
   const { data: row, error } = await supabase.from('pipeline').insert(data).select('id').single()
-  if (error) return { error: error.message, id: null }
+  if (error || !row) return { error: error?.message ?? 'Pipeline entry not created', id: null }
   return { error: null, id: row.id as string }
 }
 
 export async function updatePipelineEntry(id: string, data: PipelineData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('pipeline').update(data).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
@@ -39,6 +43,8 @@ export async function updatePipelineEntry(id: string, data: PipelineData) {
 
 export async function deletePipelineEntry(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('pipeline').delete().eq('id', id)
   if (error) return { error: error.message }
   return { error: null }

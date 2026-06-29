@@ -134,10 +134,14 @@ export async function getSavedFilters() {
 export async function getSavedFilter(filterId: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', filter: null }
+
   const { data: filter, error } = await supabase
     .from('task_saved_filters')
     .select('*')
     .eq('id', filterId)
+    .eq('created_by', user.id)
     .single()
 
   if (error) return { error: error.message, filter: null }

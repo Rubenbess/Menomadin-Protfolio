@@ -16,6 +16,8 @@ export async function createNotification(data: {
   link?: string | null
 }): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('notifications').insert({
     type:       data.type,
     title:      data.title,
@@ -31,6 +33,8 @@ export async function createNotification(data: {
 
 export async function markNotificationRead(id: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/', 'layout')
@@ -39,6 +43,8 @@ export async function markNotificationRead(id: string): Promise<{ error?: string
 
 export async function markAllNotificationsRead(): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('notifications').update({ read: true }).eq('read', false)
   if (error) return { error: error.message }
   revalidatePath('/', 'layout')
@@ -47,6 +53,8 @@ export async function markAllNotificationsRead(): Promise<{ error?: string }> {
 
 export async function deleteNotification(id: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('notifications').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/', 'layout')

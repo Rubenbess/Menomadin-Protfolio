@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function getLegalEntities() {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: 'Not authenticated' }
   const { data, error } = await supabase
     .from('legal_entities')
     .select('*')
@@ -15,6 +17,8 @@ export async function getLegalEntities() {
 
 export async function createLegalEntity(data: { name: string; cap_table_alias?: string | null }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('legal_entities').insert({
     name: data.name.trim(),
     cap_table_alias: data.cap_table_alias?.trim() || null,
@@ -26,6 +30,8 @@ export async function createLegalEntity(data: { name: string; cap_table_alias?: 
 
 export async function updateLegalEntity(id: string, data: { name: string; cap_table_alias?: string | null }) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase
     .from('legal_entities')
     .update({ name: data.name.trim(), cap_table_alias: data.cap_table_alias?.trim() || null })
@@ -37,6 +43,8 @@ export async function updateLegalEntity(id: string, data: { name: string; cap_ta
 
 export async function deleteLegalEntity(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('legal_entities').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/settings/legal-entities')

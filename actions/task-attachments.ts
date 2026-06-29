@@ -35,6 +35,9 @@ export async function uploadTaskAttachment(
 export async function deleteTaskAttachment(id: string) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated' }
+
   const { error } = await supabase.from('task_attachments').delete().eq('id', id)
   if (error) return { error: error.message }
 
@@ -44,6 +47,9 @@ export async function deleteTaskAttachment(id: string) {
 
 export async function getTaskAttachments(taskId: string) {
   const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'Not authenticated', attachments: [] }
 
   const { data: attachments, error } = await supabase
     .from('task_attachments')

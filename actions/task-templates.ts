@@ -63,6 +63,9 @@ export async function updateTaskTemplate(
 ) {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
   const { data: template, error } = await supabase
     .from('task_templates')
     .update(data)

@@ -66,6 +66,9 @@ export async function getActivities(
   try {
     const supabase = await createServerSupabaseClient()
 
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated', activities: null }
+
     let query = supabase
       .from('activities')
       .select(
@@ -109,6 +112,9 @@ export async function getActivities(
 export async function getActivityFeed(limit = 20) {
   try {
     const supabase = await createServerSupabaseClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated', activities: null }
 
     const { data, error } = await supabase
       .from('activities')

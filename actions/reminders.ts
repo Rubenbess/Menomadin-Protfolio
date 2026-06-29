@@ -12,6 +12,8 @@ interface ReminderData {
 
 export async function createReminder(data: ReminderData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('reminders').insert(data)
   if (error) return { error: error.message }
   return { error: null }
@@ -19,6 +21,8 @@ export async function createReminder(data: ReminderData) {
 
 export async function updateReminder(id: string, data: ReminderData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('reminders').update(data).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
@@ -26,6 +30,8 @@ export async function updateReminder(id: string, data: ReminderData) {
 
 export async function toggleReminder(id: string, completed: boolean) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('reminders').update({ completed }).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
@@ -33,6 +39,8 @@ export async function toggleReminder(id: string, completed: boolean) {
 
 export async function deleteReminder(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('reminders').delete().eq('id', id)
   if (error) return { error: error.message }
   return { error: null }

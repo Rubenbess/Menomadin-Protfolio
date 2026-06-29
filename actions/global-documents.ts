@@ -15,6 +15,8 @@ interface GlobalDocumentData {
 
 export async function createGlobalDocument(data: GlobalDocumentData) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', id: null }
   const { data: row, error } = await supabase.from('global_documents').insert(data).select('id').single()
   if (error || !row) return { error: error?.message ?? 'Global document not created', id: null }
   revalidatePath('/documents')
@@ -23,6 +25,8 @@ export async function createGlobalDocument(data: GlobalDocumentData) {
 
 export async function updateGlobalDocument(id: string, data: Partial<GlobalDocumentData>) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('global_documents').update(data).eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/documents')
@@ -31,6 +35,8 @@ export async function updateGlobalDocument(id: string, data: Partial<GlobalDocum
 
 export async function deleteGlobalDocument(id: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase.from('global_documents').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/documents')

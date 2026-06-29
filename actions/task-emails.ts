@@ -14,6 +14,8 @@ export async function getTaskEmailAttachments(
   taskId: string
 ): Promise<{ error: string | null; attachments: TaskEmailAttachment[] }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated', attachments: [] }
   const { data, error } = await supabase
     .from('task_email_attachments')
     .select('*')
@@ -29,6 +31,8 @@ export async function setEmailAttachmentPrivacy(
   isPrivate: boolean
 ): Promise<{ error: string | null }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase
     .from('task_email_attachments')
     .update({ is_private: isPrivate })
@@ -42,6 +46,8 @@ export async function detachEmailFromTask(
   id: string
 ): Promise<{ error: string | null }> {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
   const { error } = await supabase
     .from('task_email_attachments')
     .delete()
