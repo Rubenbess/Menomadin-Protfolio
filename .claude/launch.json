@@ -5,8 +5,14 @@
       "name": "Next.js Dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "C:\\Users\\rubenb\\menomadin-protfolio",
+      "cwd": ".",
       "autoPort": true
+    },
+    {
+      "name": "Artifacts",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "artifacts", "--listen", "4321", "--no-clipboard"],
+      "port": 4321
     }
   ]
 }
