@@ -5,3 +5,13 @@ node_modules/
 dist/
 build/
 tsconfig.tsbuildinfo
+
+# Claude Code agent worktrees (nested working copies — never commit)
+.claude/worktrees/
+
+# Supabase CLI cache
+supabase/.temp/
+
+# Ad-hoc scratch / exported data — may contain confidential email & deal data
+artifacts/
+managed_agents_quickstart.py
