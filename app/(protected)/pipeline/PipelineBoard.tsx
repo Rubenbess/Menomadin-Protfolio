@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   DndContext,
@@ -546,6 +546,11 @@ export default function PipelineBoard({ stages, entries }: { stages: Stage[]; en
   const [view, setView] = useState<'board' | 'analytics'>('board')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [localEntries, setLocalEntries] = useState(entries)
+
+  // Re-sync when the server sends new entries (deal added/edited triggers
+  // router.refresh()). Without this a freshly added/edited deal never appears
+  // until a full reload, since the board reads only localEntries.
+  useEffect(() => { setLocalEntries(entries) }, [entries])
 
   const [panelEntry, setPanelEntry] = useState<PipelineEntry | null>(null)
   const [addCardStage, setAddCardStage] = useState<string | null>(null)

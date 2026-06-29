@@ -26,6 +26,7 @@ export default function GlobalSearch() {
   const [results, setResults] = useState<Result[]>([])
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [cursor, setCursor] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -57,20 +58,27 @@ export default function GlobalSearch() {
   }, [open])
 
   const search = useCallback(async (q: string) => {
-    if (q.length < 2) { setResults([]); setHasMore(false); return }
+    if (q.length < 2) { setResults([]); setHasMore(false); setError(null); return }
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+      if (!res.ok) throw new Error(`Search failed (${res.status})`)
       const json = await res.json()
       setResults(json.results ?? [])
       setHasMore(json.hasMore ?? false)
       setCursor(0)
     } catch (err) {
+      // A superseded request aborts intentionally — ignore it. Any other failure
+      // is shown to the user instead of re-thrown (a re-throw here escapes the
+      // fire-and-forget setTimeout callback as an unhandled promise rejection).
       if (err instanceof Error && err.name === 'AbortError') return
-      throw err
+      setResults([])
+      setHasMore(false)
+      setError('Search is temporarily unavailable. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -135,7 +143,9 @@ export default function GlobalSearch() {
         </div>
 
         {/* Results */}
-        {results.length > 0 ? (
+        {error ? (
+          <div className="py-10 text-center text-sm text-red-500 dark:text-red-400">{error}</div>
+        ) : results.length > 0 ? (
           <div className="py-2 max-h-80 overflow-y-auto">
             {results.map((r, i) => {
               const cfg = TYPE_CONFIG[r.type]

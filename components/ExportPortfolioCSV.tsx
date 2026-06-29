@@ -38,7 +38,7 @@ export default function ExportPortfolioCSV({ companies }: Props) {
       c.totalInvested.toFixed(0),
       c.currentValue.toFixed(0),
       c.moic.toFixed(2),
-      (c.ownershipPct * 100).toFixed(2),
+      c.ownershipPct.toFixed(2),
     ])
 
     const csv = [header, ...rows]

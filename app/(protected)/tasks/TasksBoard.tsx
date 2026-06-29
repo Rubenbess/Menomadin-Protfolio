@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   DndContext,
@@ -190,6 +190,11 @@ export default function TasksBoard({ groupedTasks, onTaskClick, onTaskCreate, on
   const [activeId, setActiveId] = useState<string | null>(null)
   const [localTasks, setLocalTasks] = useState<Record<TaskStatus, TaskWithRelations[]>>(groupedTasks)
 
+  // Re-sync when the parent recomputes columns (task created/edited, search or
+  // filters changed). Without this the board snapshots props once at mount and
+  // silently drops every later update until a full page reload.
+  useEffect(() => { setLocalTasks(groupedTasks) }, [groupedTasks])
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   )
@@ -219,6 +224,9 @@ export default function TasksBoard({ groupedTasks, onTaskClick, onTaskCreate, on
 
     if (!task) return
 
+    // Snapshot so the optimistic move can be rolled back if the server write fails.
+    const prevTasks = localTasks
+
     // Update local state
     setLocalTasks(prev => {
       const current = Object.values(prev).flat().find(t => t.id === taskId)
@@ -231,20 +239,32 @@ export default function TasksBoard({ groupedTasks, onTaskClick, onTaskCreate, on
       }
     })
 
-    // Update in database
-    await updateTask(taskId, { status: newStatus })
+    // Update in database; revert the optimistic move on failure so the board
+    // never silently diverges from the DB (mirrors RemindersClient's pattern).
+    const result = await updateTask(taskId, { status: newStatus })
+    if (result?.error) {
+      setLocalTasks(prevTasks)
+      return
+    }
     router.refresh()
   }
 
   async function handleDeleteTask(id: string, title: string) {
     if (!confirm(`Delete task "${title}"?`)) return
+    const prevTasks = localTasks
     setLocalTasks(prev => ({
       ...prev,
       ...Object.fromEntries(
         STATUSES.map(status => [status, prev[status].filter(t => t.id !== id)])
       ),
     }))
-    await deleteTask(id)
+    // Revert the optimistic removal if the delete fails — otherwise the card
+    // disappears while the row still exists in the DB until a manual refresh.
+    const result = await deleteTask(id)
+    if (result?.error) {
+      setLocalTasks(prevTasks)
+      return
+    }
     router.refresh()
   }
 

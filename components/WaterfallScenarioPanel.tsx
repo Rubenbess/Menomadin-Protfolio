@@ -200,7 +200,7 @@ export default function WaterfallScenarioPanel({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
-                    {result.holders.sort((a, b) => b.proceeds - a.proceeds).map((h, i) => (
+                    {[...result.holders].sort((a, b) => b.proceeds - a.proceeds).map((h, i) => (
                       <tr key={h.id} className="hover:bg-neutral-50/60 dark:hover:bg-neutral-800/60 transition-colors">
                         <td className="px-4 py-3 font-medium text-neutral-900 dark:text-neutral-50">{h.name}</td>
                         <td className="px-4 py-3">
@@ -286,7 +286,9 @@ export default function WaterfallScenarioPanel({
               <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider mb-2">Saved Scenarios</p>
               <div className="space-y-2">
                 {savedScenarios.map(s => {
-                  const savedResult = holders.length > 0 ? calcWaterfall(s.exit_value, holders) : null
+                  // Guard exit_value > 0: a stored 0-exit scenario would make the
+                  // proceeds-share cell divide by totalProceeds (=exit_value) → NaN%.
+                  const savedResult = holders.length > 0 && s.exit_value > 0 ? calcWaterfall(s.exit_value, holders) : null
                   const isExpanded = expandedScenario === s.id
 
                   return (
@@ -312,7 +314,7 @@ export default function WaterfallScenarioPanel({
                         <div className="border-t border-neutral-200 dark:border-neutral-700 overflow-x-auto">
                           <table className="w-full text-sm">
                             <tbody className="divide-y divide-slate-50 dark:divide-neutral-800">
-                              {savedResult.holders.sort((a, b) => b.proceeds - a.proceeds).map(h => (
+                              {[...savedResult.holders].sort((a, b) => b.proceeds - a.proceeds).map(h => (
                                 <tr key={h.id} className="px-4">
                                   <td className="px-4 py-2 text-neutral-800 dark:text-neutral-200 text-xs">{h.name}</td>
                                   <td className="px-4 py-2 text-xs text-neutral-600 dark:text-neutral-400">{h.shareClass}</td>

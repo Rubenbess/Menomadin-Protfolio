@@ -57,24 +57,31 @@ export default function TaskDetailModal({
 
   // Load comments and attachments on mount
   useEffect(() => {
+    let ignore = false
     const loadData = async () => {
       setLoadingComments(true)
       setLoadingAttachments(true)
 
       const commentsResult = await getTaskComments(task.id)
-      if (!commentsResult.error && commentsResult.comments) {
+      if (!ignore && !commentsResult.error && commentsResult.comments) {
         setComments(commentsResult.comments)
       }
 
       const attachmentsResult = await getTaskAttachments(task.id)
-      if (!attachmentsResult.error && attachmentsResult.attachments) {
+      if (!ignore && !attachmentsResult.error && attachmentsResult.attachments) {
         setAttachments(attachmentsResult.attachments)
       }
 
-      setLoadingComments(false)
-      setLoadingAttachments(false)
+      if (!ignore) {
+        setLoadingComments(false)
+        setLoadingAttachments(false)
+      }
     }
     loadData()
+    // Cancel stale resolutions: closing the modal or switching tasks before
+    // both awaits resolve must not overwrite the newer task's data or setState
+    // after unmount.
+    return () => { ignore = true }
   }, [task.id])
 
   const handleComplete = async () => {

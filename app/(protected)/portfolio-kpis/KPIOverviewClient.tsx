@@ -116,6 +116,11 @@ function CsvImportButton({ companies }: { companies: { id: string; name: string 
 
     const text = await file.text()
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+    if (lines.length === 0) {
+      setResult('File is empty.')
+      setImporting(false)
+      return
+    }
     const header = lines[0].toLowerCase().split(',').map(h => h.trim())
 
     const col = (name: string) => header.indexOf(name)

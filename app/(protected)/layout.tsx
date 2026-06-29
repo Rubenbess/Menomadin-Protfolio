@@ -33,9 +33,13 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   if (!member && user.email) {
     const name = user.email.split('@')[0]
     const initials = name.slice(0, 2).toUpperCase()
+    // Least-privilege default: a self-provisioned member starts as 'viewer' and is
+    // promoted explicitly by an admin. (Previously defaulted to 'admin', which —
+    // combined with open signup — meant any signup became a full admin.) The DB
+    // trigger handle_new_user() is the primary creation path; this is a fallback.
     const { data: created, error: insertError } = await supabase
       .from('team_members')
-      .insert({ id: user.id, name, email: user.email, role: 'admin', color: '#5a7fa8', initials })
+      .insert({ id: user.id, name, email: user.email, role: 'viewer', color: '#5a7fa8', initials })
       .select('id, name, color, initials, job_title')
       .single()
     if (insertError) {
