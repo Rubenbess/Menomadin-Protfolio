@@ -16,12 +16,23 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
 
-  // Fetch the PDF from Supabase storage
+  // Fetch the PDF from Supabase storage, capping size to bound memory.
+  // A "deck" larger than this is almost certainly not a real pitch deck, and
+  // buffering an unbounded body (then base64-encoding it at ~1.33x) can OOM the
+  // serverless instance and burn Anthropic credits. Mirrors app/api/extract/route.ts.
+  const MAX_DECK_BYTES = 20 * 1024 * 1024
   let pdfBuffer: ArrayBuffer
   try {
     const res = await fetch(deck_url)
     if (!res.ok) return NextResponse.json({ error: 'Could not fetch deck file' }, { status: 400 })
+    const declared = Number(res.headers.get('content-length') ?? 0)
+    if (declared > MAX_DECK_BYTES) {
+      return NextResponse.json({ error: 'Deck file too large (max 20 MB)' }, { status: 413 })
+    }
     pdfBuffer = await res.arrayBuffer()
+    if (pdfBuffer.byteLength > MAX_DECK_BYTES) {
+      return NextResponse.json({ error: 'Deck file too large (max 20 MB)' }, { status: 413 })
+    }
   } catch {
     return NextResponse.json({ error: 'Failed to download deck' }, { status: 400 })
   }
@@ -71,11 +82,10 @@ export async function POST(req: NextRequest) {
         },
       ],
     })
-    text = message.content[0].type === 'text' ? message.content[0].text : ''
+    text = message.content[0]?.type === 'text' ? message.content[0].text : ''
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error'
     console.error('analyze-deck: Anthropic API call failed', err)
-    return NextResponse.json({ error: `AI analysis failed: ${msg}` }, { status: 500 })
+    return NextResponse.json({ error: 'AI analysis failed' }, { status: 500 })
   }
 
   // Extract JSON from response

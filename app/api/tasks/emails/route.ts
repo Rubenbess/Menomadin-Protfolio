@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('[api/tasks/emails] insert failed', error)
       return NextResponse.json(
-        { error: error.message, code: error.code, details: error.details },
+        { error: 'Failed to save email attachment' },
         { status: 500 }
       )
     }

@@ -165,7 +165,8 @@ export async function POST(req: NextRequest) {
       extracted = parseClaudeJSON(plainText)
     }
   } catch (err) {
-    return NextResponse.json({ error: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 500 })
+    console.error('extract: extraction failed', err)
+    return NextResponse.json({ error: 'Extraction failed' }, { status: 500 })
   }
 
   // Persist to database (supabase from requireAuth above)
