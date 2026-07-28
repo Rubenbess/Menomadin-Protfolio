@@ -4,7 +4,7 @@ import DashboardCharts from '@/components/DashboardCharts'
 import DashboardMetricCard from '@/components/ui/DashboardMetricCard'
 import ExportPortfolioCSV from '@/components/ExportPortfolioCSV'
 import {
-  calcCurrentValue,
+  calcCompanyCurrentValue,
   calcMOIC,
   calcTVPI,
   calcXIRR,
@@ -14,6 +14,7 @@ import {
   totalInvestedInCompany,
   fmt$$,
   fmtMultiple,
+  fmtMultipleOrDash,
   fmtPct,
   type CashFlow,
 } from '@/lib/calculations'
@@ -98,7 +99,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     const totalInvested    = totalInvestedInCompany(coInvestments)
     const latestRound      = getLatestRound(coRounds)
     const ownershipPct     = calcCombinedOwnershipPct(coCapTable, legalEntitiesList)
-    const currentValue     = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
+    const currentValue     = calcCompanyCurrentValue(co.status, ownershipPct, latestRound?.post_money)
     const moic             = calcMOIC(currentValue, totalInvested)
     const plannedReserves  = coReserve?.reserved_amount  ?? 0
     const deployedReserves = coReserve?.deployed_amount  ?? 0
@@ -121,7 +122,9 @@ export default async function DashboardPage({ searchParams }: Props) {
       : []),
   ]
   const irr = calcXIRR(xirrFlows)
-  const dpi = calcDPI(0, totalInvested)
+  // No distributions table exists yet, so DPI is genuinely unknown rather than
+  // zero. `null` renders as an em dash instead of a fabricated 0.00x.
+  const dpi = calcDPI(null, totalInvested)
 
   // ── Sparkline data for metric cards ──────────────────────────────────────────
 
@@ -248,8 +251,8 @@ export default async function DashboardPage({ searchParams }: Props) {
           />
           <DashboardMetricCard
             label="DPI"
-            value={fmtMultiple(dpi)}
-            sub="Distributions / paid-in"
+            value={fmtMultipleOrDash(dpi)}
+            sub={dpi === null ? 'No distributions recorded' : 'Distributions / paid-in'}
             chartData={dpiChartData}
             accentColor="#14b8a6"
             icon={<ArrowUpRight size={15} color="#14b8a6" />}

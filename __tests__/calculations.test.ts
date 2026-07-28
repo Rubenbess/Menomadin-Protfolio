@@ -11,11 +11,16 @@ import {
   calcWaterfall,
   clampOwnershipPct,
   getFundOwnershipPct,
+  fundOwnershipIsPositional,
   calcCombinedOwnershipPct,
+  calcCompanyCurrentValue,
+  isWrittenOff,
   fmt$$,
   fmtPct,
+  fmtMultipleOrDash,
   normalizeSector,
 } from '../lib/calculations'
+import { mandateForEntity, mandateIsInferred, normalizeEntity } from '../lib/entities'
 import { getTopPerformers, getUnderperformers } from '../lib/analytics-utils'
 import type { Safe, ShareSeries, CapTableEntry, LegalEntity } from '../lib/types'
 
@@ -106,6 +111,78 @@ describe('calcDPI', () => {
   it('returns 0 on zero invested', () => {
     expect(calcDPI(500_000, 0)).toBe(0)
   })
+  it('returns null when there is no distributions data source', () => {
+    // The dashboards pass null rather than a literal 0 so the UI can render
+    // "no data" instead of a fabricated 0.00x.
+    expect(calcDPI(null, 1_000_000)).toBeNull()
+    expect(calcDPI(null, 0)).toBeNull()
+  })
+  it('formats an unknown multiple as an em dash', () => {
+    expect(fmtMultipleOrDash(null)).toBe('—')
+    expect(fmtMultipleOrDash(1.5)).toBe('1.50x')
+  })
+})
+
+describe('calcCompanyCurrentValue', () => {
+  it('values a live company at ownership x post-money', () => {
+    expect(calcCompanyCurrentValue('active', 10, 50_000_000)).toBe(5_000_000)
+  })
+  it('values a written-off company at zero despite a live post-money', () => {
+    expect(calcCompanyCurrentValue('written-off', 10, 50_000_000)).toBe(0)
+  })
+  it('is case- and whitespace-insensitive on status', () => {
+    expect(calcCompanyCurrentValue('  Written-Off ', 10, 50_000_000)).toBe(0)
+  })
+  it('still values exited and watchlist companies', () => {
+    expect(calcCompanyCurrentValue('exited', 10, 50_000_000)).toBe(5_000_000)
+    expect(calcCompanyCurrentValue('watchlist', 10, 50_000_000)).toBe(5_000_000)
+  })
+  it('returns 0 when there is no round to price against', () => {
+    expect(calcCompanyCurrentValue('active', 10, null)).toBe(0)
+    expect(calcCompanyCurrentValue('active', 10, undefined)).toBe(0)
+  })
+})
+
+describe('isWrittenOff', () => {
+  it('recognises the written-off status only', () => {
+    expect(isWrittenOff('written-off')).toBe(true)
+    expect(isWrittenOff('active')).toBe(false)
+    expect(isWrittenOff('exited')).toBe(false)
+    expect(isWrittenOff(null)).toBe(false)
+    expect(isWrittenOff(undefined)).toBe(false)
+  })
+})
+
+describe('mandateForEntity', () => {
+  it('treats MIF, MII and Miles as impact vehicles regardless of sector', () => {
+    expect(mandateForEntity('MIF', 'Cybersecurity')).toBe('impact')
+    expect(mandateForEntity('MII', 'Cybersecurity')).toBe('impact')
+    expect(mandateForEntity('Miles', 'Cybersecurity')).toBe('impact')
+  })
+  it('resolves MHAG by sector, since it deploys both mandates from 2026', () => {
+    expect(mandateForEntity('MHAG', 'HealthTech')).toBe('impact')
+    expect(mandateForEntity('MHAG', 'Cybersecurity')).toBe('venture')
+  })
+  it('resolves David Taib by sector too', () => {
+    expect(mandateForEntity('David_Taib', 'AgriTech')).toBe('impact')
+    expect(mandateForEntity('David Taib', 'Semiconductors')).toBe('venture')
+  })
+  it('falls back to venture when neither entity nor sector is informative', () => {
+    expect(mandateForEntity('', '')).toBe('venture')
+    expect(mandateForEntity(null, null)).toBe('venture')
+  })
+  it('flags which rows had their mandate inferred', () => {
+    expect(mandateIsInferred('MIF')).toBe(false)
+    expect(mandateIsInferred('MII')).toBe(false)
+    expect(mandateIsInferred('MHAG')).toBe(true)
+    expect(mandateIsInferred('David Taib')).toBe(true)
+    expect(mandateIsInferred('something else')).toBe(true)
+  })
+  it('normalises long-form and padded vehicle names', () => {
+    expect(normalizeEntity('  Menomadin Holdings AG ')).toBe('MHAG')
+    expect(normalizeEntity('Menomadin Impact Fund')).toBe('MIF')
+    expect(normalizeEntity('nonsense')).toBeNull()
+  })
 })
 
 // ── IRR ───────────────────────────────────────────────────────────────────────
@@ -180,6 +257,49 @@ describe('getFundOwnershipPct', () => {
   it('returns 0 for an empty cap table', () => { expect(getFundOwnershipPct([])).toBe(0) })
   it('clamps an out-of-range stored % to 100', () => {
     expect(getFundOwnershipPct([makeCapEntry({ ownership_percentage: 250 })])).toBe(100)
+  })
+
+  // The rows below name our vehicles explicitly, so they exercise the
+  // marker-based path rather than the positional fallback. Note the default
+  // makeCapEntry name ('Menomadin Fund') is deliberately NOT an alias, which is
+  // why the two cases above still go through the fallback.
+  it('sums every row held by one of our vehicles, ignoring row order', () => {
+    const capTable = [
+      makeCapEntry({ id: 'a', shareholder_name: 'MIF', ownership_percentage: 4 }),
+      makeCapEntry({ id: 'b', shareholder_name: 'Founders', ownership_percentage: 60 }),
+      makeCapEntry({ id: 'c', shareholder_name: 'MHAG', ownership_percentage: 3 }),
+      makeCapEntry({ id: 'd', shareholder_name: 'Some Other VC', ownership_percentage: 33 }),
+    ]
+    expect(getFundOwnershipPct(capTable)).toBeCloseTo(7)
+  })
+  it('is unaffected by where the fund rows sit — the old code read the last row', () => {
+    const fundLast = [
+      makeCapEntry({ id: 'a', shareholder_name: 'Founders', ownership_percentage: 90 }),
+      makeCapEntry({ id: 'b', shareholder_name: 'MIF', ownership_percentage: 10 }),
+    ]
+    const fundFirst = [
+      makeCapEntry({ id: 'b', shareholder_name: 'MIF', ownership_percentage: 10 }),
+      makeCapEntry({ id: 'a', shareholder_name: 'Founders', ownership_percentage: 90 }),
+    ]
+    expect(getFundOwnershipPct(fundLast)).toBeCloseTo(10)
+    expect(getFundOwnershipPct(fundFirst)).toBeCloseTo(10)
+  })
+  it('recognises MII, Miles and MHAG, which were previously excluded', () => {
+    expect(getFundOwnershipPct([makeCapEntry({ shareholder_name: 'MII', ownership_percentage: 12 })])).toBeCloseTo(12)
+    expect(getFundOwnershipPct([makeCapEntry({ shareholder_name: 'Miles Holdings', ownership_percentage: 14 })])).toBeCloseTo(14)
+    expect(getFundOwnershipPct([makeCapEntry({ shareholder_name: 'Menomadin Holdings AG', ownership_percentage: 5 })])).toBeCloseTo(5)
+  })
+  it('falls back to the last row when no shareholder name is recognised', () => {
+    const capTable = [
+      makeCapEntry({ id: 'a', shareholder_name: 'Founders', ownership_percentage: 90 }),
+      makeCapEntry({ id: 'b', shareholder_name: 'Menomadin Fund', ownership_percentage: 10 }),
+    ]
+    expect(getFundOwnershipPct(capTable)).toBeCloseTo(10)
+    expect(fundOwnershipIsPositional(capTable)).toBe(true)
+  })
+  it('reports that a recognised cap table is not positional', () => {
+    expect(fundOwnershipIsPositional([makeCapEntry({ shareholder_name: 'MIF' })])).toBe(false)
+    expect(fundOwnershipIsPositional([])).toBe(false)
   })
 })
 

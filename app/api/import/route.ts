@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as XLSX from 'xlsx'
 import { requireAdminAuth } from '@/lib/api-auth'
+import { mandateForEntity, mandateIsInferred } from '@/lib/entities'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -14,8 +15,11 @@ function toDate(val: unknown): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-function mapStrategy(entity: string): 'impact' | 'venture' {
-  return entity?.toUpperCase().includes('MIF') ? 'impact' : 'venture'
+// Mandate resolution lives in lib/entities.ts — MIF/MII/Miles are impact
+// vehicles, while MHAG and David Taib deploy both mandates and are resolved by
+// sector instead.
+function mapStrategy(entity: string, sector?: string): 'impact' | 'venture' {
+  return mandateForEntity(entity, sector)
 }
 
 function mapInstrument(type: string): string {
@@ -99,11 +103,17 @@ export async function POST(req: NextRequest) {
   if (dryRun) {
     const preview = uniqueNames.map(name => {
       const rows = rawRows.filter(r => String(r['Investment Name']).trim() === name)
+      const entity = String(rows[0]['Entity'] || '').trim()
+      const sector = String(rows[0]['Sector'] || 'Other').trim()
       return {
         company: name,
         rowCount: rows.length,
-        sector: String(rows[0]['Sector'] || 'Other').trim(),
-        strategy: mapStrategy(String(rows[0]['Entity'] || '')),
+        sector,
+        entity,
+        strategy: mapStrategy(entity, sector),
+        // MHAG and David Taib deploy both mandates, so their strategy is
+        // inferred from the sector and is worth a human glance before import.
+        strategyInferred: mandateIsInferred(entity),
         warning: 'Existing rounds, investments, and cap table entries for this company will be deleted and replaced.',
       }
     })
@@ -138,12 +148,18 @@ export async function POST(req: NextRequest) {
     let companyId: string
     const existingId = existingByName.get(name)
 
+    const rowSector = String(firstRow['Sector'] || 'Other').trim()
+    const rowEntity = String(firstRow['Entity'] || '').trim()
+
     if (existingId) {
+      // `status` is deliberately not written on update. The sheet has no status
+      // column, so forcing 'active' resurrected companies that had been marked
+      // exited or written-off — which then re-entered the valuation at full
+      // post-money.
       const { error: updErr } = await supabase.from('companies').update({
-        sector: String(firstRow['Sector'] || 'Other').trim(),
-        strategy: mapStrategy(String(firstRow['Entity'] || '')),
+        sector: rowSector,
+        strategy: mapStrategy(rowEntity, rowSector),
         hq: String(firstRow['Geography'] || '').trim(),
-        status: 'active',
       }).eq('id', existingId)
       if (updErr) {
         results.errors.push(`Failed to update company "${name}": ${updErr.message}`)
@@ -156,8 +172,8 @@ export async function POST(req: NextRequest) {
         .from('companies')
         .insert({
           name,
-          sector: String(firstRow['Sector'] || 'Other').trim(),
-          strategy: mapStrategy(String(firstRow['Entity'] || '')),
+          sector: rowSector,
+          strategy: mapStrategy(rowEntity, rowSector),
           hq: String(firstRow['Geography'] || '').trim(),
           status: 'active',
         })
@@ -208,12 +224,18 @@ export async function POST(req: NextRequest) {
       instrument:     mapInstrument(String(row['Type'] || 'Equity')),
     }))
 
+    // `post_money` is the price of THIS round. It previously fell back to the
+    // sheet's "Current Valuation" column, which overwrote the historical round
+    // price with a present-day mark — corrupting the one field every downstream
+    // valuation, MOIC and IRR calculation reads. Current Valuation has no home
+    // in the schema yet (it needs a `valuations` table with an as-of date), so
+    // it is deliberately not written here rather than written to the wrong column.
     const roundsPayload = rowPayloads.map(p => ({
       company_id: companyId,
       date: p.date,
       type: p.stage || 'Seed',
       pre_money: p.preMoney,
-      post_money: p.currentVal > 0 ? p.currentVal : p.postMoney,
+      post_money: p.postMoney,
       amount_raised: p.totalRound,
     }))
 

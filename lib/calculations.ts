@@ -1,4 +1,5 @@
 import type { Investment, Round, CapTableEntry, ShareSeries, OptionPool, Safe, WaterfallHolder, WaterfallHolderResult, WaterfallResult, DataCompleteness, CompanyKPI, LegalEntity } from './types'
+import { isFundShareholder } from './branding'
 
 // Canonical sector names — any alias maps to the canonical form
 const SECTOR_ALIASES: Record<string, string> = {
@@ -33,6 +34,33 @@ export function calcCurrentValue(ownershipPct: number, latestPostMoney: number):
   return (ownershipPct / 100) * latestPostMoney
 }
 
+/** Company statuses that carry no residual equity value. */
+const ZERO_VALUE_STATUSES: readonly string[] = ['written-off'] as const
+
+export function isWrittenOff(status: string | null | undefined): boolean {
+  if (!status) return false
+  return ZERO_VALUE_STATUSES.includes(status.trim().toLowerCase())
+}
+
+/**
+ * Current value of a position, respecting company status.
+ *
+ * A written-off company retains its last round's post-money in `rounds`, so
+ * valuing it as ownership × post-money credited it with full value and inflated
+ * portfolio MOIC, TVPI and XIRR (the terminal cash flow is the sum of these).
+ * Callers should use this rather than `calcCurrentValue` directly whenever a
+ * company status is available.
+ */
+export function calcCompanyCurrentValue(
+  status: string | null | undefined,
+  ownershipPct: number,
+  latestPostMoney: number | null | undefined,
+): number {
+  if (isWrittenOff(status)) return 0
+  if (!latestPostMoney) return 0
+  return calcCurrentValue(ownershipPct, latestPostMoney)
+}
+
 export function calcTVPI(totalPortfolioValue: number, totalInvested: number): number {
   if (!totalInvested || totalInvested === 0) return 0
   return totalPortfolioValue / totalInvested
@@ -49,13 +77,45 @@ export function clampOwnershipPct(pct: number): number {
   return Math.min(Math.max(pct, 0), 100)
 }
 
-/** Returns the fund's ownership % from the latest cap table entry. */
+/**
+ * Returns the fund's ownership % by summing every cap-table row held by one of
+ * our vehicles (see FUND_SHAREHOLDER_ALIASES).
+ *
+ * Previously this read `capTable[capTable.length - 1]` on the convention that
+ * "users should add the fund entry last", which made reported ownership — and
+ * therefore currentValue and MOIC — depend on row insertion order. Any write to
+ * a cap table could silently change portfolio-wide numbers, which also made it
+ * unsafe for an agent to insert cap-table rows at all.
+ *
+ * The positional read survives only as a last resort, for legacy cap tables
+ * whose shareholder names predate the alias list. Those are worth correcting at
+ * source; until then this at least keeps the previous value rather than
+ * returning zero.
+ */
 export function getFundOwnershipPct(capTable: CapTableEntry[]): number {
   if (!capTable.length) return 0
-  // Use the last entry (most recent) — users should add the fund entry last.
-  // NOTE: this relies on row insertion order rather than an explicit fund marker;
-  // the schema-level fix is tracked as M-002 in the daily health-check report.
+
+  const fundRows = capTable.filter(c => isFundShareholder(c.shareholder_name))
+  if (fundRows.length) {
+    return clampOwnershipPct(
+      fundRows.reduce(
+        (sum, c) => sum + (Number.isFinite(c.ownership_percentage) ? c.ownership_percentage : 0),
+        0,
+      ),
+    )
+  }
+
   return clampOwnershipPct(capTable[capTable.length - 1].ownership_percentage)
+}
+
+/**
+ * True when no cap-table row names a known vehicle, so `getFundOwnershipPct`
+ * fell back to reading the last row positionally. Surfacing this lets a UI or an
+ * import flag the company for a name correction instead of quietly trusting it.
+ */
+export function fundOwnershipIsPositional(capTable: CapTableEntry[]): boolean {
+  if (!capTable.length) return false
+  return !capTable.some(c => isFundShareholder(c.shareholder_name))
 }
 
 /**
@@ -537,7 +597,18 @@ export function calcWaterfall(
 
 // ─── DPI ─────────────────────────────────────────────────────────────────────
 
-export function calcDPI(totalDistributions: number, totalInvested: number): number {
+/**
+ * Distributions to paid-in.
+ *
+ * Pass `null` for `totalDistributions` when there is no distributions data
+ * source to read — the caller then renders "no data" rather than a number.
+ * Both dashboards previously called `calcDPI(0, totalInvested)` with a literal
+ * zero, which reported a confident `0.00x` to anyone reading the page, including
+ * in LP-facing output. There is still no distributions table in the schema, so
+ * `null` is the only truthful answer until one exists.
+ */
+export function calcDPI(totalDistributions: number | null, totalInvested: number): number | null {
+  if (totalDistributions === null) return null
   if (!totalInvested || totalInvested === 0) return 0
   return totalDistributions / totalInvested
 }
@@ -545,10 +616,15 @@ export function calcDPI(totalDistributions: number, totalInvested: number): numb
 // ─── Formatting ─────────────────────────────────────────────────────────────
 
 export function fmt$$(amount: number): string {
-  if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toFixed(1)}B`
-  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`
-  return `$${amount.toLocaleString()}`
+  // Scale on the absolute value and re-apply the sign: comparing the signed
+  // amount against the thresholds made every negative figure fall through to
+  // the unscaled branch, so a -$5M write-down rendered as "$-5,000,000".
+  const sign = amount < 0 ? '-' : ''
+  const abs = Math.abs(amount)
+  if (abs >= 1_000_000_000) return `${sign}$${(abs / 1_000_000_000).toFixed(1)}B`
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1)}M`
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(0)}K`
+  return `${sign}$${abs.toLocaleString()}`
 }
 
 /**
@@ -562,6 +638,11 @@ export function fmt$Nullable(amount: number | null | undefined): string | null {
 
 export function fmtMultiple(x: number): string {
   return `${x.toFixed(2)}x`
+}
+
+/** Renders an em dash for metrics with no data source, rather than a false 0.00x. */
+export function fmtMultipleOrDash(x: number | null): string {
+  return x === null ? '—' : fmtMultiple(x)
 }
 
 export function fmtPct(p: number): string {
