@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import AnalyticsClient from './AnalyticsClient'
 import {
-  calcCurrentValue,
+  calcCompanyCurrentValue,
   calcMOIC,
   calcTVPI,
   calcXIRR,
@@ -56,7 +56,7 @@ export default async function AnalyticsPage() {
     const invested     = totalInvestedInCompany(coInvestments)
     const latestRound  = getLatestRound(coRounds)
     const ownershipPct = calcCombinedOwnershipPct(coCapTable, legalEntitiesList)
-    const currentValue = latestRound ? calcCurrentValue(ownershipPct, latestRound.post_money) : 0
+    const currentValue = calcCompanyCurrentValue(co.status, ownershipPct, latestRound?.post_money)
     const moic         = calcMOIC(currentValue, invested)
 
     return {
@@ -79,7 +79,8 @@ export default async function AnalyticsPage() {
     })(),
   ]
   const irr = calcXIRR(xirrFlows) ?? 0
-  const dpi = calcDPI(0, companiesWithMetrics.reduce((s, c) => s + c.totalInvested, 0))
+  // No distributions table exists yet, so DPI is unknown rather than zero.
+  const dpi = calcDPI(null, companiesWithMetrics.reduce((s, c) => s + c.totalInvested, 0))
 
   return (
     <div className="px-8 py-8">

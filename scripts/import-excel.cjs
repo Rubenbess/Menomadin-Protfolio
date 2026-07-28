@@ -21,11 +21,27 @@ function toDate(val) {
   return null
 }
 
+// Mirrors lib/entities.ts — kept inline because this is a plain CommonJS script
+// and cannot import the TS module. Change both together.
+//
+// MIF, MII and Miles were single-mandate impact vehicles. MHAG (the sole
+// investing vehicle from 2026) and David Taib deploy both mandates, so for those
+// the entity is uninformative and the sector decides. The previous version
+// tested only for 'MIF', which labelled MII, Miles, MHAG and David Taib as
+// venture — i.e. every 2026 position and both other impact vehicles.
+const IMPACT_ENTITY_PATTERNS = [/\bMIF\b/, /MENOMADIN IMPACT FUND/, /\bMII\b/, /MENOMADIN IMPACT INVESTMENTS/, /\bMILES\b/]
+const IMPACT_SECTOR_FRAGMENTS = [
+  'health', 'medtech', 'medical', 'biotech',
+  'education', 'edtech',
+  'clean', 'energy', 'water', 'climate', 'environment',
+  'agri', 'food', 'accessibility', 'impact',
+]
+
 function mapStrategy(entity, sector) {
-  if (!entity) return 'venture'
-  const e = entity.toString().toUpperCase()
-  if (e.includes('MIF')) return 'impact'
-  return 'venture'
+  const e = (entity || '').toString().toUpperCase()
+  if (IMPACT_ENTITY_PATTERNS.some(p => p.test(e))) return 'impact'
+  const s = (sector || '').toString().toLowerCase()
+  return IMPACT_SECTOR_FRAGMENTS.some(f => s.includes(f)) ? 'impact' : 'venture'
 }
 
 function mapStatus() { return 'active' }

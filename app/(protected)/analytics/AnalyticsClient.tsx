@@ -23,7 +23,8 @@ interface Props {
   companies: CompanyWithMetrics[]
   investments: Investment[]
   portfolioIrr: number
-  portfolioDpi: number
+  /** `null` when no distributions data source exists — renders as an em dash. */
+  portfolioDpi: number | null
 }
 
 export default function AnalyticsClient({ companies, investments, portfolioIrr, portfolioDpi }: Props) {
@@ -102,8 +103,8 @@ export default function AnalyticsClient({ companies, investments, portfolioIrr, 
           />
           <MetricCard
             title="DPI"
-            value={formatMultiple(portfolioDpi)}
-            subtitle="Distributions to Paid-in"
+            value={portfolioDpi === null ? '—' : formatMultiple(portfolioDpi)}
+            subtitle={portfolioDpi === null ? 'No distributions recorded' : 'Distributions to Paid-in'}
           />
           <MetricCard
             title="Active Deals"
