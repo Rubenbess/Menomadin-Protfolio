@@ -6,6 +6,10 @@ import { inputClasses } from '@/lib/form-styles'
 
 type Tab = 'signin' | 'signup' | 'reset' | 'recovery'
 
+// Closed platform: self-signup off. Flip only with a deliberate decision —
+// and mirror it in Supabase Auth settings, which is where the real gate lives.
+const ALLOW_SELF_SIGNUP = false
+
 export default function LoginPage() {
   const [tab, setTab] = useState<Tab>('signin')
   const [email, setEmail] = useState('')
@@ -95,6 +99,18 @@ export default function LoginPage() {
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    // Public self-signup is disabled: the platform serves a closed 4-person
+    // team, RLS grants broad access to any `authenticated` principal on some
+    // tables, and an open "Create account" on the internet made any stranger
+    // an authenticated user. New team members are provisioned by an admin in
+    // Supabase Auth (Dashboard → Authentication → Users → Invite).
+    // Server-side signup should also be disabled in Supabase Auth settings —
+    // this client-side removal alone does not stop direct API signups.
+    if (!ALLOW_SELF_SIGNUP) {
+      setError('Account creation is disabled. Ask an administrator to invite you.')
+      return
+    }
 
     if (!email || !password) {
       setError('Email and password are required')
@@ -215,7 +231,9 @@ export default function LoginPage() {
 
   const visibleTabs: { id: Tab; label: string }[] = [
     { id: 'signin', label: 'Sign in' },
-    { id: 'signup', label: 'Create account' },
+    // "Create account" is deliberately absent — closed platform, admin-invite
+    // only. See ALLOW_SELF_SIGNUP above before considering restoring it.
+    ...(ALLOW_SELF_SIGNUP ? [{ id: 'signup' as Tab, label: 'Create account' }] : []),
     { id: 'reset', label: 'Reset password' },
   ]
 
