@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createUpdate, updateUpdate } from '@/actions/updates'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { todayLocal } from '@/lib/date-utils'
 import type { CompanyUpdate } from '@/lib/types'
 
 interface Props {
@@ -62,7 +63,7 @@ export default function UpdateForm({ companyId, update, onClose }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={lbl}>Date *</label>
-          <input name="date" type="date" required className={inp} defaultValue={update?.date?.slice(0, 10) ?? new Date().toISOString().split('T')[0]} />
+          <input name="date" type="date" required className={inp} defaultValue={update?.date?.slice(0, 10) ?? todayLocal()} />
         </div>
         <div>
           <label className={lbl}>Category *</label>

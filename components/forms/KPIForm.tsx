@@ -6,6 +6,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { createKPI } from '@/actions/kpis'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { todayLocal } from '@/lib/date-utils'
 
 interface Props {
   companyId: string
@@ -102,7 +103,7 @@ export default function KPIForm({ companyId, sector = '', onClose }: Props) {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className={lbl}>Date *</label>
-        <input name="date" type="date" required className={inp} defaultValue={new Date().toISOString().split('T')[0]} />
+        <input name="date" type="date" required className={inp} defaultValue={todayLocal()} />
       </div>
 
       {/* Standard fields */}

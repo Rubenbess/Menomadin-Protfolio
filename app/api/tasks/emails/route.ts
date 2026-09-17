@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
     try {
       formData = await req.formData()
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Bad form data'
-      return NextResponse.json({ error: msg }, { status: 400 })
+      console.error('[api/tasks/emails] form-data parse failed', e)
+      return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
     }
 
     const taskId = formData.get('taskId')
@@ -65,9 +65,8 @@ export async function POST(req: NextRequest) {
       snapshot = isEml ? await snapshotFromEml(buf) : await snapshotFromMsg(buf)
     } catch (e) {
       console.error('[api/tasks/emails] parse failed', e)
-      const msg = e instanceof Error ? e.message : 'Failed to parse email file'
       return NextResponse.json(
-        { error: `Parse error: ${msg}` },
+        { error: 'Could not parse the email file.' },
         { status: 400 }
       )
     }
@@ -97,7 +96,6 @@ export async function POST(req: NextRequest) {
     })
   } catch (e) {
     console.error('[api/tasks/emails] unexpected error', e)
-    const msg = e instanceof Error ? e.message : 'Unexpected error'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return NextResponse.json({ error: 'Unexpected error' }, { status: 500 })
   }
 }

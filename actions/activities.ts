@@ -40,8 +40,10 @@ export async function logActivity({
       actor_id: user.id,
       action,
       field_changed: fieldChanged || null,
-      old_value: oldValue ? String(oldValue) : null,
-      new_value: newValue ? String(newValue) : null,
+      // Use != null (not truthiness): a legitimate 0 or false must be recorded,
+      // otherwise numeric/boolean field changes vanish from the audit trail.
+      old_value: oldValue != null ? String(oldValue) : null,
+      new_value: newValue != null ? String(newValue) : null,
       metadata: metadata || null,
       created_at: new Date().toISOString(),
     })

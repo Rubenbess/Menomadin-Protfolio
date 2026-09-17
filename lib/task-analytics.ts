@@ -1,4 +1,5 @@
 import type { TaskWithRelations, TaskStatus, TaskPriority } from '@/lib/types'
+import { localDateKey } from '@/lib/date-utils'
 
 export interface TaskMetrics {
   total: number
@@ -84,11 +85,11 @@ export function calculateTaskMetrics(tasks: TaskWithRelations[], dateRangeStart?
   for (let i = 29; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
-    const dateStr = date.toISOString().split('T')[0]
+    const dateStr = localDateKey(date)
 
     const countForDate = filteredTasks.filter(t => {
       if (t.status !== 'Done' || !t.completed_at) return false
-      const completedDate = new Date(t.completed_at).toISOString().split('T')[0]
+      const completedDate = localDateKey(new Date(t.completed_at))
       return completedDate === dateStr
     }).length
 

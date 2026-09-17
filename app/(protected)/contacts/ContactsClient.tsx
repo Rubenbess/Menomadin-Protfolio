@@ -11,6 +11,7 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import ContactForm from '@/components/forms/ContactForm'
 import EmptyState from '@/components/EmptyState'
+import { todayLocal } from '@/lib/date-utils'
 import { deleteContact, createInteraction, deleteInteraction } from '@/actions/contacts'
 import ContactTasks from './ContactTasks'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -70,7 +71,7 @@ function typeIcon(t: InteractionType) {
 function AddInteractionForm({ contactId, onDone }: { contactId: string; onDone: () => void }) {
   const router = useRouter()
   const [type, setType] = useState<InteractionType>('call')
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState(todayLocal())
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
 

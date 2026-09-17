@@ -175,7 +175,8 @@ export async function POST(req: NextRequest) {
     .update({ extracted_data: extracted })
     .eq('id', document_id)
   if (updateError) {
-    return NextResponse.json({ error: `Failed to persist extraction: ${updateError.message}` }, { status: 500 })
+    console.error('extract: failed to persist extraction', updateError)
+    return NextResponse.json({ error: 'Failed to persist extraction' }, { status: 500 })
   }
 
   return NextResponse.json({ extracted })

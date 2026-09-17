@@ -36,7 +36,10 @@ export async function POST(req: NextRequest) {
     .select('id')
     .eq('id', body.company_id)
     .maybeSingle()
-  if (companyError) return NextResponse.json({ error: companyError.message }, { status: 500 })
+  if (companyError) {
+    console.error('documents: company lookup failed', companyError)
+    return NextResponse.json({ error: 'Could not verify company' }, { status: 500 })
+  }
   if (!company) return NextResponse.json({ error: 'Company not found' }, { status: 404 })
 
   const { error } = await supabase.from('documents').insert({
@@ -46,6 +49,9 @@ export async function POST(req: NextRequest) {
     type: body.type ?? null,
   })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('documents: insert failed', error)
+    return NextResponse.json({ error: 'Could not save document' }, { status: 500 })
+  }
   return NextResponse.json({ success: true })
 }

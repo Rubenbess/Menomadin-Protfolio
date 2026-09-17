@@ -5,6 +5,7 @@ import { CheckCircle2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { submitFounderUpdate } from '@/actions/founder-updates'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { todayLocal } from '@/lib/date-utils'
 import { FUND_NAME } from '@/lib/branding'
 
 const inp = inputClasses
@@ -44,7 +45,7 @@ export default function FounderUpdateForm({ token, companyName }: Props) {
 
     const result = await submitFounderUpdate({
       token,
-      date: (fd.get('date') as string) || new Date().toISOString().split('T')[0],
+      date: (fd.get('date') as string) || todayLocal(),
       highlights: str('highlights'),
       challenges: str('challenges'),
       next_quarter: str('next_quarter'),
@@ -75,7 +76,7 @@ export default function FounderUpdateForm({ token, companyName }: Props) {
 
       <div>
         <label className={lbl}>Period (date)</label>
-        <input name="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className={inp} />
+        <input name="date" type="date" defaultValue={todayLocal()} className={inp} />
       </div>
 
       <div>

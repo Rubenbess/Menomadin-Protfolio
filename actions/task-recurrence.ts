@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import type { RecurrenceFrequency } from '@/lib/types'
+import { jerusalemDateKey, todayJerusalem } from '@/lib/date-utils'
 
 export async function createRecurrenceRule(data: {
   frequency: RecurrenceFrequency
@@ -98,7 +99,7 @@ export async function generateNextRecurringTask(
         description: sourceTask.description,
         status: 'To do',
         priority: sourceTask.priority,
-        due_date: futureDate.toISOString().split('T')[0],
+        due_date: jerusalemDateKey(futureDate),
         company_id: sourceTask.company_id,
         created_by: user.id,
         is_recurring: true,
@@ -115,8 +116,8 @@ export async function generateNextRecurringTask(
   await supabase
     .from('task_recurrence_rules')
     .update({
-      next_occurrence: futureDate.toISOString().split('T')[0],
-      last_generated: new Date().toISOString().split('T')[0],
+      next_occurrence: jerusalemDateKey(futureDate),
+      last_generated: todayJerusalem(),
     })
     .eq('id', recurrenceRuleId)
 

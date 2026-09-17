@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import type { TaskRecurrenceRule, RecurrenceFrequency } from '@/lib/types'
+import { addDaysLocal } from '@/lib/date-utils'
 
 interface Props {
   rule?: TaskRecurrenceRule | null
@@ -31,7 +32,7 @@ export default function TaskRecurrenceForm({
   const [dayOfWeek, setDayOfWeek] = useState<number | null>(rule?.day_of_week ?? new Date().getDay())
   const [dayOfMonth, setDayOfMonth] = useState<number | null>(rule?.day_of_month ?? new Date().getDate())
   const [nextOccurrence, setNextOccurrence] = useState(
-    rule?.next_occurrence || new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    rule?.next_occurrence || addDaysLocal(1)
   )
   const [isActive, setIsActive] = useState(rule?.is_active ?? true)
   const [error, setError] = useState('')

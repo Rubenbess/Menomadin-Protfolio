@@ -7,6 +7,7 @@ import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileSpreadsheet, FileText, Download, CheckCircle2, Users, ChevronLeft, TrendingUp, Upload, X, Mail, Plus, Trash2, ChevronDown } from 'lucide-react'
 import type { Round, Investment, CapTableEntry } from '@/lib/types'
+import { todayLocal } from '@/lib/date-utils'
 import type { DealReport, DealReportRecipient } from './page'
 import { uploadDealReport, addDealReportRecipient, removeDealReportRecipient } from './actions'
 
@@ -433,7 +434,7 @@ function DealReportViewer({ report, onBack }: { report: DealReport; onBack: () =
 // ── Upload modal ──────────────────────────────────────────────────────────────
 
 function UploadModal({ onClose, onSaved }: { onClose: () => void; onSaved: (r: DealReport) => void }) {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayLocal())
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')

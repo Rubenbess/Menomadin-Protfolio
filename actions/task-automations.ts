@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import type { AutomationTrigger, AutomationAction } from '@/lib/types'
+import { jerusalemDateKey } from '@/lib/date-utils'
 
 export async function createAutomationRule(data: {
   name: string
@@ -84,6 +85,9 @@ export async function deleteAutomationRule(ruleId: string) {
 export async function getAutomationRules() {
   const supabase = await createServerSupabaseClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
   const { data: rules, error } = await supabase
     .from('task_automation_rules')
     .select('*')
@@ -137,7 +141,7 @@ export async function triggerAutomationRules(trigger: AutomationTrigger, context
             description: template.template_content?.description,
             status: 'To do',
             priority: template.template_content?.priority || 'medium',
-            due_date: dueDate.toISOString().split('T')[0],
+            due_date: jerusalemDateKey(dueDate),
             company_id: context.company_id,
             created_by: user.id,
             template_id: templateId,

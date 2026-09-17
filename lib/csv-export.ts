@@ -1,3 +1,5 @@
+import { localDateKey, todayLocal } from './date-utils'
+
 /**
  * Export data as CSV file
  */
@@ -85,7 +87,7 @@ function formatValue(value: any): string {
   if (value === null || value === undefined) return ''
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
   if (typeof value === 'number') return value.toString()
-  if (value instanceof Date) return value.toISOString().split('T')[0]
+  if (value instanceof Date) return localDateKey(value)
   if (typeof value === 'object') return JSON.stringify(value)
   return String(value)
 }
@@ -119,7 +121,7 @@ function downloadBlob(blob: Blob, filename: string) {
  * Export companies data as CSV
  */
 export function exportCompaniesCSV(companies: any[]) {
-  const filename = `Companies-${new Date().toISOString().split('T')[0]}.csv`
+  const filename = `Companies-${todayLocal()}.csv`
   const columns = [
     { header: 'Company Name', key: 'name' },
     { header: 'Sector', key: 'sector' },
@@ -139,7 +141,7 @@ export function exportCompaniesCSV(companies: any[]) {
  * Export cap table as CSV
  */
 export function exportCapTableCSV(capTable: any[]) {
-  const filename = `CapTable-${new Date().toISOString().split('T')[0]}.csv`
+  const filename = `CapTable-${todayLocal()}.csv`
   const columns = [
     { header: 'Holder', key: 'holder_name' },
     { header: 'Series', key: 'series' },
@@ -154,7 +156,7 @@ export function exportCapTableCSV(capTable: any[]) {
  * Export tasks as CSV
  */
 export function exportTasksCSV(tasks: any[]) {
-  const filename = `Tasks-${new Date().toISOString().split('T')[0]}.csv`
+  const filename = `Tasks-${todayLocal()}.csv`
   const columns = [
     { header: 'Task', key: 'title' },
     { header: 'Status', key: 'status' },
@@ -171,7 +173,7 @@ export function exportTasksCSV(tasks: any[]) {
  * Export contacts as CSV
  */
 export function exportContactsCSV(contacts: any[]) {
-  const filename = `Contacts-${new Date().toISOString().split('T')[0]}.csv`
+  const filename = `Contacts-${todayLocal()}.csv`
   const columns = [
     { header: 'Name', key: 'name' },
     { header: 'Title', key: 'position' },

@@ -108,8 +108,9 @@ export async function POST(req: NextRequest) {
       results: { stagesCreated, cardsCreated, errors },
     })
   } catch (err) {
+    console.error('import/trello: import failed', err)
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Import failed' },
+      { error: 'Import failed' },
       { status: 500 }
     )
   }

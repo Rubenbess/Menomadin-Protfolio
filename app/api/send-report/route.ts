@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { BRAND_NO_REPLY_EMAIL } from '@/lib/branding'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { todayJerusalem } from '@/lib/date-utils'
 
 export async function POST(req: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
   if (!toAddress) {
     return NextResponse.json({ error: 'No recipient: provide `to` or set WEEKLY_REPORT_TO/TEAM_EMAIL' }, { status: 400 })
   }
-  const emailSubject = subject ?? `Menomadin Weekly Deal Report | ${new Date().toISOString().split('T')[0]}`
+  const emailSubject = subject ?? `Menomadin Weekly Deal Report | ${todayJerusalem()}`
 
   const resend = new Resend(resendKey)
   const { error } = await resend.emails.send({

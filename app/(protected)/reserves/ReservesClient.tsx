@@ -41,7 +41,7 @@ function remaining(planned: number, deployed: number) {
 
 function CompanyAvatar({ co }: { co: CompanySnippet }) {
   if (co.logo_url) return (
-    <img src={co.logo_url} alt={co.name} className="w-8 h-8 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-200 flex-shrink-0" />
+    <img src={co.logo_url} alt={co.name} className="w-8 h-8 rounded-lg object-contain bg-neutral-50 dark:bg-neutral-800 ring-1 ring-slate-200 dark:ring-neutral-700 flex-shrink-0" />
   )
   return (
     <div className="w-8 h-8 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
@@ -195,7 +195,7 @@ export default function ReservesClient({ companies, reserves }: Props) {
           { label: 'Remaining',       value: fmt$$(totalRemain),   sub: 'available to deploy',              accent: 'text-emerald-600' },
           { label: 'No Reserve Set',  value: String(withoutReserve.length), sub: 'companies',              accent: 'text-neutral-500' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 shadow-sm">
+          <div key={s.label} className="card px-4 py-3">
             <p className="text-xs text-neutral-500 font-medium mb-1">{s.label}</p>
             <p className={`text-xl font-bold ${s.accent}`}>{s.value}</p>
             <p className="text-xs text-neutral-500 mt-0.5">{s.sub}</p>
@@ -269,11 +269,11 @@ export default function ReservesClient({ companies, reserves }: Props) {
             {withoutReserve.map(co => (
               <div
                 key={co.id}
-                className="bg-white rounded-lg border border-neutral-200 px-4 py-3 flex items-center gap-3 group hover:border-violet-200 transition-colors"
+                className="card px-4 py-3 flex items-center gap-3 group hover:border-violet-200 transition-colors"
               >
                 <CompanyAvatar co={co} />
                 <div className="flex-1 min-w-0">
-                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-neutral-900 hover:text-primary-500 transition-colors truncate block">
+                  <Link href={`/companies/${co.id}`} className="text-sm font-semibold text-neutral-900 dark:text-white hover:text-primary-500 transition-colors truncate block">
                     {co.name}
                   </Link>
                   <p className="text-xs text-neutral-500">{co.sector}</p>

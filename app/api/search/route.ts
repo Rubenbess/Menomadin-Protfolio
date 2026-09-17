@@ -9,8 +9,11 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim()
   if (!q || q.length < 2) return NextResponse.json({ results: [], hasMore: false })
 
+  // Number('abc') → NaN, and Math.max/Math.min both propagate NaN, so a
+  // non-numeric ?limit= would otherwise reach Supabase's .limit(NaN). Guard
+  // explicitly and fall back to the default; Math.trunc keeps it an integer.
   const limitParam = Number(req.nextUrl.searchParams.get('limit') ?? 8)
-  const limit = Math.min(Math.max(limitParam, 1), 20)
+  const limit = Number.isFinite(limitParam) ? Math.min(Math.max(Math.trunc(limitParam), 1), 20) : 8
   // Fetch one extra row per category to detect whether more results exist
   const fetchLimit = limit + 1
 

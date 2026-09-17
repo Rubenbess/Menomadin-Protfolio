@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
 import { BRAND_NO_REPLY_EMAIL, FUND_NAME, FUND_PORTFOLIO_NAME } from '@/lib/branding'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { todayJerusalem } from '@/lib/date-utils'
 
 export async function GET(req: NextRequest) {
   const cronError = requireCronAuth(req)
@@ -33,7 +34,10 @@ export async function GET(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
   )
-  const today = new Date().toISOString().split('T')[0]
+  // Israel calendar day, not UTC. The scheduled fire is 07:00 UTC (same day in
+  // Israel), but a retry or manual invocation just after Israeli midnight would
+  // read yesterday's date and silently skip that day's due reminders.
+  const today = todayJerusalem()
 
   const { data: reminders, error } = await supabase
     .from('reminders')

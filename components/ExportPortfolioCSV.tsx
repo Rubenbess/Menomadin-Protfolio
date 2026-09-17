@@ -1,6 +1,7 @@
 'use client'
 
 import { Download } from 'lucide-react'
+import { todayLocal } from '@/lib/date-utils'
 
 interface CompanyRow {
   name: string
@@ -49,7 +50,7 @@ export default function ExportPortfolioCSV({ companies }: Props) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `portfolio-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `portfolio-${todayLocal()}.csv`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

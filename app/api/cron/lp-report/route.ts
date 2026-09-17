@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { requireCronAuth } from '@/lib/api-auth'
 import { BRAND_NO_REPLY_EMAIL, FUND_FULL_NAME, FUND_PORTFOLIO_NAME, FUND_SHAREHOLDER_ALIASES, isFundShareholder } from '@/lib/branding'
-import { fmt$$ } from '@/lib/calculations'
+import { fmt$$, fmt$Nullable } from '@/lib/calculations'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   const rounds      = roundsRes.data      ?? []
   const capTable    = capTableRes.data    ?? []
 
-  const totalInvested = investments.reduce((s: number, i: { amount: number }) => s + i.amount, 0)
+  const totalInvested = investments.reduce((s: number, i: { amount: number | null }) => s + (i.amount ?? 0), 0)
   const activeCount   = companies.filter((c: { status: string }) => c.status === 'active').length
 
   const now = new Date()
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
     .map((c: { id: string; name: string; sector: string; hq: string; entry_stage: string | null }) => {
       const inv = investments
         .filter((i: { company_id: string }) => i.company_id === c.id)
-        .reduce((s: number, i: { amount: number }) => s + i.amount, 0)
+        .reduce((s: number, i: { amount: number | null }) => s + (i.amount ?? 0), 0)
       const latestRound = rounds.find((r: { company_id: string }) => r.company_id === c.id)
       // capTable is already filtered to fund-aliased rows and ordered by
       // created_at desc, so the first hit is the most recent fund holding.
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
         <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0f172a">${esc(c.name)}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${esc(c.sector) || '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${inv > 0 ? fmt$$(inv) : '—'}</td>
-        <td style="padding:10px 16px;font-size:13px;color:#64748b">${latestRound ? fmt$$(latestRound.post_money) : '—'}</td>
+        <td style="padding:10px 16px;font-size:13px;color:#64748b">${fmt$Nullable(latestRound?.post_money) ?? '—'}</td>
         <td style="padding:10px 16px;font-size:13px;color:#64748b">${cap ? `${cap.ownership_percentage.toFixed(1)}%` : '—'}</td>
       </tr>`
     }).join('')

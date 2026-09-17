@@ -82,7 +82,10 @@ export async function POST(req: NextRequest) {
     })).filter(r => r.name)
 
     const { data, error } = await supabase.from('contacts').insert(records).select('id')
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('import/csv: contacts insert failed', error)
+      return NextResponse.json({ error: 'Could not import contacts' }, { status: 500 })
+    }
     return NextResponse.json({ created: data?.length ?? 0 })
   }
 
@@ -121,7 +124,10 @@ export async function POST(req: NextRequest) {
     }).filter(r => r.name)
 
     const { data, error } = await supabase.from('companies').insert(records).select('id')
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('import/csv: companies insert failed', error)
+      return NextResponse.json({ error: 'Could not import companies' }, { status: 500 })
+    }
     return NextResponse.json({
       created: data?.length ?? 0,
       ...(enumWarnings.length ? { enumWarnings } : {}),

@@ -67,7 +67,7 @@ export async function PUT(
 
     if (error) {
       console.error('Supabase error:', error)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: 'Could not update template' }, { status: 400 })
     }
 
     return NextResponse.json({ data })
@@ -106,7 +106,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Supabase error:', error)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: 'Could not delete template' }, { status: 400 })
     }
 
     return NextResponse.json({ success: true })

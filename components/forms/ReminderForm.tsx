@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { createReminder, updateReminder } from '@/actions/reminders'
 import { inputClasses, labelClasses } from '@/lib/form-styles'
+import { todayLocal } from '@/lib/date-utils'
 import type { Reminder } from '@/lib/types'
 
 const CATEGORIES = ['Follow-up', 'Board Meeting', 'Report Due', 'KPI Review', 'Contract Renewal', 'Call', 'Other']
@@ -83,7 +84,7 @@ export default function ReminderForm({ reminder, companies, defaultCompanyId, on
             name="due_date"
             type="date"
             required
-            defaultValue={reminder?.due_date ?? new Date().toISOString().split('T')[0]}
+            defaultValue={reminder?.due_date ?? todayLocal()}
             className={inp}
           />
         </div>

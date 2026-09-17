@@ -9,6 +9,7 @@ import {
   CheckSquare, ChevronLeft, BarChart3, Landmark,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { todayLocal } from '@/lib/date-utils'
 import { Suspense, useEffect, useState } from 'react'
 import StrategyFilter from './StrategyFilter'
 
@@ -59,7 +60,7 @@ function ReminderBadge() {
 
   useEffect(() => {
     const supabase = createClient()
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayLocal()
     supabase
       .from('reminders')
       .select('id', { count: 'exact', head: true })
@@ -81,9 +82,10 @@ function TasksBadge() {
 
   useEffect(() => {
     const supabase = createClient()
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayString = today.toISOString().split('T')[0]
+    // Local-calendar today. `setHours(0,0,0,0)` + `toISOString()` pinned this
+    // to the previous UTC day at every hour in Israel (UTC+2/+3), so tasks due
+    // yesterday were never counted as overdue.
+    const todayString = todayLocal()
     supabase
       .from('tasks')
       .select('id', { count: 'exact', head: true })

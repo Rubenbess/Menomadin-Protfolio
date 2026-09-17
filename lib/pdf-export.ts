@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { fmt$$, fmtMultiple, fmtPct } from './calculations'
+import { todayLocal } from './date-utils'
 
 // Brand gold used in the platform's primary palette. Centralised here so
 // rebrands or tone tweaks happen in one place rather than as scattered RGB tuples.
@@ -202,6 +203,6 @@ export function exportPortfolioToPDF(data: PortfolioExportData) {
     },
   })
 
-  const filename = `Portfolio-${new Date().toISOString().split('T')[0]}.pdf`
+  const filename = `Portfolio-${todayLocal()}.pdf`
   doc.save(filename)
 }

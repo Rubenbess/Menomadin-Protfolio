@@ -310,7 +310,7 @@ export default function CompaniesClient({
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {co.logo_url && (
-                        <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                        <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 dark:bg-neutral-800 ring-1 ring-slate-100 dark:ring-neutral-700 flex-shrink-0" />
                       )}
                       <Link
                         href={`/companies/${co.id}`}
@@ -409,7 +409,7 @@ export default function CompaniesClient({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         {co.logo_url ? (
-                          <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                          <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 dark:bg-neutral-800 ring-1 ring-slate-100 dark:ring-neutral-700 flex-shrink-0" />
                         ) : (
                           <div className="w-6 h-6 rounded-md bg-gold-100 flex items-center justify-center flex-shrink-0">
                             <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>

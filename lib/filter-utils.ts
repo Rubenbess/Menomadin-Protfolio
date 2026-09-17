@@ -99,6 +99,22 @@ function evaluateCondition<T extends Record<string, any>>(
 }
 
 /**
+ * Canonical sector names as produced by `normalizeSector` in lib/calculations.ts.
+ * Filter option ids are compared with strict equality against the stored value,
+ * so these must stay in sync with SECTOR_ALIASES' canonical forms.
+ */
+const CANONICAL_SECTORS = [
+  'Cleantech',
+  'Consumer',
+  'Deep Tech',
+  'Fintech',
+  'Healthtech',
+  'Marketplace',
+  'SaaS',
+  'Other',
+] as const
+
+/**
  * Get nested object value by dot notation path
  */
 function getNestedValue(obj: any, path: string): any {
@@ -129,23 +145,27 @@ export function getFieldsForEntity(entityType: string): Array<{
           label: 'Sector',
           type: 'select',
           operators: ['eq', 'neq', 'in'],
-          options: [
-            { id: 'tech', label: 'Technology' },
-            { id: 'healthcare', label: 'Healthcare' },
-            { id: 'finance', label: 'Finance' },
-            { id: 'consumer', label: 'Consumer' },
-            { id: 'energy', label: 'Energy' },
-          ],
+          // Option ids MUST equal the values actually persisted in
+          // companies.sector, which are canonicalised by normalizeSector()
+          // in lib/calculations.ts. The previous ids ('tech', 'healthcare',
+          // ...) matched nothing, so every sector filter returned 0 rows.
+          options: CANONICAL_SECTORS.map((s) => ({ id: s, label: s })),
         },
         {
           id: 'status',
           label: 'Status',
           type: 'select',
           operators: ['eq', 'neq', 'in'],
+          // Mirrors the companies.status CHECK constraint in schema.sql and
+          // the CompanyStatus union in lib/types.ts. 'closed' is not a valid
+          // status and matched nothing; 'written-off' and 'watchlist' were
+          // missing, so the two statuses that matter most for portfolio
+          // review could not be filtered at all.
           options: [
             { id: 'active', label: 'Active' },
             { id: 'exited', label: 'Exited' },
-            { id: 'closed', label: 'Closed' },
+            { id: 'written-off', label: 'Written Off' },
+            { id: 'watchlist', label: 'Watchlist' },
           ],
         },
         {
@@ -153,12 +173,17 @@ export function getFieldsForEntity(entityType: string): Array<{
           label: 'Entry Stage',
           type: 'select',
           operators: ['eq', 'neq', 'in'],
+          // companies.entry_stage is free text with no CHECK constraint and is
+          // rendered verbatim in the UI, so the ids must be the display
+          // strings themselves. The previous snake_case ids ('series_a') never
+          // matched a stored value.
           options: [
-            { id: 'seed', label: 'Seed' },
-            { id: 'series_a', label: 'Series A' },
-            { id: 'series_b', label: 'Series B' },
-            { id: 'series_c', label: 'Series C+' },
-            { id: 'growth', label: 'Growth' },
+            { id: 'Pre-Seed', label: 'Pre-Seed' },
+            { id: 'Seed', label: 'Seed' },
+            { id: 'Series A', label: 'Series A' },
+            { id: 'Series B', label: 'Series B' },
+            { id: 'Series C', label: 'Series C' },
+            { id: 'Growth', label: 'Growth' },
           ],
         },
         {
@@ -199,13 +224,16 @@ export function getFieldsForEntity(entityType: string): Array<{
           label: 'Contact Type',
           type: 'select',
           operators: ['eq', 'neq', 'in'],
+          // Mirrors the contacts.contact_type CHECK constraint in
+          // supabase/migrations/contacts.sql. Every previous id was lowercase
+          // /snake_case and matched nothing; 'executive' and 'investor' are
+          // not valid types at all, and 'Co-investor' was missing.
           options: [
-            { id: 'founder', label: 'Founder' },
-            { id: 'executive', label: 'Executive' },
-            { id: 'investor', label: 'Investor' },
-            { id: 'advisor', label: 'Advisor' },
-            { id: 'service_provider', label: 'Service Provider' },
-            { id: 'other', label: 'Other' },
+            { id: 'Founder', label: 'Founder' },
+            { id: 'Advisor', label: 'Advisor' },
+            { id: 'Co-investor', label: 'Co-investor' },
+            { id: 'Service Provider', label: 'Service Provider' },
+            { id: 'Other', label: 'Other' },
           ],
         },
       ]
