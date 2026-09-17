@@ -66,6 +66,13 @@ export default function WaterfallScenarioPanel({
     [activeExitValue, holders],
   )
 
+  // Holder-construction warnings (excluded SAFEs) and allocation warnings from
+  // the waterfall run itself are shown in one block above the results.
+  const waterfallWarnings = useMemo(
+    () => [...holderWarnings, ...(result?.warnings ?? [])],
+    [holderWarnings, result],
+  )
+
   const { totalIssuedShares, totalFDShares } = useMemo(() => {
     const tis = shareSeries.reduce((s, h) => s + h.shares, 0)
     return { totalIssuedShares: tis, totalFDShares: calcFullyDilutedShares(tis, optionPools) }
@@ -147,13 +154,17 @@ export default function WaterfallScenarioPanel({
             </div>
           </div>
 
-          {/* Excluded SAFE warnings — surface data quality so users see why some SAFEs aren't in the waterfall */}
-          {holderWarnings.length > 0 && (
+          {/* Excluded SAFE warnings (from buildWaterfallHolders) plus any
+              allocation warning raised by calcWaterfall itself — notably the
+              conservation check, which fires when the distribution does not sum
+              to the exit value. These figures reach LPs, so a silent gap is not
+              acceptable. */}
+          {waterfallWarnings.length > 0 && (
             <div className="rounded-lg ring-1 ring-amber-200 dark:ring-amber-800/60 bg-amber-50 dark:bg-amber-900/20 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle size={14} className="text-amber-600 dark:text-amber-300 mt-0.5 shrink-0" />
                 <div className="text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                  {holderWarnings.map((w, i) => <p key={i}>{w}</p>)}
+                  {waterfallWarnings.map((w, i) => <p key={i}>{w}</p>)}
                 </div>
               </div>
             </div>

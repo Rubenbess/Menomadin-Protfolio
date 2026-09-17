@@ -325,7 +325,16 @@ export function derivePricePerShare(preMoney: number, sharesOutstanding: number)
   return preMoney / sharesOutstanding
 }
 
-/** Total fully-diluted shares = issued shares + option pool reserved + SAFE shares (estimated). */
+/**
+ * Total fully-diluted shares = issued shares + option pool reserved.
+ *
+ * NOTE: unconverted SAFEs are NOT included. The doc comment previously claimed
+ * "+ SAFE shares (estimated)", which it never did — on a cap-table screen that
+ * overstates the denominator's completeness and understates dilution for any
+ * company holding unconverted SAFEs. Callers needing SAFE-inclusive FD shares
+ * should build holders via `buildWaterfallHolders` (which does estimate SAFE
+ * share counts) and sum from there.
+ */
 export function calcFullyDilutedShares(
   issuedShares: number,
   optionPools: OptionPool[],
@@ -465,6 +474,34 @@ export function buildWaterfallHolders(
 }
 
 /**
+ * Last-resort allocation for proceeds that no residual participant can absorb:
+ * split pro-rata by invested capital across everyone who put money in.
+ *
+ * Exists so that exit value can never silently disappear from the waterfall.
+ * If literally no holder has invested capital there is nobody to pay, so the
+ * caller gets a warning rather than a distribution that fails to add up.
+ */
+function distributeByInvestedCapital(
+  holders: WaterfallHolder[],
+  dist: Map<string, number>,
+  amount: number,
+  warnings: string[],
+): void {
+  if (amount <= 0) return
+  const funded = holders.filter(h => h.investedAmount > 0)
+  const totalInvested = funded.reduce((s, h) => s + h.investedAmount, 0)
+  if (totalInvested <= 0) {
+    warnings.push(
+      `${fmt$$(amount)} of exit proceeds could not be allocated — no holder has share count or invested capital to distribute against. Check the cap table for missing share counts.`
+    )
+    return
+  }
+  for (const h of funded) {
+    dist.set(h.id, (dist.get(h.id) ?? 0) + (h.investedAmount / totalInvested) * amount)
+  }
+}
+
+/**
  * Liquidation waterfall calculation.
  *
  * Algorithm:
@@ -526,6 +563,8 @@ export function calcWaterfall(
   }
 
   // Step 3: Distribute remaining to common + participating preferred + converters
+  const warnings: string[] = []
+
   if (remaining > 0) {
     const participatingHolders = holders.filter(
       h => !h.isPreferred || h.isParticipating || convertingIds.has(h.id)
@@ -541,36 +580,64 @@ export function calcWaterfall(
         dist.set(h.id, (equiv / totalParticipatingEquiv) * remaining)
       }
 
-      // Apply participation caps
-      let capExcess = 0
+      // Apply participation caps, then push the excess back out to whoever is
+      // still uncapped — repeatedly, because absorbing one holder's excess can
+      // push the next holder over its own cap. A single pass silently dropped
+      // the excess whenever the first round of recipients was itself capped.
       const cappedIds = new Set<string>()
-      for (const h of holders) {
-        if (!h.isParticipating || h.participationCapMult === null) continue
-        const alreadyPaid = payouts.get(h.id) ?? 0
-        const maxPayout = h.investedAmount * h.participationCapMult
-        const d = dist.get(h.id) ?? 0
-        if (alreadyPaid + d > maxPayout) {
-          const cappedDist = Math.max(0, maxPayout - alreadyPaid)
-          capExcess += d - cappedDist
-          dist.set(h.id, cappedDist)
-          cappedIds.add(h.id)
-        }
-      }
+      // Anyone sharing in the residual and not subject to a cap: uncapped common,
+      // converting preferred (they gave up their preference to ride the equity),
+      // and participating preferred with no cap multiple. Restricting this to
+      // common alone stranded the excess on cap tables with no uncapped common.
+      const isCappable = (h: WaterfallHolder) =>
+        h.isParticipating && h.participationCapMult !== null && !convertingIds.has(h.id)
 
-      // Redistribute cap excess to uncapped common
-      if (capExcess > 0) {
-        const uncappedCommon = participatingHolders.filter(
-          h => !h.isPreferred && !cappedIds.has(h.id)
-        )
-        const uncappedEquiv = uncappedCommon.reduce((s, h) => s + h.shares * h.conversionRatio, 0)
-        if (uncappedEquiv > 0) {
-          for (const h of uncappedCommon) {
-            const extra = ((h.shares * h.conversionRatio) / uncappedEquiv) * capExcess
-            dist.set(h.id, (dist.get(h.id) ?? 0) + extra)
+      // Bounded by the number of holders: each pass caps at least one more
+      // holder, otherwise it breaks out below.
+      for (let pass = 0; pass <= holders.length; pass++) {
+        let capExcess = 0
+        for (const h of participatingHolders) {
+          if (!isCappable(h) || cappedIds.has(h.id)) continue
+          const alreadyPaid = payouts.get(h.id) ?? 0
+          const maxPayout = h.investedAmount * h.participationCapMult!
+          const d = dist.get(h.id) ?? 0
+          if (alreadyPaid + d > maxPayout) {
+            const cappedDist = Math.max(0, maxPayout - alreadyPaid)
+            capExcess += d - cappedDist
+            dist.set(h.id, cappedDist)
+            cappedIds.add(h.id)
           }
         }
+
+        if (capExcess <= 0) break
+
+        const uncapped = participatingHolders.filter(h => !isCappable(h) && !cappedIds.has(h.id))
+        const uncappedEquiv = uncapped.reduce((s, h) => s + h.shares * h.conversionRatio, 0)
+        if (uncappedEquiv <= 0) {
+          // Every residual participant is capped out and cannot absorb more.
+          // The proceeds are real and have to land somewhere, so they revert to
+          // the preferred pro-rata by invested capital (the standard treatment
+          // for value above every participation cap). Previously this money was
+          // silently dropped and the distribution no longer summed to the exit.
+          distributeByInvestedCapital(holders, dist, capExcess, warnings)
+          break
+        }
+        for (const h of uncapped) {
+          const extra = ((h.shares * h.conversionRatio) / uncappedEquiv) * capExcess
+          dist.set(h.id, (dist.get(h.id) ?? 0) + extra)
+        }
       }
 
+      for (const [id, d] of dist) {
+        payouts.set(id, (payouts.get(id) ?? 0) + d)
+      }
+    } else {
+      // No holder participates in the residual — e.g. every holder is
+      // non-converting preferred, or preferred positions carry invested capital
+      // but no recorded share count. The remainder used to vanish here while the
+      // UI still reported the full exit value as the column total.
+      const dist = new Map<string, number>()
+      distributeByInvestedCapital(holders, dist, remaining, warnings)
       for (const [id, d] of dist) {
         payouts.set(id, (payouts.get(id) ?? 0) + d)
       }
@@ -592,7 +659,19 @@ export function calcWaterfall(
     }
   })
 
-  return { totalProceeds: exitValue, holders: holderResults, warnings: [] }
+  // Conservation invariant. The UI prints `totalProceeds` as the column total
+  // and computes every row's "% of exit" against it, so any gap between what was
+  // allocated and the exit value renders as a table that does not add up to its
+  // own stated total. Surface it rather than letting it pass silently — this
+  // function previously returned a hardcoded empty warnings array.
+  const allocated = [...payouts.values()].reduce((s, p) => s + p, 0)
+  if (Math.abs(allocated - exitValue) > 0.01) {
+    warnings.push(
+      `Distribution does not sum to the exit value: ${fmt$$(allocated)} allocated against ${fmt$$(exitValue)} exit (${fmt$$(exitValue - allocated)} unaccounted). Treat these figures as unreliable.`
+    )
+  }
+
+  return { totalProceeds: exitValue, holders: holderResults, warnings }
 }
 
 // ─── DPI ─────────────────────────────────────────────────────────────────────

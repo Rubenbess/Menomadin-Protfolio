@@ -22,7 +22,7 @@ import {
 } from '../lib/calculations'
 import { mandateForEntity, mandateIsInferred, normalizeEntity } from '../lib/entities'
 import { getTopPerformers, getUnderperformers } from '../lib/analytics-utils'
-import type { Safe, ShareSeries, CapTableEntry, LegalEntity } from '../lib/types'
+import type { Safe, ShareSeries, CapTableEntry, LegalEntity, WaterfallHolder } from '../lib/types'
 
 function makeCapEntry(overrides: Partial<CapTableEntry> = {}): CapTableEntry {
   return {
@@ -524,6 +524,106 @@ describe('calcWaterfall', () => {
     const result = calcWaterfall(10_000_000, [])
     expect(result.holders).toHaveLength(0)
     expect(result.totalProceeds).toBe(10_000_000)
+  })
+})
+
+// ── Waterfall conservation ────────────────────────────────────────────────────
+//
+// The panel prints totalProceeds (= the exit value) as the column total and
+// computes each row's "% of exit" against it, so proceeds that fail to reach a
+// holder render as a table that does not add up to its own stated total, with
+// no error anywhere. Every case below must allocate the full exit value.
+
+describe('calcWaterfall conservation', () => {
+  const holder = (o: Partial<WaterfallHolder> & { id: string }): WaterfallHolder => ({
+    name: o.id,
+    shareClass: 'X',
+    isPreferred: false,
+    shares: 0,
+    investedAmount: 0,
+    liquidationPrefMult: 1,
+    seniority: 0,
+    isParticipating: false,
+    participationCapMult: null,
+    conversionRatio: 1,
+    ...o,
+  })
+  const sum = (r: ReturnType<typeof calcWaterfall>) =>
+    r.holders.reduce((s, h) => s + h.proceeds, 0)
+
+  it('allocates the full exit when every participant is capped out and there is no common', () => {
+    // Regression: cap excess was redistributed only to uncapped *common*. With
+    // no common on the cap table the excess was dropped — $6M of a $10M exit.
+    const holders = [
+      holder({ id: 'A', isPreferred: true, isParticipating: true, participationCapMult: 2, shares: 1000, investedAmount: 1_000_000 }),
+      holder({ id: 'B', isPreferred: true, isParticipating: true, participationCapMult: 2, shares: 1000, investedAmount: 1_000_000 }),
+    ]
+    const result = calcWaterfall(10_000_000, holders)
+    expect(sum(result)).toBeCloseTo(10_000_000, 2)
+    expect(result.warnings).toHaveLength(0)
+  })
+
+  it('allocates the full exit when no holder participates in the residual', () => {
+    // Regression: a preferred position with invested capital but no recorded
+    // shares left totalParticipatingEquiv at 0, so $4M of a $5M exit vanished.
+    const holders = [holder({ id: 'A', isPreferred: true, shares: 0, investedAmount: 1_000_000 })]
+    const result = calcWaterfall(5_000_000, holders)
+    expect(sum(result)).toBeCloseTo(5_000_000, 2)
+    expect(result.warnings).toHaveLength(0)
+  })
+
+  it('cascades cap excess when absorbing it pushes the next holder over its own cap', () => {
+    // One redistribution pass is not enough: B absorbs A's excess and breaches
+    // its own cap, and that second excess must still reach the uncapped common.
+    const holders = [
+      holder({ id: 'A', isPreferred: true, isParticipating: true, participationCapMult: 1.5, shares: 5000, investedAmount: 1_000_000 }),
+      holder({ id: 'B', isPreferred: true, isParticipating: true, participationCapMult: 2, shares: 4000, investedAmount: 1_000_000 }),
+      holder({ id: 'C', shares: 1000 }),
+    ]
+    const result = calcWaterfall(20_000_000, holders)
+    expect(sum(result)).toBeCloseTo(20_000_000, 2)
+    const a = result.holders.find(h => h.id === 'A')!
+    const b = result.holders.find(h => h.id === 'B')!
+    expect(a.proceeds).toBeLessThanOrEqual(1_500_000 + 0.01)
+    expect(b.proceeds).toBeLessThanOrEqual(2_000_000 + 0.01)
+    // Everything above both caps lands on the uncapped common holder.
+    expect(result.holders.find(h => h.id === 'C')!.proceeds).toBeCloseTo(
+      20_000_000 - a.proceeds - b.proceeds, 2,
+    )
+  })
+
+  it('warns instead of silently losing proceeds when nothing can absorb them', () => {
+    // No shares and no invested capital anywhere: there is genuinely nobody to
+    // pay, so the gap must be reported rather than passed off as a valid split.
+    const holders = [holder({ id: 'A', isPreferred: true, shares: 0, investedAmount: 0 })]
+    const result = calcWaterfall(1_000_000, holders)
+    expect(result.warnings.length).toBeGreaterThan(0)
+  })
+
+  it('conserves the exit value across a randomized sweep of cap tables', () => {
+    let seed = 42
+    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648
+    for (let i = 0; i < 300; i++) {
+      const n = 1 + Math.floor(rnd() * 5)
+      const holders = Array.from({ length: n }, (_, j) => {
+        const isPreferred = rnd() > 0.4
+        const isParticipating = isPreferred && rnd() > 0.5
+        return holder({
+          id: `h${j}`,
+          isPreferred,
+          isParticipating,
+          participationCapMult: isParticipating && rnd() > 0.4 ? 1 + rnd() * 3 : null,
+          shares: Math.floor(rnd() * 10_000),
+          investedAmount: isPreferred ? Math.floor(rnd() * 5_000_000) : 0,
+          liquidationPrefMult: 1 + Math.floor(rnd() * 2),
+          seniority: Math.floor(rnd() * 3),
+        })
+      })
+      const exit = Math.floor(rnd() * 50_000_000) + 1
+      const result = calcWaterfall(exit, holders)
+      if (result.warnings.length > 0) continue  // explicitly-reported gap, asserted above
+      expect(sum(result)).toBeCloseTo(exit, 2)
+    }
   })
 })
 
