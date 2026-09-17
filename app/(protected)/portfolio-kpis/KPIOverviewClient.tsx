@@ -389,7 +389,7 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
         /* ── Chart view ─────────────────────────────────────────────────── */
         <div className="card p-6">
           <h2 className="text-sm font-semibold text-neutral-900 mb-1">Portfolio ARR Over Time</h2>
-          <p className="text-xs text-neutral-500 mb-5">Stacked area — each layer = one company's ARR</p>
+          <p className="text-xs text-neutral-500 mb-5">Stacked area — each layer = one company&apos;s ARR</p>
           <PortfolioArrChart companies={companies} kpisByCompany={kpisByCompany} />
         </div>
       ) : (
@@ -425,10 +425,10 @@ export default function KPIOverviewClient({ companies, kpisByCompany, latestKPIs
 
                   return (
                     <tr key={co.id} className="border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200">
-                      <td className="px-5 py-3.5 sticky left-0 bg-white">
+                      <td className="px-5 py-3.5 sticky left-0 bg-neutral-0 dark:bg-neutral-800">
                         <div className="flex items-center gap-3">
                           {co.logo_url ? (
-                            <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                            <img src={co.logo_url} alt={co.name} className="w-7 h-7 rounded-lg object-contain bg-neutral-50 dark:bg-neutral-800 ring-1 ring-slate-100 dark:ring-neutral-700 flex-shrink-0" />
                           ) : (
                             <div className="w-7 h-7 rounded-lg bg-gold-100 flex items-center justify-center flex-shrink-0">
                               <span className="text-xs font-bold text-primary-500">{co.name[0]}</span>

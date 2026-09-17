@@ -98,7 +98,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
       <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Security</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Manage two-factor authentication for your account</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Manage two-factor authentication for your account</p>
         </div>
       </div>
 
@@ -106,11 +106,11 @@ export default function SecurityClient({ required = false }: { required?: boolea
 
       {/* Required banner */}
       {required && !hasActiveFactor && (
-        <div className="mb-5 flex items-start gap-3 bg-amber-50 ring-1 ring-amber-200 rounded-lg px-4 py-3.5">
+        <div className="mb-5 flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200 dark:ring-amber-800/60 rounded-lg px-4 py-3.5">
           <ShieldOff size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-800">2FA is required to access this platform</p>
-            <p className="text-xs text-amber-700 mt-0.5">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">2FA is required to access this platform</p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
               Set up two-factor authentication below to continue. You won&apos;t be able to access any other page until this is done.
             </p>
           </div>
@@ -118,20 +118,18 @@ export default function SecurityClient({ required = false }: { required?: boolea
       )}
 
       {/* Status card */}
-      <div className={`rounded-lg p-5 mb-6 flex items-start gap-4 ring-1 ${
-        hasActiveFactor
-          ? 'bg-emerald-50 ring-emerald-200'
+      <div className={`rounded-lg p-5 mb-6 flex items-start gap-4 ring-1 ${ hasActiveFactor ?'bg-emerald-50 ring-emerald-200'
           : 'bg-amber-50 ring-amber-200'
       }`}>
         {hasActiveFactor
-          ? <ShieldCheck size={22} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+          ? <ShieldCheck size={22} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
           : <AlertCircle size={22} className="text-amber-500 flex-shrink-0 mt-0.5" />
         }
         <div>
-          <p className={`text-sm font-semibold ${hasActiveFactor ? 'text-emerald-800' : 'text-amber-800'}`}>
+          <p className={`text-sm font-semibold ${hasActiveFactor ?'text-emerald-800' : 'text-amber-800'}`}>
             {hasActiveFactor ? '2FA is enabled' : '2FA is not enabled'}
           </p>
-          <p className={`text-xs mt-0.5 ${hasActiveFactor ? 'text-emerald-700' : 'text-amber-700'}`}>
+          <p className={`text-xs mt-0.5 ${hasActiveFactor ?'text-emerald-700' : 'text-amber-700'}`}>
             {hasActiveFactor
               ? 'Your account is protected with an authenticator app.'
               : 'Add an extra layer of security. Recommended for all team members.'}
@@ -140,30 +138,30 @@ export default function SecurityClient({ required = false }: { required?: boolea
       </div>
 
       {success && (
-        <div className="mb-5 flex items-center gap-3 bg-emerald-50 ring-1 ring-emerald-200 rounded-lg px-4 py-3">
-          <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
-          <p className="text-sm text-emerald-800">{success}</p>
+        <div className="mb-5 flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-200 dark:ring-emerald-800/60 rounded-lg px-4 py-3">
+          <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <p className="text-sm text-emerald-800 dark:text-emerald-200">{success}</p>
         </div>
       )}
 
       {error && (
-        <div className="mb-5 bg-red-50 ring-1 ring-red-200 rounded-lg px-4 py-3">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="mb-5 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200 dark:ring-red-800/60 rounded-lg px-4 py-3">
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
         </div>
       )}
 
       {/* Active factors */}
       {hasActiveFactor && (
         <div className="card p-5 mb-5">
-          <h2 className="text-sm font-semibold text-neutral-900 mb-3">Active authenticators</h2>
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-3">Active authenticators</h2>
           <div className="space-y-2">
             {factors.filter(f => f.status === 'verified').map(f => (
-              <div key={f.id} className="flex items-center justify-between py-2.5 px-3 bg-neutral-50 rounded-xl">
+              <div key={f.id} className="flex items-center justify-between py-2.5 px-3 bg-neutral-50 dark:bg-neutral-900/50 rounded-xl">
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck size={15} className="text-emerald-500" />
                   <div>
-                    <p className="text-sm font-medium text-neutral-900">{f.friendly_name || 'Authenticator App'}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">{f.friendly_name || 'Authenticator App'}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       Added {new Date(f.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
@@ -171,7 +169,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
                 <button
                   onClick={() => removeFactor(f.id)}
                   disabled={loading}
-                  className="p-1.5 text-neutral-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -184,9 +182,9 @@ export default function SecurityClient({ required = false }: { required?: boolea
       {/* Enroll flow */}
       {!hasActiveFactor && step === 'idle' && (
         <div className="card p-6">
-          <h2 className="text-sm font-semibold text-neutral-900 mb-1">Set up authenticator app</h2>
-          <p className="text-xs text-neutral-500 mb-5">
-            Use Google Authenticator, Authy, or any TOTP app. You'll scan a QR code to link your account.
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-1">Set up authenticator app</h2>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-5">
+            Use Google Authenticator, Authy, or any TOTP app. You&apos;ll scan a QR code to link your account.
           </p>
           <Button onClick={startEnroll} loading={loading}>
             <ShieldCheck size={15} /> Enable 2FA
@@ -197,19 +195,19 @@ export default function SecurityClient({ required = false }: { required?: boolea
       {step === 'enrolling' && enrollData && (
         <div className="card p-6 space-y-5">
           <div>
-            <h2 className="text-sm font-semibold text-neutral-900 mb-1">Scan this QR code</h2>
-            <p className="text-xs text-neutral-500">Open your authenticator app and scan the QR code below.</p>
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-1">Scan this QR code</h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Open your authenticator app and scan the QR code below.</p>
           </div>
 
           {/* QR code — Supabase returns SVG string */}
           <div
-            className="flex justify-center p-4 bg-white rounded-lg ring-1 ring-slate-200"
+            className="flex justify-center p-4 bg-white dark:bg-neutral-800 rounded-lg ring-1 ring-slate-200 dark:ring-neutral-700"
             dangerouslySetInnerHTML={{ __html: enrollData.totp.qr_code }}
           />
 
-          <div className="bg-neutral-50 rounded-lg px-4 py-3">
-            <p className="text-xs text-neutral-600 mb-1">Can't scan? Enter this key manually:</p>
-            <p className="text-sm font-mono font-semibold text-neutral-900 tracking-wider break-all">
+          <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-lg px-4 py-3">
+            <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-1">Can&apos;t scan? Enter this key manually:</p>
+            <p className="text-sm font-mono font-semibold text-neutral-900 dark:text-neutral-50 tracking-wider break-all">
               {enrollData.totp.secret}
             </p>
           </div>
@@ -225,7 +223,7 @@ export default function SecurityClient({ required = false }: { required?: boolea
               value={code}
               onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="000000"
-              className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-xl font-mono text-center tracking-[0.4em] text-neutral-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white transition-all"
+              className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700 rounded-lg text-xl font-mono text-center tracking-[0.4em] text-neutral-900 dark:text-neutral-50 placeholder:text-slate-300 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 focus:bg-white dark:focus:bg-neutral-800 transition-all"
             />
           </div>
 
@@ -242,11 +240,11 @@ export default function SecurityClient({ required = false }: { required?: boolea
 
       {step === 'enrolled' && (
         <div className="card p-6 text-center">
-          <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 size={22} className="text-emerald-600" />
+          <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <CheckCircle2 size={22} className="text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h2 className="text-sm font-semibold text-neutral-900 mb-1">2FA is now active</h2>
-          <p className="text-xs text-neutral-500">Every login will now require your authenticator code.</p>
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-1">2FA is now active</h2>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">Every login will now require your authenticator code.</p>
         </div>
       )}
       </div>

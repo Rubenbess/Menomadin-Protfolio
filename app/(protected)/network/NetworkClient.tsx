@@ -35,7 +35,7 @@ function Avatar({ co }: { co: CompanySnippet }) {
       <img
         src={co.logo_url}
         alt={co.name}
-        className="w-5 h-5 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-200 flex-shrink-0"
+        className="w-5 h-5 rounded-md object-contain bg-neutral-50 dark:bg-neutral-900/50 dark:bg-neutral-800 ring-1 ring-slate-200 dark:ring-neutral-700 flex-shrink-0"
       />
     )
   }
@@ -68,9 +68,7 @@ function CoInvestorCard({
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-lg p-5 cursor-pointer transition-all ring-1 ${
-        selected
-          ? 'ring-gold-300 shadow-lg shadow-gold-100'
+      className={`bg-white dark:bg-neutral-800 rounded-lg p-5 cursor-pointer transition-all ring-1 ${ selected ?'ring-gold-300 shadow-lg shadow-gold-100'
           : isHighlighted
           ? 'ring-neutral-200 shadow-sm dark:shadow-md-hover'
           : 'ring-neutral-200 shadow-sm dark:shadow-md hover:shadow-sm dark:shadow-md-hover hover:ring-slate-200'
@@ -81,15 +79,14 @@ function CoInvestorCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {rank <= 3 && (
-              <span className={`text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                rank === 1 ? 'bg-amber-100 text-amber-600' :
+              <span className={`text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${ rank === 1 ?'bg-amber-100 text-amber-600' :
                 rank === 2 ? 'bg-neutral-100 text-neutral-600' :
                 'bg-orange-50 text-orange-500'
               }`}>
                 {rank}
               </span>
             )}
-            <p className="text-sm font-bold text-neutral-900 leading-tight">{node.name}</p>
+            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-50 leading-tight">{node.name}</p>
           </div>
         </div>
         <span className="flex-shrink-0 text-xs font-semibold bg-gold-100 text-primary-600 rounded-full px-2.5 py-0.5">
@@ -118,13 +115,13 @@ function CoInvestorCard({
           </div>
           <div className="flex gap-3 mt-1">
             {impactCount > 0 && (
-              <span className="flex items-center gap-1 text-[10px] text-neutral-500">
+              <span className="flex items-center gap-1 text-[10px] text-neutral-500 dark:text-neutral-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 {impactCount} Impact
               </span>
             )}
             {ventureCount > 0 && (
-              <span className="flex items-center gap-1 text-[10px] text-neutral-500">
+              <span className="flex items-center gap-1 text-[10px] text-neutral-500 dark:text-neutral-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                 {ventureCount} Catalyst
               </span>
@@ -140,19 +137,18 @@ function CoInvestorCard({
             key={co.id}
             href={`/companies/${co.id}`}
             onClick={e => e.stopPropagation()}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-neutral-50 hover:bg-gold-50 hover:text-primary-600 group/chip transition-colors"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-neutral-50 dark:bg-neutral-900/50 hover:bg-gold-50 hover:text-primary-600 group/chip transition-colors"
           >
             <Avatar co={co} />
-            <span className="text-xs font-medium text-neutral-800 group-hover/chip:text-primary-600 transition-colors truncate">{co.name}</span>
-            <span className={`ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-              co.strategy === 'impact' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'
+            <span className="text-xs font-medium text-neutral-800 dark:text-neutral-100 group-hover/chip:text-primary-600 transition-colors truncate">{co.name}</span>
+            <span className={`ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${ co.strategy ==='impact' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'
             }`}>
               {co.strategy === 'impact' ? 'Impact' : 'Ventures'}
             </span>
           </Link>
         ))}
         {node.companies.length > 5 && (
-          <p className="text-xs text-neutral-500 px-2.5">+{node.companies.length - 5} more</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 px-2.5">+{node.companies.length - 5} more</p>
         )}
       </div>
     </div>
@@ -218,7 +214,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
       <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Co-investor Network</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Syndicate relationships across portfolio</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Syndicate relationships across portfolio</p>
         </div>
       </div>
 
@@ -232,9 +228,9 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
           { label: 'Avg Deals / Investor',value: avgDealsPerInvestor,          icon: <TrendingUp size={14} /> },
           { label: 'Most Active',         value: mostActive?.name ?? '—',      icon: <Building2 size={14} /> },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 shadow-sm">
-            <p className="text-xs text-neutral-500 font-medium mb-1">{s.label}</p>
-            <p className="text-base font-bold text-neutral-900 truncate" title={s.value}>{s.value}</p>
+          <div key={s.label} className="card px-4 py-3">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium mb-1">{s.label}</p>
+            <p className="text-base font-bold text-neutral-900 dark:text-neutral-50 dark:text-white truncate" title={s.value}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -243,35 +239,32 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
       <div className="flex flex-wrap items-center gap-2 mb-5">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-400" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search co-investors or companies…"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-900 dark:text-neutral-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-primary-500 transition-all"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700">
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700">
               <X size={13} />
             </button>
           )}
         </div>
 
         {/* Strategy filter */}
-        <div className="flex items-center gap-1 bg-white rounded-lg border border-neutral-200 p-1">
+        <div className="flex items-center gap-1 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-1">
           {(['all', 'impact', 'venture'] as const).map(v => (
             <button
               key={v}
               onClick={() => setStrategyFilter(v)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                strategyFilter === v
-                  ? 'bg-slate-900 text-white shadow-sm'
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${ strategyFilter === v ?'bg-slate-900 text-white shadow-sm'
                   : 'text-neutral-600 hover:text-neutral-800'
               }`}
             >
               {v !== 'all' && (
-                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  v === 'impact' ? 'bg-emerald-400' : 'bg-blue-400'
+                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${ v ==='impact' ? 'bg-emerald-400' : 'bg-blue-400'
                 }`} />
               )}
               {v === 'all' ? 'All' : v === 'impact' ? 'Impact' : 'Ventures'}
@@ -282,13 +275,13 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
         {selectedInvestor && (
           <button
             onClick={() => setSelectedInvestor(null)}
-            className="flex items-center gap-1.5 text-xs text-neutral-600 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <X size={12} /> Clear selection
           </button>
         )}
 
-        <span className="text-xs text-neutral-500 ml-auto">
+        <span className="text-xs text-neutral-500 dark:text-neutral-400 ml-auto">
           {filteredNodes.length} co-investor{filteredNodes.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -335,7 +328,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
       {/* Cards grid */}
       {filteredNodes.length === 0 ? (
         <div className="card px-5 py-16 text-center">
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {nodes.length === 0
               ? 'No co-investor data yet. Add co-investors to companies to see the network.'
               : 'No co-investors match your search.'}
@@ -359,7 +352,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
       {/* Companies without co-investors */}
       {companiesWithout.length > 0 && !search && strategyFilter === 'all' && (
         <div className="mt-8">
-          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+          <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
             No co-investor data ({companiesWithout.length})
           </p>
           <div className="flex flex-wrap gap-2">
@@ -367,7 +360,7 @@ export default function NetworkClient({ nodes, allCompanies }: Props) {
               <Link
                 key={co.id}
                 href={`/companies/${co.id}`}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-neutral-200 text-xs text-neutral-600 hover:text-primary-500 hover:border-violet-200 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-600 dark:text-neutral-400 hover:text-primary-500 hover:border-violet-200 transition-colors"
               >
                 <Avatar co={co} />
                 {co.name}

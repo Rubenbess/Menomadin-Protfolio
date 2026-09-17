@@ -68,7 +68,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
       <div className="page-header border-b border-neutral-200 dark:border-neutral-700">
         <div>
           <h1 className="page-title">Email Scanner</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
             Automatically detect investment opportunities from your Outlook inbox
           </p>
         </div>
@@ -77,33 +77,30 @@ export default function EmailScannerClient({ searchParams }: Props) {
       <div className="flex-1 overflow-y-auto px-6 py-6">
 
       {alert && (
-        <div className={`mb-5 flex items-center gap-3 rounded-lg px-4 py-3 ring-1 ${
-          alert.type === 'success'
+        <div className={`mb-5 flex items-center gap-3 rounded-lg px-4 py-3 ring-1 ${ alert.type ==='success'
             ? 'bg-emerald-50 ring-emerald-200'
             : 'bg-red-50 ring-red-200'
         }`}>
           {alert.type === 'success'
-            ? <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
+            ? <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             : <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
           }
-          <p className={`text-sm ${alert.type === 'success' ? 'text-emerald-800' : 'text-red-700'}`}>
+          <p className={`text-sm ${alert.type ==='success' ? 'text-emerald-800' : 'text-red-700'}`}>
             {alert.message}
           </p>
         </div>
       )}
 
       {/* Status card */}
-      <div className={`rounded-lg p-5 mb-6 flex items-start gap-4 ring-1 ${
-        integration
-          ? 'bg-emerald-50 ring-emerald-200'
+      <div className={`rounded-lg p-5 mb-6 flex items-start gap-4 ring-1 ${ integration ?'bg-emerald-50 ring-emerald-200'
           : 'bg-neutral-50 ring-slate-200'
       }`}>
-        <Mail size={22} className={`flex-shrink-0 mt-0.5 ${integration ? 'text-emerald-600' : 'text-neutral-500'}`} />
+        <Mail size={22} className={`flex-shrink-0 mt-0.5 ${integration ?'text-emerald-600' : 'text-neutral-500'}`} />
         <div>
-          <p className={`text-sm font-semibold ${integration ? 'text-emerald-800' : 'text-neutral-800'}`}>
+          <p className={`text-sm font-semibold ${integration ?'text-emerald-800' : 'text-neutral-800'}`}>
             {loading ? 'Loading…' : integration ? 'Outlook connected' : 'Not connected'}
           </p>
-          <p className={`text-xs mt-0.5 ${integration ? 'text-emerald-700' : 'text-neutral-600'}`}>
+          <p className={`text-xs mt-0.5 ${integration ?'text-emerald-700' : 'text-neutral-600'}`}>
             {integration
               ? `Scanning ${integration.email} · Last run: ${formatDate(integration.last_scanned_at)}`
               : 'Connect your Outlook to automatically discover deal flow from your inbox.'
@@ -114,7 +111,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
 
       {/* How it works */}
       <div className="card p-5 mb-5">
-        <h2 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+        <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-3 flex items-center gap-2">
           <Zap size={15} className="text-primary-500" />
           How it works
         </h2>
@@ -130,7 +127,7 @@ export default function EmailScannerClient({ searchParams }: Props) {
               <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary-500/10 text-primary-500 text-[11px] font-bold flex items-center justify-center mt-0.5">
                 {i + 1}
               </span>
-              <p className="text-sm text-neutral-700">{step}</p>
+              <p className="text-sm text-neutral-700 dark:text-neutral-300">{step}</p>
             </li>
           ))}
         </ol>
@@ -143,21 +140,21 @@ export default function EmailScannerClient({ searchParams }: Props) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-neutral-900">Connected account</p>
-                  <p className="text-xs text-neutral-600 mt-0.5">{integration.email}</p>
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Connected account</p>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">{integration.email}</p>
                 </div>
-                <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-700 rounded-full px-2.5 py-1">
+                <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full px-2.5 py-1">
                   Active
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-3 pt-1 border-t border-neutral-200">
+              <div className="grid grid-cols-2 gap-3 pt-1 border-t border-neutral-200 dark:border-neutral-700">
                 <div>
-                  <p className="text-[11px] text-neutral-500 uppercase tracking-wider font-medium">Connected</p>
-                  <p className="text-xs text-neutral-800 mt-0.5">{formatDate(integration.created_at)}</p>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Connected</p>
+                  <p className="text-xs text-neutral-800 dark:text-neutral-100 mt-0.5">{formatDate(integration.created_at)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-neutral-500 uppercase tracking-wider font-medium">Last scan</p>
-                  <p className="text-xs text-neutral-800 mt-0.5">{formatDate(integration.last_scanned_at)}</p>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Last scan</p>
+                  <p className="text-xs text-neutral-800 dark:text-neutral-100 mt-0.5">{formatDate(integration.last_scanned_at)}</p>
                 </div>
               </div>
               <div className="flex gap-2.5 pt-1">
@@ -180,8 +177,8 @@ export default function EmailScannerClient({ searchParams }: Props) {
             </div>
           ) : (
             <div>
-              <h2 className="text-sm font-semibold text-neutral-900 mb-1">Connect Outlook</h2>
-              <p className="text-xs text-neutral-500 mb-4">
+              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-1">Connect Outlook</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">
                 You&#39;ll be redirected to Microsoft to authorize read-only access to your inbox.
                 We never send emails or modify your mailbox.
               </p>

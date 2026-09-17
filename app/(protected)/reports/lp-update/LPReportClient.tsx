@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Download, CheckCircle2, CalendarDays } from 'lucide-react'
 import type { CompanyKPI, CompanyUpdate } from '@/lib/types'
 import { calcMOIC, fmt$$, fmtMultiple, fmtPct } from '@/lib/calculations'
+import { todayLocal } from '@/lib/date-utils'
 import { CATEGORY_COLORS } from '@/components/forms/UpdateForm'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -206,7 +207,7 @@ async function exportPDF(
     doc.text(`Page ${i} of ${pageCount}`, 283, 207, { align: 'right' })
   }
 
-  doc.save(`menomadin-lp-update-${new Date().toISOString().slice(0, 10)}.pdf`)
+  doc.save(`menomadin-lp-update-${todayLocal()}.pdf`)
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -279,24 +280,22 @@ export default function LPReportClient({
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/reports"
-          className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-slate-800 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400 hover:text-slate-800 transition-colors"
         >
           <ArrowLeft size={14} /> Reports
         </Link>
         <span className="text-slate-200">/</span>
-        <span className="text-sm font-medium text-neutral-800">LP Update</span>
+        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-100">LP Update</span>
 
         <div className="ml-auto flex items-center gap-2">
           {/* Period selector */}
-          <div className="flex items-center gap-1 bg-white rounded-lg border border-neutral-200 p-1">
-            <CalendarDays size={13} className="text-neutral-500 ml-1" />
+          <div className="flex items-center gap-1 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-1">
+            <CalendarDays size={13} className="text-neutral-500 dark:text-neutral-400 ml-1" />
             {PERIODS.map(p => (
               <button
                 key={p.days}
                 onClick={() => setPeriodDays(p.days)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                  periodDays === p.days
-                    ? 'bg-primary-500 text-white'
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${ periodDays === p.days ?'bg-primary-500 text-white'
                     : 'text-neutral-600 hover:text-neutral-800'
                 }`}
               >
@@ -329,7 +328,7 @@ export default function LPReportClient({
           <div>
             <p className="text-gold-200 text-xs font-semibold uppercase tracking-widest mb-2">LP Portfolio Update</p>
             <h1 className="text-2xl font-bold tracking-tight">Menomadin Group</h1>
-            <p className="text-neutral-500 text-sm mt-1">As of {today}</p>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">As of {today}</p>
           </div>
           <div className="text-right">
             <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/10 text-white/60 text-xs font-medium border border-white/10">
@@ -348,7 +347,7 @@ export default function LPReportClient({
             { label: 'IRR',               value: irr != null ? `${(irr * 100).toFixed(1)}%` : 'N/A' },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="text-xs text-neutral-600 font-medium uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 font-medium uppercase tracking-wider mb-1">{label}</p>
               <p className="text-xl font-bold text-white">{value}</p>
             </div>
           ))}
@@ -357,44 +356,44 @@ export default function LPReportClient({
 
       {/* Strategy breakdown */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5 border-l-4 border-emerald-500">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5 border-l-4 border-emerald-500">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-sm font-semibold text-neutral-900">Menomadin Impact</span>
-            <span className="ml-auto text-xs text-neutral-500">{impactCos.length} companies</span>
+            <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Impact</span>
+            <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{impactCos.length} companies</span>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Deployed</p><p className="text-base font-bold text-neutral-900 mt-1">{fmt$$(impactDep)}</p></div>
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Value</p><p className="text-base font-bold text-neutral-900 mt-1">{fmt$$(impactVal)}</p></div>
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">MOIC</p><p className="text-base font-bold text-emerald-600 mt-1">{fmtMultiple(calcMOIC(impactVal, impactDep))}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Deployed</p><p className="text-base font-bold text-neutral-900 dark:text-neutral-50 mt-1">{fmt$$(impactDep)}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Value</p><p className="text-base font-bold text-neutral-900 dark:text-neutral-50 mt-1">{fmt$$(impactVal)}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">MOIC</p><p className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-1">{fmtMultiple(calcMOIC(impactVal, impactDep))}</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5 border-l-4 border-blue-500">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 p-5 border-l-4 border-blue-500">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-sm font-semibold text-neutral-900">Menomadin Catalyst</span>
-            <span className="ml-auto text-xs text-neutral-500">{ventureCos.length} companies</span>
+            <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Menomadin Catalyst</span>
+            <span className="ml-auto text-xs text-neutral-500 dark:text-neutral-400">{ventureCos.length} companies</span>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Deployed</p><p className="text-base font-bold text-neutral-900 mt-1">{fmt$$(ventureDep)}</p></div>
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Value</p><p className="text-base font-bold text-neutral-900 mt-1">{fmt$$(ventureVal)}</p></div>
-            <div><p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">MOIC</p><p className="text-base font-bold text-blue-600 mt-1">{fmtMultiple(calcMOIC(ventureVal, ventureDep))}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Deployed</p><p className="text-base font-bold text-neutral-900 dark:text-neutral-50 mt-1">{fmt$$(ventureDep)}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Value</p><p className="text-base font-bold text-neutral-900 dark:text-neutral-50 mt-1">{fmt$$(ventureVal)}</p></div>
+            <div><p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">MOIC</p><p className="text-base font-bold text-blue-600 dark:text-blue-400 mt-1">{fmtMultiple(calcMOIC(ventureVal, ventureDep))}</p></div>
           </div>
         </div>
       </div>
 
       {/* Portfolio companies table */}
-      <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
-        <div className="px-5 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-900">Portfolio Companies</h2>
-          <span className="text-xs font-medium text-neutral-500 bg-neutral-100 rounded-full px-2.5 py-0.5">{companies.length}</span>
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
+        <div className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Portfolio Companies</h2>
+          <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 rounded-full px-2.5 py-0.5">{companies.length}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-200 bg-neutral-50/70">
+              <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50/70">
                 {['Company', 'Sector', 'Strategy', 'Status', 'Stage', 'Deployed', 'Value', 'MOIC', 'Ownership'].map(h => (
-                  <th key={h} className={`px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider ${h === 'Company' ? 'text-left pl-5' : 'text-right'}`}>{h}</th>
+                  <th key={h} className={`px-4 py-3 text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider ${h ==='Company' ? 'text-left pl-5' : 'text-right'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -404,22 +403,21 @@ export default function LPReportClient({
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
                       {co.logo_url
-                        ? <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 ring-1 ring-slate-100 flex-shrink-0" />
+                        ? <img src={co.logo_url} alt={co.name} className="w-6 h-6 rounded-md object-contain bg-neutral-50 dark:bg-neutral-900/50 dark:bg-neutral-800 ring-1 ring-slate-100 dark:ring-neutral-700 flex-shrink-0" />
                         : <div className="w-6 h-6 rounded-md bg-gold-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary-500">{co.name[0]}</div>
                       }
-                      <span className="font-semibold text-neutral-900 text-sm">{co.name}</span>
+                      <span className="font-semibold text-neutral-900 dark:text-neutral-50 text-sm">{co.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-neutral-600">{co.sector}</td>
+                  <td className="px-4 py-3 text-right text-xs text-neutral-600 dark:text-neutral-400">{co.sector}</td>
                   <td className="px-4 py-3 text-right">
                     <span className={`inline-flex items-center gap-1 text-xs font-medium`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${co.strategy === 'impact' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${co.strategy ==='impact' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                       {co.strategy === 'impact' ? 'Impact' : 'Ventures'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      co.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ co.status ==='active' ? 'bg-emerald-100 text-emerald-700' :
                       co.status === 'exited' ? 'bg-blue-100 text-blue-700' :
                       co.status === 'written-off' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
@@ -427,15 +425,15 @@ export default function LPReportClient({
                       {co.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-neutral-500">{co.entry_stage ?? <span className="text-slate-200">—</span>}</td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-800 text-sm">{co.totalInvested > 0 ? fmt$$(co.totalInvested) : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-800 text-sm">{co.currentValue  > 0 ? fmt$$(co.currentValue)  : <span className="text-slate-300">—</span>}</td>
+                  <td className="px-4 py-3 text-right text-xs text-neutral-500 dark:text-neutral-400">{co.entry_stage ?? <span className="text-slate-200">—</span>}</td>
+                  <td className="px-4 py-3 text-right font-medium text-neutral-800 dark:text-neutral-100 text-sm">{co.totalInvested > 0 ? fmt$$(co.totalInvested) : <span className="text-slate-300">—</span>}</td>
+                  <td className="px-4 py-3 text-right font-medium text-neutral-800 dark:text-neutral-100 text-sm">{co.currentValue  > 0 ? fmt$$(co.currentValue)  : <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-3 text-right text-sm">
                     {co.totalInvested > 0
                       ? <span className={co.moic >= 1 ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}>{fmtMultiple(co.moic)}</span>
                       : <span className="text-slate-300">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-neutral-600">{co.ownershipPct > 0 ? fmtPct(co.ownershipPct) : <span className="text-slate-300">—</span>}</td>
+                  <td className="px-4 py-3 text-right text-xs text-neutral-600 dark:text-neutral-400">{co.ownershipPct > 0 ? fmtPct(co.ownershipPct) : <span className="text-slate-300">—</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -446,35 +444,35 @@ export default function LPReportClient({
       {/* Recent highlights */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-neutral-900">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
             Recent Highlights
-            <span className="ml-2 text-xs font-normal text-neutral-500">— last {PERIODS.find(p => p.days === periodDays)?.label}</span>
+            <span className="ml-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">— last {PERIODS.find(p => p.days === periodDays)?.label}</span>
           </h2>
-          <span className="text-xs text-neutral-500">{filteredUpdates.length} updates</span>
+          <span className="text-xs text-neutral-500 dark:text-neutral-400">{filteredUpdates.length} updates</span>
         </div>
 
         {filteredUpdates.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 px-5 py-10 text-center">
-            <p className="text-sm text-neutral-500">No updates in this period.</p>
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 px-5 py-10 text-center">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">No updates in this period.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {Object.entries(updatesByCategory).map(([category, catUpdates]) => (
-              <div key={category} className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-                <div className="px-5 py-3 border-b border-neutral-200 flex items-center gap-2">
-                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${CATEGORY_COLORS[category] ?? 'bg-neutral-100 text-neutral-800'}`}>
+              <div key={category} className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+                <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-700 flex items-center gap-2">
+                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${CATEGORY_COLORS[category] ??'bg-neutral-100 text-neutral-800'}`}>
                     {category}
                   </span>
-                  <span className="text-xs text-neutral-500">{catUpdates.length} update{catUpdates.length !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400">{catUpdates.length} update{catUpdates.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div className="divide-y divide-slate-50">
                   {catUpdates.map(u => (
                     <div key={u.id} className="px-5 py-3.5 flex items-start gap-4">
-                      <p className="text-xs text-neutral-500 flex-shrink-0 w-24 pt-0.5">{fmtDate(u.date)}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0 w-24 pt-0.5">{fmtDate(u.date)}</p>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-primary-500 mb-0.5">{companyName(u.company_id)}</p>
                         <p className="text-sm font-medium text-slate-800">{u.title}</p>
-                        {u.notes && <p className="text-xs text-neutral-600 mt-0.5 leading-relaxed">{u.notes}</p>}
+                        {u.notes && <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5 leading-relaxed">{u.notes}</p>}
                       </div>
                     </div>
                   ))}
@@ -487,29 +485,29 @@ export default function LPReportClient({
 
       {/* KPI Snapshot */}
       {kpisWithData.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
-          <div className="px-5 py-4 border-b border-neutral-200">
-            <h2 className="text-sm font-semibold text-neutral-900">KPI Snapshot <span className="text-xs font-normal text-neutral-500 ml-1">— latest per company</span></h2>
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm dark:shadow-md border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
+          <div className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-700">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">KPI Snapshot <span className="text-xs font-normal text-neutral-500 dark:text-neutral-400 ml-1">— latest per company</span></h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-200 bg-neutral-50/70">
+                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50/70">
                   {['Company', 'As of', 'ARR', 'Revenue', 'Burn Rate', 'Runway (mo)', 'Headcount'].map(h => (
-                    <th key={h} className={`px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider ${h === 'Company' ? 'text-left pl-5' : 'text-right'}`}>{h}</th>
+                    <th key={h} className={`px-4 py-3 text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider ${h ==='Company' ? 'text-left pl-5' : 'text-right'}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {kpisWithData.map(k => (
                   <tr key={k.id} className="hover:bg-neutral-50/60 transition-colors">
-                    <td className="px-5 py-3 font-medium text-neutral-900">{k.companyName}</td>
-                    <td className="px-4 py-3 text-right text-xs text-neutral-500">{fmtDate(k.date)}</td>
-                    <td className="px-4 py-3 text-right text-neutral-800">{fmtKpiVal(k.arr)}</td>
-                    <td className="px-4 py-3 text-right text-neutral-800">{fmtKpiVal(k.revenue)}</td>
-                    <td className="px-4 py-3 text-right text-neutral-800">{fmtKpiVal(k.burn_rate)}</td>
-                    <td className="px-4 py-3 text-right text-neutral-600">{k.cash_runway != null ? k.cash_runway : '—'}</td>
-                    <td className="px-4 py-3 text-right text-neutral-600">{k.headcount != null ? k.headcount : '—'}</td>
+                    <td className="px-5 py-3 font-medium text-neutral-900 dark:text-neutral-50">{k.companyName}</td>
+                    <td className="px-4 py-3 text-right text-xs text-neutral-500 dark:text-neutral-400">{fmtDate(k.date)}</td>
+                    <td className="px-4 py-3 text-right text-neutral-800 dark:text-neutral-100">{fmtKpiVal(k.arr)}</td>
+                    <td className="px-4 py-3 text-right text-neutral-800 dark:text-neutral-100">{fmtKpiVal(k.revenue)}</td>
+                    <td className="px-4 py-3 text-right text-neutral-800 dark:text-neutral-100">{fmtKpiVal(k.burn_rate)}</td>
+                    <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400">{k.cash_runway != null ? k.cash_runway : '—'}</td>
+                    <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400">{k.headcount != null ? k.headcount : '—'}</td>
                   </tr>
                 ))}
               </tbody>

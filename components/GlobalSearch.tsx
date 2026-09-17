@@ -57,6 +57,12 @@ export default function GlobalSearch() {
     return () => abortRef.current?.abort()
   }, [open])
 
+  // Clear a pending debounce timer on unmount so a queued search() can't fire
+  // setState after the component is gone (React "unmounted component" warning).
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+  }, [])
+
   const search = useCallback(async (q: string) => {
     if (q.length < 2) { setResults([]); setHasMore(false); setError(null); return }
     abortRef.current?.abort()
@@ -178,7 +184,7 @@ export default function GlobalSearch() {
             })}
           </div>
         ) : query.length >= 2 && !loading ? (
-          <div className="py-10 text-center text-sm text-neutral-500 dark:text-neutral-400">No results for "{query}"</div>
+          <div className="py-10 text-center text-sm text-neutral-500 dark:text-neutral-400">No results for &quot;{query}&quot;</div>
         ) : query.length === 0 ? (
           <div className="py-6 px-4">
             <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Quick navigation</p>
