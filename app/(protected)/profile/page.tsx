@@ -38,11 +38,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   return (
     <ProfileClient
       profile={profile as TeamMember}
-      tasks={tasks as any[]}
-      deals={deals as any[]}
-      companies={companies as any[]}
-      activities={activities as any[]}
-      teamMembers={members as any[]}
+      tasks={tasks}
+      deals={deals}
+      companies={companies}
+      activities={activities}
+      teamMembers={members}
       isWelcome={welcome === '1'}
     />
   )

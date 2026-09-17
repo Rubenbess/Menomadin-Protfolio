@@ -3,6 +3,21 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 
+/**
+ * Collapse a PostgREST embedded relation to a single record or null.
+ *
+ * `select('company:companies(id, name)')` on a many-to-one FK returns one
+ * object at runtime, but the Supabase client types every embed as an array
+ * because it cannot infer cardinality without generated DB types. Callers were
+ * papering over that with `as any[]` at the component boundary, which erased
+ * the mismatch instead of resolving it. Normalising here handles both shapes,
+ * so the declared prop types match what actually arrives.
+ */
+function one<T>(rel: T | T[] | null | undefined): T | null {
+  if (Array.isArray(rel)) return rel[0] ?? null
+  return rel ?? null
+}
+
 function deriveInitials(name: string): string {
   const parts = name.trim().split(/\s+/)
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
@@ -66,7 +81,13 @@ export async function getMyTasks() {
     .not('status', 'in', '("Done","Cancelled")')
     .order('due_date', { ascending: true, nullsFirst: false })
 
-  return { tasks: tasks || [] }
+  return {
+    tasks: (tasks || []).map(t => ({
+      ...t,
+      company: one(t.company),
+      pipeline_deal: one(t.pipeline_deal),
+    })),
+  }
 }
 
 export async function getMyPipeline() {
