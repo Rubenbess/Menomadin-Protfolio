@@ -178,7 +178,7 @@ export default function TaskTemplatesClient({ initialTemplates }: Props) {
         <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Template?">
           <div className="px-6 py-5">
             <p className="text-sm text-neutral-700 dark:text-neutral-500 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-neutral-900 dark:text-neutral-100">"{deleteTarget.name}"</span>? This cannot be undone.
+              Are you sure you want to delete <span className="font-semibold text-neutral-900 dark:text-neutral-100">&quot;{deleteTarget.name}&quot;</span>? This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button

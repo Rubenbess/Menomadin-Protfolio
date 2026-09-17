@@ -67,7 +67,7 @@ export default function SafeForm({ companyId, safe, onClose }: {
           onChange={e => setInvestorName(e.target.value)}
         />
         <p className="text-[11px] text-neutral-500 mt-1">
-          Fill in to record a third-party investor's SAFE (e.g. "Sequoia", "John Smith")
+          Fill in to record a third-party investor&apos;s SAFE (e.g. &quot;Sequoia&quot;, &quot;John Smith&quot;)
         </p>
       </div>
 

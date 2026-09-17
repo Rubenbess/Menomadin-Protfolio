@@ -149,7 +149,7 @@ export default function ContactTasks({ contactId, contactName }: Props) {
 
       {loadError ? (
         <div className="text-xs text-red-600 text-center py-4 space-y-2">
-          <p>Couldn't load tasks: {loadError}</p>
+          <p>Couldn&apos;t load tasks: {loadError}</p>
           <button
             type="button"
             onClick={() => { setLoading(true); loadTasks() }}

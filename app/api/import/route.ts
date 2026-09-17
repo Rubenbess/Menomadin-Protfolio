@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // XLSX.sheet_to_json returns untyped rows; narrowed by the .filter() below.
   const rawRows: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[rawSheetName], { defval: '' })
     .filter((r: unknown) => {
       const row = r as Record<string, unknown>
