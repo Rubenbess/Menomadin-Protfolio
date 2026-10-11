@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, Pencil, Link2, X } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
+import HealthBadge from '@/components/ui/HealthBadge'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import EmptyState from '@/components/ui/EmptyState'
@@ -186,10 +187,16 @@ export default function CompanyDetailClient({ company, rounds, investments, capT
                 <h1 className="page-title">{company.name}</h1>
                 <Badge value={company.status} />
                 <Badge value={company.strategy} type="strategy" />
+                <HealthBadge health={company.health} note={company.health_note} />
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-500 mt-2">
                 {company.sector}{company.hq ? ` · ${company.hq}` : ''}
               </p>
+              {company.health && company.health_note && (
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-2xl">
+                  {company.health_note}
+                </p>
+              )}
             </div>
           </div>
         </div>

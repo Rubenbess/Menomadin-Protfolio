@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Pencil, Trash2, MapPin, User, Search, X, ChevronDown, LayoutGrid, List, Lock } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import HealthBadge from '@/components/ui/HealthBadge'
 import Modal from '@/components/ui/Modal'
 import CompanyForm from '@/components/forms/CompanyForm'
 import EmptyState from '@/components/EmptyState'
@@ -320,6 +321,7 @@ export default function CompaniesClient({
                       </Link>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                      <HealthBadge health={co.health} note={co.health_note} />
                       <Badge value={co.strategy} type="strategy" />
                       <Badge value={co.status} />
                     </div>
@@ -423,7 +425,12 @@ export default function CompaniesClient({
                     <td className="px-4 py-3 text-xs text-neutral-600">{co.sector ?? '—'}</td>
                     <td className="px-4 py-3 text-xs text-neutral-600">{co.hq ?? '—'}</td>
                     <td className="px-4 py-3 text-xs text-neutral-600">{co.entry_stage ?? '—'}</td>
-                    <td className="px-4 py-3"><Badge value={co.status} /></td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Badge value={co.status} />
+                        <HealthBadge health={co.health} note={co.health_note} />
+                      </div>
+                    </td>
                     <td className="px-4 py-3"><Badge value={co.strategy} type="strategy" /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">

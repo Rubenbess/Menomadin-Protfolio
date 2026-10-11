@@ -17,7 +17,14 @@ export interface Company {
   co_investors: string[] | null
   update_token: string | null
   created_at: string
+  // Set by the daily portfolio refresh (app/api/sync/portfolio). Optional until
+  // supabase/migrations/20261011_company_health.sql is applied everywhere.
+  health?: CompanyHealth | null
+  health_note?: string | null
+  health_updated_at?: string | null
 }
+
+export type CompanyHealth = 'Critical' | 'Watch' | 'On track' | 'Closing'
 
 export type ContactType = 'Founder' | 'Advisor' | 'Co-investor' | 'Service Provider' | 'Other'
 

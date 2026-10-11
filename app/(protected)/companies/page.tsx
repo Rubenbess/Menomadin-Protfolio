@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic'
 // initial server payload. Verified by grepping property accesses on the
 // `companies`/`contacts` arrays passed to CompaniesClient.
 const COMPANY_COLUMNS = 'id, name, sector, strategy, hq, status, description, entry_stage, logo_url'
+// Health columns come from supabase/migrations/20261011_company_health.sql.
+const COMPANY_COLUMNS_WITH_HEALTH = 'id, name, sector, strategy, hq, status, description, entry_stage, logo_url, health, health_note'
 const CONTACT_COLUMNS = 'id, company_id, name, position'
 
 interface Props {
@@ -19,12 +21,23 @@ export default async function CompaniesPage({ searchParams }: Props) {
   const { strategy } = await searchParams
   const supabase = await createServerSupabaseClient()
 
-  let query = supabase.from('companies').select(COMPANY_COLUMNS).order('name')
-  if (strategy) query = query.eq('strategy', strategy)
-  const { data: companies, error: companiesError } = await query
+  let healthQuery = supabase.from('companies').select(COMPANY_COLUMNS_WITH_HEALTH).order('name')
+  if (strategy) healthQuery = healthQuery.eq('strategy', strategy)
+  const withHealth = await healthQuery
+
+  let companies: unknown[] | null = withHealth.data
+  let companiesError: { message: string } | null = withHealth.error
+  if (companiesError) {
+    // Migration not applied yet: fall back to the base projection.
+    let baseQuery = supabase.from('companies').select(COMPANY_COLUMNS).order('name')
+    if (strategy) baseQuery = baseQuery.eq('strategy', strategy)
+    const base = await baseQuery
+    companies = base.data
+    companiesError = base.error
+  }
   if (companiesError) throw new Error(companiesError.message)
 
-  const ids = (companies ?? []).map((c: { id: string }) => c.id)
+  const ids = ((companies ?? []) as { id: string }[]).map(c => c.id)
 
   const [{ data: contacts, error: contactsError }] = await (ids.length
     ? Promise.all([supabase.from('contacts').select(CONTACT_COLUMNS).in('company_id', ids).limit(500)])
